@@ -1,0 +1,88 @@
+\section{Deep Learning libraries}
+
+The most famous deep learning libraries are: \href{https://www.tensorflow.org}{TensorFlow}, \href{http://caffe.berkeleyvision.org}{Caffe} and \href{https://docs.microsoft.com/it-it/cognitive-toolkit}{Cognitive Toolkit}. These libraries are complete, really optimized, with every tool that you need and easy to use because based on a simple and abstract interface. However, they are not easy install, and not available on all operating system and package manager. In particular, TensorFlow is a Google library, really used, mostly in Python, for mobile and IoT applications. The following are the main features:
+\begin{itemize}
+	\item Programming languages support: Python, C++, Javascript, Java, Go, Swift;
+	\item CUDA support;
+	\item Installation: pip, docker or \href{https://formulae.brew.sh/formula/libtensorflow}{homebrew};
+\end{itemize}
+
+Caffe is an efficient, speed and modular library with also a command line interface. The following are Caffe's main features: 
+\begin{itemize}
+	\item Programming languages support: C++, Python, Matlab; 
+	\item CUDA support;
+	\item Installation: docker, \href{http://caffe.berkeleyvision.org/install_apt.html}{apt}, \href{https://formulae.brew.sh/formula/caffe}{homebrew}, and, for Windows, you need to build the project from source in the \href{https://github.com/BVLC/caffe/tree/windows}{windows branch}.
+	\item Math libraries dependencies: BLAS and BOOST;
+\end{itemize}
+
+Cognitive Toolkit is a library developed by Microsoft that allows the user to easily realize and combine popular model types. The following are CNTK's main features: 
+\begin{itemize}
+	\item Programming languages support: C++, Python, C\# or its own model description language (BrainScript); 
+	\item CUDA support on multiple GPUs and servers;
+	\item Installation: docker, pip, but generally it is installed from source through an installation script. It is not supported for MacOS.
+\end{itemize}
+
+After that, there are some libraries, not very well known, but quite optimized and specific that could be interesting: DyNet, Shogun, FANN, Shark Library, OpenNN and mlpack. DyNet is a C++ library that works well with networks that have dynamic structures that change for every training instance. These kinds of networks are particularly important in natural language processing tasks. The following are DyNet's main features:
+\begin{itemize}
+	\item Programming languages support: C++, Python; 
+	\item CUDA support;
+	\item Installation: pip, \href{https://formulae.brew.sh/formula/dynet}{homebrew}.
+	\item Math libraries dependencies: Eigen;
+\end{itemize}
+
+Shogun is a library not really specialized in deep learning models, but it offers mostly a wide range of efficient and unified machine learning methods. The following are Shogun's main features: 
+\begin{itemize}
+	\item Programming languages support: C++, Python, Octave, R, Java/Scala, Lua, C\#, Ruby; 
+	\item No CUDA support;
+	\item Installation: in the \href{https://www.shogun.ml/install}{official installation website} you can find the instructions for apt, homebrew, docker and pip package managers. Shogun natively compiles under Windows using MSVC.
+\end{itemize}
+
+FANN is a easy to use, versatile, well documented, and fast library, which implements multilayer artificial neural networks in C with support for both fully connected and sparsely connected networks. The following are FANN's main features: 
+\begin{itemize}
+	\item Programming languages support: C++, Python, Octave, R, Java/Scala, Lua, C\#, Ruby, Matlab, Perl, PHP, Javascript and others; 
+	\item No CUDA support;
+	\item Installation: vcpkg install support in Windows, but only from source for Linux systems. See \href{https://github.com/libfann/fann}{official github repository} for instructions.
+\end{itemize}
+
+Shark Library is a fast, modular, general open-source C++ machine learning library, with support for Feedforward Neural Network and Autoencoders. This library is not so big and it can be useful to use as a source from start to build a new custom ad-hoc library for our use cases. The following are Shark's main features: 
+\begin{itemize}
+	\item Programming languages support: C++; 
+	\item No CUDA support (only experimental OpenCL support on earlier releases through BLAS library);
+	\item Installation: works on Windows, MacOS X, and Linux but only from source.
+	\item Math libraries dependencies: Boost and BLAS;
+\end{itemize}
+
+OpenNN is a high performance library in terms of execution speed and memory allocation, with neural networks and machine learning algorithms. As in the case of Shark Library, also OpenNN library is easy to read from source and it can be used as starting point for developing a new ad-hoc library. The following are OpenNN's main features: 
+\begin{itemize}
+	\item Programming languages support: C++ and Python; 
+	\item support CPU parallelization by means of OpenMP and GPU acceleration with CUDA;
+	\item Installation: only from source.
+	\item Math libraries dependencies: Eigen;
+\end{itemize}
+
+Mlpack is an intuitive, fast, and flexible C++ machine learning library. This is the only library that provides more compatibilities for operating systems and package managers. The following are Mlpack's main features: 
+\begin{itemize}
+	\item Programming languages support: C++, Python, Julia, Go, R and provides a command line interface; 
+	\item No native CUDA support, but indirectly inherits CUDA support through Armadillo library dependency;
+	\item Installation: in the \href{https://www.mlpack.org/getstarted.html}{official get stared guide} there are all the informations to install mlpack on MacOS and Linux (Debian), with support for homebrew, Pkg.jl, apt, pip, docker or from source. Install from source or through \href{https://www.mlpack.org/doc/mlpack-3.4.2/doxygen/build_windows.html}{vcpkg} for Windows. 
+	\item Math libraries dependencies: BLAS, Armadillo and Boost;
+\end{itemize}
+
+Finally, a good solution could be the one to develop a custom ad-hoc library. A custom ad-hoc library would result lighter and more efficient, because specific for the task to solve. On the other hand, a third-party library would result in faster, easier developing and a wide choice availability of machine learning algorithms that can be used also for future implementations. The following is a list of useful reference from which to start developing a custom ad-hoc C++ library:
+\begin{itemize}
+	\item \href{https://github.com/3ammor/SimpleNeuralNet/tree/master/NeuralNetwork}{github.com/3ammor/SimpleNeuralNet}
+	\item \href{https://github.com/huangzehao/SimpleNeuralNetwork}{github.com/huangzehao/SimpleNeuralNetwork}
+	\item \href{https://github.com/jeremyong/cpp_nn_in_a_weekend}{github.com/jeremyong/cpp\_nn\_in\_a\_weekend}
+	\item \href{https://github.com/Whiax/NeuralNetworkCpp}{github.com/Whiax/NeuralNetworkCpp}
+\end{itemize}
+
+\section{Math libraries}
+
+A custom ad-hoc implementation could be developed with a library that supports mathematical operations along huge arrays and matrices. The following are libraries that can be used in C++ for machine learning and deep learning applications: Boost, Eigen3 and Armadillo. 
+
+Boost is a set of libraries for the C++ programming language that provides support for tasks and structures such as linear algebra, pseudorandom number generation, multithreading, image processing, regular expressions, and unit testing. Boost library is not built to support CUDA internally but from CUDA 2.2 you can use Boost functionalities inside CUDA kernels. Boost supports the main installation package managers: \href{https://formulae.brew.sh/formula/boost}{homebrew}, \href{https://www.osetc.com/en/how-to-install-boost-on-ubuntu-16-04-18-04-linux.html}{apt}, \href{https://docs.microsoft.com/en-us/cpp/build/manage-libraries-with-vcpkg?view=msvc-160&tabs=windows}{vcpkg}.
+
+Eigen3 is a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms. Similarly to Boost library, Eigen3 doesn't support CUDA internally but the library functionalities can be partially used in CUDA kernels. Eigen3 supports the main installation package managers: \href{https://formulae.brew.sh/formula/eigen}{homebrew}, \href{https://ubuntu.pkgs.org/18.04/ubuntu-universe-amd64/libeigen3-dev_3.3.4-4_all.deb.html}{apt}, but it doesn't support vcpkg.
+
+Armadillo is a high quality linear algebra library for the C++ language, aiming towards a good balance between speed and ease of use. Armadillo is a library of higher abstraction level than Boost or Eigen3 libraries, in fact it uses BLAS library as dependency. In order to obtain GPU speed up on large matrix multiplications, you can link Armadillo with NVBLAS, which is a GPU-accelerated implementation in CUDA of BLAS. Armadillo supports the main installation package managers: \href{https://formulae.brew.sh/formula/armadillo}{homebrew}, \href{https://www.uio.no/studier/emner/matnat/fys/FYS4411/v13/guides/installing-armadillo}{apt}, \href{https://github.com/microsoft/vcpkg/pull/2954}{vcpkg}.
+

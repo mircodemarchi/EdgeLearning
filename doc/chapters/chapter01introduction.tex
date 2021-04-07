@@ -1,0 +1,30 @@
+Ariadne is a tool for reachability analysis and model checking of hybrid systems. Additionally, Ariadne is a framework for rigorous computation featuring arithmetic, linear algebra, calculus, geometry, algebraic and differential equations, and optimization solvers.
+
+AriadneDL wants to be a library that extends Ariadne functionalities in order to provide online estimations of the running system to improve its execution through Machine Learning and Deep Learning techniques. In particular, AriadneDL focuses on 2 main use case: 
+\begin{itemize}
+	\item Task execution time estimation;
+	\item Adaptation of the dynamic part of a hybrid system model;
+\end{itemize}
+
+The implementation has to be done in C++ and it can be based on a library for Machine Learning and Deep Learning, with strict compatibility for the major operating systems. As alternative, the library can be developed from zero, in order to build an ad-hoc implementation. The library has to be compatible with MacOS, Ubuntu, Debian and Windows, in particular the library has to be provided by the following package manager: \href{https://brew.sh}{Homebrew}, \href{https://wiki.debian.org/Aptitude}{Aptitude} and \href{https://docs.microsoft.com/it-it/cpp/build/vcpkg?view=msvc-160}{vcpkg}. The libraries discussed will be the following: 
+\begin{itemize}
+	\item Tensorflow: \href{https://github.com/tensorflow/tensorflow}{github.com/tensorflow}, \href{https://www.tensorflow.org}{/www.tensorflow.org};
+	\item Caffe: \href{https://github.com/BVLC/caffe}{github.com/caffe}, \href{http://caffe.berkeleyvision.org}{caffe.org};
+	\item Cognitive Toolkit (CNTK): \href{https://github.com/microsoft/CNTK}{github.com/CNTK}, \href{https://docs.microsoft.com/it-it/cognitive-toolkit/}{docs.microsoft.com/cognitive-toolkit};
+	\item dynet: \href{https://github.com/clab/dynet}{github.com/dynet}, \href{http://dynet.io}{dynet.io};
+	\item shogun: \href{https://github.com/shogun-toolbox/shogun}{github.com/shogun}, \href{https://www.shogun.ml}{www.shogun.ml};
+	\item FANN: \href{https://github.com/libfann/fann}{github.com/fann}, \href{http://leenissen.dk/fann/wp/}{leenissen.dk/fann};
+	\item Shark library: \href{https://github.com/Shark-ML/Shark}{github.com/Shark}, \href{http://www.shark-ml.org}{www.shark-ml.org};
+	\item OpenNN: \href{https://github.com/Artelnics/OpenNN}{github.com/OpenNN}, \href{https://www.opennn.net}{www.opennn.net};
+	\item mlpack: \href{https://github.com/mlpack/mlpack}{github.com/mlpack}, \href{https://www.mlpack.org}{www.mlpack.org};
+	\item Boost: \href{https://github.com/boostorg/boost}{github.com/boost}, \href{https://www.boost.org}{www.boost.org};
+	\item Eigen3: \href{https://gitlab.com/libeigen/eigen}{gitlab.com/eigen}, \href{https://eigen.tuxfamily.org/index.php?title=Main_Page}{eigen.tuxfamily.org};
+	\item Armadillo: \href{https://gitlab.com/conradsnicta/armadillo-code}{gitlab.com/armadillo}, \href{http://arma.sourceforge.net}{arma.sourceforge.net}
+\end{itemize}
+
+
+The following list provides some useful links related to the implementation and other resources: 
+\begin{itemize}
+	\item Ariadne main repository: \href{https://github.com/ariadne-cps/ariadne}{github.com/ariadne-cps/ariadne};
+	\item AriadneDL extension repository: \href{https://github.com/mircodemarchi/AriadneDL}{github.com/mircodemarchi/AriadneDL};
+\end{itemize}

@@ -1,0 +1,93 @@
+\documentclass[12pt, a4paper,titlepage]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+%\usepackage{algorithm,algorithmic}
+
+\usepackage{hyperref}
+\hypersetup{
+	linktoc=all
+}
+
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[RO,LE]{AriadneDL}
+\fancyfoot{}
+\fancyfoot[LE,RO]{\thepage}
+\fancyfoot[LO,CE]{Chapter \thechapter}
+\fancyfoot[CO,RE]{Mirco De Marchi}
+
+% Package align math
+%\usepackage{amsmath}
+
+%\usepackage{xcolor}
+%\definecolor{deepblue}{rgb}{0,0,0.5}
+%\definecolor{deepred}{rgb}{0.6,0,0}
+%\definecolor{deepgreen}{rgb}{0,0.5,0}
+%\definecolor{maroon}{rgb}{0.5,0,0}
+
+\usepackage{listings}
+
+% Table environment
+\usepackage{array, longtable}
+\usepackage{tabularx}
+\renewcommand{\arraystretch}{1.2}
+
+% Force table position
+\usepackage{float}
+\restylefloat{table}
+
+\begin{document}
+	\begin{titlepage}
+		\begin{center}
+			\vspace*{2cm}
+			
+			\normalsize
+			Project Documentation
+			
+			\vspace{2.5cm}
+			
+			\Huge
+			\textbf{AriadneDL}
+			\vspace{0.5cm}
+			
+			\large
+			Deep Learning for Ariadne
+			
+			\vspace{3cm}
+			
+			\large
+			\textbf{Mirco De Marchi}
+			
+			\vspace{5cm}
+		\end{center}
+	\end{titlepage}
+	
+	\tableofcontents
+	
+	% INTRODUCTION
+	\chapter{Introduction}
+	\input{chapters/chapter01introduction}
+	
+	% REQUIREMENTS
+	\chapter{Requirements}
+	\input{chapters/chapter02requirements}
+	
+	% DEEP LEARNING C++ LIBRARY ANALISYS
+	\chapter{C++ Libraries}
+	\input{chapters/chapter03deeplearning-lib-analysis}
+	
+	% IMPLEMENTATION
+	\chapter{Implementation}
+	\input{chapters/chapter04implementation-details}
+	
+	% CONCLUSION
+	\chapter{Conclusion}
+	\input{chapters/chapter05conclusion}
+	
+\end{document}
+
