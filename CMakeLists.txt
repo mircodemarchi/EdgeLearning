@@ -24,6 +24,7 @@ set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual
     disabled-optimization init-self missing-include-dirs sign-promo
     switch-default undef redundant-decls)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MACOSX_RPATH 1)
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -49,13 +50,26 @@ endif()
 enable_testing()
 include(CTest)
 
+# Find Ariadne. TODO: uncomment the following line.
+# find_package(Ariadne REQUIRED)
+
+# Find Armadillo
+find_package(Armadillo REQUIRED)
+
+# Find MLPACK
+find_package(MLPACK REQUIRED) # TODO: make it OPTIONAL.
+
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
 add_subdirectory(source)
 add_subdirectory(tests)
 
-add_library(ariadnedl SHARED $<TARGET_OBJECTS:ariadnedl-all>)
-target_link_libraries(ariadnedl dl)
+add_library(ariadnedl SHARED 
+    $<TARGET_OBJECTS:ariadnedl-all>
+    $<TARGET_OBJECTS:ariadnedl-estimators>
+)
+
+target_link_libraries(ariadnedl dl ${MLPACK_LIBRARY} ${ARMADILLO_LIBRARIES})
 
 if(COVERAGE)
     target_link_libraries(ariadnedl coverage_config)
