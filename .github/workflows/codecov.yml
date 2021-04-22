@@ -18,7 +18,7 @@ jobs:
 
     - name: Set Up Dependencies
       run: |
-        sudo apt install -y cmake pkg-config lcov g++-10
+        sudo apt install -y cmake pkg-config lcov g++-10 libmlpack-dev
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
