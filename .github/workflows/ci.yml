@@ -57,12 +57,12 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install gcc@10
+        brew install gcc@10 mlpack
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake pkg-config clang-11 g++-10
+        sudo apt install -y cmake pkg-config clang-11 g++-10 libmlpack-dev
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
