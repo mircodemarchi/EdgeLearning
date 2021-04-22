@@ -21,22 +21,26 @@ jobs:
           - {
             name: "macOS 10.15 AppleClang",
             os: macos-10.15,
-            cxx: "clang++"
+            cxx: "clang++",
+            c: "clang"
           }
           - {
             name: "macOS 10.15 GCC 10",
             os: macos-10.15,
-            cxx: "g++-10"
+            cxx: "g++-10",
+            c: "gcc-10"
           }
           - {
             name: "Ubuntu 20.04 Clang 11",
             os: ubuntu-20.04,
-            cxx: "clang++-11"
+            cxx: "clang++-11",
+            c: "clang-11"
           }
           - {
             name: "Ubuntu 20.04 GCC 10",
             os: ubuntu-20.04,
-            cxx: "g++-10"
+            cxx: "g++-10",
+            c: "gcc-10"
           }
 
     steps:
@@ -62,14 +66,14 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y cmake pkg-config clang-11 g++-10 libmlpack-dev
+        sudo apt install -y cmake pkg-config clang-11 g++-10 libmlpack-dev libensmallen-dev
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}}
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -DCMAKE_C_COMPILER=${{matrix.config.c}}
 
     - name: Build All
       working-directory: ${{runner.workspace}}/build
