@@ -26,14 +26,14 @@
 
 namespace Ariadne {
 
-TimeEstimatorModel::TimeEstimatorModel() : model() {
+TimeEstimatorModel::TimeEstimatorModel() : model(), data() {
     data_training_fp = std::filesystem::path(__FILE__).parent_path() / ".." / ".." / "data" / DATA_TRAINING_FN;
 }
 
 TimeEstimatorModel::~TimeEstimatorModel() = default;
 
 void TimeEstimatorModel::load_data() {
-    data::Load(this->data_training_fp, this->data, true, true, arma::csv_ascii);
+    data::Load(this->data_training_fp.string(), this->data, true);
 }
 
 
