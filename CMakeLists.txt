@@ -8,8 +8,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     message(WARNING "Microsoft compiler not supported.")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.2)
-        message(FATAL_ERROR "GCC version must be at least 10.2!")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0) # 10.2
+        message(FATAL_ERROR "GCC version must be at least 9.0!")  # 10.2
     endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)

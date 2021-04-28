@@ -25,10 +25,10 @@ jobs:
             c: "clang"
           }
           - {
-            name: "macOS 10.15 GCC 10",
+            name: "macOS 10.15 GCC 9",
             os: macos-10.15,
-            cxx: "g++-10",
-            c: "gcc-10"
+            cxx: "g++-9",
+            c: "gcc-9"
           }
           - {
             name: "Ubuntu 20.04 Clang 11",
@@ -61,7 +61,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install gcc@10 mlpack
+        brew install gcc@9 mlpack
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
