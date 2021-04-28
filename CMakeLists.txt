@@ -50,29 +50,14 @@ endif()
 enable_testing()
 include(CTest)
 
-option(USE_OPENMP "If available, use OpenMP for parallelization." ON)
-
 # Find Ariadne. TODO: uncomment the following line.
 # find_package(Ariadne REQUIRED)
 
 # Find Armadillo
 find_package(Armadillo 8.400.0 REQUIRED)
-include_directories(${ARMADILLO_INCLUDE_DIRS})
-
-# Find OpenMP
-if (USE_OPENMP)
-  message(WARNING "Only use OpenMP if mlpack has been compiled with OpenMP.")
-  find_package(OpenMP)
-endif ()
-
-if (OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif ()
 
 # Find MLPACK
 find_package(MLPACK REQUIRED) # TODO: make it OPTIONAL.
-include_directories(${MLPACK_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
@@ -84,7 +69,7 @@ add_library(ariadnedl SHARED
     $<TARGET_OBJECTS:ariadnedl-estimators>
 )
 
-target_link_libraries(ariadnedl dl ${MLPACK_LIBRARY} ${ARMADILLO_LIBRARIES})
+target_link_libraries(ariadnedl dl ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
 
 if(COVERAGE)
     target_link_libraries(ariadnedl coverage_config)
