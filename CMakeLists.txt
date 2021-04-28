@@ -55,9 +55,11 @@ include(CTest)
 
 # Find Armadillo
 find_package(Armadillo 8.400.0 REQUIRED)
+include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 # Find MLPACK
 find_package(MLPACK REQUIRED) # TODO: make it OPTIONAL.
+include_directories(${MLPACK_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
