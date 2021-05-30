@@ -24,6 +24,8 @@
 
 #include "estimators/time_estimator.hpp"
 
+#if ENABLE_MLPACK
+
 namespace Ariadne {
 
 TimeEstimatorModel::TimeEstimatorModel() : model(), data() {
@@ -38,3 +40,5 @@ void TimeEstimatorModel::load_data() {
 
 
 } // namespace Ariadne
+
+#endif // ENABLE_MLPACK

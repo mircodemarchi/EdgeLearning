@@ -29,6 +29,8 @@
 #ifndef ARIADNE_ESTIMATORS_TIME_ESTIMATOR_HPP
 #define ARIADNE_ESTIMATORS_TIME_ESTIMATOR_HPP
 
+#if ENABLE_MLPACK
+
 #include <filesystem>
 
 #include <mlpack/core.hpp>
@@ -55,5 +57,7 @@ class TimeEstimatorModel {
 };
 
 } // namespace Ariadne
+
+#endif // ENABLE_MLPACK
 
 #endif // ARIADNE_ESTIMATORS_TIME_ESTIMATOR_HPP

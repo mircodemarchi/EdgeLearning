@@ -28,6 +28,7 @@
 using namespace std;
 using namespace Ariadne;
 
+#if 0
 class TestTimeEstimator {
   public:
     void test() {
@@ -43,6 +44,4 @@ int main() {
     TestTimeEstimator().test();
     return ARIADNE_TEST_FAILURES;
 }
-
-
-
+#endif

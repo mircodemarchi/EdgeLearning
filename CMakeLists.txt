@@ -50,18 +50,22 @@ endif()
 enable_testing()
 include(CTest)
 
+# Options
+set(ENABLE_MLPACK false CACHE BOOL "Enable MLPACK library. Warning: not supported.")
+add_definitions(-DENABLE_MLPACK=${ENABLE_MLPACK})
+
 # Find Ariadne. TODO: uncomment the following line.
 # find_package(Ariadne REQUIRED)
 
-# Find Armadillo
-find_package(Armadillo 8.400.0 REQUIRED)
-include_directories(${ARMADILLO_INCLUDE_DIRS})
-
-# Find MLPACK
-find_package(MLPACK REQUIRED) # TODO: make it OPTIONAL.
-include_directories(${MLPACK_INCLUDE_DIRS})
+# Find MLPACK and dependencies
+find_package(Armadillo 8.400.0 QUIET)
+find_package(MLPACK QUIET)
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
+if(ENABLE_MLPACK)
+    include_directories(${ARMADILLO_INCLUDE_DIRS})
+    include_directories(${MLPACK_INCLUDE_DIRS})
+endif()
 
 add_subdirectory(source)
 add_subdirectory(tests)
@@ -71,7 +75,10 @@ add_library(ariadnedl SHARED
     $<TARGET_OBJECTS:ariadnedl-estimators>
 )
 
-target_link_libraries(ariadnedl dl ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
+target_link_libraries(ariadnedl dl)
+if(ENABLE_MLPACK)
+    target_link_libraries(${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
+endif()
 
 if(COVERAGE)
     target_link_libraries(ariadnedl coverage_config)

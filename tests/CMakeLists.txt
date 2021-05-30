@@ -1,6 +1,6 @@
 set(UNIT_TESTS
         test_replaceme
-        test_estimators
+        # test_estimators
     )
 
 foreach(TEST ${UNIT_TESTS})
