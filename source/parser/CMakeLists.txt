@@ -1,11 +1,8 @@
-set(LIBRARY_NAME ariadnedl-all)
+set(LIBRARY_NAME ariadnedl-parser)
 
 add_library(${LIBRARY_NAME} OBJECT
-    replaceme.cpp
+    csv.cpp
 )
-
-add_subdirectory(estimators)
-add_subdirectory(parser)
 
 if(COVERAGE)
     target_link_libraries(${LIBRARY_NAME} PUBLIC coverage_config)

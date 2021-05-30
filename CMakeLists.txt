@@ -73,6 +73,7 @@ add_subdirectory(tests)
 add_library(ariadnedl SHARED 
     $<TARGET_OBJECTS:ariadnedl-all>
     $<TARGET_OBJECTS:ariadnedl-estimators>
+    $<TARGET_OBJECTS:ariadnedl-parser>
 )
 
 target_link_libraries(ariadnedl dl)
