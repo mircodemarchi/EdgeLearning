@@ -41,21 +41,22 @@ CSVField::CSVField(std::string field, const ParserType &type, size_t col_index)
 
 }
 
-CSVRow::CSVRow(std::string line, size_t size, 
+CSVRow::CSVRow(std::string line, size_t size, size_t row_idx, 
     std::vector<ParserType> &types, char separator)
     : _line{line}
     , _size{size}
+    , _row_idx{row_idx}
     , _types{types}
     , _separator{separator}
 {
 
 }
 
-CSVRow::CSVRow(std::string line, std::vector<ParserType> &types, 
+CSVRow::CSVRow(std::string line, size_t row_idx, std::vector<ParserType> &types, 
     char separator)
     : CSVRow{line, 
         static_cast<size_t>(std::count(line.begin(), line.end(), separator)), 
-        types, separator}
+        row_idx, types, separator}
 {
 
 }
@@ -63,6 +64,7 @@ CSVRow::CSVRow(std::string line, std::vector<ParserType> &types,
 CSVRow::CSVRow(std::vector<ParserType> &types)
     : _line{}
     , _size{0}
+    , _row_idx{}
     , _types{types}
     , _separator{}
 {
@@ -107,6 +109,59 @@ CSVRow& CSVRow::operator=(const CSVRow &obj)
     return *this;
 }
 
+CSVIterator::CSVIterator(CSVRow row, std::string fn)
+    : _fn{fn}
+    , _file{fn}
+    , _row{row}
+{
+    size_t idx = _row.idx();
+    for (size_t i = 0; i < idx; ++i)
+    {
+        _file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+}
+
+CSVIterator::CSVIterator(const CSVIterator &obj)
+    : _fn{obj._fn}
+    , _file{obj._fn}
+    , _row{obj._row}
+{
+
+}
+
+CSVIterator::~CSVIterator()
+{
+    _file.close();
+}
+
+bool CSVIterator::operator==(const CSVIterator& rhs) const
+{
+    return this->_row.idx() == rhs._row.idx()
+        && this->_row.size() == rhs._row.size();
+}
+
+bool CSVIterator::operator!=(const CSVIterator& rhs) const
+{
+    return this->_row.idx() != rhs._row.idx()
+        || this->_row.size() != rhs._row.size();
+}
+
+CSVIterator &CSVIterator::operator++() 
+{
+    std::string line;
+    std::getline(_file, line);
+    this->_row._line = line;
+    this->_row._row_idx++;
+    return *this;
+}
+
+CSVIterator CSVIterator::operator++(int)
+{
+    CSVIterator tmp(*this); 
+    operator++(); 
+    return tmp;
+}
+
 CSV::CSV(std::string fn, std::vector<ParserType> types, char separator) 
     : Parser()
     , _fn{fn}
@@ -120,19 +175,27 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
         throw std::runtime_error("Could not open file");
     }
 
+    // Get number of rows.
+    _rows_amount = static_cast<size_t>(
+        std::count(std::istream_iterator<char>(file), 
+            std::istream_iterator<char>(), '\n'));
+    file.seekg(0);
+
+    // Get first two lines.
     std::string header, first_line;
     std::getline(file, header);
     std::getline(file, first_line);
 
-    _row_size = static_cast<size_t>(
+    // Get number of columns.
+    _cols_amount = static_cast<size_t>(
         std::count(header.begin(), header.end(), separator));
 
     if((std::find(types.begin(), types.end(), ParserType::AUTO) != types.end())
         || types.size() == 0
-        || types.size() != _row_size) 
+        || types.size() != _cols_amount) 
     {
         std::stringstream ss{first_line};
-        for (size_t i = 0; i < _row_size; ++i)
+        for (size_t i = 0; i < _cols_amount; ++i)
         {
             std::string s;
             std::getline(ss, s, separator);
@@ -144,23 +207,29 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
         _types = types;
     }
 
-    _row_header = CSVRow{header,     _row_size, _types, separator};
-    _row_cache  = CSVRow{first_line, _row_size, _types, separator};
+    _row_header = CSVRow{header,     _cols_amount, 0, _types, separator};
+    _row_cache  = CSVRow{first_line, _cols_amount, 1, _types, separator};
     file.close();
 }
 
 const CSVRow &CSV::operator[](size_t idx)
 {
-    auto file = std::ifstream{_fn};
+    // Manage row saved in cache.
+    if (_row_cache.idx() == idx) return _row_cache;
+    // Handle overflow with a circular indexing.
+    idx = idx % _rows_amount; 
 
-    for (size_t i = 0; i < idx - 1; ++i)
+    auto file = std::ifstream{_fn};
+    // file.seekg(_row_header._line.size() + 1);
+    for (size_t i = 0; i < idx; ++i)
     {
         file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
     std::string line;
     std::getline(file, line);
-    _row_cache = CSVRow{line, _row_size, _types, _separator};
+    _row_cache = CSVRow{line, _cols_amount, idx, _types, _separator};
+    file.close();
     return _row_cache;
 }
 

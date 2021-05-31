@@ -40,6 +40,8 @@ namespace Ariadne {
 
 class CSVField
 {
+    friend class CSVRow;
+
 public:
     CSVField(std::string field, const ParserType &type, size_t col_index);
     ~CSVField() = default;
@@ -59,7 +61,7 @@ public:
     }
 
     const ParserType &type()  const    { return _type; }
-    size_t col_index() const    { return _col_index; }
+    size_t idx() const    { return _col_index; }
 
 private:
     std::string _field;
@@ -70,10 +72,13 @@ private:
 
 class CSVRow 
 {
+    friend class CSV;
+    friend class CSVIterator;
+
 public:
-    CSVRow(std::string line, size_t size, std::vector<ParserType> &types, 
-        char separator = ',');
-    CSVRow(std::string line, std::vector<ParserType> &types, 
+    CSVRow(std::string line, size_t size, size_t row_idx, 
+        std::vector<ParserType> &types, char separator = ',');
+    CSVRow(std::string line, size_t row_idx, std::vector<ParserType> &types, 
         char separator = ',');
     CSVRow(std::vector<ParserType> &types);
     CSVRow(const CSVRow &obj);
@@ -86,12 +91,38 @@ public:
     size_t size() const { return _size; }
     bool empty() const { return _size == 0; }
     const std::vector<ParserType> &types() const { return _types; } 
+    size_t idx() const { return _row_idx; }
 
 private:
     std::string _line;
     size_t _size;
+    size_t _row_idx;
     std::vector<ParserType> &_types;
     char _separator;
+};
+
+
+class CSVIterator 
+{
+    using iterator_category = std::forward_iterator_tag;
+
+public:
+    CSVIterator(CSVRow row, std::string fn);
+    CSVIterator(const CSVIterator &obj);
+    ~CSVIterator();
+
+    CSVRow &operator*() { return _row; }
+    CSVRow *operator->() { return &_row; }
+
+    bool operator==(const CSVIterator& rhs) const;
+    bool operator!=(const CSVIterator& rhs) const;
+    CSVIterator &operator++();
+    CSVIterator operator++(int);
+
+private:
+    std::string _fn;
+    std::ifstream _file;
+    CSVRow _row;
 };
 
 
@@ -102,18 +133,24 @@ public:
         char separator = ',');
     ~CSV() = default;
 
-    size_t row_size() const { return _row_size; }
+    size_t col_size() const { return _cols_amount; }
+    size_t row_size() const { return _rows_amount; }
     const CSVRow &header() const { return _row_header; }
     const std::vector<ParserType> &types() const { return _types; }
 
     const CSVRow &operator[](size_t idx);
+
+    CSVIterator begin() { return CSVIterator{operator[](1), _fn}; }
+    CSVIterator end()   
+        { return CSVIterator{operator[](_rows_amount - 1), _fn}; }
 
 private:
     std::string _fn;
     std::vector<ParserType> _types;
     CSVRow _row_header;
     CSVRow _row_cache;
-    size_t _row_size;
+    size_t _cols_amount;
+    size_t _rows_amount;
     char _separator;
 };
 
