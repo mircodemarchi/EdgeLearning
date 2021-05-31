@@ -32,6 +32,8 @@
 namespace Ariadne {
 
 #include "estimators/time_estimator.hpp"
+#include "parser/parser.hpp"
+#include "parser/csv.hpp"
 
 } // namespace Ariadne
 
