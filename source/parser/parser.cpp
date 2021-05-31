@@ -27,27 +27,27 @@
 
 namespace Ariadne {
 
-const std::regex Parser::float_regex 
+const std::regex Parser::_float_regex 
     { "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$" };
-const std::regex Parser::integer_regex { "^(0|[1-9][0-9]*)$" };
-const std::regex Parser::boolean_regex { "^(true|false)$"    };
-const std::regex Parser::string_regex  { "^\".*\"$"          };
+const std::regex Parser::_integer_regex { "^(0|[1-9][0-9]*)$" };
+const std::regex Parser::_boolean_regex { "^(true|false)$"    };
+const std::regex Parser::_string_regex  { "^\".*\"$"          };
 
 ParserType Parser::parse(const std::string &field)
 {
-    if (std::regex_match(field, string_regex))
+    if (std::regex_match(field, _string_regex))
     {
         return ParserType::STRING;
     }
-    else if (std::regex_match(field, boolean_regex))
+    else if (std::regex_match(field, _boolean_regex))
     {
         return ParserType::BOOL;
     }
-    else if (std::regex_match(field, integer_regex))
+    else if (std::regex_match(field, _integer_regex))
     {
         return ParserType::INT;
     }
-    else if (std::regex_match(field, float_regex))
+    else if (std::regex_match(field, _float_regex))
     {
         return ParserType::FLOAT;
     }

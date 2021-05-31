@@ -86,10 +86,10 @@ protected:
         const std::vector<std::string> &fields);
 
 private:
-    static const std::regex float_regex;
-    static const std::regex boolean_regex;
-    static const std::regex integer_regex;
-    static const std::regex string_regex;
+    static const std::regex _float_regex;
+    static const std::regex _boolean_regex;
+    static const std::regex _integer_regex;
+    static const std::regex _string_regex;
 };
 
 std::ostream& operator<<(std::ostream& os, const ParserType& obj);
