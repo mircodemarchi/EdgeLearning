@@ -30,6 +30,7 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <limits>
 
 
 namespace Ariadne {
