@@ -40,9 +40,14 @@ private:
     void test_parse() {
         auto parser = Parser();
         ARIADNE_TEST_EQUAL(parser("1.2"),               ParserType::FLOAT);
+        ARIADNE_TEST_EQUAL(parser("+0.0"),              ParserType::FLOAT);
+        ARIADNE_TEST_EQUAL(parser("-0.0"),              ParserType::FLOAT);
         ARIADNE_TEST_EQUAL(parser("+1e-10"),            ParserType::FLOAT);
         ARIADNE_TEST_EQUAL(parser("true"),              ParserType::BOOL);
         ARIADNE_TEST_EQUAL(parser("1"),                 ParserType::INT);
+        ARIADNE_TEST_EQUAL(parser("-1"),                ParserType::INT);
+        ARIADNE_TEST_EQUAL(parser("+0"),                ParserType::INT);
+        ARIADNE_TEST_EQUAL(parser("-0"),                ParserType::INT);
         ARIADNE_TEST_EQUAL(parser("\"string\""),        ParserType::STRING);
         ARIADNE_TEST_EQUAL(parser("123ariadne456"),     ParserType::STRING);
     }

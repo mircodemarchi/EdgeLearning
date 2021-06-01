@@ -93,6 +93,12 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const ParserType& obj);
+std::ostream& operator<<(std::ostream& os, const std::vector<ParserType>& obj);
+
+bool operator==(const std::vector<ParserType> &lhs, 
+    const std::vector<ParserType> &rhs);
+bool operator!=(const std::vector<ParserType> &lhs, 
+    const std::vector<ParserType> &rhs);
 
 template<typename T>
 bool convert(const std::string &s, T *ptr)

@@ -29,7 +29,7 @@ namespace Ariadne {
 
 const std::regex Parser::_float_regex 
     { "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$" };
-const std::regex Parser::_integer_regex { "^(0|[1-9][0-9]*)$" };
+const std::regex Parser::_integer_regex { "^[-+]?(0|[1-9][0-9]*)$" };
 const std::regex Parser::_boolean_regex { "^(true|false)$"    };
 const std::regex Parser::_string_regex  { "^\".*\"$"          };
 
@@ -75,8 +75,50 @@ std::vector<ParserType> Parser::parse(
 
 std::ostream& operator<<(std::ostream& os, const ParserType& obj)
 {
-   os << static_cast<std::underlying_type<ParserType>::type>(obj);
+   switch(obj)
+   {
+        case ParserType::NONE:   os << "NONE"; break;
+        case ParserType::AUTO:   os << "AUTO"; break;
+        case ParserType::FLOAT:  os << "FLOAT"; break; 
+        case ParserType::INT:    os << "INT"; break;
+        case ParserType::BOOL:   os << "BOOL"; break;
+        case ParserType::STRING: os << "STRING"; break;
+        case ParserType::OBJECT: os << "OBJECT"; break;
+        default: break;
+   }
+   os << "(" << static_cast<std::underlying_type<ParserType>::type>(obj) << ")";
    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<ParserType>& obj)
+{
+    os << "{";
+    for (auto &pt: obj)
+    {
+        os << pt << ",";
+    }
+    os << "}";
+    return os;
+}
+
+bool operator==(const std::vector<ParserType> &lhs, 
+    const std::vector<ParserType> &rhs)
+{
+    if (lhs.size() != rhs.size()) return false;
+    for (size_t i = 0; i < lhs.size(); ++i)
+    {
+        if (lhs.at(i) != rhs.at(i))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool operator!=(const std::vector<ParserType> &lhs, 
+    const std::vector<ParserType> &rhs)
+{
+    return !operator==(lhs, rhs);
 }
 
 } // namespace Ariadne
