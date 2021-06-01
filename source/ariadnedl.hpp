@@ -29,12 +29,10 @@
 #ifndef ARIADNE_ARIADNEDL_HPP
 #define ARIADNE_ARIADNEDL_HPP
 
-namespace Ariadne {
-
 #include "estimators/time_estimator.hpp"
 #include "parser/parser.hpp"
 #include "parser/csv.hpp"
 
-} // namespace Ariadne
+namespace Ariadne { } // namespace Ariadne
 
 #endif // ARIADNE_ARIADNEDL_HPP
