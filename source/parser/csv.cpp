@@ -29,6 +29,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 
 namespace Ariadne {
@@ -41,11 +42,11 @@ CSVField::CSVField(std::string field, const ParserType &type, size_t col_index)
 
 }
 
-CSVRow::CSVRow(std::string line, size_t size, size_t row_idx, 
+CSVRow::CSVRow(std::string line, size_t row_idx, size_t cols_amount, 
     std::vector<ParserType> &types, char separator)
     : _line{line}
-    , _size{size}
-    , _row_idx{row_idx}
+    , _idx{row_idx}
+    , _cols_amount{cols_amount}
     , _types{types}
     , _separator{separator}
 {
@@ -61,19 +62,19 @@ CSVRow::CSVRow(std::string line, size_t row_idx, std::vector<ParserType> &types,
 
 }
 
-CSVRow::CSVRow(std::vector<ParserType> &types)
+CSVRow::CSVRow(std::vector<ParserType> &types, char separator)
     : _line{}
-    , _size{0}
-    , _row_idx{}
+    , _idx{}
+    , _cols_amount{0}
     , _types{types}
-    , _separator{}
+    , _separator{separator}
 {
 
 }
 
 CSVRow::CSVRow(const CSVRow &obj)
     : _line{obj._line}
-    , _size{obj._size}
+    , _cols_amount{obj._cols_amount}
     , _types{obj._types}
     , _separator{obj._separator}
 {
@@ -82,9 +83,10 @@ CSVRow::CSVRow(const CSVRow &obj)
 
 CSVField CSVRow::operator[](size_t idx) const
 {
-    if (idx >= this->_size)
+    if (idx >= this->_cols_amount)
     {
-        throw std::runtime_error("operator[] failed: idx >= this->size");
+        throw std::runtime_error(
+            "operator[] failed: idx >= this->_cols_amount");
     }
 
     std::string field;
@@ -103,63 +105,137 @@ CSVField CSVRow::operator[](size_t idx) const
 CSVRow& CSVRow::operator=(const CSVRow &obj)
 {
     _line = obj._line;
-    _size = obj._size;
+    _cols_amount = obj._cols_amount;
     _types = obj._types;
     _separator = obj._separator;
     return *this;
 }
 
-CSVIterator::CSVIterator(CSVRow row, std::string fn)
-    : _fn{fn}
-    , _file{fn}
-    , _row{row}
+std::ostream& operator<<(std::ostream& stream, const CSVRow& obj)
+{ 
+    stream << obj._line;
+    return stream;
+}
+
+CSVRow::operator std::vector<std::string>()
 {
-    size_t idx = _row.idx();
-    for (size_t i = 0; i < idx; ++i)
+    std::vector<std::string> ret{};
+    std::stringstream ss{_line};
+    for (size_t i = 0; i < _cols_amount; ++i)
     {
-        _file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::string s;
+        std::getline(ss, s, _separator);
+        ret.push_back(s);
     }
+    return ret;
+}
+
+CSVRow::operator std::vector<CSVField>()
+{
+    std::vector<CSVField> ret{};
+    std::stringstream ss{_line};
+    for (size_t i = 0; i < _cols_amount; ++i)
+    {
+        std::string s;
+        std::getline(ss, s, _separator);
+        ret.push_back(CSVField{s, _types.at(i), i});
+    }
+    return ret;
+}
+
+template<typename T>
+CSVRow::operator std::vector<T>()
+{
+    std::vector<T> ret{};
+    std::stringstream ss{_line};
+    for (size_t i = 0; i < _cols_amount; ++i)
+    {
+        std::string s;
+        std::getline(ss, s, _separator);
+        T t;
+        convert(s, &t);
+        ret.push_back(t);
+    }
+    return ret;
+}
+
+CSVIterator::CSVIterator(std::string fn, size_t idx, size_t cols_amount,
+    std::vector<ParserType> &types, char separator)
+    : _fn{fn}
+    , _row{types, separator}
+    , _is_stream_updated{false}
+    , _stream{fn}
+{
+    _row._idx = idx;
+    _row._cols_amount = cols_amount;
 }
 
 CSVIterator::CSVIterator(const CSVIterator &obj)
     : _fn{obj._fn}
-    , _file{obj._fn}
     , _row{obj._row}
+    , _is_stream_updated{false}
+    , _stream{obj._fn}
 {
 
 }
 
 CSVIterator::~CSVIterator()
 {
-    _file.close();
+    _stream.close();
 }
 
-bool CSVIterator::operator==(const CSVIterator& rhs) const
+CSVRow &CSVIterator::operator*()
 {
-    return this->_row.idx() == rhs._row.idx()
-        && this->_row.size() == rhs._row.size();
+    update_stream();
+    update_row();
+    return _row;
 }
 
-bool CSVIterator::operator!=(const CSVIterator& rhs) const
+CSVRow *CSVIterator::operator->()
 {
-    return this->_row.idx() != rhs._row.idx()
-        || this->_row.size() != rhs._row.size();
+    update_stream();
+    update_row();
+    return &_row;
 }
 
-CSVIterator &CSVIterator::operator++() 
+bool CSVIterator::operator==(const CSVIterator &rhs) const
 {
-    std::string line;
-    std::getline(_file, line);
-    this->_row._line = line;
-    this->_row._row_idx++;
+    return _row._idx == rhs._row._idx;
+}
+
+bool CSVIterator::operator!=(const CSVIterator &rhs) const
+{
+    return _row._idx != rhs._row._idx;
+}
+
+CSVIterator &CSVIterator::operator++()
+{
+    _row._idx++;
     return *this;
 }
 
 CSVIterator CSVIterator::operator++(int)
 {
-    CSVIterator tmp(*this); 
-    operator++(); 
+    CSVIterator tmp(*this);
+    operator++();
     return tmp;
+}
+
+void CSVIterator::update_stream()
+{
+    if (!_is_stream_updated)
+    {
+        for (size_t i = 0; i < _row._idx; ++i)
+        {
+            _stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        _is_stream_updated = true;
+    }
+}
+
+void CSVIterator::update_row()
+{
+    std::getline(_stream, _row._line);
 }
 
 CSV::CSV(std::string fn, std::vector<ParserType> types, char separator) 
