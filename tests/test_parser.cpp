@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/test_replaceme.cpp
+ *            tests/test_parser.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

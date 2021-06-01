@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/test_replaceme.cpp
+ *            tests/test_csv.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -36,6 +36,8 @@ public:
     void test() {
         ARIADNE_TEST_CALL(test_csv_field());
         ARIADNE_TEST_CALL(test_csv_row());
+        ARIADNE_TEST_CALL(test_csv());
+        ARIADNE_TEST_CALL(test_csv_iterator(5));
     }
 private:
     void test_csv_field() {
@@ -85,10 +87,7 @@ private:
             ParserType::INT, ParserType::FLOAT,
             ParserType::STRING, ParserType::BOOL};
         auto types_to_test = csv_row.types();
-        for (size_t i = 0; i < csv_row.size(); ++i)
-        {
-            ARIADNE_TEST_EQUAL(types_groundtruth.at(i), types_to_test.at(i));
-        }
+        ARIADNE_TEST_EQUAL(types_groundtruth, types_to_test);
 
         csv_row = CSVRow("10,1.3", 3, types, ',');
         ARIADNE_TEST_EQUAL(csv_row.size(), 2);
@@ -102,6 +101,41 @@ private:
         ARIADNE_TEST_EQUAL(csv_row.types().size(), 0);
         ARIADNE_TEST_EQUAL(csv_row.empty(), true);
         ARIADNE_TEST_FAIL(csv_row[0]);
+    }
+
+    void test_csv() {
+        auto csv = CSV(data_training_fp.string());
+        auto types_groundtruth = std::vector<ParserType>{6, ParserType::INT};
+
+        ARIADNE_TEST_EQUAL(csv.cols_size(), 6);
+        ARIADNE_TEST_EQUAL(csv.rows_size(), 3201);
+        ARIADNE_TEST_EQUAL(csv.types(), types_groundtruth);
+
+        ARIADNE_TEST_PRINT(csv.header());
+        ARIADNE_TEST_ASSERT(!csv.header().empty());
+        ARIADNE_TEST_EQUAL(csv.header().size(), csv.cols_size());
+        ARIADNE_TEST_EQUAL(csv.header().types(), types_groundtruth);
+        ARIADNE_TEST_EQUAL(csv.header().idx(), 0);
+    
+        ARIADNE_TEST_PRINT(csv[1]);
+        ARIADNE_TEST_ASSERT(!csv[1].empty());
+        ARIADNE_TEST_EQUAL(csv[1].size(), csv.cols_size());
+        ARIADNE_TEST_EQUAL(csv[1].idx(), 1);
+        ARIADNE_TEST_EQUAL(types_groundtruth, csv[1].types());
+    }
+
+    void test_csv_iterator(const size_t num_lines) {
+        auto csv = CSV(data_training_fp.string());
+        size_t i = 0;
+        for (auto &row: csv)
+        {
+            if (i == num_lines)
+            {
+                break;
+            }
+            ARIADNE_TEST_PRINT(row);
+            ++i;
+        }
     }
 
     static const std::string DATA_TRAINING_FN;
