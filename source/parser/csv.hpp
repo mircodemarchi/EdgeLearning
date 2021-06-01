@@ -84,7 +84,6 @@ public:
     CSVRow(const CSVRow &obj);
     ~CSVRow() = default;
 
-    // CSVField& operator[](size_t idx);
     CSVField operator[](size_t idx) const;
     CSVRow& operator=(const CSVRow &obj);
     friend std::ostream& operator<<(std::ostream& stream, const CSVRow& obj);

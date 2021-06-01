@@ -121,6 +121,7 @@ CSVField CSVRow::operator[](size_t idx) const
 CSVRow& CSVRow::operator=(const CSVRow &obj)
 {
     _line = obj._line;
+    _idx = obj._idx;
     _cols_amount = obj._cols_amount;
     _types = obj._types;
     _separator = obj._separator;
@@ -241,8 +242,9 @@ void CSVIterator::update_row()
 CSV::CSV(std::string fn, std::vector<ParserType> types, char separator) 
     : Parser()
     , _fn{fn}
-    , _row_header{types}
-    , _row_cache{types}
+    , _types{types}
+    , _row_header{_types}
+    , _row_cache{_types}
     , _separator{separator}
 {
     auto file = std::ifstream{fn};
@@ -252,9 +254,11 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
     }
 
     // Get number of rows.
+    file.unsetf(std::ios_base::skipws);
     _rows_amount = static_cast<size_t>(
         std::count(std::istream_iterator<char>(file), 
             std::istream_iterator<char>(), '\n'));
+    file.clear();
     file.seekg(0);
 
     // Get first two lines.
@@ -264,7 +268,7 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
 
     // Get number of columns.
     _cols_amount = static_cast<size_t>(
-        std::count(header.begin(), header.end(), separator));
+        std::count(header.begin(), header.end(), separator)+1);
 
     if((std::find(types.begin(), types.end(), ParserType::AUTO) != types.end())
         || types.size() == 0
@@ -283,8 +287,8 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
         _types = types;
     }
 
-    _row_header = CSVRow{header,     _cols_amount, 0, _types, separator};
-    _row_cache  = CSVRow{first_line, _cols_amount, 1, _types, separator};
+    _row_header = CSVRow{header,     0, _cols_amount, _types, separator};
+    _row_cache  = CSVRow{first_line, 1, _cols_amount, _types, separator};
     file.close();
 }
 
@@ -304,7 +308,7 @@ const CSVRow &CSV::operator[](size_t idx)
 
     std::string line;
     std::getline(file, line);
-    _row_cache = CSVRow{line, _cols_amount, idx, _types, _separator};
+    _row_cache = CSVRow{line, idx, _cols_amount, _types, _separator};
     file.close();
     return _row_cache;
 }
