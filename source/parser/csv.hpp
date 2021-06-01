@@ -43,7 +43,7 @@ class CSVField
     friend class CSVRow;
 
 public:
-    CSVField(std::string field, const ParserType &type, size_t col_index);
+    CSVField(std::string field, ParserType &type, size_t col_index);
     ~CSVField() = default;
 
     template<typename T>
@@ -60,12 +60,12 @@ public:
         return ret;
     }
 
-    const ParserType &type()  const    { return _type; }
-    size_t idx() const    { return _col_index; }
+    const ParserType &type() const { return _type; }
+    size_t idx() const { return _col_index; }
 
 private:
     std::string _field;
-    const ParserType &_type;
+    ParserType &_type;
     size_t _col_index;
 };
 
@@ -92,7 +92,20 @@ public:
     operator std::vector<CSVField>();
 
     template<typename T>
-    operator std::vector<T>();
+    operator std::vector<T>()
+    {
+        std::vector<T> ret{};
+        std::stringstream ss{_line};
+        for (size_t i = 0; i < _cols_amount; ++i)
+        {
+            std::string s;
+            std::getline(ss, s, _separator);
+            T t;
+            convert(s, &t);
+            ret.push_back(t);
+        }
+        return ret;
+    }
 
     size_t size() const { return _cols_amount; }
     bool empty() const { return _cols_amount == 0; }

@@ -34,12 +34,16 @@
 
 namespace Ariadne {
 
-CSVField::CSVField(std::string field, const ParserType &type, size_t col_index)
+CSVField::CSVField(std::string field, ParserType &type, size_t col_index)
     : _field{field}
     , _type{type}
     , _col_index{col_index}
 {
-
+    if (_type == ParserType::AUTO)
+    {
+        auto p = Parser();
+        _type = p(_field);
+    }
 }
 
 CSVRow::CSVRow(std::string line, size_t row_idx, size_t cols_amount, 
@@ -50,24 +54,33 @@ CSVRow::CSVRow(std::string line, size_t row_idx, size_t cols_amount,
     , _types{types}
     , _separator{separator}
 {
-
+    if((std::find(types.begin(), types.end(), ParserType::AUTO) != types.end())
+        || types.size() == 0
+        || types.size() != cols_amount) 
+    {
+        std::stringstream ss{line};
+        auto p = Parser();
+        _types = std::vector<ParserType>{};
+        for (size_t i = 0; i < cols_amount; ++i)
+        {
+            std::string s;
+            std::getline(ss, s, separator);
+            _types.push_back(p(s));
+        }
+    }
 }
 
 CSVRow::CSVRow(std::string line, size_t row_idx, std::vector<ParserType> &types, 
-    char separator)
-    : CSVRow{line, 
-        static_cast<size_t>(std::count(line.begin(), line.end(), separator)), 
-        row_idx, types, separator}
+    char separator) 
+    : CSVRow{line, row_idx,
+        static_cast<size_t>(std::count(line.begin(), line.end(), separator)+1), 
+        types, separator}
 {
 
 }
 
 CSVRow::CSVRow(std::vector<ParserType> &types, char separator)
-    : _line{}
-    , _idx{}
-    , _cols_amount{0}
-    , _types{types}
-    , _separator{separator}
+    : CSVRow{std::string{}, size_t{}, size_t{0}, types, separator}
 {
 
 }
@@ -92,11 +105,14 @@ CSVField CSVRow::operator[](size_t idx) const
     std::string field;
     size_t i = 0;
     std::stringstream ss{_line};
-    while(std::getline(ss, field, _separator)) {
+    while(std::getline(ss, field, _separator)) 
+    {
         if(i == idx)
         {
             return CSVField{field, _types.at(idx), idx};
         }
+
+        i++;
     }
 
     throw std::runtime_error("CSV bad format: fields missing");
@@ -139,22 +155,6 @@ CSVRow::operator std::vector<CSVField>()
         std::string s;
         std::getline(ss, s, _separator);
         ret.push_back(CSVField{s, _types.at(i), i});
-    }
-    return ret;
-}
-
-template<typename T>
-CSVRow::operator std::vector<T>()
-{
-    std::vector<T> ret{};
-    std::stringstream ss{_line};
-    for (size_t i = 0; i < _cols_amount; ++i)
-    {
-        std::string s;
-        std::getline(ss, s, _separator);
-        T t;
-        convert(s, &t);
-        ret.push_back(t);
     }
     return ret;
 }
