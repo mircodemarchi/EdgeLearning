@@ -35,6 +35,11 @@ const std::regex Parser::_string_regex  { "^\".*\"$"          };
 
 ParserType Parser::parse(const std::string &field)
 {
+    if (field.empty())
+    {
+        return ParserType::NONE;
+    }
+
     if (std::regex_match(field, _string_regex))
     {
         return ParserType::STRING;
