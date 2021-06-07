@@ -34,7 +34,12 @@
 namespace Ariadne {
 
 using num_t = float;
-using rne_t = std::mt19937;
+
+/**
+ * Random number engine: 64-bit Mersenne Twister by Matsumoto and
+ * Nishimura, 1998.
+ */
+using rne_t = std::mt19937_64;
 
 } // namespace Ariadne
 
