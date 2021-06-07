@@ -33,7 +33,7 @@
 
 namespace Ariadne {
 
-using num_t = float;
+using num_t = double;
 
 /**
  * Random number engine: 64-bit Mersenne Twister by Matsumoto and
