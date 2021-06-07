@@ -29,6 +29,7 @@
 #include <cmath>
 #include <functional>
 #include <cassert>
+#include <stdexcept>
 
 
 #ifndef ARIADNE_DL_DLMATH_HPP
