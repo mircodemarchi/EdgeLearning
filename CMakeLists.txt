@@ -74,6 +74,7 @@ add_library(ariadnedl SHARED
     $<TARGET_OBJECTS:ariadnedl-all>
     $<TARGET_OBJECTS:ariadnedl-estimators>
     $<TARGET_OBJECTS:ariadnedl-parser>
+    $<TARGET_OBJECTS:ariadnedl-dnn>
 )
 
 target_link_libraries(ariadnedl dl)
