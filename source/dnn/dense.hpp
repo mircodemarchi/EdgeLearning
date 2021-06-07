@@ -63,8 +63,8 @@ public:
      */
     void reverse(num_t* gradients) override;
 
-    num_t* param(size_t index);
-    num_t* gradient(size_t index);
+    num_t* param(size_t index) override;
+    num_t* gradient(size_t index) override;
 
     void print() const override;
 
