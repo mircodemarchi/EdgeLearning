@@ -27,6 +27,8 @@
 
 namespace Ariadne {
 
-
+Model::Model(std::string name)
+    : _name{name}
+{ }
 
 } // namespace Ariadne
