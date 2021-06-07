@@ -26,12 +26,13 @@
  *  \brief Simply replace me.
  */
 
-#ifndef ARIADNE_DL_DLMATH_HPP
-#define ARIADNE_DL_DLMATH_HPP
-
 #include <cmath>
 #include <functional>
+#include <cassert>
 
+
+#ifndef ARIADNE_DL_DLMATH_HPP
+#define ARIADNE_DL_DLMATH_HPP
 
 namespace Ariadne {
 
@@ -61,6 +62,7 @@ std::function<T(rne_t)> normal_pdf(float mean, float std_dev)
 
 /**
  * \brief ReLU Function.
+ * relu(z)_i = max(0, z_i)
  * \tparam T     Type of each source and destination elements.
  * \param src    Array of read elements.
  * \param dst    Array to write the result.
@@ -103,6 +105,73 @@ void softmax(const T *src, T* dst, size_t length)
         dst[i] *= inv_sum_exp_z;
     }
 }
+
+/**
+ * \brief Derivative of ReLU Function.
+ * relu'[z]_i = 1 if z_i > 0 else 0
+ * \tparam T     Type of each source and destination elements.
+ * \param src    Array of read elements.
+ * \param dst    Array to write the result.
+ * \param length Length of the arrays.
+ */
+template <typename T>
+void relu_1(const T *src, T* dst, size_t length)
+{
+    for (size_t i = 0; i < length; ++i)
+    {
+        dst[i] = (src[i] > T{0.0}) ? T{1.0} : T{0.0};
+    }
+}
+
+/**
+ * \brief Derivative Optimized of Softmax Function with the value of the 
+ * argmax already saved in the src array. Source and Destination has to be 
+ * differents.
+ * softmax'(z)_i = \sum_j(
+ *      softmax(z_i)(1 - softmax(z_i)) if i == j else -softmax(z_i)softmax(z_j))
+ * \tparam T     Type of each source and destination elements.
+ * \param src    Array of read elements. It has to be different by dst.
+ * \param dst    Array to write the result. It has to be different by src.
+ * \param length Length of the arrays.
+ */
+template <typename T>
+void softmax_1_opt(const T *src, T* dst, size_t length)
+{
+    if (src == dst) 
+    {
+        throw std::runtime_error("src, dst have to be different "
+                                 "in order to perform softmax_1_opt");
+    }
+
+    for (size_t i = 0; i < length; ++i)
+    {
+        dst[i] = T{0.0};
+        for(size_t j = 0; j < length; ++j)
+        {
+            dst[i] += (i == j) ? src[i] * (T{1.0} - src[i]) : -src[i] * src[j];
+        }
+    }
+}
+
+/**
+ * \brief Derivative of Softmax Function.
+ * softmax'(z)_i = \sum_j(
+ *  softmax(z_i)(1 - softmax(z_i)) if i == j else -softmax(z_i)softmax(z_j))
+ * \tparam T     Type of each source and destination elements.
+ * \param src    Array of read elements.
+ * \param dst    Array to write the result.
+ * \param length Length of the arrays.
+ */
+template <typename T>
+void softmax_1(const T *src, T* dst, size_t length)
+{
+    T *tmp = new T[length];
+    assert(tmp);
+    softmax(src, tmp, length);
+    softmax_1_opt(tmp, dst, length);
+    delete[] tmp;
+}
+
 
 } // namespace dlmath
 
