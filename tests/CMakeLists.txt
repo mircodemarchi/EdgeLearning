@@ -3,6 +3,7 @@ set(UNIT_TESTS
         # test_estimators
         test_parser
         test_csv
+        test_dnn
     )
 
 foreach(TEST ${UNIT_TESTS})
