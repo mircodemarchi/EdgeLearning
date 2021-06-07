@@ -29,18 +29,16 @@
 #ifndef ARIADNE_DNN_LAYER_HPP
 #define ARIADNE_DNN_LAYER_HPP
 
+#include "type.hpp"
+
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <random>
 
 
 namespace Ariadne {
 
-using num_t = float;
-using rne_t = std::mt19937;
-
-class Model; //< TODO: to define later.
+class Model;
 
 class Layer 
 {
@@ -83,7 +81,7 @@ public:
      * \param index size_t Parameter index.
      * \return num_t* Pointer to parameter.
      */
-    virtual num_t* param(size_t index) { return nullptr; }
+    virtual num_t* param(size_t index) { (void) index; return nullptr; }
 
     /**
      * \brief Virtual method accessor for loss-gradient with respect to a 
@@ -91,7 +89,7 @@ public:
      * \param index size_t Parameter index.
      * \return num_t* Pointer to gradient value of parameter.
      */
-    virtual num_t* gradient(size_t index) { return nullptr; }
+    virtual num_t* gradient(size_t index) { (void) index; return nullptr; }
 
     /**
      * \brief Virtual method information dump for debugging purposes.
