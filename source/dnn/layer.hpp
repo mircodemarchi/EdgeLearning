@@ -94,7 +94,7 @@ public:
     /**
      * \brief Print.
      */
-    virtual void print() const;
+    virtual void print() const = 0;
 
     /**
      * \brief Virtual method information dump for debugging purposes.

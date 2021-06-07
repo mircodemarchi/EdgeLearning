@@ -27,6 +27,10 @@
 
 namespace Ariadne {
 
+Layer::Layer(Model& model, std::string name)
+    : _model(model)
+    , _name{std::move(name)}
+{ }
 
 
 } // namespace Ariadne
