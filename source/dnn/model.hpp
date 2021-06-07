@@ -1,5 +1,5 @@
 /***************************************************************************
- *            layer.cpp
+ *            model.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,11 +22,17 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "layer.hpp"
+/*! \file model.hpp
+ *  \brief Simply replace me.
+ */
 
+#ifndef ARIADNE_DNN_MODEL_HPP
+#define ARIADNE_DNN_MODEL_HPP
 
 namespace Ariadne {
 
 
 
 } // namespace Ariadne
+
+#endif // ARIADNE_DNN_MODEL_HPP

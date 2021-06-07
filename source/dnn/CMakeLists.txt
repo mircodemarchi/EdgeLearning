@@ -2,6 +2,7 @@ set(LIBRARY_NAME ariadnedl-dnn)
 
 add_library(${LIBRARY_NAME} OBJECT
     layer.cpp
+    model.cpp
 )
 
 if(COVERAGE)

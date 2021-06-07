@@ -1,5 +1,5 @@
 /***************************************************************************
- *            layer.cpp
+ *            model.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "layer.hpp"
+#include "model.hpp"
 
 
 namespace Ariadne {
