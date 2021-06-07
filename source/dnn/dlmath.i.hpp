@@ -39,7 +39,7 @@ namespace dlmath {
 
 /**
  * \brief Gaussian Probability Density Function.
- * @tparam T Input and output type.
+ * \tparam T Input and output type.
  * \param x       Input value to compute.
  * \param mean    Mean of the probability distribution required.
  * \param std_dev Standard Deviation of the probability distribution required.
@@ -57,6 +57,51 @@ std::function<T(rne_t)> normal_pdf(float mean, float std_dev)
         return T(inv_sqrt_2pi_std_dev * std::exp(-0.5f * a * a));
     };
     return ret;
+}
+
+/**
+ * \brief ReLU Function.
+ * \tparam T     Type of each source and destination elements.
+ * \param src    Array of read elements.
+ * \param dst    Array to write the result.
+ * \param length Length of the arrays.
+ */
+template <typename T>
+void relu(const T* src, T* dst, size_t length)
+{
+    for (size_t i = 0; i < length; ++i)
+    {
+        dst[i] = std::max(src[i], T{0.0});
+    }
+}
+
+/**
+ * \brief Softmax Function.
+ * softmax(z)_i = exp(z_i) / \sum_j(exp(z_j))
+ * \tparam T     Type of each source and destination elements.
+ * \param src    Array of read elements.
+ * \param dst    Array to write the result.
+ * \param length Length of the arrays.
+ */
+template <typename T>
+void softmax(const T *src, T* dst, size_t length)
+{
+    // Compute the exponential of each value and compute the sum. 
+    T sum_exp_z{0.0};
+    for (size_t i = 0; i < length; ++i)
+    {
+        dst[i] = std::exp(src[i]);
+        sum_exp_z += dst[i];
+    }
+
+    // Compute the inverse of the sum.
+    T inv_sum_exp_z = T{1.0} / sum_exp_z;
+
+    // Multiply the inverse of the sum for each value.
+    for (size_t i = 0; i < length; ++i)
+    {
+        dst[i] *= inv_sum_exp_z;
+    }
 }
 
 } // namespace dlmath
