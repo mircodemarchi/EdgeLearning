@@ -92,6 +92,11 @@ public:
     virtual num_t* gradient(size_t index) { (void) index; return nullptr; }
 
     /**
+     * \brief Print.
+     */
+    virtual void print() const;
+
+    /**
      * \brief Virtual method information dump for debugging purposes.
      * \return std::string const& The layer name.
      */

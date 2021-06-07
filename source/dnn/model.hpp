@@ -23,7 +23,7 @@
  */
 
 /*! \file model.hpp
- *  \brief Simply replace me.
+ *  \brief Deep Neural Network Model.
  */
 
 #ifndef ARIADNE_DNN_MODEL_HPP
