@@ -94,7 +94,48 @@ void DenseLayer::init(rne_t& rne)
 
 void DenseLayer::forward(num_t* inputs) 
 {
+    // Remember the last input data for backpropagation later.
+    _last_input = inputs;
 
+    /* 
+     * Compute the product of the input data with the weight add the bias.
+     * z = W * x + b
+     */
+    for (size_t i = 0; i < _output_size; ++i)
+    {
+        num_t z{0.0};
+
+        size_t offset = i * _input_size;
+        for (size_t j = 0; j < _input_size; ++j)
+        {
+            z += _weights[offset + j] * inputs[j];
+        }
+        z += _biases[i];
+
+        // Save the result in activations vector.
+        _activations[i] = z;
+    }
+
+    switch (_activation)
+    {
+        case Activation::ReLU:
+        {
+            dlmath::relu<num_t>(_activations.data(), _activations.data(), 
+                size_t(_output_size));
+        }
+        case Activation::Softmax:
+        default:
+        {
+            dlmath::softmax<num_t>(_activations.data(), _activations.data(), 
+                size_t(_output_size));
+        }
+    }
+
+    // Forward to the next layers.
+    for (auto *layer: this->_subsequents)
+    {
+        layer->forward(_activations.data());
+    }
 }
 
 void DenseLayer::reverse(num_t* gradients)

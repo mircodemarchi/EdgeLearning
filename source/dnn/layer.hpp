@@ -64,7 +64,8 @@ public:
      * \brief Virtual method used to perform reverse propagations. During 
      * reverse propagation nodes receive loss gradients to its previous outputs
      * and compute gradients with respect to each tunable parameter.
-     * \param gradients num_t ptr
+     * Compute dJ/dz = dJ/dg(z) * dg(z)/dz.
+     * \param gradients num_t ptr dJ/dg(z)
      */
     virtual void reverse(num_t* gradients) = 0;
 
@@ -102,7 +103,7 @@ public:
      */
     virtual std::string const& name() const noexcept { return _name; }
 
-private:
+protected:
     friend class Model;
 
     Model& _model;                      ///< Model reference.

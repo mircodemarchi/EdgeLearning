@@ -59,6 +59,10 @@ public:
 
     /**
      * \brief The gradient data should have size _output_size.
+     * Compute dJ/dz = dJ/dg(z) * dg(z)/dz
+     * where dJ/dg(z) is the input gradients, dg(z)/dz is the activation_grad 
+     * computed in the function and dJ/dz will be the result saved in 
+     * _activation_gradients.
      * \param gradients
      */
     void reverse(num_t* gradients) override;
