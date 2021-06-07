@@ -29,6 +29,8 @@
 #include "dnn/model.hpp"
 
 #include <vector>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 using namespace Ariadne;
@@ -74,6 +76,29 @@ private:
             ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
             ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+        }
+
+        ARIADNE_PRINT_TEST_COMMENT("Test ReLU First Derivative");
+        test_vec = std::vector<num_t>{-2,-1,0,1,2};
+        truth_vec = std::vector<num_t>{0,0,0,1,1};
+        dlmath::relu_1<num_t>(test_vec.data(), test_vec.data(), test_vec.size());
+        for (size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+                + std::to_string(test_vec[i]));
+            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+        }
+
+        ARIADNE_PRINT_TEST_COMMENT("Test SoftMax First Derivative");
+        test_vec = std::vector<num_t>{-2,-1,0,1,2};
+        ARIADNE_TEST_FAIL(dlmath::softmax_1_opt<num_t>(test_vec.data(), 
+            test_vec.data(), test_vec.size()));
+        ARIADNE_TEST_EXECUTE(dlmath::softmax_1<num_t>(test_vec.data(), 
+            test_vec.data(), test_vec.size()));
+        for (size_t i = 0; i < test_vec.size(); ++i)
+        {
+            std::cout << std::fixed << std::setprecision(25) 
+                << "test_vec[i]: " << test_vec[i] << std::endl;
         }
     }
 
