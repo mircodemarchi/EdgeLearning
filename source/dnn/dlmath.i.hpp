@@ -63,6 +63,19 @@ std::function<T(rne_t)> normal_pdf(float mean, float std_dev)
 
 /**
  * \brief ReLU Function.
+ * relu(x) = max(0, x)
+ * \tparam T Type of the input and return type.
+ * \param x  Input value.
+ * \return T
+ */
+template <typename T>
+T relu(T x)
+{
+    return std::max(x, T{0.0});
+}
+
+/**
+ * \brief ReLU Function applied to a vector.
  * relu(z)_i = max(0, z_i)
  * \tparam T     Type of each source and destination elements.
  * \param src    Array of read elements.
@@ -74,7 +87,7 @@ void relu(const T* src, T* dst, size_t length)
 {
     for (size_t i = 0; i < length; ++i)
     {
-        dst[i] = std::max(src[i], T{0.0});
+        dst[i] = relu(src[i]);
     }
 }
 
