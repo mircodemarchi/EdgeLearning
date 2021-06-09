@@ -41,7 +41,7 @@ namespace dlmath {
 
 /**
  * \brief Gaussian Probability Density Function.
- * \tparam T Input and output type.
+ * \tparam T      Input and output type.
  * \param x       Input value to compute.
  * \param mean    Mean of the probability distribution required.
  * \param std_dev Standard Deviation of the probability distribution required.
@@ -62,6 +62,70 @@ std::function<T(rne_t)> normal_pdf(float mean, float std_dev)
 }
 
 /**
+ * \brief Element wise multiplication between two arrays.
+ * \tparam T     Type of each source and destination elements.
+ * \param dst    Array to write the result.
+ * \param src1   First operand array.
+ * \param src2   Second operand array.
+ * \param length Length of the arrays.
+ */
+template <typename T>
+void arr_mul(T* dst, const T* src1, const T* src2, size_t length)
+{
+    for (size_t i = 0; i < length; ++i)
+    {
+        dst[i] = src1[i] * src2[i];
+    }
+}
+
+/**
+ * \brief Element wise summation between two arrays.
+ * \tparam T     Type of each source and destination elements.
+ * \param dst    Array to write the result.
+ * \param src1   First operand array.
+ * \param src2   Second operand array.
+ * \param length Length of the arrays.
+ */
+template <typename T>
+void arr_sum(T* dst, const T* src1, const T* src2, size_t length)
+{
+    for (size_t i = 0; i < length; ++i)
+    {
+        dst[i] = src1[i] + src2[i];
+    }
+}
+
+/**
+ * \brief Multiplication between a matrix and an array.
+ * Used for y = Wx
+ * @tparam T      Type of each source and destination elements.
+ * \param arr_dst Array destination to write the result.
+ * \param mat_src Matrix source, left operand.
+ * \param arr_src Array source, right operand.
+ * \param rows    Amount of rows.
+ * \param cols    Amount of columns.
+ */
+template <typename T>
+void matarr_mul(T* arr_dst, const T* mat_src, const T* arr_src, 
+    size_t rows, size_t cols)
+{
+    if (arr_src == arr_dst) 
+    {
+        throw std::runtime_error("arr_src, arr_dst have to be different "
+                                 "in order to perform matarr_mul");
+    }
+
+    for (size_t i = 0; i < rows; ++i)
+    {
+        arr_dst[i] = T{0};
+        for (size_t j = 0; j < cols; ++j)
+        {
+            arr_dst[i] += mat_src[(i * cols) + j] * arr_src[j];
+        }
+    }
+}
+
+/**
  * \brief ReLU Function.
  * relu(x) = max(0, x)
  * \tparam T Type of the input and return type.
@@ -71,7 +135,7 @@ std::function<T(rne_t)> normal_pdf(float mean, float std_dev)
 template <typename T>
 T relu(T x)
 {
-    return std::max(x, T{0.0});
+    return std::max(x, T{0});
 }
 
 /**
@@ -103,7 +167,7 @@ template <typename T>
 void softmax(const T *src, T* dst, size_t length)
 {
     // Compute the exponential of each value and compute the sum. 
-    T sum_exp_z{0.0};
+    T sum_exp_z{0};
     for (size_t i = 0; i < length; ++i)
     {
         dst[i] = std::exp(src[i]);
@@ -111,7 +175,7 @@ void softmax(const T *src, T* dst, size_t length)
     }
 
     // Compute the inverse of the sum.
-    T inv_sum_exp_z = T{1.0} / sum_exp_z;
+    T inv_sum_exp_z = T{1} / sum_exp_z;
 
     // Multiply the inverse of the sum for each value.
     for (size_t i = 0; i < length; ++i)
@@ -133,7 +197,7 @@ void relu_1(const T *src, T* dst, size_t length)
 {
     for (size_t i = 0; i < length; ++i)
     {
-        dst[i] = (src[i] > T{0.0}) ? T{1.0} : T{0.0};
+        dst[i] = (src[i] > T{0}) ? T{1} : T{0};
     }
 }
 
@@ -159,10 +223,10 @@ void softmax_1_opt(const T *src, T* dst, size_t length)
 
     for (size_t i = 0; i < length; ++i)
     {
-        dst[i] = T{0.0};
+        dst[i] = T{0};
         for(size_t j = 0; j < length; ++j)
         {
-            dst[i] += (i == j) ? src[i] * (T{1.0} - src[i]) : -src[i] * src[j];
+            dst[i] += (i == j) ? src[i] * (T{1} - src[i]) : -src[i] * src[j];
         }
     }
 }
