@@ -44,6 +44,7 @@ class Model
 {
 public:
     Model(std::string name);
+    ~Model() = default;
 
     /**
      * \brief Append a layer to the model, forward its parameters to the layer 

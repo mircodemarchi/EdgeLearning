@@ -29,6 +29,7 @@ namespace Ariadne {
 
 Model::Model(std::string name)
     : _name{name}
+    , _layers{}
 { }
 
 } // namespace Ariadne
