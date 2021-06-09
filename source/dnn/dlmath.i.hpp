@@ -245,8 +245,8 @@ void softmax_1(T* dst, const T *src, size_t length)
 {
     T *tmp = new T[length];
     assert(tmp);
-    softmax(src, tmp, length);
-    softmax_1_opt(tmp, dst, length);
+    softmax(tmp, src, length);
+    softmax_1_opt(dst, tmp, length);
     delete[] tmp;
 }
 
