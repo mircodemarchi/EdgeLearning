@@ -142,12 +142,12 @@ T relu(T x)
  * \brief ReLU Function applied to a vector.
  * relu(z)_i = max(0, z_i)
  * \tparam T     Type of each source and destination elements.
- * \param src    Array of read elements.
  * \param dst    Array to write the result.
+ * \param src    Array of read elements.
  * \param length Length of the arrays.
  */
 template <typename T>
-void relu(const T* src, T* dst, size_t length)
+void relu(T* dst, const T* src, size_t length)
 {
     for (size_t i = 0; i < length; ++i)
     {
@@ -159,12 +159,12 @@ void relu(const T* src, T* dst, size_t length)
  * \brief Softmax Function.
  * softmax(z)_i = exp(z_i) / \sum_j(exp(z_j))
  * \tparam T     Type of each source and destination elements.
- * \param src    Array of read elements.
  * \param dst    Array to write the result.
+ * \param src    Array of read elements.
  * \param length Length of the arrays.
  */
 template <typename T>
-void softmax(const T *src, T* dst, size_t length)
+void softmax(T* dst, const T *src, size_t length)
 {
     // Compute the exponential of each value and compute the sum. 
     T sum_exp_z{0};
@@ -188,12 +188,12 @@ void softmax(const T *src, T* dst, size_t length)
  * \brief Derivative of ReLU Function.
  * relu'[z]_i = 1 if z_i > 0 else 0
  * \tparam T     Type of each source and destination elements.
- * \param src    Array of read elements.
  * \param dst    Array to write the result.
+ * \param src    Array of read elements.
  * \param length Length of the arrays.
  */
 template <typename T>
-void relu_1(const T *src, T* dst, size_t length)
+void relu_1(T* dst, const T *src, size_t length)
 {
     for (size_t i = 0; i < length; ++i)
     {
@@ -208,12 +208,12 @@ void relu_1(const T *src, T* dst, size_t length)
  * softmax'(z)_i = \sum_j(
  *      softmax(z_i)(1 - softmax(z_i)) if i == j else -softmax(z_i)softmax(z_j))
  * \tparam T     Type of each source and destination elements.
- * \param src    Array of read elements. It has to be different by dst.
  * \param dst    Array to write the result. It has to be different by src.
+ * \param src    Array of read elements. It has to be different by dst.
  * \param length Length of the arrays.
  */
 template <typename T>
-void softmax_1_opt(const T *src, T* dst, size_t length)
+void softmax_1_opt(T* dst, const T *src, size_t length)
 {
     if (src == dst) 
     {
@@ -236,12 +236,12 @@ void softmax_1_opt(const T *src, T* dst, size_t length)
  * softmax'(z)_i = \sum_j(
  *  softmax(z_i)(1 - softmax(z_i)) if i == j else -softmax(z_i)softmax(z_j))
  * \tparam T     Type of each source and destination elements.
- * \param src    Array of read elements.
  * \param dst    Array to write the result.
+ * \param src    Array of read elements.
  * \param length Length of the arrays.
  */
 template <typename T>
-void softmax_1(const T *src, T* dst, size_t length)
+void softmax_1(T* dst, const T *src, size_t length)
 {
     T *tmp = new T[length];
     assert(tmp);
