@@ -94,27 +94,17 @@ void DenseLayer::init(rne_t& rne)
 
 void DenseLayer::forward(num_t* inputs) 
 {
-    // Remember the last input data for backpropagation later.
+    // Remember the last input data for backpropagation.
     _last_input = inputs;
 
     /* 
      * Compute the product of the input data with the weight add the bias.
      * z = W * x + b
      */
-    for (size_t i = 0; i < _output_size; ++i)
-    {
-        num_t z{0.0};
-
-        size_t offset = i * _input_size;
-        for (size_t j = 0; j < _input_size; ++j)
-        {
-            z += _weights[offset + j] * inputs[j];
-        }
-        z += _biases[i];
-
-        // Save the result in activations vector.
-        _activations[i] = z;
-    }
+    dlmath::matarr_mul<num_t>(_activations.data(), _weights.data(), inputs, 
+        _output_size, _input_size);
+    dlmath::arr_sum<num_t>(_activations.data(), _activations.data(), 
+        _biases.data(), _output_size);
 
     switch (_activation)
     {
@@ -140,7 +130,90 @@ void DenseLayer::forward(num_t* inputs)
 
 void DenseLayer::reverse(num_t* gradients)
 {
+    // Calculate dg(z)/dz and put in _activation_gradients.
+    switch (_activation)
+    {
+        case Activation::ReLU:
+        {
+            /*
+             * The input for ReLU derivation is the _activations vector, that 
+             * is filled with the ReLU of vector z, and not directly the vector
+             * z. Considering that the input of ReLU derivation is used only 
+             * to check if it is > 0, and that if z > 0 then ReLU(z) > 0 and 
+             * viceversa, using ReLU of vector z or using directly the vector z
+             * there is no differences.  
+             */
+            dlmath::relu_1<num_t>(
+                _activation_gradients.data(), 
+                _activations.data(), 
+                _output_size);
+        }
+        case Activation::Softmax:
+        default:
+        {
+            /*
+             * The softmax derivation explits the calculus of softmax performed 
+             * previously and saved in _activations vector.
+             */
+            dlmath::softmax_1_opt<num_t>(
+                _activation_gradients.data(),
+                _activations.data(), 
+                _output_size);
+        }
+    }
 
+    // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
+    dlmath::arr_mul(_activation_gradients.data(), _activation_gradients.data(),
+        gradients, _output_size);
+
+    /*
+     * Bias gradient.
+     * Calculate dJ/db = dJ/dg(z) * dg(z)/db
+     *                 = dJ/dg(z) * dg(z)/dz * dz/db            <- z = Wx+b
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/db 
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * 1
+     *                 = dJ/dg(z) * dg(z)/dz
+     *                 = dJ/dz
+     */
+    dlmath::arr_sum(_bias_gradients.data(), _bias_gradients.data(), 
+        _activation_gradients.data(), _output_size);
+
+    /*
+     * Weight gradient.
+     * Calculate dJ/dw_i_j = dJ/dg(z) * dg(z)/dw_i_j
+     *                     = dJ/dg(z) * dg(z)/dz * dz/dw_i_j    <- z = Wx+b
+     *                     = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/dw_i_j 
+     *                     = dJ/dg(z) * dg(Wx+b)/dz * x_j
+     *                     = dJ/dg(z) * dg(z)/dz * x_j
+     *                     = dJ/dz * x_j
+     */
+    for (size_t i = 0; i < _output_size; ++i)
+    {
+        for (size_t j = 0; j < _input_size; ++j)
+        {
+            _weight_gradients[(i * _input_size) + j] += 
+                _activation_gradients[i] * _last_input[j];
+        }
+    }
+
+    /* 
+     * Input gradient.
+     * Calculate dJ/dx = dJ/dg(z) * dg(z)/x
+     *                 = dJ/dg(z) * dg(z)/dz * dz/x             <- z = Wx+b
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/x 
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * W
+     *                 = dJ/dg(z) * dg(z)/dz * W
+     *                 = dJ/dz * W
+     */
+    std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
+    for (size_t i = 0; i < _output_size; ++i)
+    {
+        for (size_t j = 0; j < _input_size; ++j)
+        {
+            _input_gradients[j] += 
+                _activation_gradients[i] * _weights[(i * _input_size) + j];
+        }
+    }
 }
 
 num_t* DenseLayer::param(size_t index)
