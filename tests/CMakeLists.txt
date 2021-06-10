@@ -1,5 +1,4 @@
 set(UNIT_TESTS
-        test_replaceme
         # test_estimators
         test_parser
         test_csv

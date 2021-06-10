@@ -24,7 +24,7 @@
 
 #include "dense.hpp"
 
-#include "dlmath.i.hpp"
+#include "dlmath.hpp"
 
 
 namespace Ariadne {

@@ -70,8 +70,7 @@ endif()
 add_subdirectory(source)
 add_subdirectory(tests)
 
-add_library(ariadnedl SHARED 
-    $<TARGET_OBJECTS:ariadnedl-all>
+add_library(ariadnedl SHARED
     $<TARGET_OBJECTS:ariadnedl-estimators>
     $<TARGET_OBJECTS:ariadnedl-parser>
     $<TARGET_OBJECTS:ariadnedl-dnn>
