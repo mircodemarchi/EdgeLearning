@@ -167,7 +167,7 @@ void relu(T* dst, const T* src, size_t length)
  * \param length Length of the arrays.
  */
 template <typename T>
-void softmax(T* dst, const T *src, size_t length)
+void softmax(T* dst, const T* src, size_t length)
 {
     // Compute the exponential of each value and compute the sum. 
     T sum_exp_z{0};
@@ -196,7 +196,7 @@ void softmax(T* dst, const T *src, size_t length)
  * \param length Length of the arrays.
  */
 template <typename T>
-void relu_1(T* dst, const T *src, size_t length)
+void relu_1(T* dst, const T* src, size_t length)
 {
     for (size_t i = 0; i < length; ++i)
     {
@@ -216,7 +216,7 @@ void relu_1(T* dst, const T *src, size_t length)
  * \param length Length of the arrays.
  */
 template <typename T>
-void softmax_1_opt(T* dst, const T *src, size_t length)
+void softmax_1_opt(T* dst, const T* src, size_t length)
 {
     if (src == dst) 
     {
@@ -244,9 +244,9 @@ void softmax_1_opt(T* dst, const T *src, size_t length)
  * \param length Length of the arrays.
  */
 template <typename T>
-void softmax_1(T* dst, const T *src, size_t length)
+void softmax_1(T* dst, const T* src, size_t length)
 {
-    T *tmp = new T[length];
+    T* tmp = new T[length];
     assert(tmp);
     softmax(tmp, src, length);
     softmax_1_opt(dst, tmp, length);
@@ -265,7 +265,7 @@ template <typename T>
 T cross_entropy(T y, T y_hat)
 {
     return - y * std::log(std::max(y_hat, 
-        std::numeric_limits<num_t>::epsilon()));
+        std::numeric_limits<T>::epsilon()));
 }
 
 /**
@@ -277,33 +277,34 @@ T cross_entropy(T y, T y_hat)
  * \return T The resulting Cross-Entropy.
  */
 template <typename T>
-T cross_entropy(T *y, T *y_hat, size_t length)
+T cross_entropy(const T* y, const T* y_hat, size_t length)
 {
-    T ret{0};
+    T ret{0.0};
     for (size_t i = 0; i < length; ++i)
     {
-        ret += relu(y[i], y_hat[i]);
+        ret += cross_entropy(y[i], y_hat[i]);
     }
     return ret;
 }
 
 template <typename T>
-T max(T *src, size_t length) 
+T max(const T* src, size_t length) 
 {
     return *std::max_element(src, src + length);
 }
 
 template <typename T>
-T argmax(T *src, size_t length) 
+size_t argmax(const T* src, size_t length) 
 {
-    return std::distance(src, std::max_element(src, src + length));
+    return static_cast<size_t>(std::distance(src, 
+        std::max_element(src, src + length)));
 }
 
 template <typename T>
-std::tuple<T, size_t> max(T *src, size_t length) 
+std::tuple<T, size_t> max_and_argmax(T* src, size_t length) 
 {
     auto max_iter = std::max_element(src, src + length);
-    auto dist = std::distance(src, max_iter);
+    auto dist = static_cast<size_t>(std::distance(src, max_iter));
     return {*max_iter, dist};
 }
 

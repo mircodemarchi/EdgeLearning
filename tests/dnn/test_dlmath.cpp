@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/test_replaceme.cpp
+ *            tests/test_dlmath.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -46,6 +46,8 @@ public:
         ARIADNE_TEST_CALL(test_softmax());
         ARIADNE_TEST_CALL(test_relu_1());
         ARIADNE_TEST_CALL(test_softmax_1());
+        ARIADNE_TEST_CALL(test_cross_entropy());
+        ARIADNE_TEST_CALL(test_max_argmax());
     }
 
 private:
@@ -156,6 +158,36 @@ private:
             std::cout << std::fixed << std::setprecision(25) 
                 << "test_vec[i]: " << test_vec[i] << std::endl << std::endl;
         }
+    }
+
+    void test_cross_entropy() {
+        std::vector<num_t> test_vec{0.1, 0.1, 0.25, 0.05, 0.5};
+        num_t truth_ce = 1.303450812836454;
+        auto ret = dlmath::cross_entropy(test_vec.data(), test_vec.data(), 
+            test_vec.size());
+        ARIADNE_TEST_WITHIN(ret, truth_ce, 0.00000000001);
+
+        num_t test_val = 0.5;
+        num_t truth_val = 0.34657359027997264;
+        ret = dlmath::cross_entropy(test_val, test_val);
+        ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
+    }
+
+    void test_max_argmax() {
+        std::vector<num_t> test_vec{0,1,5,4,3};
+        num_t truth_max = 5;
+        num_t ret_max = dlmath::max<num_t>(test_vec.data(), test_vec.size());
+        ARIADNE_TEST_EQUAL(ret_max, truth_max);
+
+        num_t truth_argmax = 2;
+        num_t ret_argmax = dlmath::argmax<num_t>(test_vec.data(), 
+            test_vec.size());
+        ARIADNE_TEST_EQUAL(ret_argmax, truth_argmax);
+
+        auto ret_tuple = dlmath::max_and_argmax<num_t>(test_vec.data(), 
+            test_vec.size());
+        ARIADNE_TEST_EQUAL(std::get<0>(ret_tuple), truth_max);
+        ARIADNE_TEST_EQUAL(std::get<1>(ret_tuple), truth_argmax);
     }
 };
 
