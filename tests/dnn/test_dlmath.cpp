@@ -159,21 +159,7 @@ private:
     }
 };
 
-class TestDNN {
-public:
-    void test() {
-        ARIADNE_TEST_CALL(test_dlmath());
-    }
-private:
-    void test_dlmath() {
-        ARIADNE_TEST_CALL(TestDLMath().test());
-    }
-};
-
 int main() {
-    TestDNN().test();
+    TestDLMath().test();
     return ARIADNE_TEST_FAILURES;
 }
-
-
-
