@@ -47,6 +47,7 @@ public:
         ARIADNE_TEST_CALL(test_relu_1());
         ARIADNE_TEST_CALL(test_softmax_1());
         ARIADNE_TEST_CALL(test_cross_entropy());
+        ARIADNE_TEST_CALL(test_cross_entropy_1());
         ARIADNE_TEST_CALL(test_max_argmax());
     }
 
@@ -161,16 +162,36 @@ private:
     }
 
     void test_cross_entropy() {
-        std::vector<num_t> test_vec{0.1, 0.1, 0.25, 0.05, 0.5};
-        num_t truth_ce = 1.303450812836454;
-        auto ret = DLMath::cross_entropy(test_vec.data(), test_vec.data(), 
-            test_vec.size());
+        std::vector<num_t> test_y    {0.0, 0.0, 0.00, 0.00, 1.0};
+        std::vector<num_t> test_y_hat{0.1, 0.1, 0.25, 0.05, 0.5};
+        num_t truth_ce = 0.6931471805599453;
+        auto ret = DLMath::cross_entropy(test_y.data(), test_y_hat.data(), 
+            test_y_hat.size());
         ARIADNE_TEST_WITHIN(ret, truth_ce, 0.00000000001);
 
         num_t test_val = 0.5;
         num_t truth_val = 0.34657359027997264;
         ret = DLMath::cross_entropy(test_val, test_val);
         ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
+    }
+
+    void test_cross_entropy_1() {
+        std::vector<num_t> test_y    {0.0, 0.0, 0.00, 0.00, 1.0};
+        std::vector<num_t> test_y_hat{0.1, 0.1, 0.25, 0.05, 0.5};
+        std::vector<num_t> truth_ce1 {0.0, 0.0, 0.00, 0.00, -2.0};
+        std::vector<num_t> ret_vec; ret_vec.resize(truth_ce1.size());
+        DLMath::cross_entropy_1(ret_vec.data(), test_y.data(), test_y_hat.data(), 
+            1.0, test_y_hat.size());
+        for (size_t i = 0; i < truth_ce1.size(); ++i)
+        {
+            ARIADNE_TEST_WITHIN(ret_vec[i], truth_ce1[i], 0.00000000001);
+        }
+        
+
+        num_t test_val = 0.5;
+        num_t truth_val = -1.0;
+        auto ret_val = DLMath::cross_entropy_1(test_val, test_val, 1.0);
+        ARIADNE_TEST_WITHIN(ret_val, truth_val, 0.00000000001);
     }
 
     void test_max_argmax() {
