@@ -88,6 +88,7 @@ CSVRow::CSVRow(std::vector<ParserType> &types, char separator)
 
 CSVRow::CSVRow(const CSVRow &obj)
     : _line{obj._line}
+    , _idx{obj._idx}
     , _cols_amount{obj._cols_amount}
     , _types{obj._types}
     , _separator{obj._separator}

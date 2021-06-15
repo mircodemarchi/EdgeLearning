@@ -27,6 +27,7 @@
 
 #include <filesystem>
 #include <vector>
+#include <stdexcept>
 
 using namespace std;
 using namespace Ariadne;
@@ -65,6 +66,10 @@ private:
 
         ARIADNE_TEST_EQUAL(csv_field_int.type(), ParserType::INT);
         ARIADNE_TEST_EQUAL(csv_field_str.type(), ParserType::STRING);
+
+        auto csv_field_cpy = CSVField{csv_field_int};
+        ARIADNE_TEST_EQUAL(csv_field_cpy.idx(), csv_field_int.idx());
+        ARIADNE_TEST_EQUAL(csv_field_cpy.type(), csv_field_int.type());
     }
 
     void test_csv_row() {
@@ -91,7 +96,7 @@ private:
 
         csv_row = CSVRow("10,1.3", 3, types, ',');
         ARIADNE_TEST_EQUAL(csv_row.size(), 2);
-        ARIADNE_TEST_FAIL(csv_row[3]);
+        ARIADNE_TEST_THROWS(csv_row[3], std::runtime_error);
         ARIADNE_TEST_EXECUTE(auto v = std::vector<float>(csv_row));
         ARIADNE_TEST_EXECUTE(auto v = std::vector<int>(csv_row));
         ARIADNE_TEST_EXECUTE(auto v = std::vector<std::string>(csv_row));
@@ -101,6 +106,14 @@ private:
         ARIADNE_TEST_EQUAL(csv_row.types().size(), 0);
         ARIADNE_TEST_EQUAL(csv_row.empty(), true);
         ARIADNE_TEST_FAIL(csv_row[0]);
+
+        auto csv_row_cpy = CSVRow{csv_row};
+        ARIADNE_TEST_EQUAL(csv_row_cpy.idx(), csv_row.idx());
+        ARIADNE_TEST_EQUAL(csv_row_cpy.size(), csv_row.size());
+        ARIADNE_TEST_EQUAL(csv_row_cpy.types(), csv_row.types());
+
+        csv_row = CSVRow("10,1.3,ariadnedl,true", 1, 5, types, ',');
+        ARIADNE_TEST_THROWS(csv_row[4], std::runtime_error);
     }
 
     void test_csv() {
@@ -122,6 +135,25 @@ private:
         ARIADNE_TEST_EQUAL(csv[1].size(), csv.cols_size());
         ARIADNE_TEST_EQUAL(csv[1].idx(), 1);
         ARIADNE_TEST_EQUAL(types_groundtruth, csv[1].types());
+
+        ARIADNE_TEST_PRINT(csv[2]);
+        ARIADNE_TEST_ASSERT(!csv[2].empty());
+        ARIADNE_TEST_EQUAL(csv[2].size(), csv.cols_size());
+        ARIADNE_TEST_EQUAL(csv[2].idx(), 2);
+        ARIADNE_TEST_EQUAL(types_groundtruth, csv[2].types());
+
+        ARIADNE_TEST_THROWS(CSV{""}, std::runtime_error);
+
+        csv = CSV(data_training_fp.string(), std::vector<ParserType>{});
+        ARIADNE_TEST_EQUAL(csv.types(), types_groundtruth);
+
+        csv = CSV(data_training_fp.string(), 
+            std::vector<ParserType>{ParserType::INT});
+        ARIADNE_TEST_EQUAL(csv.types(), types_groundtruth);
+
+        csv = CSV(data_training_fp.string(), 
+            std::vector<ParserType>{6, ParserType::FLOAT});
+        ARIADNE_TEST_NOT_EQUAL(csv.types(), types_groundtruth);
     }
 
     void test_csv_iterator(const size_t num_lines) {
@@ -136,6 +168,14 @@ private:
             ARIADNE_TEST_PRINT(row);
             ++i;
         }
+
+        auto iterator = csv.begin();
+        ARIADNE_TEST_EQUAL(iterator->idx(), csv[1].idx());
+
+        auto iterator_cpy = CSVIterator{iterator++};
+        iterator_cpy++;
+        ARIADNE_TEST_EQUAL(iterator_cpy->idx(), csv[2].idx());
+        ARIADNE_TEST_ASSERT(iterator == iterator_cpy)
     }
 
     static const std::string DATA_TRAINING_FN;
