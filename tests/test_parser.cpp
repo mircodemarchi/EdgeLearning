@@ -25,6 +25,11 @@
 #include "test.hpp"
 #include "parser/parser.hpp"
 
+#include <vector>
+#include <map>
+#include <string>
+
+
 using namespace std;
 using namespace Ariadne;
 
@@ -39,17 +44,36 @@ public:
 private:
     void test_parse() {
         auto parser = Parser();
-        ARIADNE_TEST_EQUAL(parser("1.2"),               ParserType::FLOAT);
-        ARIADNE_TEST_EQUAL(parser("+0.0"),              ParserType::FLOAT);
-        ARIADNE_TEST_EQUAL(parser("-0.0"),              ParserType::FLOAT);
-        ARIADNE_TEST_EQUAL(parser("+1e-10"),            ParserType::FLOAT);
-        ARIADNE_TEST_EQUAL(parser("true"),              ParserType::BOOL);
-        ARIADNE_TEST_EQUAL(parser("1"),                 ParserType::INT);
-        ARIADNE_TEST_EQUAL(parser("-1"),                ParserType::INT);
-        ARIADNE_TEST_EQUAL(parser("+0"),                ParserType::INT);
-        ARIADNE_TEST_EQUAL(parser("-0"),                ParserType::INT);
-        ARIADNE_TEST_EQUAL(parser("\"string\""),        ParserType::STRING);
-        ARIADNE_TEST_EQUAL(parser("123ariadne456"),     ParserType::STRING);
+        auto test_vec = std::map<std::string, ParserType>{
+            { "1.2",           ParserType::FLOAT  },
+            { "+0.0",          ParserType::FLOAT  },
+            { "-0.0",          ParserType::FLOAT  },
+            { "+1e-10",        ParserType::FLOAT  },
+            { "true",          ParserType::BOOL   },
+            { "1",             ParserType::INT    },
+            { "-1",            ParserType::INT    },
+            { "+0",            ParserType::INT    },
+            { "-0",            ParserType::INT    },
+            { "\"string\"",    ParserType::STRING },
+            { "123ariadne456", ParserType::STRING },
+            { std::string{},   ParserType::NONE   },
+        };
+
+        auto keys = std::vector<std::string>{};
+        auto values = std::vector<ParserType>{};
+        for (const auto& [key, value]: test_vec)
+        {
+            keys.push_back(key);
+            values.push_back(value);
+        }
+
+        auto parsed_values = parser(keys);
+        ARIADNE_TEST_ASSERT(parsed_values == values);
+        ARIADNE_TEST_PRINT(parsed_values);
+
+        auto values_cpy = std::vector<ParserType>(values);
+        values_cpy.push_back(ParserType::NONE);
+        ARIADNE_TEST_ASSERT(parsed_values != values_cpy);
     }
 
     void test_is() {
