@@ -71,6 +71,12 @@ public:
     void reset_score();
 
 private:
+    /**
+     * \brief Find the argument of _target array that is active.
+     * \return size_t
+     */
+    size_t argactive() const;
+
     uint16_t _input_size;
     num_t _loss;
     const num_t* _target;

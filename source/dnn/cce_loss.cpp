@@ -74,4 +74,22 @@ void CCELossLayer::reset_score()
 
 }
 
+size_t CCELossLayer::argactive() const
+{
+    if (_target == nullptr)
+    {
+        std::runtime_error("_target is null, call set_target before");
+    }
+
+    for (size_t i = 0; i < _input_size; ++i)
+    {
+        if (_target[i] != num_t{0.0})
+        {
+            return i;
+        }
+    }
+    
+    std::runtime_error("_target is an array of 0.0 values");
+}
+
 } // namespace Ariadne
