@@ -4,6 +4,7 @@ add_library(${LIBRARY_NAME} OBJECT
     layer.cpp
     model.cpp
     dense.cpp
+    cce_loss.cpp
 )
 
 if(COVERAGE)
