@@ -54,7 +54,7 @@ public:
      * \param x       Input value to compute.
      * \param mean    Mean of the probability distribution required.
      * \param std_dev Standard Deviation of the probability distribution required.
-     * \return T
+     * \return std::function<T(rne_t)> The distribution function.
      */
     template <typename T>
     static std::function<T(rne_t)> normal_pdf(float mean, float std_dev)
@@ -77,14 +77,16 @@ public:
      * \param src1   First operand array.
      * \param src2   Second operand array.
      * \param length Length of the arrays.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void arr_mul(T* dst, const T* src1, const T* src2, size_t length)
+    static T* arr_mul(T* dst, const T* src1, const T* src2, size_t length)
     {
         for (size_t i = 0; i < length; ++i)
         {
             dst[i] = src1[i] * src2[i];
         }
+        return dst;
     }
 
     /**
@@ -94,14 +96,16 @@ public:
      * \param src1   First operand array.
      * \param src2   Second operand array.
      * \param length Length of the arrays.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void arr_sum(T* dst, const T* src1, const T* src2, size_t length)
+    static T* arr_sum(T* dst, const T* src1, const T* src2, size_t length)
     {
         for (size_t i = 0; i < length; ++i)
         {
             dst[i] = src1[i] + src2[i];
         }
+        return dst;
     }
 
     /**
@@ -113,9 +117,10 @@ public:
      * \param arr_src Array source, right operand.
      * \param rows    Amount of rows.
      * \param cols    Amount of columns.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void matarr_mul(T* arr_dst, const T* mat_src, const T* arr_src, 
+    static T* matarr_mul(T* arr_dst, const T* mat_src, const T* arr_src, 
         size_t rows, size_t cols)
     {
         if (arr_src == arr_dst) 
@@ -132,6 +137,7 @@ public:
                 arr_dst[i] += mat_src[(i * cols) + j] * arr_src[j];
             }
         }
+        return arr_dst;
     }
 
     /**
@@ -154,14 +160,16 @@ public:
      * \param dst    Array to write the result.
      * \param src    Array of read elements.
      * \param length Length of the arrays.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void relu(T* dst, const T* src, size_t length)
+    static T* relu(T* dst, const T* src, size_t length)
     {
         for (size_t i = 0; i < length; ++i)
         {
             dst[i] = relu(src[i]);
         }
+        return dst;
     }
 
     /**
@@ -171,9 +179,10 @@ public:
      * \param dst    Array to write the result.
      * \param src    Array of read elements.
      * \param length Length of the arrays.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void softmax(T* dst, const T* src, size_t length)
+    static T* softmax(T* dst, const T* src, size_t length)
     {
         // Compute the exponential of each value and compute the sum. 
         T sum_exp_z{0};
@@ -191,6 +200,7 @@ public:
         {
             dst[i] *= inv_sum_exp_z;
         }
+        return dst;
     }
 
     /**
@@ -200,14 +210,16 @@ public:
      * \param dst    Array to write the result.
      * \param src    Array of read elements.
      * \param length Length of the arrays.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void relu_1(T* dst, const T* src, size_t length)
+    static T* relu_1(T* dst, const T* src, size_t length)
     {
         for (size_t i = 0; i < length; ++i)
         {
             dst[i] = (src[i] > T{0}) ? T{1} : T{0};
         }
+        return dst;
     }
 
     /**
@@ -220,9 +232,10 @@ public:
      * \param dst    Array to write the result. It has to be different by src.
      * \param src    Array of read elements. It has to be different by dst.
      * \param length Length of the arrays.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void softmax_1_opt(T* dst, const T* src, size_t length)
+    static T* softmax_1_opt(T* dst, const T* src, size_t length)
     {
         if (src == dst) 
         {
@@ -240,6 +253,7 @@ public:
                     : -src[i] * src[j];
             }
         }
+        return dst;
     }
 
     /**
@@ -250,15 +264,17 @@ public:
      * \param dst    Array to write the result.
      * \param src    Array of read elements.
      * \param length Length of the arrays.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static void softmax_1(T* dst, const T* src, size_t length)
+    static T* softmax_1(T* dst, const T* src, size_t length)
     {
         T* tmp = new T[length];
         assert(tmp);
         softmax(tmp, src, length);
         softmax_1_opt(dst, tmp, length);
         delete[] tmp;
+        return dst;
     }
 
     /**
@@ -278,10 +294,11 @@ public:
 
     /**
      * \brief Cross-Entropy Function.
-     * relu(x) = - \sum_j(y_j * log( max(y_hat_j, epsilon) ))
+     * cross_entropy(x) = - \sum_j(y_j * log( max(y_hat_j, epsilon) ))
      * \tparam T Type of the input and return type.
-     * \param y     Target array values.
-     * \param y_hat Estimated array values.
+     * \param y      Target array values.
+     * \param y_hat  Estimated array values.
+     * \param length Length of the arrays.
      * \return T The resulting Cross-Entropy.
      */
     template <typename T>
@@ -295,12 +312,63 @@ public:
         return ret;
     }
 
+    /**
+     * \brief Cross-Entropy Function first derivative.
+     * cross_entropy'(x) = - y / max(y_hat, epsilon)
+     * \tparam T Type of the input and return type.
+     * \param y     Target value.
+     * \param y_hat Estimated value.
+     * \param norm  Normalizer term to multiply.
+     * \return T The resulting Cross-Entropy first derivative.
+     */
+    template <typename T>
+    static T cross_entropy_1(T y, T y_hat, T norm)
+    {
+        return norm * (-y / (std::max(y_hat, 
+            std::numeric_limits<T>::epsilon())));
+    }
+
+    /**
+     * \brief Cross-Entropy Function first derivative.
+     * cross_entropy'(x)_i = - y_i / max(y_hat_i, epsilon)
+     * \tparam T Type of the input and return type.
+     * \param y      Target array values.
+     * \param y_hat  Estimated array values.
+     * \param norm   Normalizer term.
+     * \param length Length of the arrays. 
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* cross_entropy_1(T* dst, const T* y, const T* y_hat, T norm, 
+        size_t length)
+    {
+        for (size_t i = 0; i < length; ++i)
+        {
+            dst[i] = cross_entropy_1(y[i], y_hat[i], norm);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Find the max value of a vector.
+     * \tparam T Type of the input and return type.
+     * \param src    Source array.
+     * \param length Length of the array.
+     * \return T The max value.
+     */
     template <typename T>
     static T max(const T* src, size_t length) 
     {
         return *std::max_element(src, src + length);
     }
 
+    /**
+     * \brief Find the argument that point to the maximum value.
+     * \tparam T Type of the input.
+     * \param src    Source array.
+     * \param length Length of the array.
+     * \return size_t The argmax index.
+     */
     template <typename T>
     static size_t argmax(const T* src, size_t length) 
     {
@@ -308,6 +376,13 @@ public:
             std::max_element(src, src + length)));
     }
 
+    /**
+     * \brief Find the max and the argmax values.
+     * \tparam T Type of the input.
+     * \param src    Source array.
+     * \param length Length of the array.
+     * \return std::tuple<T, size_t> Tuple of max and argmax.
+     */
     template <typename T>
     static std::tuple<T, size_t> max_and_argmax(T* src, size_t length) 
     {
