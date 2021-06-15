@@ -30,6 +30,9 @@
 #include <functional>
 #include <cassert>
 #include <stdexcept>
+#include <tuple>
+#include <algorithm>
+#include <iterator>
 
 
 #ifndef ARIADNE_DL_DLMATH_HPP
@@ -248,6 +251,60 @@ void softmax_1(T* dst, const T *src, size_t length)
     softmax(tmp, src, length);
     softmax_1_opt(dst, tmp, length);
     delete[] tmp;
+}
+
+/**
+ * \brief Cross-Entropy Function.
+ * relu(x) = - y * log(max(y_hat, epsilon))
+ * \tparam T Type of the input and return type.
+ * \param y     Target value.
+ * \param y_hat Estimated value.
+ * \return T The resulting Cross-Entropy.
+ */
+template <typename T>
+T cross_entropy(T y, T y_hat)
+{
+    return - y * std::log(std::max(y_hat, 
+        std::numeric_limits<num_t>::epsilon()));
+}
+
+/**
+ * \brief Cross-Entropy Function.
+ * relu(x) = - \sum_j(y_j * log( max(y_hat_j, epsilon) ))
+ * \tparam T Type of the input and return type.
+ * \param y     Target array values.
+ * \param y_hat Estimated array values.
+ * \return T The resulting Cross-Entropy.
+ */
+template <typename T>
+T cross_entropy(T *y, T *y_hat, size_t length)
+{
+    T ret{0};
+    for (size_t i = 0; i < length; ++i)
+    {
+        ret += relu(y[i], y_hat[i]);
+    }
+    return ret;
+}
+
+template <typename T>
+T max(T *src, size_t length) 
+{
+    return *std::max_element(src, src + length);
+}
+
+template <typename T>
+T argmax(T *src, size_t length) 
+{
+    return std::distance(src, std::max_element(src, src + length));
+}
+
+template <typename T>
+std::tuple<T, size_t> max(T *src, size_t length) 
+{
+    auto max_iter = std::max_element(src, src + length);
+    auto dist = std::distance(src, max_iter);
+    return {*max_iter, dist};
 }
 
 
