@@ -56,7 +56,7 @@ private:
 
     void test_normal_pdf() {
         rne_t generator{SEED};
-        auto dist = dlmath::normal_pdf<num_t>(0, 0.1);
+        auto dist = DLMath::normal_pdf<num_t>(0, 0.1);
         for (size_t i = 0; i < PRINT_TIMES; ++i)
         {
             ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
@@ -68,7 +68,7 @@ private:
         std::vector<int> test_vec1{5,4,3,2,1};
         std::vector<int> test_vec2{1,2,3,4,5};
         std::vector<int> truth_vec{6,6,6,6,6};
-        dlmath::arr_sum<int>(test_vec1.data(), test_vec1.data(), 
+        DLMath::arr_sum<int>(test_vec1.data(), test_vec1.data(), 
             test_vec2.data(), test_vec1.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -80,7 +80,7 @@ private:
         std::vector<int> test_vec1{5,4,3,2,1};
         std::vector<int> test_vec2{1,2,3,4,5};
         std::vector<int> truth_vec{5,8,9,8,5};
-        dlmath::arr_mul<int>(test_vec1.data(), test_vec1.data(), 
+        DLMath::arr_mul<int>(test_vec1.data(), test_vec1.data(), 
             test_vec2.data(), test_vec1.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -93,11 +93,11 @@ private:
         std::vector<int> test_vec{1,2};
         std::vector<int> truth_vec{5,11};
         ARIADNE_TEST_FAIL(
-            dlmath::matarr_mul<int>(test_vec.data(), test_mat.data(), 
+            DLMath::matarr_mul<int>(test_vec.data(), test_mat.data(), 
                                     test_vec.data(), 2, 2)
         );
         std::vector<int> res_vec; res_vec.resize(test_vec.size());
-        dlmath::matarr_mul<int>(res_vec.data(), test_mat.data(), 
+        DLMath::matarr_mul<int>(res_vec.data(), test_mat.data(), 
                                 test_vec.data(), 2, 2);
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -108,7 +108,7 @@ private:
     void test_relu() {
         std::vector<num_t> test_vec{-2,-1,0,1,2};
         std::vector<num_t> truth_vec{0,0,0,1,2};
-        dlmath::relu<num_t>(test_vec.data(), test_vec.data(), 
+        DLMath::relu<num_t>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -124,7 +124,7 @@ private:
         std::vector<num_t> truth_vec{
             0.01165623095604, 0.031684920796124, 0.086128544436269,
             0.23412165725274, 0.63640864655883};
-        dlmath::softmax<num_t>(test_vec.data(), test_vec.data(), 
+        DLMath::softmax<num_t>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -137,7 +137,7 @@ private:
     void test_relu_1() {
         std::vector<num_t> test_vec{-2,-1,0,1,2};
         std::vector<num_t> truth_vec{0,0,0,1,1};
-        dlmath::relu_1<num_t>(test_vec.data(), test_vec.data(), 
+        DLMath::relu_1<num_t>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -149,9 +149,9 @@ private:
 
     void test_softmax_1() {
         std::vector<num_t> test_vec{-2,-1,0,1,2};
-        ARIADNE_TEST_FAIL(dlmath::softmax_1_opt<num_t>(test_vec.data(), 
+        ARIADNE_TEST_FAIL(DLMath::softmax_1_opt<num_t>(test_vec.data(), 
             test_vec.data(), test_vec.size()));
-        ARIADNE_TEST_EXECUTE(dlmath::softmax_1<num_t>(test_vec.data(), 
+        ARIADNE_TEST_EXECUTE(DLMath::softmax_1<num_t>(test_vec.data(), 
             test_vec.data(), test_vec.size()));
         for (size_t i = 0; i < test_vec.size(); ++i)
         {
@@ -163,28 +163,28 @@ private:
     void test_cross_entropy() {
         std::vector<num_t> test_vec{0.1, 0.1, 0.25, 0.05, 0.5};
         num_t truth_ce = 1.303450812836454;
-        auto ret = dlmath::cross_entropy(test_vec.data(), test_vec.data(), 
+        auto ret = DLMath::cross_entropy(test_vec.data(), test_vec.data(), 
             test_vec.size());
         ARIADNE_TEST_WITHIN(ret, truth_ce, 0.00000000001);
 
         num_t test_val = 0.5;
         num_t truth_val = 0.34657359027997264;
-        ret = dlmath::cross_entropy(test_val, test_val);
+        ret = DLMath::cross_entropy(test_val, test_val);
         ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
     }
 
     void test_max_argmax() {
         std::vector<num_t> test_vec{0,1,5,4,3};
         num_t truth_max = 5;
-        num_t ret_max = dlmath::max<num_t>(test_vec.data(), test_vec.size());
+        num_t ret_max = DLMath::max<num_t>(test_vec.data(), test_vec.size());
         ARIADNE_TEST_EQUAL(ret_max, truth_max);
 
         num_t truth_argmax = 2;
-        num_t ret_argmax = dlmath::argmax<num_t>(test_vec.data(), 
+        num_t ret_argmax = DLMath::argmax<num_t>(test_vec.data(), 
             test_vec.size());
         ARIADNE_TEST_EQUAL(ret_argmax, truth_argmax);
 
-        auto ret_tuple = dlmath::max_and_argmax<num_t>(test_vec.data(), 
+        auto ret_tuple = DLMath::max_and_argmax<num_t>(test_vec.data(), 
             test_vec.size());
         ARIADNE_TEST_EQUAL(std::get<0>(ret_tuple), truth_max);
         ARIADNE_TEST_EQUAL(std::get<1>(ret_tuple), truth_argmax);

@@ -72,7 +72,7 @@ void DenseLayer::init(rne_t& rne)
          * different compilers and platforms, therefore I use my own 
          * distributions to provide deterministic results.
          */
-        auto dist = dlmath::normal_pdf<num_t>(0.0, sigma);
+        auto dist = DLMath::normal_pdf<num_t>(0.0, sigma);
 
         for (num_t& w: _weights)
         {
@@ -101,22 +101,22 @@ void DenseLayer::forward(num_t* inputs)
      * Compute the product of the input data with the weight add the bias.
      * z = W * x + b
      */
-    dlmath::matarr_mul<num_t>(_activations.data(), _weights.data(), inputs, 
+    DLMath::matarr_mul<num_t>(_activations.data(), _weights.data(), inputs, 
         _output_size, _input_size);
-    dlmath::arr_sum<num_t>(_activations.data(), _activations.data(), 
+    DLMath::arr_sum<num_t>(_activations.data(), _activations.data(), 
         _biases.data(), _output_size);
 
     switch (_activation)
     {
         case Activation::ReLU:
         {
-            dlmath::relu<num_t>(_activations.data(), _activations.data(), 
+            DLMath::relu<num_t>(_activations.data(), _activations.data(), 
                 size_t(_output_size));
         }
         case Activation::Softmax:
         default:
         {
-            dlmath::softmax<num_t>(_activations.data(), _activations.data(), 
+            DLMath::softmax<num_t>(_activations.data(), _activations.data(), 
                 size_t(_output_size));
         }
     }
@@ -143,7 +143,7 @@ void DenseLayer::reverse(num_t* gradients)
              * viceversa, using ReLU of vector z or using directly the vector z
              * there is no differences.  
              */
-            dlmath::relu_1<num_t>(
+            DLMath::relu_1<num_t>(
                 _activation_gradients.data(), 
                 _activations.data(), 
                 _output_size);
@@ -155,7 +155,7 @@ void DenseLayer::reverse(num_t* gradients)
              * The softmax derivation explits the calculus of softmax performed 
              * previously and saved in _activations vector.
              */
-            dlmath::softmax_1_opt<num_t>(
+            DLMath::softmax_1_opt<num_t>(
                 _activation_gradients.data(),
                 _activations.data(), 
                 _output_size);
@@ -163,7 +163,7 @@ void DenseLayer::reverse(num_t* gradients)
     }
 
     // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
-    dlmath::arr_mul(_activation_gradients.data(), _activation_gradients.data(),
+    DLMath::arr_mul(_activation_gradients.data(), _activation_gradients.data(),
         gradients, _output_size);
 
     /*
@@ -175,7 +175,7 @@ void DenseLayer::reverse(num_t* gradients)
      *                 = dJ/dg(z) * dg(z)/dz
      *                 = dJ/dz
      */
-    dlmath::arr_sum(_bias_gradients.data(), _bias_gradients.data(), 
+    DLMath::arr_sum(_bias_gradients.data(), _bias_gradients.data(), 
         _activation_gradients.data(), _output_size);
 
     /*
