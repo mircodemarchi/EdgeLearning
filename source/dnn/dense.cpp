@@ -214,6 +214,11 @@ void DenseLayer::reverse(num_t* gradients)
                 _activation_gradients[i] * _weights[(i * _input_size) + j];
         }
     }
+
+    for (auto *l: _antecedents)
+    {
+        l->reverse(_input_gradients.data());
+    }
 }
 
 num_t* DenseLayer::param(size_t index)
