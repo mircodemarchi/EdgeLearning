@@ -279,8 +279,8 @@ public:
 
     /**
      * \brief Cross-Entropy Function.
-     * relu(x) = - y * log(max(y_hat, epsilon))
-     * \tparam T Type of the input and return type.
+     * cross_entropy(y, y_hat) = - y * log(max(y_hat, epsilon))
+     * \tparam T Type of the inputs and return type.
      * \param y     Target value.
      * \param y_hat Estimated value.
      * \return T The resulting Cross-Entropy.
@@ -294,8 +294,8 @@ public:
 
     /**
      * \brief Cross-Entropy Function.
-     * cross_entropy(x) = - \sum_j(y_j * log( max(y_hat_j, epsilon) ))
-     * \tparam T Type of the input and return type.
+     * cross_entropy(y, y_hat) = - \sum_j(y_j * log( max(y_hat_j, epsilon) ))
+     * \tparam T Type of the inputs and return type.
      * \param y      Target array values.
      * \param y_hat  Estimated array values.
      * \param length Length of the arrays.
@@ -314,8 +314,8 @@ public:
 
     /**
      * \brief Cross-Entropy Function first derivative.
-     * cross_entropy'(x) = - y / max(y_hat, epsilon)
-     * \tparam T Type of the input and return type.
+     * cross_entropy'(y, y_hat) = - y / max(y_hat, epsilon)
+     * \tparam T Type of the inputs and return type.
      * \param y     Target value.
      * \param y_hat Estimated value.
      * \param norm  Normalizer term to multiply.
@@ -330,8 +330,9 @@ public:
 
     /**
      * \brief Cross-Entropy Function first derivative.
-     * cross_entropy'(x)_i = - y_i / max(y_hat_i, epsilon)
-     * \tparam T Type of the input and return type.
+     * cross_entropy'(y, y_hat)_i = - y_i / max(y_hat_i, epsilon)
+     * \tparam T Type of the inputs and return type.
+     * \param dst    Destination array.
      * \param y      Target array values.
      * \param y_hat  Estimated array values.
      * \param norm   Normalizer term.
@@ -347,6 +348,76 @@ public:
             dst[i] = cross_entropy_1(y[i], y_hat[i], norm);
         }
         return dst;
+    }
+
+    /**
+     * \brief Squared Error Function.
+     * squared_error(y, y_hat) = (y - y_hat)^2
+     * \tparam T Type of the inputs and return type.
+     * \param y      Target array values.
+     * \param y_hat  Estimated array values.
+     * \param length Length of the arrays. 
+     * \return T The squared error value.
+     */
+    template <typename T>
+    static T squared_error(T y, T y_hat)
+    {
+        return (y - y_hat) * (y - y_hat);
+    }
+
+    /**
+     * \brief Mean Squared Error Function.
+     * mean_squared_error(y, y_hat) = (1 / n) * \sum_i( (y_i - y_hat_i)^2 )
+     * \tparam T Type of the inputs and return type.
+     * \param y      Target array values.
+     * \param y_hat  Estimated array values.
+     * \param length Length of the arrays. 
+     * \return T The mean squared error value.
+     */
+    template <typename T>
+    static T mean_squared_error(const T* y, const T* y_hat, size_t length)
+    {
+        T ret{0.0};
+        for (size_t i = 0; i < length; ++i)
+        {
+            ret += squared_error(y[i], y_hat[i]);
+        }
+        return ret / length;
+    }
+
+    /**
+     * \brief Squared Error Function first derivative.
+     * squared_error(y, y_hat) = -2 * (y - y_hat)
+     * \tparam T Type of the inputs and return type.
+     * \param y      Target array values.
+     * \param y_hat  Estimated array values.
+     * \param length Length of the arrays. 
+     * \return T The first derivative squared error value.
+     */
+    template <typename T>
+    static T squared_error_1(T y, T y_hat)
+    {
+        return -2 * (y - y_hat);
+    }
+
+    /**
+     * \brief Mean Squared Error Function first derivative. 
+     * mean_squared_error(y, y_hat) = - (2 / n) * \sum_i( y_i - y_hat_i )
+     * \tparam T Type of the inputs and return type.
+     * \param y      Target array values.
+     * \param y_hat  Estimated array values.
+     * \param length Length of the arrays. 
+     * \return T The first derivative mean squared error value.
+     */
+    template <typename T>
+    static T mean_squared_error_1(const T* y, const T* y_hat, size_t length)
+    {
+        T ret{0.0};
+        for (size_t i = 0; i < length; ++i)
+        {
+            ret += y[i] - y_hat[i];
+        }
+        return -2 * ret / length;
     }
 
     /**
