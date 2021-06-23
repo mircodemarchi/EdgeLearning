@@ -5,6 +5,7 @@ add_library(${LIBRARY_NAME} OBJECT
     model.cpp
     dense.cpp
     cce_loss.cpp
+    gd_optimizer.cpp
 )
 
 if(COVERAGE)

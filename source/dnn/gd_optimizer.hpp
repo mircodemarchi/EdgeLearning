@@ -54,9 +54,9 @@ public:
      * \brief Invoked at the end of each batch's evaluation.
      * The interface technically permits the use of different optimizers for
      * different segments of the computational graph.
-     * \param node
+     * \param layer
      */
-    void train(Layer& node) override;
+    void train(Layer& layer) override;
 
 private:
     num_t _eta; ///< Learning rate.
