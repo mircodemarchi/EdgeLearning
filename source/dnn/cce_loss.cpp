@@ -70,6 +70,9 @@ void CCELossLayer::forward(num_t* inputs)
 
 void CCELossLayer::reverse(num_t* inputs)
 {
+    // Parameter ignored because it is a loss layer.
+    (void) inputs;
+
     DLMath::cross_entropy_1(_gradients.data(), _target, _last_input, 
         _inv_batch_size, _input_size);
 
@@ -86,7 +89,7 @@ void CCELossLayer::print() const
 
 void CCELossLayer::set_target(num_t const* target)
 {
-
+    _target = target;
 }
 
 num_t CCELossLayer::accuracy() const
@@ -124,6 +127,7 @@ size_t CCELossLayer::_argactive() const
     }
     
     std::runtime_error("_target is an array of 0.0 values");
+    return 0;
 }
 
 } // namespace Ariadne

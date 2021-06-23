@@ -45,7 +45,7 @@ public:
      * \brief No initiallization is needed for this layer.
      * \param rne
      */
-    void init(rne_t& rne) override {};
+    void init(rne_t& rne) override { (void) rne; };
 
     void forward(num_t* inputs) override;
 
