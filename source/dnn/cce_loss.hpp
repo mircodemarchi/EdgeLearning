@@ -75,7 +75,7 @@ private:
      * \brief Find the argument of _target array that is active.
      * \return size_t
      */
-    size_t argactive() const;
+    size_t _argactive() const;
 
     uint16_t _input_size;
     num_t _loss;
@@ -91,8 +91,8 @@ private:
     num_t _cumulative_loss{0.0};
     
     // Running counts of correct and incorrect predictions.
-    size_t correct{0};
-    size_t incorrect{0};
+    size_t _correct{0};
+    size_t _incorrect{0};
 };
 
 } // namespace Ariadne

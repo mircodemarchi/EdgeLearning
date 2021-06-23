@@ -24,6 +24,11 @@
 
 #include "cce_loss.hpp"
 
+#include "dlmath.hpp"
+
+#include <tuple>
+#include <cstdio>
+
 namespace Ariadne {
 
 CCELossLayer::CCELossLayer(Model& model, std::string name, 
@@ -41,17 +46,42 @@ CCELossLayer::CCELossLayer(Model& model, std::string name,
 
 void CCELossLayer::forward(num_t* inputs)
 {
+    _loss = DLMath::cross_entropy(_target, inputs, _input_size);
+    
+    auto max = DLMath::max_and_argmax(inputs, _input_size);
+    // num_t max_value = std::get<0>(max);
+    size_t max_index = std::get<1>(max);
 
+    _active = _argactive();
+    if (max_index == _active)
+    {
+        ++_correct;
+    }
+    else 
+    {
+        ++_incorrect;
+    }
+
+    _cumulative_loss += _loss;
+
+    // Store the data pointer to compute gradients later.
+    _last_input = inputs;
 }
 
 void CCELossLayer::reverse(num_t* inputs)
 {
+    DLMath::cross_entropy_1(_gradients.data(), _target, _last_input, 
+        _inv_batch_size, _input_size);
 
+    for (auto *l: _antecedents)
+    {
+        l->reverse(_gradients.data());
+    }
 }
 
 void CCELossLayer::print() const
 {
-
+    std::printf("Avg Loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
 }
 
 void CCELossLayer::set_target(num_t const* target)
@@ -61,20 +91,24 @@ void CCELossLayer::set_target(num_t const* target)
 
 num_t CCELossLayer::accuracy() const
 {
-
+    return static_cast<num_t>(_correct) 
+         / static_cast<num_t>(_correct + _incorrect);
 }
 
 num_t CCELossLayer::avg_loss() const
 {
-
+    return static_cast<num_t>(_cumulative_loss) 
+         / static_cast<num_t>(_correct + _incorrect);
 }
 
 void CCELossLayer::reset_score()
 {
-
+    _cumulative_loss = 0.0;
+    _correct = 0.0;
+    _incorrect = 0.0;
 }
 
-size_t CCELossLayer::argactive() const
+size_t CCELossLayer::_argactive() const
 {
     if (_target == nullptr)
     {
