@@ -39,7 +39,7 @@ namespace Ariadne {
 class MSELossLayer : public Layer {
 public:
     MSELossLayer(Model& model, std::string name, uint16_t input_size, 
-        size_t batch_size);
+        size_t batch_size, num_t loss_tolerance=0.1);
 
     /**
      * \brief No initiallization is needed for this layer.
@@ -73,6 +73,7 @@ public:
 private:
     uint16_t _input_size;
     num_t _loss;
+    num_t _loss_tolerance;
     const num_t* _target;
     num_t* _last_input;
 

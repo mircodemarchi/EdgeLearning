@@ -1,5 +1,5 @@
 /***************************************************************************
- *            cce_loss.cpp
+ *            mse_loss.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,20 +22,18 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cce_loss.hpp"
+#include "mse_loss.hpp"
 
 #include "dlmath.hpp"
 
-#include <tuple>
-#include <cstdio>
-
 namespace Ariadne {
 
-CCELossLayer::CCELossLayer(Model& model, std::string name, 
-    uint16_t input_size, size_t batch_size)
+MSELossLayer::MSELossLayer(Model& model, std::string name, 
+    uint16_t input_size, size_t batch_size, num_t loss_tolerance)
     : Layer(model, name)
     , _input_size{input_size}
     , _inv_batch_size{num_t{1.0} / batch_size}
+    , _loss_tolerance{loss_tolerance}
 { 
     /* 
      * When we deliver a gradient back, we deliver just the loss gradient with
@@ -44,35 +42,30 @@ CCELossLayer::CCELossLayer(Model& model, std::string name,
     _gradients.resize(_input_size);
 }
 
-void CCELossLayer::forward(num_t* inputs)
+void MSELossLayer::forward(num_t* inputs)
 {
-    _loss = DLMath::cross_entropy(_target, inputs, _input_size);
+    _loss = DLMath::mean_squared_error(_target, inputs, _input_size);
     _cumulative_loss += _loss;
-    
-    auto max = DLMath::max_and_argmax(inputs, _input_size);
-    // num_t max_value = std::get<0>(max);
-    size_t max_index = std::get<1>(max);
 
-    _active = _argactive();
-    if (max_index == _active)
+    if (-_loss_tolerance <= _loss && _loss <= _loss_tolerance)
     {
-        ++_correct;
+        _correct++;
     }
     else 
     {
-        ++_incorrect;
+        _incorrect++;
     }
 
     // Store the data pointer to compute gradients later.
     _last_input = inputs;
 }
 
-void CCELossLayer::reverse(num_t* inputs)
+void MSELossLayer::reverse(num_t* inputs)
 {
     // Parameter ignored because it is a loss layer.
     (void) inputs;
 
-    DLMath::cross_entropy_1(_gradients.data(), _target, _last_input, 
+    DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input, 
         _inv_batch_size, _input_size);
 
     for (auto *l: _antecedents)
@@ -81,52 +74,34 @@ void CCELossLayer::reverse(num_t* inputs)
     }
 }
 
-void CCELossLayer::print() const
+void MSELossLayer::print() const
 {
     std::printf("Avg Loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
 }
 
-void CCELossLayer::set_target(num_t const* target)
+void MSELossLayer::set_target(num_t const* target)
 {
     _target = target;
 }
 
-num_t CCELossLayer::accuracy() const
+num_t MSELossLayer::accuracy() const
 {
     return static_cast<num_t>(_correct) 
          / static_cast<num_t>(_correct + _incorrect);
 }
 
-num_t CCELossLayer::avg_loss() const
+num_t MSELossLayer::avg_loss() const
 {
     return static_cast<num_t>(_cumulative_loss) 
          / static_cast<num_t>(_correct + _incorrect);
 }
 
-void CCELossLayer::reset_score()
+void MSELossLayer::reset_score()
 {
     _cumulative_loss = 0.0;
     _correct         = 0.0;
     _incorrect       = 0.0;
 }
 
-size_t CCELossLayer::_argactive() const
-{
-    if (_target == nullptr)
-    {
-        std::runtime_error("_target is null, call set_target before");
-    }
-
-    for (size_t i = 0; i < _input_size; ++i)
-    {
-        if (_target[i] != num_t{0.0})
-        {
-            return i;
-        }
-    }
-    
-    std::runtime_error("_target is an array of 0.0 values");
-    return 0;
-}
 
 } // namespace Ariadne
