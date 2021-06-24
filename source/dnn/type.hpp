@@ -33,13 +33,13 @@
 
 namespace Ariadne {
 
-using num_t = double;
+using NumType = double;
 
 /**
  * Random number engine: 64-bit Mersenne Twister by Matsumoto and
  * Nishimura, 1998.
  */
-using rne_t = std::mt19937_64;
+using RneType = std::mt19937_64;
 
 } // namespace Ariadne
 

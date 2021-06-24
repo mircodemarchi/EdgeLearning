@@ -49,26 +49,26 @@ public:
     /**
      * \brief Virtual method used to describe how a layer should be 
      * initialized.
-     * \param rne rne_t
+     * \param rne RneType
      */
-    virtual void init(rne_t& rne) = 0;
+    virtual void init(RneType& rne) = 0;
 
     /**
      * \brief Virtual method used to perform foward propagations. During 
      * forward propagation nodes transform input data and feed results to all 
      * subsequent nodes.
-     * \param inputs num_t ptr
+     * \param inputs NumType ptr
      */
-    virtual void forward(num_t* inputs) = 0;
+    virtual void forward(NumType* inputs) = 0;
 
     /**
      * \brief Virtual method used to perform reverse propagations. During 
      * reverse propagation nodes receive loss gradients to its previous outputs
      * and compute gradients with respect to each tunable parameter.
      * Compute dJ/dz = dJ/dg(z) * dg(z)/dz.
-     * \param gradients num_t ptr dJ/dg(z)
+     * \param gradients NumType ptr dJ/dg(z)
      */
-    virtual void reverse(num_t* gradients) = 0;
+    virtual void reverse(NumType* gradients) = 0;
 
     /**
      * \brief Virtual method that return the number of tunable parameters. 
@@ -81,17 +81,17 @@ public:
     /**
      * \brief Virtual method accessor for parameter by index.
      * \param index size_t Parameter index.
-     * \return num_t* Pointer to parameter.
+     * \return NumType* Pointer to parameter.
      */
-    virtual num_t* param(size_t index) { (void) index; return nullptr; }
+    virtual NumType* param(size_t index) { (void) index; return nullptr; }
 
     /**
      * \brief Virtual method accessor for loss-gradient with respect to a 
      * parameter specified by index.
      * \param index size_t Parameter index.
-     * \return num_t* Pointer to gradient value of parameter.
+     * \return NumType* Pointer to gradient value of parameter.
      */
-    virtual num_t* gradient(size_t index) { (void) index; return nullptr; }
+    virtual NumType* gradient(size_t index) { (void) index; return nullptr; }
 
     /**
      * \brief Print.

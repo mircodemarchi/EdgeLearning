@@ -41,9 +41,9 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     
 }
 
-void DenseLayer::init(rne_t& rne)
+void DenseLayer::init(RneType& rne)
 {
-    num_t sigma;
+    NumType sigma;
     switch (_activation)
     {
         case Activation::ReLU:
@@ -53,7 +53,7 @@ void DenseLayer::init(rne_t& rne)
              * https://arxiv.org/pdf/1502.01852.pdf
              * Nrmal distribution with variance := sqrt( 2 / n_in )
              */
-            sigma = std::sqrt(2.0 / static_cast<num_t>(_input_size));
+            sigma = std::sqrt(2.0 / static_cast<NumType>(_input_size));
             break;
         }
         case Activation::Softmax:
@@ -65,7 +65,7 @@ void DenseLayer::init(rne_t& rne)
              * https://arxiv.org/pdf/1706.02515.pdf
              * Normal distribution with variance := sqrt( 1 / n_in )
              */
-            sigma = std::sqrt(1.0 / static_cast<num_t>(_input_size));
+            sigma = std::sqrt(1.0 / static_cast<NumType>(_input_size));
             break;
         }
 
@@ -75,9 +75,9 @@ void DenseLayer::init(rne_t& rne)
          * different compilers and platforms, therefore I use my own 
          * distributions to provide deterministic results.
          */
-        auto dist = DLMath::normal_pdf<num_t>(0.0, sigma);
+        auto dist = DLMath::normal_pdf<NumType>(0.0, sigma);
 
-        for (num_t& w: _weights)
+        for (NumType& w: _weights)
         {
             w = dist(rne);
         }
@@ -88,14 +88,14 @@ void DenseLayer::init(rne_t& rne)
          * that a non-zero bias will ensure that the neuron always "fires" at 
          * the beginning to produce a signal.
          */
-        for (num_t& b: _biases)
+        for (NumType& b: _biases)
         {
             b = 0.01; ///< You can try also with 0.0 or other strategies.
         }
     }
 }
 
-void DenseLayer::forward(num_t* inputs) 
+void DenseLayer::forward(NumType* inputs) 
 {
     // Remember the last input data for backpropagation.
     _last_input = inputs;
@@ -104,22 +104,22 @@ void DenseLayer::forward(num_t* inputs)
      * Compute the product of the input data with the weight add the bias.
      * z = W * x + b
      */
-    DLMath::matarr_mul<num_t>(_activations.data(), _weights.data(), inputs, 
+    DLMath::matarr_mul<NumType>(_activations.data(), _weights.data(), inputs, 
         _output_size, _input_size);
-    DLMath::arr_sum<num_t>(_activations.data(), _activations.data(), 
+    DLMath::arr_sum<NumType>(_activations.data(), _activations.data(), 
         _biases.data(), _output_size);
 
     switch (_activation)
     {
         case Activation::ReLU:
         {
-            DLMath::relu<num_t>(_activations.data(), _activations.data(), 
+            DLMath::relu<NumType>(_activations.data(), _activations.data(), 
                 size_t(_output_size));
             break;
         }
         case Activation::Softmax:
         {
-            DLMath::softmax<num_t>(_activations.data(), _activations.data(), 
+            DLMath::softmax<NumType>(_activations.data(), _activations.data(), 
                 size_t(_output_size));
             break;
         }
@@ -138,7 +138,7 @@ void DenseLayer::forward(num_t* inputs)
     }
 }
 
-void DenseLayer::reverse(num_t* gradients)
+void DenseLayer::reverse(NumType* gradients)
 {
     // Calculate dg(z)/dz and put in _activation_gradients.
     switch (_activation)
@@ -153,7 +153,7 @@ void DenseLayer::reverse(num_t* gradients)
              * viceversa, using ReLU of vector z or using directly the vector z
              * there is no differences.  
              */
-            DLMath::relu_1<num_t>(
+            DLMath::relu_1<NumType>(
                 _activation_gradients.data(), 
                 _activations.data(), 
                 _output_size);
@@ -165,7 +165,7 @@ void DenseLayer::reverse(num_t* gradients)
              * The softmax derivation explits the calculus of softmax performed 
              * previously and saved in _activations vector.
              */
-            DLMath::softmax_1_opt<num_t>(
+            DLMath::softmax_1_opt<NumType>(
                 _activation_gradients.data(),
                 _activations.data(), 
                 _output_size);
@@ -175,7 +175,7 @@ void DenseLayer::reverse(num_t* gradients)
         default:
         {
             std::fill(_activation_gradients.begin(), 
-                _activation_gradients.end(), num_t{1.0});
+                _activation_gradients.end(), NumType{1.0});
         }
     }
 
@@ -238,12 +238,12 @@ void DenseLayer::reverse(num_t* gradients)
     }
 }
 
-num_t* DenseLayer::param(size_t index)
+NumType* DenseLayer::param(size_t index)
 {
 
 }
 
-num_t* DenseLayer::gradient(size_t index)
+NumType* DenseLayer::gradient(size_t index)
 {
 
 }

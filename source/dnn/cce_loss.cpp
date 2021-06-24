@@ -35,7 +35,7 @@ CCELossLayer::CCELossLayer(Model& model, std::string name,
     uint16_t input_size, size_t batch_size)
     : Layer(model, name)
     , _input_size{input_size}
-    , _inv_batch_size{num_t{1.0} / batch_size}
+    , _inv_batch_size{NumType{1.0} / batch_size}
 { 
     /* 
      * When we deliver a gradient back, we deliver just the loss gradient with
@@ -44,13 +44,13 @@ CCELossLayer::CCELossLayer(Model& model, std::string name,
     _gradients.resize(_input_size);
 }
 
-void CCELossLayer::forward(num_t* inputs)
+void CCELossLayer::forward(NumType* inputs)
 {
     _loss = DLMath::cross_entropy(_target, inputs, _input_size);
     _cumulative_loss += _loss;
     
     auto max = DLMath::max_and_argmax(inputs, _input_size);
-    // num_t max_value = std::get<0>(max);
+    // NumType max_value = std::get<0>(max);
     size_t max_index = std::get<1>(max);
 
     _active = _argactive();
@@ -67,7 +67,7 @@ void CCELossLayer::forward(num_t* inputs)
     _last_input = inputs;
 }
 
-void CCELossLayer::reverse(num_t* inputs)
+void CCELossLayer::reverse(NumType* inputs)
 {
     // Parameter ignored because it is a loss layer.
     (void) inputs;
@@ -86,21 +86,21 @@ void CCELossLayer::print() const
     std::printf("Avg Loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
 }
 
-void CCELossLayer::set_target(num_t const* target)
+void CCELossLayer::set_target(NumType const* target)
 {
     _target = target;
 }
 
-num_t CCELossLayer::accuracy() const
+NumType CCELossLayer::accuracy() const
 {
-    return static_cast<num_t>(_correct) 
-         / static_cast<num_t>(_correct + _incorrect);
+    return static_cast<NumType>(_correct) 
+         / static_cast<NumType>(_correct + _incorrect);
 }
 
-num_t CCELossLayer::avg_loss() const
+NumType CCELossLayer::avg_loss() const
 {
-    return static_cast<num_t>(_cumulative_loss) 
-         / static_cast<num_t>(_correct + _incorrect);
+    return static_cast<NumType>(_cumulative_loss) 
+         / static_cast<NumType>(_correct + _incorrect);
 }
 
 void CCELossLayer::reset_score()
@@ -119,7 +119,7 @@ size_t CCELossLayer::_argactive() const
 
     for (size_t i = 0; i < _input_size; ++i)
     {
-        if (_target[i] != num_t{0.0})
+        if (_target[i] != NumType{0.0})
         {
             return i;
         }

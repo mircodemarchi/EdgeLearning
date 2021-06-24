@@ -45,16 +45,16 @@ public:
      * \brief No initiallization is needed for this layer.
      * \param rne
      */
-    void init(rne_t& rne) override { (void) rne; };
+    void init(RneType& rne) override { (void) rne; };
 
-    void forward(num_t* inputs) override;
+    void forward(NumType* inputs) override;
 
     /**
      * \brief As a loss node, the argument to this method is ignored (the 
      * gradient of the loss with respect to itself is unity).
      * \param inputs
      */
-    void reverse(num_t* inputs) override;
+    void reverse(NumType* inputs) override;
 
     void print() const override;
 
@@ -64,10 +64,10 @@ public:
      * a given sample.
      * \param target
      */
-    void set_target(num_t const* target);
+    void set_target(NumType const* target);
 
-    num_t accuracy() const;
-    num_t avg_loss() const;
+    NumType accuracy() const;
+    NumType avg_loss() const;
     void reset_score();
 
 private:
@@ -78,17 +78,17 @@ private:
     size_t _argactive() const;
 
     uint16_t _input_size;
-    num_t _loss;
-    const num_t* _target;
-    num_t* _last_input;
+    NumType _loss;
+    const NumType* _target;
+    NumType* _last_input;
 
-    std::vector<num_t> _gradients;
+    std::vector<NumType> _gradients;
 
-    num_t _inv_batch_size; ///< Used to scale with batch size.
+    NumType _inv_batch_size; ///< Used to scale with batch size.
 
     // Last active classification in the target one-hot encoding. 
     size_t _active; 
-    num_t _cumulative_loss{0.0};
+    NumType _cumulative_loss{0.0};
     
     // Running counts of correct and incorrect predictions.
     size_t _correct{0};

@@ -50,13 +50,13 @@ public:
     DenseLayer(Model& model, std::string name, Activation activation, 
         uint16_t output_size, uint16_t input_size);
 
-    void init(rne_t& rne) override;
+    void init(RneType& rne) override;
 
     /**
      * \brief The input data should have size _input_size.
      * \param inputs
      */
-    void forward(num_t* inputs) override;
+    void forward(NumType* inputs) override;
 
     /**
      * \brief The gradient data should have size _output_size.
@@ -66,10 +66,10 @@ public:
      * _activation_gradients.
      * \param gradients
      */
-    void reverse(num_t* gradients) override;
+    void reverse(NumType* gradients) override;
 
-    num_t* param(size_t index) override;
-    num_t* gradient(size_t index) override;
+    NumType* param(size_t index) override;
+    NumType* gradient(size_t index) override;
 
     void print() const override;
 
@@ -80,31 +80,31 @@ private:
 
     // == Layer parameters ==
     /// \brief Weights of the layer. Size: _output_size * _input_size.
-    std::vector<num_t> _weights;
+    std::vector<NumType> _weights;
     /// \brief Biases of the layer. Size: _output_size. 
-    std::vector<num_t> _biases;
+    std::vector<NumType> _biases;
     /// \brief Activations of the layer. Size: _output_size. 
-    std::vector<num_t> _activations;
+    std::vector<NumType> _activations;
 
     // == Loss Gradients ==
     /// \brief Weight gradients of the layer. Size: _output_size * _input_size.
-    std::vector<num_t> _weight_gradients;
+    std::vector<NumType> _weight_gradients;
     /// \brief Biase gradients of the layer. Size: _output_size. 
-    std::vector<num_t> _bias_gradients;
+    std::vector<NumType> _bias_gradients;
     /// \brief Activation gradients of the layer. Size: _output_size. 
-    std::vector<num_t> _activation_gradients;
+    std::vector<NumType> _activation_gradients;
     /**
      * \brief Input gradients of the layer. Size: _input_size. 
      * This buffer is used to store temporary gradients used in a **singe** 
      * backpropagation pass. Note that this doed not accumulate like the weight 
      * and bias gradients do.
      */
-    std::vector<num_t> _input_gradients;
+    std::vector<NumType> _input_gradients;
     /**
      * \brief The last input passed to the layer. It is needed to compute loss 
      * gradients with respect to the weights during backpropagation.
      */
-    num_t* _last_input;
+    NumType* _last_input;
 };
 
 } // namespace Ariadne

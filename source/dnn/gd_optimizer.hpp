@@ -48,7 +48,7 @@ public:
      * descent, p will be adjusted such that p' = p - eta * dL/dp.
      * \param eta commonly accepted character used to denote the learning rate.
      */
-    GDOptimizer(num_t eta);
+    GDOptimizer(NumType eta);
 
     /**
      * \brief Invoked at the end of each batch's evaluation.
@@ -59,7 +59,7 @@ public:
     void train(Layer& layer) override;
 
 private:
-    num_t _eta; ///< Learning rate.
+    NumType _eta; ///< Learning rate.
 };
 
 } // namespace Ariadne

@@ -26,7 +26,7 @@
 
 namespace Ariadne {
 
-GDOptimizer::GDOptimizer(num_t eta)
+GDOptimizer::GDOptimizer(NumType eta)
     : _eta{eta}
 { }
 
@@ -35,13 +35,13 @@ void GDOptimizer::train(Layer& layer)
     size_t param_count = layer.param_count();
     for (size_t i = 0; i < param_count; ++i)
     {
-        num_t& param    = *layer.param(i);
-        num_t& gradient = *layer.gradient(i);
+        NumType& param    = *layer.param(i);
+        NumType& gradient = *layer.gradient(i);
 
         param -= _eta * gradient;
 
         // Reset the gradient accumulated again in the next training epoch.
-        gradient = num_t{0.0};
+        gradient = NumType{0.0};
     }
 }
 

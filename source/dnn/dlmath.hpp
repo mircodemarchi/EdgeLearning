@@ -54,15 +54,15 @@ public:
      * \param x       Input value to compute.
      * \param mean    Mean of the probability distribution required.
      * \param std_dev Standard Deviation of the probability distribution required.
-     * \return std::function<T(rne_t)> The distribution function.
+     * \return std::function<T(RneType)> The distribution function.
      */
     template <typename T>
-    static std::function<T(rne_t)> normal_pdf(float mean, float std_dev)
+    static std::function<T(RneType)> normal_pdf(float mean, float std_dev)
     {
         double inv_sqrt_2pi_std_dev = (inv_sqrt_2pi / std_dev);
         
-        std::function<T(rne_t)> ret = 
-            [inv_sqrt_2pi_std_dev, mean, std_dev](rne_t x) 
+        std::function<T(RneType)> ret = 
+            [inv_sqrt_2pi_std_dev, mean, std_dev](RneType x) 
         {
             double a = (double(x()) - mean) / std_dev;
             return T(inv_sqrt_2pi_std_dev * std::exp(-0.5f * a * a));

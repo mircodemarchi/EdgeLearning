@@ -76,9 +76,9 @@ public:
      * \brief Initialize the parameters of all nodes with the provided seed. 
      * If the seed is 0 a new random seed is chosen instead. 
      * \param seed Seed provided.  
-     * \return rne_t::result_type Seed used.
+     * \return RneType::result_type Seed used.
      */
-    rne_t::result_type init(rne_t::result_type seed = 0);
+    RneType::result_type init(RneType::result_type seed = 0);
 
     /**
      * \brief Adjust all model parameters of constituent layers using the 

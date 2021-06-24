@@ -29,10 +29,10 @@
 namespace Ariadne {
 
 MSELossLayer::MSELossLayer(Model& model, std::string name, 
-    uint16_t input_size, size_t batch_size, num_t loss_tolerance)
+    uint16_t input_size, size_t batch_size, NumType loss_tolerance)
     : Layer(model, name)
     , _input_size{input_size}
-    , _inv_batch_size{num_t{1.0} / batch_size}
+    , _inv_batch_size{NumType{1.0} / batch_size}
     , _loss_tolerance{loss_tolerance}
 { 
     /* 
@@ -42,7 +42,7 @@ MSELossLayer::MSELossLayer(Model& model, std::string name,
     _gradients.resize(_input_size);
 }
 
-void MSELossLayer::forward(num_t* inputs)
+void MSELossLayer::forward(NumType* inputs)
 {
     _loss = DLMath::mean_squared_error(_target, inputs, _input_size);
     _cumulative_loss += _loss;
@@ -60,7 +60,7 @@ void MSELossLayer::forward(num_t* inputs)
     _last_input = inputs;
 }
 
-void MSELossLayer::reverse(num_t* inputs)
+void MSELossLayer::reverse(NumType* inputs)
 {
     // Parameter ignored because it is a loss layer.
     (void) inputs;
@@ -79,21 +79,21 @@ void MSELossLayer::print() const
     std::printf("Avg Loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
 }
 
-void MSELossLayer::set_target(num_t const* target)
+void MSELossLayer::set_target(NumType const* target)
 {
     _target = target;
 }
 
-num_t MSELossLayer::accuracy() const
+NumType MSELossLayer::accuracy() const
 {
-    return static_cast<num_t>(_correct) 
-         / static_cast<num_t>(_correct + _incorrect);
+    return static_cast<NumType>(_correct) 
+         / static_cast<NumType>(_correct + _incorrect);
 }
 
-num_t MSELossLayer::avg_loss() const
+NumType MSELossLayer::avg_loss() const
 {
-    return static_cast<num_t>(_cumulative_loss) 
-         / static_cast<num_t>(_correct + _incorrect);
+    return static_cast<NumType>(_cumulative_loss) 
+         / static_cast<NumType>(_correct + _incorrect);
 }
 
 void MSELossLayer::reset_score()
