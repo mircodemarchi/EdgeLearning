@@ -68,6 +68,15 @@ public:
      */
     void reverse(NumType* gradients) override;
 
+    /**
+     * \brief Weight matrix entries + bias entries.
+     * \return size_t
+     */
+    size_t param_count() const noexcept override
+    {
+        return (_input_size + 1) * _output_size;
+    }
+
     NumType* param(size_t index) override;
     NumType* gradient(size_t index) override;
 

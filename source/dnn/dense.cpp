@@ -27,7 +27,7 @@
 #include "dlmath.hpp"
 
 #include <algorithm>
-
+#include <cstdio>
 
 namespace Ariadne {
 
@@ -38,7 +38,21 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     , _output_size{output_size}
     , _input_size{input_size}
 {
-    
+    std::printf("%s: %d -> %d\n", _name.c_str(), _input_size, _output_size);
+
+    // The weight parameters of a FF-layer are an NxM matrix.
+    _weights.resize(_output_size * _input_size);
+
+    // Each node in this layer is assigned a bias.
+    _biases.resize(_output_size);
+
+    // The outputs of each neuron within the layer is an "activation".
+    _activations.resize(_output_size);
+
+    _activation_gradients.resize(_output_size);
+    _weight_gradients.resize(_output_size * _input_size);
+    _bias_gradients.resize(_output_size);
+    _input_gradients.resize(_input_size);
 }
 
 void DenseLayer::init(RneType& rne)
@@ -240,17 +254,42 @@ void DenseLayer::reverse(NumType* gradients)
 
 NumType* DenseLayer::param(size_t index)
 {
-
+    if (index < _weights.size())
+    {
+        return &_weights[index];
+    }
+    return &_biases[index - _weights.size()];
 }
 
 NumType* DenseLayer::gradient(size_t index)
 {
-
+    if (index < _weights.size())
+    {
+        return &_weight_gradients[index];
+    }
+    return &_bias_gradients[index - _weights.size()];
 }
 
 void DenseLayer::print() const 
 {
+    std::printf("%s\n", _name.c_str());
 
+    std::printf("Weights (%d x %d)\n", _output_size, _input_size);
+    for (size_t i = 0; i < _output_size; ++i)
+    {
+        size_t offset = i * _input_size;
+        for (size_t j = 0; j < _input_size; ++j)
+        {
+            std::printf("\t[%zu]%f", offset + j, _weights[offset + j]);
+        }
+        std::printf("\n");
+    }
+    std::printf("Biases (%d x 1)\n", _output_size);
+    for (size_t i = 0; i < _output_size; ++i)
+    {
+        std::printf("\t%f\n", _biases[i]);
+    }
+    std::printf("\n");
 }
 
 } // namespace Ariadne
