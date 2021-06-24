@@ -40,6 +40,9 @@ namespace Ariadne {
 
 class Model;
 
+/**
+ * \brief Base class of computational layers in a model.
+ */
 class Layer 
 {
 public:
@@ -54,7 +57,7 @@ public:
     virtual void init(RneType& rne) = 0;
 
     /**
-     * \brief Virtual method used to perform foward propagations. During 
+     * \brief Virtual method used to perform forward propagations. During 
      * forward propagation nodes transform input data and feed results to all 
      * subsequent nodes.
      * \param inputs NumType ptr

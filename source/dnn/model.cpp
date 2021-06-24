@@ -24,6 +24,7 @@
 
 #include "model.hpp"
 
+#include <cstdio>
 
 namespace Ariadne {
 
@@ -31,5 +32,72 @@ Model::Model(std::string name)
     : _name{name}
     , _layers{}
 { }
+
+void Model::create_edge(Layer& dst, Layer& src)
+{
+    // NOTE: No validation is done to ensure the edge doesn't already exist
+    dst._antecedents.push_back(&src);
+    src._subsequents.push_back(&dst);
+}
+
+RneType::result_type Model::init(RneType::result_type seed = 0)
+{
+    if (seed == 0)
+    {
+        // Generate a new random seed from the host random device.
+        std::random_device rd{};
+        seed = rd();
+    }
+    std::printf("Initializing model parameters with seed: %u\n", seed);
+
+    RneType rne{seed};
+    for (auto& layer: _layers)
+    {
+        layer->init(rne);
+    }
+
+    return seed;
+}
+
+void Model::train(Optimizer& optimizer)
+{
+    for (auto& layer: _layers)
+    {
+        optimizer.train(*layer);
+    }
+}
+
+void Model::print() const
+{
+    for (auto& layer: _layers)
+    {
+        layer->print();
+    }
+}
+
+void Model::save(std::ofstream& out)
+{
+    for (auto& layer: _layers)
+    {
+        size_t param_count = layer->param_count();
+        for (size_t i = 0; i < param_count; ++i)
+        {
+            out.write(reinterpret_cast<char const*>(layer->param(i)), 
+                sizeof(NumType));
+        }
+    }
+}
+
+void Model::load(std::ifstream& in)
+{
+    for (auto& layer: _layers)
+    {
+        size_t param_count = layer->param_count();
+        for (size_t i = 0; i < param_count; ++i)
+        {
+            in.read(reinterpret_cast<char*>(layer->param(i)), sizeof(NumType));
+        }
+    }
+}
 
 } // namespace Ariadne

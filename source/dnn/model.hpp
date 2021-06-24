@@ -30,16 +30,19 @@
 #define ARIADNE_DNN_MODEL_HPP
 
 #include "layer.hpp"
+#include "optimizer.hpp"
 #include "type.hpp"
 
 #include <string>
 #include <vector>
 #include <memory>
+#include <fstream>
 
 namespace Ariadne {
 
-class Optimizer; // TODO: define later.
-
+/**
+ * \brief Base class of a neural network model.
+ */
 class Model
 {
 public:
@@ -103,6 +106,18 @@ public:
 
     /**
      * \brief Save the model weights to disk.
+     * 
+     * To save the model to disk, we employ a very simple scheme. All nodes are
+     * looped through in the order they were added to the model. Then, all
+     * advertised learnable parameters are serialized in host byte-order to the
+     * supplied output stream.
+     *
+     * This simplistic method of saving the model to disk isn't very
+     * robust or practical in the real world. It contains no reflection data 
+     * about the topology of the model. Furthermore, the data will be parsed 
+     * incorrectly if the program is recompiled to operate with a different 
+     * precision. 
+     * 
      * \param out Out file stream
      */
     void save(std::ofstream& out);
