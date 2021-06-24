@@ -213,8 +213,8 @@ private:
     void test_mean_squared_error_1() {
         num_t test_val1 = 1.0;
         num_t test_val2 = 1.5;
-        num_t truth_val = 1.0;
-        auto ret = DLMath::squared_error_1(test_val1, test_val2);
+        num_t truth_val = 0.5;
+        auto ret = DLMath::squared_error_1(test_val1, test_val2, 0.5);
         ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
 
         std::vector<num_t> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
@@ -222,7 +222,7 @@ private:
         std::vector<num_t> truth_mse1 {0.2, -1.8, 0.4, 1.0, -1.0};
         std::vector<num_t> ret_vec; ret_vec.resize(truth_mse1.size());
         DLMath::mean_squared_error_1(ret_vec.data(), test_y.data(), 
-            test_y_hat.data(), test_y_hat.size());
+            test_y_hat.data(), 1.0, test_y_hat.size());
         for (size_t i = 0; i < truth_mse1.size(); ++i)
         {
             ARIADNE_TEST_WITHIN(ret_vec[i], truth_mse1[i], 0.00000000001);

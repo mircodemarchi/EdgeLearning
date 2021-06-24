@@ -391,13 +391,13 @@ public:
      * \tparam T Type of the inputs and return type.
      * \param y      Target array values.
      * \param y_hat  Estimated array values.
-     * \param length Length of the arrays. 
+     * \param norm   Normalizer term.
      * \return T The first derivative squared error value.
      */
     template <typename T>
-    static T squared_error_1(T y, T y_hat)
+    static T squared_error_1(T y, T y_hat, T norm)
     {
-        return -2 * (y - y_hat);
+        return -T{2.0} * norm * (y - y_hat);
     }
 
     /**
@@ -407,16 +407,17 @@ public:
      * \param dst    Destination array.
      * \param y      Target array values.
      * \param y_hat  Estimated array values.
+     * \param norm   Normalizer term.
      * \param length Length of the arrays. 
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* mean_squared_error_1(T* dst, const T* y, const T* y_hat, 
+    static T* mean_squared_error_1(T* dst, const T* y, const T* y_hat, T norm, 
         size_t length)
     {
         for (size_t i = 0; i < length; ++i)
         {
-            dst[i] = squared_error_1(y[i], y_hat[i]);
+            dst[i] = squared_error_1(y[i], y_hat[i], norm);
         }
         return dst;
     }
