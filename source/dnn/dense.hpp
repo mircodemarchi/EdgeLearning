@@ -40,7 +40,8 @@ namespace Ariadne {
 enum class Activation
 {
     ReLU,
-    Softmax
+    Softmax,
+    Linear
 };
 
 class DenseLayer : public Layer 

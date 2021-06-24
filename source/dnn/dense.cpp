@@ -26,6 +26,8 @@
 
 #include "dlmath.hpp"
 
+#include <algorithm>
+
 
 namespace Ariadne {
 
@@ -49,18 +51,19 @@ void DenseLayer::init(rne_t& rne)
             /*
              * Kaiming He, et. al. weight initialization for ReLU networks 
              * https://arxiv.org/pdf/1502.01852.pdf
-             * Suggests using a normal distribution with variance := 2 / n_in
+             * Nrmal distribution with variance := sqrt( 2 / n_in )
              */
             sigma = std::sqrt(2.0 / static_cast<num_t>(_input_size));
             break;
         }
         case Activation::Softmax:
+        case Activation::Linear:
         default:
         {
             /* 
-             * LeCun initialization for "Self-Normalizing Neural Networks"
+             * Xavier initialization
              * https://arxiv.org/pdf/1706.02515.pdf
-             * Suggests using a normal distribution with variance := 1 / n_in
+             * Normal distribution with variance := sqrt( 1 / n_in )
              */
             sigma = std::sqrt(1.0 / static_cast<num_t>(_input_size));
             break;
@@ -112,12 +115,19 @@ void DenseLayer::forward(num_t* inputs)
         {
             DLMath::relu<num_t>(_activations.data(), _activations.data(), 
                 size_t(_output_size));
+            break;
         }
         case Activation::Softmax:
-        default:
         {
             DLMath::softmax<num_t>(_activations.data(), _activations.data(), 
                 size_t(_output_size));
+            break;
+        }
+        case Activation::Linear:
+        default:
+        {
+            // Linear activation disables non-linear function.
+            break;
         }
     }
 
@@ -147,9 +157,9 @@ void DenseLayer::reverse(num_t* gradients)
                 _activation_gradients.data(), 
                 _activations.data(), 
                 _output_size);
+            break;
         }
         case Activation::Softmax:
-        default:
         {
             /*
              * The softmax derivation explits the calculus of softmax performed 
@@ -159,6 +169,13 @@ void DenseLayer::reverse(num_t* gradients)
                 _activation_gradients.data(),
                 _activations.data(), 
                 _output_size);
+            break;
+        }
+        case Activation::Linear:
+        default:
+        {
+            std::fill(_activation_gradients.begin(), 
+                _activation_gradients.end(), num_t{1.0});
         }
     }
 
