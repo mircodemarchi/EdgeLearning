@@ -402,22 +402,23 @@ public:
 
     /**
      * \brief Mean Squared Error Function first derivative. 
-     * mean_squared_error(y, y_hat) = - (2 / n) * \sum_i( y_i - y_hat_i )
+     * mean_squared_error(y, y_hat)_i = -2 * ( y_i - y_hat_i )
      * \tparam T Type of the inputs and return type.
+     * \param dst    Destination array.
      * \param y      Target array values.
      * \param y_hat  Estimated array values.
      * \param length Length of the arrays. 
-     * \return T The first derivative mean squared error value.
+     * \return T* The destination array pointer.
      */
     template <typename T>
-    static T mean_squared_error_1(const T* y, const T* y_hat, size_t length)
+    static T* mean_squared_error_1(T* dst, const T* y, const T* y_hat, 
+        size_t length)
     {
-        T ret{0.0};
         for (size_t i = 0; i < length; ++i)
         {
-            ret += y[i] - y_hat[i];
+            dst[i] = squared_error_1(y[i], y_hat[i]);
         }
-        return -2 * ret / length;
+        return dst;
     }
 
     /**

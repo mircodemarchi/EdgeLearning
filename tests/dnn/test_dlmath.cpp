@@ -219,10 +219,14 @@ private:
 
         std::vector<num_t> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
         std::vector<num_t> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
-        num_t truth_mse = -0.24;
-        ret = DLMath::mean_squared_error_1(test_y.data(), test_y_hat.data(), 
-            test_y_hat.size());
-        ARIADNE_TEST_WITHIN(ret, truth_mse, 0.00000000001);
+        std::vector<num_t> truth_mse1 {0.2, -1.8, 0.4, 1.0, -1.0};
+        std::vector<num_t> ret_vec; ret_vec.resize(truth_mse1.size());
+        DLMath::mean_squared_error_1(ret_vec.data(), test_y.data(), 
+            test_y_hat.data(), test_y_hat.size());
+        for (size_t i = 0; i < truth_mse1.size(); ++i)
+        {
+            ARIADNE_TEST_WITHIN(ret_vec[i], truth_mse1[i], 0.00000000001);
+        }
     }
 
     void test_max_argmax() {
