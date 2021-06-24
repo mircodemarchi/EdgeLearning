@@ -48,6 +48,8 @@ public:
         ARIADNE_TEST_CALL(test_softmax_1());
         ARIADNE_TEST_CALL(test_cross_entropy());
         ARIADNE_TEST_CALL(test_cross_entropy_1());
+        ARIADNE_TEST_CALL(test_mean_squared_error());
+        ARIADNE_TEST_CALL(test_mean_squared_error_1());
         ARIADNE_TEST_CALL(test_max_argmax());
     }
 
@@ -149,14 +151,14 @@ private:
     }
 
     void test_softmax_1() {
-        std::vector<num_t> test_vec{-2,-1,0,1,2};
+        std::vector<num_t> test_vec{-2.0,-1.0,0.0,1.0,2.0};
         ARIADNE_TEST_FAIL(DLMath::softmax_1_opt<num_t>(test_vec.data(), 
             test_vec.data(), test_vec.size()));
         ARIADNE_TEST_EXECUTE(DLMath::softmax_1<num_t>(test_vec.data(), 
             test_vec.data(), test_vec.size()));
         for (size_t i = 0; i < test_vec.size(); ++i)
         {
-            std::cout << std::fixed << std::setprecision(25) 
+            std::cout << std::fixed << std::setprecision(40) 
                 << "test_vec[i]: " << test_vec[i] << std::endl << std::endl;
         }
     }
@@ -180,8 +182,8 @@ private:
         std::vector<num_t> test_y_hat{0.1, 0.1, 0.25, 0.05, 0.5};
         std::vector<num_t> truth_ce1 {0.0, 0.0, 0.00, 0.00, -2.0};
         std::vector<num_t> ret_vec; ret_vec.resize(truth_ce1.size());
-        DLMath::cross_entropy_1(ret_vec.data(), test_y.data(), test_y_hat.data(), 
-            1.0, test_y_hat.size());
+        DLMath::cross_entropy_1(ret_vec.data(), test_y.data(), 
+            test_y_hat.data(), 1.0, test_y_hat.size());
         for (size_t i = 0; i < truth_ce1.size(); ++i)
         {
             ARIADNE_TEST_WITHIN(ret_vec[i], truth_ce1[i], 0.00000000001);
@@ -192,6 +194,35 @@ private:
         num_t truth_val = -1.0;
         auto ret_val = DLMath::cross_entropy_1(test_val, test_val, 1.0);
         ARIADNE_TEST_WITHIN(ret_val, truth_val, 0.00000000001);
+    }
+
+    void test_mean_squared_error() {
+        num_t test_val = 1.0;
+        num_t truth_val = 0.0;
+        auto ret = DLMath::squared_error(test_val, test_val);
+        ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
+
+        std::vector<num_t> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
+        std::vector<num_t> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
+        num_t truth_mse = 0.272;
+        ret = DLMath::mean_squared_error(test_y.data(), test_y_hat.data(), 
+            test_y_hat.size());
+        ARIADNE_TEST_WITHIN(ret, truth_mse, 0.00000000001);
+    }
+
+    void test_mean_squared_error_1() {
+        num_t test_val1 = 1.0;
+        num_t test_val2 = 1.5;
+        num_t truth_val = 1.0;
+        auto ret = DLMath::squared_error_1(test_val1, test_val2);
+        ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
+
+        std::vector<num_t> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
+        std::vector<num_t> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
+        num_t truth_mse = -0.24;
+        ret = DLMath::mean_squared_error_1(test_y.data(), test_y_hat.data(), 
+            test_y_hat.size());
+        ARIADNE_TEST_WITHIN(ret, truth_mse, 0.00000000001);
     }
 
     void test_max_argmax() {

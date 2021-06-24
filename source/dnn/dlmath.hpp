@@ -188,7 +188,7 @@ public:
         T sum_exp_z{0};
         for (size_t i = 0; i < length; ++i)
         {
-            dst[i] = std::exp(src[i]);
+            dst[i] = std::expl(src[i]);
             sum_exp_z += dst[i];
         }
 
@@ -245,11 +245,11 @@ public:
 
         for (size_t i = 0; i < length; ++i)
         {
-            dst[i] = T{0};
+            dst[i] = T{0.0};
             for(size_t j = 0; j < length; ++j)
             {
                 dst[i] += (i == j) 
-                    ? src[i] * (T{1} - src[i]) 
+                    ? src[i] * (T{1.0} - src[i]) 
                     : -src[i] * src[j];
             }
         }
