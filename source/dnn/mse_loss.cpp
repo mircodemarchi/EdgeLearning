@@ -60,15 +60,15 @@ void MSELossLayer::forward(NumType* inputs)
     _last_input = inputs;
 }
 
-void MSELossLayer::reverse(NumType* inputs)
+void MSELossLayer::reverse(NumType* gradients)
 {
     // Parameter ignored because it is a loss layer.
-    (void) inputs;
+    (void) gradients;
 
     DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input, 
         _inv_batch_size, _input_size);
 
-    for (auto *l: _antecedents)
+    for (auto* l: _antecedents)
     {
         l->reverse(_gradients.data());
     }

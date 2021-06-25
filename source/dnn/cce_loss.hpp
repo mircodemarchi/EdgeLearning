@@ -52,9 +52,9 @@ public:
     /**
      * \brief As a loss node, the argument to this method is ignored (the 
      * gradient of the loss with respect to itself is unity).
-     * \param inputs
+     * \param gradients
      */
-    void reverse(NumType* inputs) override;
+    void reverse(NumType* gradients = nullptr) override;
 
     void print() const override;
 

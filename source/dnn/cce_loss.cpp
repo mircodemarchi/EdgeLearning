@@ -67,15 +67,15 @@ void CCELossLayer::forward(NumType* inputs)
     _last_input = inputs;
 }
 
-void CCELossLayer::reverse(NumType* inputs)
+void CCELossLayer::reverse(NumType* gradients)
 {
     // Parameter ignored because it is a loss layer.
-    (void) inputs;
+    (void) gradients;
 
     DLMath::cross_entropy_1(_gradients.data(), _target, _last_input, 
         _inv_batch_size, _input_size);
 
-    for (auto *l: _antecedents)
+    for (auto* l: _antecedents)
     {
         l->reverse(_gradients.data());
     }
@@ -83,7 +83,7 @@ void CCELossLayer::reverse(NumType* inputs)
 
 void CCELossLayer::print() const
 {
-    std::printf("Avg Loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
+    std::printf("avg loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
 }
 
 void CCELossLayer::set_target(NumType const* target)
