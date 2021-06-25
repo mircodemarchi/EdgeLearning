@@ -39,7 +39,9 @@ class TestModel {
 public:
     void test() {
         ARIADNE_TEST_CALL(test_classifier_model());
+        ARIADNE_TEST_CALL(test_classifier_model_predict());
         ARIADNE_TEST_CALL(test_regressor_model());
+        ARIADNE_TEST_CALL(test_regressor_model_predict());
     }
 
 private:
@@ -107,6 +109,19 @@ private:
         m.save(params_file);
     }
 
+    void test_classifier_model_predict() {
+        DenseLayer* input_layer;
+        CCELossLayer* loss_layer;
+        GDOptimizer o{NumType{0.3}};
+        Model m = TestModel::_create_binary_classifier_model(&input_layer, 
+            &loss_layer);
+
+        std::ifstream params_file{
+            std::filesystem::path{"classifier.weight"}, 
+            std::ios::binary};
+        m.load(params_file);
+    }
+
     void test_regressor_model() {
         // Input definition.
         NumType* input  = nullptr;
@@ -168,6 +183,19 @@ private:
         m.save(params_file);
     }
 
+    void test_regressor_model_predict() {
+        DenseLayer* input_layer;
+        MSELossLayer* loss_layer;
+        GDOptimizer o{NumType{0.3}};
+        Model m = TestModel::_create_regressor_model(&input_layer, 
+            &loss_layer);
+
+        std::ifstream params_file{
+            std::filesystem::path{"regressor.weight"}, 
+            std::ios::binary};
+        m.load(params_file);
+    }
+
     Model _create_binary_classifier_model(DenseLayer** first_layer, 
         CCELossLayer** loss_layer)
     {
@@ -192,7 +220,7 @@ private:
         DenseLayer& output_layer = m.add_node<DenseLayer>("output", 
             Activation::Linear, 2, 8);
 
-        *loss_layer = &m.add_node<MSELossLayer>("loss", 2, BATCH_SIZE);
+        *loss_layer = &m.add_node<MSELossLayer>("loss", 2, BATCH_SIZE, 0.5);
         m.create_edge(output_layer, **first_layer);
         m.create_edge(**loss_layer, output_layer);
         return m;
