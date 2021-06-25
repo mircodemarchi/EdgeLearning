@@ -41,6 +41,11 @@ public:
         ARIADNE_TEST_CALL(test_csv_iterator(5));
     }
 private:
+    const std::string DATA_TRAINING_FN = "execution-time.csv";
+    const std::filesystem::path data_training_fp = 
+        std::filesystem::path(__FILE__).parent_path() 
+            / ".." / ".." / "data" / DATA_TRAINING_FN;
+
     void test_csv_field() {
         auto csv_field_int_t   = ParserType::AUTO;
         auto csv_field_str_t   = ParserType::AUTO;
@@ -177,16 +182,7 @@ private:
         ARIADNE_TEST_EQUAL(iterator_cpy->idx(), csv[2].idx());
         ARIADNE_TEST_ASSERT(iterator == iterator_cpy)
     }
-
-    static const std::string DATA_TRAINING_FN;
-    static const std::filesystem::path data_training_fp;
 };
-
-const std::string TestCSV::DATA_TRAINING_FN = "execution-time.csv";
-const std::filesystem::path TestCSV::data_training_fp = 
-    std::filesystem::path(__FILE__).parent_path() 
-        / ".." / "data" / TestCSV::DATA_TRAINING_FN;
-
 
 int main() {
     TestCSV().test();
