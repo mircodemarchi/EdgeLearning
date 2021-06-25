@@ -73,6 +73,7 @@ public:
 private:
     uint16_t _input_size;
     NumType _loss;
+    NumType _cumulative_loss{0.0};
     NumType _loss_tolerance;
     const NumType* _target;
     NumType* _last_input;
@@ -80,10 +81,6 @@ private:
     std::vector<NumType> _gradients;
 
     NumType _inv_batch_size; ///< Used to scale with batch size.
-
-    // Last active classification in the target one-hot encoding. 
-    size_t _active; 
-    NumType _cumulative_loss{0.0};
     
     // Running counts of correct and incorrect predictions.
     size_t _correct{0};

@@ -32,8 +32,8 @@ MSELossLayer::MSELossLayer(Model& model, std::string name,
     uint16_t input_size, size_t batch_size, NumType loss_tolerance)
     : Layer(model, name)
     , _input_size{input_size}
-    , _inv_batch_size{NumType{1.0} / batch_size}
     , _loss_tolerance{loss_tolerance}
+    , _inv_batch_size{NumType{1.0} / batch_size}
 { 
     /* 
      * When we deliver a gradient back, we deliver just the loss gradient with
