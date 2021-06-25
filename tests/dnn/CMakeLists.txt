@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_dlmath
+    test_model
 )
 
 foreach(TEST ${UNIT_TESTS})
