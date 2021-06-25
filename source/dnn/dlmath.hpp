@@ -189,7 +189,7 @@ public:
         T sum_exp_z{0};
         for (size_t i = 0; i < length; ++i)
         {
-            dst[i] = std::expl(src[i]);
+            dst[i] = std::exp(src[i]);
             sum_exp_z += dst[i];
         }
 

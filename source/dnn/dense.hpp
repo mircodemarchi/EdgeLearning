@@ -74,7 +74,7 @@ public:
      */
     size_t param_count() const noexcept override
     {
-        return (_input_size + 1) * _output_size;
+        return (_input_size + 1UL) * _output_size;
     }
 
     NumType* param(size_t index) override;
