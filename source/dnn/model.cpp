@@ -49,7 +49,7 @@ RneType::result_type Model::init(RneType::result_type seed)
         std::random_device rd{};
         seed = rd();
     }
-    std::printf("Initializing model parameters with seed: %lu\n", seed);
+    std::printf("Initializing model parameters with seed: %llu\n", seed);
 
     RneType rne{seed};
     for (auto* layer: _layers)
