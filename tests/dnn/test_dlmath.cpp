@@ -31,6 +31,7 @@
 #include <vector>
 #include <iostream>
 #include <iomanip>
+#include <random>
 
 using namespace std;
 using namespace Ariadne;
@@ -54,17 +55,34 @@ public:
     }
 
 private:
-    static const int SEED = 1;
-    static const int PRINT_TIMES = 4;
+    const RneType::result_type SEED = 1;
+    const size_t PRINT_TIMES = 4;
 
     void test_normal_pdf() {
         RneType generator{SEED};
-        auto dist = DLMath::normal_pdf<NumType>(0, 0.1);
+        auto dist = DLMath::normal_pdf<NumType>(0.0, 0.1);
         for (size_t i = 0; i < PRINT_TIMES; ++i)
         {
             ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(dist(generator)));
         }
+
+        std::random_device rd;
+        generator = RneType{rd()};
+        size_t gt1_count = 0, lt1_count = 0;
+        for (size_t i = 0; i < 10000; ++i)
+        {
+            if (dist(generator) > 0.0)
+            {
+                ++gt1_count;
+            }
+            else 
+            {
+                ++lt1_count;
+            }
+        }
+        ARIADNE_TEST_WITHIN(static_cast<int>(gt1_count), 
+            static_cast<int>(lt1_count), 200);
     }
 
     void test_arr_sum() {

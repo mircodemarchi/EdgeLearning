@@ -33,7 +33,9 @@
 #include <tuple>
 #include <algorithm>
 #include <iterator>
+#include <limits>
 
+#include <iostream>
 
 #ifndef ARIADNE_DL_DLMATH_HPP
 #define ARIADNE_DL_DLMATH_HPP
@@ -43,10 +45,8 @@ namespace Ariadne {
 class DLMath 
 {
 public:
-    /**
-     * \brief 1 / sqrt(2 * pi)
-     */
-    static constexpr double inv_sqrt_2pi = 0.3989422804014327;
+    static constexpr RneType::result_type max_rand = 
+        std::numeric_limits<RneType::result_type>::max();
 
     /**
      * \brief Gaussian Probability Density Function.
@@ -57,15 +57,16 @@ public:
      * \return std::function<T(RneType)> The distribution function.
      */
     template <typename T>
-    static std::function<T(RneType)> normal_pdf(float mean, float std_dev)
+    static std::function<T(RneType&)> normal_pdf(double mean, double std_dev)
     {
-        double inv_sqrt_2pi_std_dev = (inv_sqrt_2pi / std_dev);
+        T std_dev_coverage = T{3.0 * std_dev};
         
-        std::function<T(RneType)> ret = 
-            [inv_sqrt_2pi_std_dev, mean, std_dev](RneType x) 
+        std::function<T(RneType&)> ret = 
+            [std_dev_coverage, mean](RneType& x) 
         {
-            double a = (double(x()) - mean) / std_dev;
-            return T(inv_sqrt_2pi_std_dev * std::exp(-0.5f * a * a));
+            T rand = ((static_cast<T>(x()) / max_rand) * T{2.0}) - T{1.0};
+            rand = (rand * std_dev_coverage) + mean;
+            return rand;
         };
         return ret;
     }
