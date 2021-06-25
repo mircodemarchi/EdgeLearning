@@ -82,30 +82,30 @@ void DenseLayer::init(RneType& rne)
             sigma = std::sqrt(1.0 / static_cast<NumType>(_input_size));
             break;
         }
+    }
 
-        /*
-         * The C++ standard does not guarantee that the results obtained from a 
-         * distribution function will be identical given the same inputs across 
-         * different compilers and platforms, therefore I use my own 
-         * distributions to provide deterministic results.
-         */
-        auto dist = DLMath::normal_pdf<NumType>(0.0, sigma);
+    /*
+     * The C++ standard does not guarantee that the results obtained from a 
+     * distribution function will be identical given the same inputs across 
+     * different compilers and platforms, therefore I use my own 
+     * distributions to provide deterministic results.
+     */
+    auto dist = DLMath::normal_pdf<NumType>(0.0, sigma);
 
-        for (NumType& w: _weights)
-        {
-            w = dist(rne);
-        }
+    for (NumType& w: _weights)
+    {
+        w = dist(rne);
+    }
 
-        /*
-         * Setting biases to zero is a common practice, as is initializing the 
-         * bias to a small value (e.g. on the order of 0.01). The thinking is
-         * that a non-zero bias will ensure that the neuron always "fires" at 
-         * the beginning to produce a signal.
-         */
-        for (NumType& b: _biases)
-        {
-            b = 0.01; ///< You can try also with 0.0 or other strategies.
-        }
+    /*
+     * Setting biases to zero is a common practice, as is initializing the 
+     * bias to a small value (e.g. on the order of 0.01). The thinking is
+     * that a non-zero bias will ensure that the neuron always "fires" at 
+     * the beginning to produce a signal.
+     */
+    for (NumType& b: _biases)
+    {
+        b = 0.01; ///< You can try also with 0.0 or other strategies.
     }
 }
 
@@ -190,6 +190,7 @@ void DenseLayer::reverse(NumType* gradients)
         {
             std::fill(_activation_gradients.begin(), 
                 _activation_gradients.end(), NumType{1.0});
+            break;
         }
     }
 
@@ -263,11 +264,11 @@ NumType* DenseLayer::param(size_t index)
 
 NumType* DenseLayer::gradient(size_t index)
 {
-    if (index < _weights.size())
+    if (index < _weight_gradients.size())
     {
         return &_weight_gradients[index];
     }
-    return &_bias_gradients[index - _weights.size()];
+    return &_bias_gradients[index - _weight_gradients.size()];
 }
 
 void DenseLayer::print() const 

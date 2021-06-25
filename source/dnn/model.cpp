@@ -25,6 +25,7 @@
 #include "model.hpp"
 
 #include <cstdio>
+#include <cassert>
 
 namespace Ariadne {
 
@@ -40,7 +41,7 @@ void Model::create_edge(Layer& dst, Layer& src)
     src._subsequents.push_back(&dst);
 }
 
-RneType::result_type Model::init(RneType::result_type seed = 0)
+RneType::result_type Model::init(RneType::result_type seed)
 {
     if (seed == 0)
     {
@@ -48,10 +49,10 @@ RneType::result_type Model::init(RneType::result_type seed = 0)
         std::random_device rd{};
         seed = rd();
     }
-    std::printf("Initializing model parameters with seed: %u\n", seed);
+    std::printf("Initializing model parameters with seed: %llu\n", seed);
 
     RneType rne{seed};
-    for (auto& layer: _layers)
+    for (auto* layer: _layers)
     {
         layer->init(rne);
     }

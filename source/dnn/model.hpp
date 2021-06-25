@@ -33,10 +33,12 @@
 #include "optimizer.hpp"
 #include "type.hpp"
 
+#include <cstdint>
+#include <fstream>
+#include <memory>
+#include <random>
 #include <string>
 #include <vector>
-#include <memory>
-#include <fstream>
 
 namespace Ariadne {
 
@@ -47,7 +49,13 @@ class Model
 {
 public:
     Model(std::string name);
-    ~Model() = default;
+    ~Model()
+    {
+        for (auto* layer: _layers)
+        {
+            delete layer;
+        }
+    }
 
     /**
      * \brief Append a layer to the model, forward its parameters to the layer 
@@ -59,11 +67,11 @@ public:
      * constructor.
      * \return Layer_t& The reference to the layer inserted.
      */
-    template <typename Layer_t, typename... T>
+    template <class Layer_t, typename... T>
     Layer_t& add_node(T&&... args)
     {
-        _layers.emplace_back(
-            std::make_unique<Layer>(*this, std::forward<T>(args)...)
+        _layers.push_back(
+            new Layer_t(*this, std::forward<T>(args)...)
         );
         return reinterpret_cast<Layer_t&>(*_layers.back());
     }
@@ -132,7 +140,7 @@ private:
     friend class Layer;
 
     std::string _name;                           ///< Model name;
-    std::vector<std::unique_ptr<Layer>> _layers; ///< List of layers pointers;
+    std::vector<Layer*> _layers; ///< List of layers pointers;
 };
 
 } // namespace Ariadne
