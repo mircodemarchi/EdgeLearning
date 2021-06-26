@@ -49,13 +49,6 @@ class Model
 {
 public:
     Model(std::string name);
-    ~Model()
-    {
-        for (auto* layer: _layers)
-        {
-            delete layer;
-        }
-    }
 
     /**
      * \brief Append a layer to the model, forward its parameters to the layer 
@@ -71,7 +64,7 @@ public:
     Layer_t& add_node(T&&... args)
     {
         _layers.push_back(
-            new Layer_t(*this, std::forward<T>(args)...)
+            std::make_unique<Layer_t>(*this, std::forward<T>(args)...)
         );
         return reinterpret_cast<Layer_t&>(*_layers.back());
     }
@@ -102,7 +95,7 @@ public:
      * \brief Model name provided for debugging purposes.
      * \return std::string const& Model name string.
      */
-    std::string const& name() const noexcept
+    [[nodiscard]] std::string const& name() const noexcept
     {
         return _name;
     }
@@ -140,7 +133,7 @@ private:
     friend class Layer;
 
     std::string _name;                           ///< Model name;
-    std::vector<Layer*> _layers; ///< List of layers pointers;
+    std::vector<std::unique_ptr<Layer>> _layers; ///< List of layers pointers;
 };
 
 } // namespace Ariadne

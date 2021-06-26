@@ -105,7 +105,10 @@ public:
      * \brief Virtual method information dump for debugging purposes.
      * \return std::string const& The layer name.
      */
-    virtual std::string const& name() const noexcept { return _name; }
+    [[nodiscard]] std::string const& name() const noexcept 
+    { 
+        return _name; 
+    }
 
 protected:
     friend class Model;
