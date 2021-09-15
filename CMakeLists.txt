@@ -60,8 +60,19 @@ add_definitions(-DENABLE_MLPACK=${ENABLE_MLPACK})
 # find_package(Ariadne REQUIRED)
 
 # Find MLPACK and dependencies
+message(STATUS "MLPACK enabled: ${ENABLE_MLPACK}")
 find_package(Armadillo 8.400.0 QUIET)
 find_package(MLPACK QUIET)
+
+if(ENABLE_MLPACK AND NOT MLPACK_FOUND)
+    message(FATAL_ERROR "MLPACK enabled but not found")
+endif()
+
+if(ENABLE_MLPACK AND MLPACK_FOUND)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND ((${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Darwin") OR APPLE))
+        message(FATAL_ERROR "MLPACK is not supported with MacOS and GCC GNU compiler, configure Clang instead.")
+    endif()
+endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 if(ENABLE_MLPACK)
@@ -73,14 +84,14 @@ add_subdirectory(source)
 add_subdirectory(tests)
 
 add_library(ariadnedl SHARED
-    $<TARGET_OBJECTS:ariadnedl-estimators>
     $<TARGET_OBJECTS:ariadnedl-parser>
     $<TARGET_OBJECTS:ariadnedl-dnn>
+    $<TARGET_OBJECTS:ariadnedl-middleware>
 )
 
 target_link_libraries(ariadnedl dl)
 if(ENABLE_MLPACK)
-    target_link_libraries(${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
+    target_link_libraries(ariadnedl ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
 endif()
 
 if(COVERAGE)
