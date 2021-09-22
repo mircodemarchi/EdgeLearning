@@ -105,7 +105,7 @@ private:
     /**
      * \brief Input gradients of the layer. Size: _input_size. 
      * This buffer is used to store temporary gradients used in a **singe** 
-     * backpropagation pass. Note that this doed not accumulate like the weight 
+     * backpropagation pass. Note that this does not accumulate like the weight 
      * and bias gradients do.
      */
     std::vector<NumType> _input_gradients;

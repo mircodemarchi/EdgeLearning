@@ -7,6 +7,7 @@ add_library(${LIBRARY_NAME} OBJECT
     cce_loss.cpp
     mse_loss.cpp
     gd_optimizer.cpp
+    recurrent.cpp
 )
 
 if(COVERAGE)
