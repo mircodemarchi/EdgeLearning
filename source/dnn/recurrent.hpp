@@ -73,7 +73,8 @@ public:
     void reverse(NumType* gradients) override;
 
     /**
-     * \brief Weight.
+     * \brief Weight input to hidden, hidden to hidden and hidden to output.
+     * Bias to hidden and to output. 
      * \return size_t
      */
     size_t param_count() const noexcept override

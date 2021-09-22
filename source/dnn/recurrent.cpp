@@ -149,17 +149,104 @@ void RecurrentLayer::reverse(NumType* gradients)
 
 NumType* RecurrentLayer::param(size_t index)
 {
-    
+    size_t acc_size = 0;
+    if (index < _weights_i_to_h.size())
+    {
+        return &_weights_i_to_h[index];
+    }
+    acc_size += _weights_i_to_h.size();
+    if (index < acc_size + _weights_h_to_h.size())
+    {
+        return &_weights_h_to_h[index - acc_size];
+    }
+    acc_size += _weights_h_to_h.size();
+    if (index < acc_size + _biases_to_h.size())
+    {
+        return &_biases_to_h[index - acc_size];
+    }
+    acc_size += _biases_to_h.size();
+    if (index < acc_size + _weights_h_to_o.size())
+    {
+        return &_weights_h_to_o[index - acc_size];
+    }
+    acc_size += _weights_h_to_o.size();
+    return &_biases_to_o[index - acc_size];
 }
 
 NumType* RecurrentLayer::gradient(size_t index)
 {
-    
+    size_t acc_size = 0;
+    if (index < _weights_i_to_h_gradients.size())
+    {
+        return &_weights_i_to_h_gradients[index];
+    }
+    acc_size += _weights_i_to_h_gradients.size();
+    if (index < acc_size + _weights_h_to_h_gradients.size())
+    {
+        return &_weights_h_to_h_gradients[index - acc_size];
+    }
+    acc_size += _weights_h_to_h_gradients.size();
+    if (index < acc_size + _biases_to_h_gradients.size())
+    {
+        return &_biases_to_h_gradients[index - acc_size];
+    }
+    acc_size += _biases_to_h_gradients.size();
+    if (index < acc_size + _weights_h_to_o_gradients.size())
+    {
+        return &_weights_h_to_o_gradients[index - acc_size];
+    }
+    acc_size += _weights_h_to_o_gradients.size();
+    return &_biases_to_o_gradients[index - acc_size];
 }
 
 void RecurrentLayer::print() const 
 {
-    
+    std::printf("%s\n", _name.c_str());
+
+    std::printf("Weights input to hidden (%d x %d)\n", 
+        _hidden_size, _input_size);
+    for (size_t i = 0; i < _hidden_size; ++i)
+    {
+        size_t offset = i * _input_size;
+        for (size_t j = 0; j < _input_size; ++j)
+        {
+            std::printf("\t[%zu]%f", offset + j, _weights_i_to_h[offset + j]);
+        }
+        std::printf("\n");
+    }
+    std::printf("Weights hidden to hidden (%d x %d)\n", 
+        _hidden_size, _hidden_size);
+    for (size_t i = 0; i < _hidden_size; ++i)
+    {
+        size_t offset = i * _hidden_size;
+        for (size_t j = 0; j < _hidden_size; ++j)
+        {
+            std::printf("\t[%zu]%f", offset + j, _weights_h_to_h[offset + j]);
+        }
+        std::printf("\n");
+    }
+    std::printf("Weights hidden to output (%d x %d)\n", 
+        _output_size, _hidden_size);
+    for (size_t i = 0; i < _output_size; ++i)
+    {
+        size_t offset = i * _hidden_size;
+        for (size_t j = 0; j < _hidden_size; ++j)
+        {
+            std::printf("\t[%zu]%f", offset + j, _weights_h_to_o[offset + j]);
+        }
+        std::printf("\n");
+    }
+    std::printf("Biases to hidden (%d x 1)\n", _hidden_size);
+    for (size_t i = 0; i < _hidden_size; ++i)
+    {
+        std::printf("\t%f\n", _biases_to_h[i]);
+    }
+    std::printf("Biases to output (%d x 1)\n", _output_size);
+    for (size_t i = 0; i < _hidden_size; ++i)
+    {
+        std::printf("\t%f\n", _biases_to_o[i]);
+    }
+    std::printf("\n");
 }
 
 } // namespace Ariadne
