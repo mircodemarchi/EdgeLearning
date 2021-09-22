@@ -464,7 +464,67 @@ public:
         auto dist = static_cast<size_t>(std::distance(src, max_iter));
         return {*max_iter, dist};
     }
-};
+
+    /**
+     * \brief Hyperbolic Tangent Function.
+     * \tparam T Type of the input and return type.
+     * \param x  Input value.
+     * \return T
+     */
+    template <typename T>
+    static T tanh(T x)
+    {
+        return std::tanh(x);
+    }
+
+    /**
+     * \brief Hyperbolic Tangent Function applied to a vector.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* tanh(T* dst, const T* src, size_t length)
+    {
+        for (size_t i = 0; i < length; ++i)
+        {
+            dst[i] = tanh(src[i]);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Hyperbolic Tangent Function first derivative.
+     * \tparam T Type of the input and return type.
+     * \param x  Input value.
+     * \return T
+     */
+    template <typename T>
+    static T tanh_1(T x)
+    {
+        T t = std::tanh(x);
+        return 1 - t * t;
+    }
+
+    /**
+     * \brief Hyperbolic Tangent Function first derivative applied to a vector.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* tanh_1(T* dst, const T* src, size_t length)
+    {
+        for (size_t i = 0; i < length; ++i)
+        {
+            dst[i] = tanh_1(src[i]);
+        }
+        return dst;
+    }
 
 } // namespace Ariadne
 
