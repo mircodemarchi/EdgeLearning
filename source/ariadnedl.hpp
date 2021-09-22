@@ -29,7 +29,18 @@
 #ifndef ARIADNE_ARIADNEDL_HPP
 #define ARIADNE_ARIADNEDL_HPP
 
-#include "estimators/time_estimator.hpp"
+#include "dnn/type.hpp"
+#include "dnn/dlmath.hpp"
+#include "dnn/model.hpp"
+#include "dnn/layer.hpp"
+#include "dnn/optimizer.hpp"
+#include "dnn/cce_loss.hpp"
+#include "dnn/mse_loss.hpp"
+#include "dnn/dense.hpp"
+#include "dnn/recurrent.hpp"
+#include "dnn/gd_optimizer.hpp"
+#include "middleware/feed_forward.hpp"
+#include "middleware/recurrent.hpp"
 #include "parser/parser.hpp"
 #include "parser/csv.hpp"
 
