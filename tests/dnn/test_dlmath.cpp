@@ -52,6 +52,8 @@ public:
         ARIADNE_TEST_CALL(test_mean_squared_error());
         ARIADNE_TEST_CALL(test_mean_squared_error_1());
         ARIADNE_TEST_CALL(test_max_argmax());
+        ARIADNE_TEST_CALL(test_tanh());
+        ARIADNE_TEST_CALL(test_tanh_1());
     }
 
 private:
@@ -262,6 +264,33 @@ private:
             test_vec.size());
         ARIADNE_TEST_EQUAL(std::get<0>(ret_tuple), truth_max);
         ARIADNE_TEST_EQUAL(std::get<1>(ret_tuple), truth_argmax);
+    }
+
+    void test_tanh() {
+        std::vector<NumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<NumType> truth_vec{-1.0, 0.0, 0.76159416, 0.99999834, 1.0};
+        DLMath::tanh<NumType>(test_vec.data(), test_vec.data(), 
+            test_vec.size());
+        for (size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+                + std::to_string(test_vec[i]));
+            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
+        }
+    }
+
+    void test_tanh_1() {
+        std::vector<NumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<NumType> truth_vec{8.24461455e-09, 1.00000000e+00, 
+            4.19974342e-01, 3.32610934e-06, 0.00000000e+00};
+        DLMath::tanh_1<NumType>(test_vec.data(), test_vec.data(), 
+            test_vec.size());
+        for (size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+                + std::to_string(test_vec[i]));
+            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
+        }
     }
 };
 

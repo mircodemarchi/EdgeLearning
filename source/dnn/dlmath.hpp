@@ -505,7 +505,7 @@ public:
     static T tanh_1(T x)
     {
         T t = std::tanh(x);
-        return 1 - t * t;
+        return T{1} - t * t;
     }
 
     /**
@@ -525,6 +525,7 @@ public:
         }
         return dst;
     }
+};
 
 } // namespace Ariadne
 
