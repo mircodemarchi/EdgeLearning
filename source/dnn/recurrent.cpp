@@ -33,13 +33,15 @@ namespace Ariadne {
 
 RecurrentLayer::RecurrentLayer(Model& model, std::string name, 
     uint16_t output_size, uint16_t input_size, uint16_t hidden_size, 
+    uint16_t time_steps, 
     OutputActivation output_activation, HiddenActivation hidden_activation)
     : Layer(model, std::move(name))
+    , _output_activation{output_activation}
+    , _hidden_activation{hidden_activation}
     , _output_size{output_size}
     , _input_size{input_size}
     , _hidden_size{hidden_size}
-    , _output_activation{output_activation}
-    , _hidden_activation{hidden_activation}
+    , _time_steps{time_steps}
 {
     std::printf("%s: %d -{%d}-> %d\n", 
         _name.c_str(), _input_size, _hidden_size, _output_size);
@@ -58,6 +60,10 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
 
     // The outputs of each neuron within the layer is an "activation".
     _activations.resize(_output_size);
+
+    // The hidden state is of hidden_size for each time step of the sequences.
+    _hidden_state = std::vector<NumType>(
+        size_t(_hidden_size * std::max(_time_steps, uint16_t(1U))), 0.0);
 
     _activation_gradients.resize(_output_size);
     _weights_i_to_h_gradients.resize(_hidden_size * _input_size);
@@ -134,6 +140,12 @@ void RecurrentLayer::init(RneType& rne)
     for (NumType& b: _biases_to_o)
     {
         b = 0.01; ///< You can try also with 0.0 or other strategies.
+    }
+
+    // Init first hidden state.
+    for (NumType& hs: _hidden_state)
+    {
+        hs = 0.0;
     }
 }
 

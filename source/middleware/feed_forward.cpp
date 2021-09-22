@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "estimators/time_estimator.hpp"
+#include "middleware/feed_forward.hpp"
 
 #if ENABLE_MLPACK
 

@@ -55,6 +55,7 @@ class RecurrentLayer : public Layer
 public: 
     RecurrentLayer(Model& model, std::string name, 
         uint16_t output_size, uint16_t input_size, uint16_t hidden_size,
+        uint16_t time_steps = 0,
         OutputActivation output_activation = OutputActivation::Linear, 
         HiddenActivation hidden_activation = HiddenActivation::TanH);
 
@@ -88,12 +89,40 @@ public:
 
     void print() const override;
 
+    void set_initial_hidden_state(std::vector<NumType> initial_hidden_state) 
+    {
+        if (initial_hidden_state.size() > _hidden_size)
+        {
+            std::runtime_error("initial hidden state exceeds the hidden size");
+        }
+        std::copy(initial_hidden_state.begin(), initial_hidden_state.end(), 
+            _hidden_state.begin());
+    }
+
+    void set_time_steps(uint16_t time_steps)
+    {
+        _time_steps = time_steps;
+        _hidden_state.resize(
+            _hidden_size * std::max(_time_steps, uint16_t(1U)));
+    }
+
+    void reset_hidden_state()
+    {
+        for (NumType& s: _hidden_state)
+        {
+            s = 0.0;
+        }
+    }
+
 private:
     OutputActivation _output_activation;
     HiddenActivation _hidden_activation;
     uint16_t _output_size;
     uint16_t _input_size;
     uint16_t _hidden_size;
+
+    std::vector<NumType> _hidden_state;
+    uint16_t _time_steps;
 
     // == Layer parameters ==
     /**
