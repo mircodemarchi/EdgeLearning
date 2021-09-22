@@ -1,7 +1,8 @@
-set(LIBRARY_NAME ariadnedl-estimators)
+set(LIBRARY_NAME ariadnedl-middleware)
 
 add_library(${LIBRARY_NAME} OBJECT
-    time_estimator.cpp
+    feed_forward.cpp
+    recurrent.cpp
 )
 
 if(COVERAGE)
