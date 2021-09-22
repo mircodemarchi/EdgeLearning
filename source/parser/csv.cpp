@@ -31,6 +31,7 @@
 #include <vector>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 
 
 namespace Ariadne {

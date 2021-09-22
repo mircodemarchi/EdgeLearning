@@ -28,6 +28,7 @@
 
 #include <tuple>
 #include <cstdio>
+#include <stdexcept>
 
 namespace Ariadne {
 
