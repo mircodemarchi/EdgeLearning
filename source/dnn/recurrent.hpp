@@ -108,6 +108,8 @@ public:
         _hidden_state.resize(
             _hidden_size * std::max(_time_steps, uint16_t(1U)));
         _activations.resize(_output_size * _time_steps);
+        _activation_gradients.resize(_output_size * _time_steps);
+        _input_gradients.resize(_input_size * _time_steps);
     }
 
     void reset_hidden_state()
@@ -184,6 +186,11 @@ private:
      * and bias gradients do.
      */
     std::vector<NumType> _input_gradients;
+    /**
+     * \brief The last input passed to the layer. It is needed to compute loss 
+     * gradients with respect to the weights during backpropagation.
+     */
+    NumType* _last_input;
 };
 
 } // namespace Ariadne

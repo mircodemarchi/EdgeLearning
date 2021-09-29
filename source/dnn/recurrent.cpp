@@ -42,6 +42,7 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     , _input_size{input_size}
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
+    , _last_input{}
 {
     std::printf("%s: %d -{%d}-> %d\n", 
         _name.c_str(), _input_size, _hidden_size, _output_size);
@@ -65,13 +66,13 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     _hidden_state = std::vector<NumType>(
         size_t(_hidden_size * std::max(_time_steps, uint16_t(1U))), 0.0);
 
-    _activation_gradients.resize(_output_size);
+    _activation_gradients.resize(_output_size * _time_steps);
     _weights_i_to_h_gradients.resize(_hidden_size * _input_size);
     _weights_h_to_h_gradients.resize(_hidden_size * _hidden_size);
     _weights_h_to_o_gradients.resize(_output_size * _hidden_size);
     _biases_to_h_gradients.resize(_hidden_size);
     _biases_to_o_gradients.resize(_output_size);
-    _input_gradients.resize(_input_size);
+    _input_gradients.resize(_input_size * _time_steps);
 }
 
 void RecurrentLayer::init(RneType& rne)
@@ -151,18 +152,21 @@ void RecurrentLayer::init(RneType& rne)
 
 void RecurrentLayer::forward(NumType* inputs) 
 {
+    // Remember the last input data for backpropagation.
+    _last_input = inputs;
+
     NumType* curr_sequence;     //< Ptr to the current sequence to forward.
-    size_t curr_hs_idx;         //< Current hidden state index.
-    size_t next_hs_idx;         //< Next hidden state index.
+    int32_t curr_hs_idx;         //< Current hidden state index.
+    int32_t next_hs_idx;         //< Next hidden state index.
 
     NumType *tmp_mul = new NumType[_hidden_size];
 
     // Loop the time sequences.
-    for (size_t i = 0; i < _time_steps; ++i)
+    for (int32_t t = 0; t < _time_steps; ++t)
     {
-        curr_sequence = inputs + i * _input_size;
-        curr_hs_idx = i;
-        next_hs_idx = (i == (_time_steps - 1)) ? 0UL : i + 1;
+        curr_sequence = inputs + t * _input_size;
+        curr_hs_idx = t;
+        next_hs_idx = (t == (_time_steps - 1)) ? 0 : t + 1;
 
         /*
          * Compute the product of the input with its input_to_hidden weights.
@@ -171,7 +175,7 @@ void RecurrentLayer::forward(NumType* inputs)
         DLMath::matarr_mul<NumType>(
             _hidden_state.data() + next_hs_idx * _hidden_size, 
             _weights_i_to_h.data(),
-            inputs, _hidden_size, _input_size);
+            curr_sequence, _hidden_size, _input_size);
 
         /*
          * Compute the product of the hidden state with its 
@@ -190,6 +194,7 @@ void RecurrentLayer::forward(NumType* inputs)
             _hidden_state.data() + next_hs_idx * _hidden_size,
             _biases_to_h.data(), _hidden_size);
 
+        // Calculate hidden activations.
         switch (_hidden_activation)
         {
             // TODO: to test.
@@ -199,7 +204,7 @@ void RecurrentLayer::forward(NumType* inputs)
             //      * Compute the relu of the new hidden state.
             //      * h(t+1) = relu(h(t+1))
             //      */ 
-            //     DLMath::relu(
+            //     DLMath::relu<NumType>(
             //         _hidden_state.data() + next_hs_idx * _hidden_size,
             //         _hidden_state.data() + next_hs_idx * _hidden_size, 
             //         _hidden_size);
@@ -217,7 +222,7 @@ void RecurrentLayer::forward(NumType* inputs)
                  * Compute the tanh of the new hidden state.
                  * h(t+1) = tanh(h(t+1))
                  */ 
-                DLMath::tanh(
+                DLMath::tanh<NumType>(
                     _hidden_state.data() + next_hs_idx * _hidden_size,
                     _hidden_state.data() + next_hs_idx * _hidden_size, 
                     _hidden_size);
@@ -230,15 +235,16 @@ void RecurrentLayer::forward(NumType* inputs)
          * hidden_to_output weights and the sum with the to_output bias.
          * a(t) = W_ho * h(t + 1) + b_o
          */
-        DLMath::matarr_mul<NumType>(_activations.data() + i * _output_size, 
+        DLMath::matarr_mul<NumType>(_activations.data() + t * _output_size, 
             _weights_h_to_o.data(),
             _hidden_state.data() + next_hs_idx * _hidden_size, 
             _output_size, _hidden_size);
         DLMath::arr_sum<NumType>(
-            _activations.data() + i * _output_size,
-            _activations.data() + i * _output_size,
+            _activations.data() + t * _output_size,
+            _activations.data() + t * _output_size,
             _biases_to_o.data(), _output_size);
 
+        // Calculate output activations.
         switch (_output_activation)
         {
             // TODO: to test.
@@ -270,7 +276,173 @@ void RecurrentLayer::forward(NumType* inputs)
 
 void RecurrentLayer::reverse(NumType* gradients)
 {
-    
+    NumType* curr_sequence_gradients; //< Ptr to the current sequence gradients.
+    int32_t curr_hs_idx;              //< Current hidden state index.
+    int32_t prev_hs_idx;              //< Previous hidden state index.
+
+    std::vector<NumType> next_hidden_state(size_t{_hidden_size}, NumType{0.0});
+    NumType *tmp_mul = new NumType[_hidden_size];
+
+    // Loop the gradient sequences in reverse.
+    for (int32_t t = _time_steps - 1; t >= 0; --t)
+    {
+        curr_sequence_gradients = gradients + (t * _output_size);
+        curr_hs_idx = (t >= (_time_steps - 1)) ? 0 : t + 1;
+        prev_hs_idx = t;
+
+        /* 
+         * Calculate gradient of output activation and put in 
+         * _activation_gradients.
+         */
+        NumType* curr_activation_gradients = _activation_gradients.data() 
+            + (t * _output_size);
+        switch (_output_activation)
+        {
+            // TODO: to test.
+            // case OutputActivation::Softmax:
+            // {
+            //     DLMath::softmax_1_opt<NumType>(
+            //         curr_activation_gradients,
+            //         _activations.data() + t * _output_size, 
+            //         _output_size);
+            //     break;
+            // }
+            case OutputActivation::Linear:
+            default:
+            {
+                std::fill(curr_activation_gradients, 
+                    curr_activation_gradients + _output_size, NumType{1.0});
+                break;
+            }
+        }
+
+        // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
+        DLMath::arr_mul(
+            curr_activation_gradients, curr_activation_gradients,
+            curr_sequence_gradients, _output_size);
+
+        // Bias gradient to output.
+        DLMath::arr_sum(
+            _biases_to_o_gradients.data(), 
+            _biases_to_o_gradients.data(), 
+            curr_activation_gradients, _output_size);
+
+        // Weight gradient hidden to output.
+        for (size_t i = 0; i < _output_size; ++i)
+        {
+            for (size_t j = 0; j < _hidden_size; ++j)
+            {
+                _weights_h_to_o_gradients[(i * _hidden_size) + j] += 
+                    curr_activation_gradients[i] 
+                        * _hidden_state[(curr_hs_idx * _hidden_size) + j];
+            }
+        }
+
+        // Hidden state gradient for next time step gradient propagation.
+        for (size_t j = 0; j < _hidden_size; ++j)
+        {
+            tmp_mul[j] = NumType(0.0);
+            for (size_t i = 0; i < _output_size; ++i)
+            {
+                tmp_mul[j] += _weights_h_to_o[(i * _hidden_size) + j] 
+                    * curr_activation_gradients[i];
+            }
+        }
+        DLMath::arr_sum(
+            tmp_mul, 
+            tmp_mul, 
+            next_hidden_state.data(), _hidden_size);
+
+        // Calculate gradient of hidden activation and put in next_hidden_state.
+        switch (_hidden_activation)
+        {
+            // TODO: to test.
+            // case HiddenActivation::ReLU:
+            // {
+            //     DLMath::relu_1<NumType>(next_hidden_state.data(), 
+            //         _hidden_state.data() + curr_hs_idx * _hidden_size, 
+            //         _hidden_size);
+            //     break;
+            // }
+            // case HiddenActivation::Linear:
+            // {
+            //     std::fill(next_hidden_state.begin(), next_hidden_state.end(),
+            //         NumType{1.0});
+            //     break;
+            // }
+            case HiddenActivation::TanH:
+            default:
+            {
+                DLMath::tanh_1<NumType>(
+                    next_hidden_state.data(), 
+                    _hidden_state.data() + curr_hs_idx * _hidden_size, 
+                    _hidden_size);
+                break;
+            }
+        }
+        DLMath::arr_mul<NumType>(next_hidden_state.data(), 
+            next_hidden_state.data(), tmp_mul, _hidden_size);
+
+        // Bias gradient to hidden.
+        DLMath::arr_sum<NumType>(
+            _biases_to_h_gradients.data(), 
+            _biases_to_h_gradients.data(), 
+            next_hidden_state.data(), _hidden_size);
+
+        // Weight gradient input to hidden.
+        for (size_t i = 0; i < _hidden_size; ++i)
+        {
+            for (size_t j = 0; j < _input_size; ++j)
+            {
+                _weights_i_to_h_gradients[(i * _input_size) + j] += 
+                    next_hidden_state[i] * _last_input[(t * _input_size) + j];
+            }
+        }
+
+        // Weight gradient hidden to hidden.
+        for (size_t i = 0; i < _hidden_size; ++i)
+        {
+            for (size_t j = 0; j < _hidden_size; ++j)
+            {
+                _weights_h_to_h_gradients[(i * _hidden_size) + j] += 
+                    next_hidden_state[i] 
+                        * _hidden_state[(prev_hs_idx * _hidden_size) + j];
+            }
+        }
+
+        // Input gradient.
+        NumType* curr_input_gradients = _input_gradients.data() 
+            + (t * _input_size);
+        std::fill(curr_input_gradients, curr_input_gradients + _input_size, 0);
+        for (size_t i = 0; i < _hidden_size; ++i)
+        {
+            for (size_t j = 0; j < _input_size; ++j)
+            {
+                curr_input_gradients[j] += 
+                    next_hidden_state[i] 
+                        * _weights_i_to_h[(i * _input_size) + j];
+            }
+        }
+
+        // Update next hidden state for next time step.
+        for (size_t j = 0; j < _hidden_size; ++j)
+        {
+            tmp_mul[j] = NumType(0.0);
+            for (size_t i = 0; i < _hidden_size; ++i)
+            {
+                tmp_mul[j] += _weights_h_to_h[(i * _hidden_size) + j] 
+                    * next_hidden_state[i];
+            }
+        }
+        std::copy(tmp_mul, tmp_mul + _hidden_size, next_hidden_state);
+    }
+
+    delete[] tmp_mul;
+
+    for (auto *l: _antecedents)
+    {
+        l->reverse(_input_gradients.data());
+    }
 }
 
 NumType* RecurrentLayer::param(size_t index)
