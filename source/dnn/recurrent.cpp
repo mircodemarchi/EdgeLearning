@@ -59,7 +59,7 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     _biases_to_o.resize(_output_size);
 
     // The outputs of each neuron within the layer is an "activation".
-    _activations.resize(_output_size);
+    _activations.resize(_output_size * _time_steps);
 
     // The hidden state is of hidden_size for each time step of the sequences.
     _hidden_state = std::vector<NumType>(
@@ -151,7 +151,121 @@ void RecurrentLayer::init(RneType& rne)
 
 void RecurrentLayer::forward(NumType* inputs) 
 {
-    
+    NumType* curr_sequence;     //< Ptr to the current sequence to forward.
+    size_t curr_hs_idx;         //< Current hidden state index.
+    size_t next_hs_idx;         //< Next hidden state index.
+
+    NumType *tmp_mul = new NumType[_hidden_size];
+
+    // Loop the time sequences.
+    for (size_t i = 0; i < _time_steps; ++i)
+    {
+        curr_sequence = inputs + i * _input_size;
+        curr_hs_idx = i;
+        next_hs_idx = (i == (_time_steps - 1)) ? 0UL : i + 1;
+
+        /*
+         * Compute the product of the input with its input_to_hidden weights.
+         * h(t+1) = W_ih * x 
+         */
+        DLMath::matarr_mul<NumType>(
+            _hidden_state.data() + next_hs_idx * _hidden_size, 
+            _weights_i_to_h.data(),
+            inputs, _hidden_size, _input_size);
+
+        /*
+         * Compute the product of the hidden state with its 
+         * hidden_to_hidden weights and the sum with the to_hidden bias.
+         * h(t+1) += W_hh * h(t) + b_h
+         */
+        DLMath::matarr_mul<NumType>(tmp_mul, _weights_h_to_h.data(),
+            _hidden_state.data() + curr_hs_idx * _hidden_size, 
+            _hidden_size, _hidden_size);
+        DLMath::arr_sum<NumType>(
+            _hidden_state.data() + next_hs_idx * _hidden_size,
+            _hidden_state.data() + next_hs_idx * _hidden_size,
+            tmp_mul, _hidden_size);
+        DLMath::arr_sum<NumType>(
+            _hidden_state.data() + next_hs_idx * _hidden_size,
+            _hidden_state.data() + next_hs_idx * _hidden_size,
+            _biases_to_h.data(), _hidden_size);
+
+        switch (_hidden_activation)
+        {
+            // TODO: to test.
+            // case HiddenActivation::ReLU:
+            // {
+            //     /*
+            //      * Compute the relu of the new hidden state.
+            //      * h(t+1) = relu(h(t+1))
+            //      */ 
+            //     DLMath::relu(
+            //         _hidden_state.data() + next_hs_idx * _hidden_size,
+            //         _hidden_state.data() + next_hs_idx * _hidden_size, 
+            //         _hidden_size);
+            //     break;
+            // }
+            // case HiddenActivation::Linear:
+            // {
+            //     // Linear activation disables non-linear function.
+            //     break;
+            // }
+            case HiddenActivation::TanH:
+            default:
+            {
+                /*
+                 * Compute the tanh of the new hidden state.
+                 * h(t+1) = tanh(h(t+1))
+                 */ 
+                DLMath::tanh(
+                    _hidden_state.data() + next_hs_idx * _hidden_size,
+                    _hidden_state.data() + next_hs_idx * _hidden_size, 
+                    _hidden_size);
+                break;
+            }
+        }
+
+        /*
+         * Compute the product of the hidden state with the 
+         * hidden_to_output weights and the sum with the to_output bias.
+         * a(t) = W_ho * h(t + 1) + b_o
+         */
+        DLMath::matarr_mul<NumType>(_activations.data() + i * _output_size, 
+            _weights_h_to_o.data(),
+            _hidden_state.data() + next_hs_idx * _hidden_size, 
+            _output_size, _hidden_size);
+        DLMath::arr_sum<NumType>(
+            _activations.data() + i * _output_size,
+            _activations.data() + i * _output_size,
+            _biases_to_o.data(), _output_size);
+
+        switch (_output_activation)
+        {
+            // TODO: to test.
+            // case OutputActivation::Softmax:
+            // {
+            //     DLMath::softmax<NumType>(
+            //         _activations.data() + i * _output_size, 
+            //         _activations.data() + i * _output_size,
+            //         size_t(_output_size));
+            //     break;
+            // }
+            case OutputActivation::Linear:
+            default:
+            {
+                // Linear activation disables non-linear function.
+                break;
+            }
+        }
+    }
+
+    delete[] tmp_mul;
+
+    // Forward to the next layers.
+    for (auto *layer: this->_subsequents)
+    {
+        layer->forward(_activations.data());
+    }
 }
 
 void RecurrentLayer::reverse(NumType* gradients)

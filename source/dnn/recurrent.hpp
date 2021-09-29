@@ -38,12 +38,14 @@
 
 namespace Ariadne {
 
+// TODO: test softmax output activation.
 enum class OutputActivation
 {
     Linear,
-    // Softmax,
+    // Softmax, 
 };
 
+// TODO: test relu and linear hidden activation.
 enum class HiddenActivation
 {
     TanH,
@@ -105,6 +107,7 @@ public:
         _time_steps = time_steps;
         _hidden_state.resize(
             _hidden_size * std::max(_time_steps, uint16_t(1U)));
+        _activations.resize(_output_size * _time_steps);
     }
 
     void reset_hidden_state()
