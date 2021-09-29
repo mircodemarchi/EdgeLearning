@@ -334,7 +334,7 @@ void RecurrentLayer::reverse(NumType* gradients)
             {
                 _weights_h_to_o_gradients[(i * _hidden_size) + j] += 
                     curr_activation_gradients[i] 
-                        * _hidden_state[(curr_hs_idx * _hidden_size) + j];
+                    * _hidden_state[(size_t(curr_hs_idx) * _hidden_size) + j];
             }
         }
 
@@ -395,7 +395,8 @@ void RecurrentLayer::reverse(NumType* gradients)
             for (size_t j = 0; j < _input_size; ++j)
             {
                 _weights_i_to_h_gradients[(i * _input_size) + j] += 
-                    next_hidden_state[i] * _last_input[(t * _input_size) + j];
+                    next_hidden_state[i] 
+                    * _last_input[(size_t(t) * _input_size) + j];
             }
         }
 
@@ -406,7 +407,7 @@ void RecurrentLayer::reverse(NumType* gradients)
             {
                 _weights_h_to_h_gradients[(i * _hidden_size) + j] += 
                     next_hidden_state[i] 
-                        * _hidden_state[(prev_hs_idx * _hidden_size) + j];
+                    * _hidden_state[(size_t(prev_hs_idx) * _hidden_size) + j];
             }
         }
 
@@ -434,7 +435,8 @@ void RecurrentLayer::reverse(NumType* gradients)
                     * next_hidden_state[i];
             }
         }
-        std::copy(tmp_mul, tmp_mul + _hidden_size, next_hidden_state);
+        next_hidden_state = std::vector<NumType>(tmp_mul, 
+            tmp_mul + _hidden_size);
     }
 
     delete[] tmp_mul;
