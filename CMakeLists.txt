@@ -56,9 +56,6 @@ include(CTest)
 set(ENABLE_MLPACK false CACHE BOOL "Enable MLPACK library. Warning: not supported.")
 add_definitions(-DENABLE_MLPACK=${ENABLE_MLPACK})
 
-# Find Ariadne. TODO: uncomment the following line.
-# find_package(Ariadne REQUIRED)
-
 # Find MLPACK and dependencies
 message(STATUS "MLPACK enabled: ${ENABLE_MLPACK}")
 find_package(Armadillo 8.400.0 QUIET)
