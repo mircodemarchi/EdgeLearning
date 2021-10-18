@@ -72,7 +72,7 @@ private:
         // Model definition.
         DenseLayer* input_layer;
         CCELossLayer* loss_layer;
-        GDOptimizer o{NumType{0.3}};
+        GDOptimizer o{NumType{0.5}};
         Model m = TestModel::_create_binary_classifier_model(&input_layer, 
             &loss_layer);
         m.init();
@@ -146,7 +146,7 @@ private:
         // Model definition.
         DenseLayer* input_layer;
         MSELossLayer* loss_layer;
-        GDOptimizer o{NumType{0.3}};
+        GDOptimizer o{NumType{0.01}};
         Model m = TestModel::_create_regressor_model(&input_layer, 
             &loss_layer);
         m.init();
