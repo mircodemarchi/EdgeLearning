@@ -1,4 +1,4 @@
-set(LIBRARY_NAME ariadnedl-dnn)
+set(LIBRARY_NAME edgelearning-dnn)
 
 add_library(${LIBRARY_NAME} OBJECT
     layer.cpp

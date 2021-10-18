@@ -1,4 +1,4 @@
-# Documentation for AriadneDL
+# Documentation for EdgeLearning
 
 - [x] Introduction: brief explanation of project motivations;
 - [x] Project Requirements: what exactly the project need to be complete;

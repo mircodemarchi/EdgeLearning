@@ -6,27 +6,27 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of EdgeLearning.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  EdgeLearning is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  EdgeLearning is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "mse_loss.hpp"
 
 #include "dlmath.hpp"
 
-namespace Ariadne {
+namespace EdgeLearning {
 
 MSELossLayer::MSELossLayer(Model& model, std::string name, 
     uint16_t input_size, size_t batch_size, NumType loss_tolerance)
@@ -104,4 +104,4 @@ void MSELossLayer::reset_score()
 }
 
 
-} // namespace Ariadne
+} // namespace EdgeLearning

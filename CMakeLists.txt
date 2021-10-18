@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 message(STATUS "CMake version ${CMAKE_VERSION}")
 
-project(AriadneDL VERSION 0.1)
+project(EdgeLearning VERSION 0.1)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     message(WARNING "Intel compiler not supported.")
@@ -80,17 +80,17 @@ endif()
 add_subdirectory(source)
 add_subdirectory(tests)
 
-add_library(ariadnedl SHARED
-    $<TARGET_OBJECTS:ariadnedl-parser>
-    $<TARGET_OBJECTS:ariadnedl-dnn>
-    $<TARGET_OBJECTS:ariadnedl-middleware>
+add_library(edgelearning SHARED
+    $<TARGET_OBJECTS:edgelearning-parser>
+    $<TARGET_OBJECTS:edgelearning-dnn>
+    $<TARGET_OBJECTS:edgelearning-middleware>
 )
 
-target_link_libraries(ariadnedl dl)
+target_link_libraries(edgelearning dl)
 if(ENABLE_MLPACK)
-    target_link_libraries(ariadnedl ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
+    target_link_libraries(edgelearning ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
 endif()
 
 if(COVERAGE)
-    target_link_libraries(ariadnedl coverage_config)
+    target_link_libraries(edgelearning coverage_config)
 endif()

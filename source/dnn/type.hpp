@@ -6,32 +6,32 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of EdgeLearning.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  EdgeLearning is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  EdgeLearning is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file type.hpp
  *  \brief Simply replace me.
  */
 
-#ifndef ARIADNE_DNN_TYPE_HPP
-#define ARIADNE_DNN_TYPE_HPP
+#ifndef EDGE_LEARNING_DNN_TYPE_HPP
+#define EDGE_LEARNING_DNN_TYPE_HPP
 
 #include <random>
 
-namespace Ariadne {
+namespace EdgeLearning {
 
 using NumType = double;
 
@@ -41,6 +41,6 @@ using NumType = double;
  */
 using RneType = std::mt19937_64;
 
-} // namespace Ariadne
+} // namespace EdgeLearning
 
-#endif // ARIADNE_DNN_TYPE_HPP
+#endif // EDGE_LEARNING_DNN_TYPE_HPP

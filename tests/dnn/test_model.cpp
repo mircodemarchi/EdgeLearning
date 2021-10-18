@@ -6,20 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of EdgeLearning.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  EdgeLearning is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  EdgeLearning is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "test.hpp"
@@ -34,16 +34,16 @@
 #include <filesystem>
 
 using namespace std;
-using namespace Ariadne;
+using namespace EdgeLearning;
 
 class TestModel {
 public:
     void test() {
-        ARIADNE_TEST_CALL(test_classifier_model());
-        ARIADNE_TEST_CALL(test_classifier_model_predict());
-        ARIADNE_TEST_CALL(test_regressor_model());
-        ARIADNE_TEST_CALL(test_regressor_model_predict());
-        ARIADNE_TEST_CALL(test_recurisive_model());
+        EDGE_LEARNING_TEST_CALL(test_classifier_model());
+        EDGE_LEARNING_TEST_CALL(test_classifier_model_predict());
+        EDGE_LEARNING_TEST_CALL(test_regressor_model());
+        EDGE_LEARNING_TEST_CALL(test_regressor_model_predict());
+        EDGE_LEARNING_TEST_CALL(test_recurisive_model());
     }
 
 private:
@@ -297,5 +297,5 @@ private:
 
 int main() {
     TestModel().test();
-    return ARIADNE_TEST_FAILURES;
+    return EDGE_LEARNING_TEST_FAILURES;
 }

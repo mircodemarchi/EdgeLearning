@@ -6,20 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of EdgeLearning.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  EdgeLearning is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  EdgeLearning is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "test.hpp"
@@ -34,26 +34,26 @@
 #include <random>
 
 using namespace std;
-using namespace Ariadne;
+using namespace EdgeLearning;
 
 class TestDLMath {
 public:
     void test() {
-        ARIADNE_TEST_CALL(test_normal_pdf());
-        ARIADNE_TEST_CALL(test_arr_sum());
-        ARIADNE_TEST_CALL(test_arr_mul());
-        ARIADNE_TEST_CALL(test_matarr_mul());
-        ARIADNE_TEST_CALL(test_relu());
-        ARIADNE_TEST_CALL(test_softmax());
-        ARIADNE_TEST_CALL(test_relu_1());
-        ARIADNE_TEST_CALL(test_softmax_1());
-        ARIADNE_TEST_CALL(test_cross_entropy());
-        ARIADNE_TEST_CALL(test_cross_entropy_1());
-        ARIADNE_TEST_CALL(test_mean_squared_error());
-        ARIADNE_TEST_CALL(test_mean_squared_error_1());
-        ARIADNE_TEST_CALL(test_max_argmax());
-        ARIADNE_TEST_CALL(test_tanh());
-        ARIADNE_TEST_CALL(test_tanh_1());
+        EDGE_LEARNING_TEST_CALL(test_normal_pdf());
+        EDGE_LEARNING_TEST_CALL(test_arr_sum());
+        EDGE_LEARNING_TEST_CALL(test_arr_mul());
+        EDGE_LEARNING_TEST_CALL(test_matarr_mul());
+        EDGE_LEARNING_TEST_CALL(test_relu());
+        EDGE_LEARNING_TEST_CALL(test_softmax());
+        EDGE_LEARNING_TEST_CALL(test_relu_1());
+        EDGE_LEARNING_TEST_CALL(test_softmax_1());
+        EDGE_LEARNING_TEST_CALL(test_cross_entropy());
+        EDGE_LEARNING_TEST_CALL(test_cross_entropy_1());
+        EDGE_LEARNING_TEST_CALL(test_mean_squared_error());
+        EDGE_LEARNING_TEST_CALL(test_mean_squared_error_1());
+        EDGE_LEARNING_TEST_CALL(test_max_argmax());
+        EDGE_LEARNING_TEST_CALL(test_tanh());
+        EDGE_LEARNING_TEST_CALL(test_tanh_1());
     }
 
 private:
@@ -65,7 +65,7 @@ private:
         auto dist = DLMath::normal_pdf<NumType>(0.0, 0.1);
         for (size_t i = 0; i < PRINT_TIMES; ++i)
         {
-            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(dist(generator)));
         }
 
@@ -83,7 +83,7 @@ private:
                 ++lt1_count;
             }
         }
-        ARIADNE_TEST_PRINT("Normal distribution >0 count similar to <=0 count:"
+        EDGE_LEARNING_TEST_PRINT("Normal distribution >0 count similar to <=0 count:"
             + std::to_string(gt1_count) + ", " + std::to_string(lt1_count));
     }
 
@@ -95,7 +95,7 @@ private:
             test_vec2.data(), test_vec1.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_EQUAL(test_vec1[i], truth_vec[i]);
+            EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
         }
     }
 
@@ -107,7 +107,7 @@ private:
             test_vec2.data(), test_vec1.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_EQUAL(test_vec1[i], truth_vec[i]);
+            EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
         }
     }
 
@@ -115,7 +115,7 @@ private:
         std::vector<int> test_mat{1,2,3,4};
         std::vector<int> test_vec{1,2};
         std::vector<int> truth_vec{5,11};
-        ARIADNE_TEST_FAIL(
+        EDGE_LEARNING_TEST_FAIL(
             DLMath::matarr_mul<int>(test_vec.data(), test_mat.data(), 
                                     test_vec.data(), 2, 2)
         );
@@ -124,7 +124,7 @@ private:
                                 test_vec.data(), 2, 2);
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_EQUAL(res_vec[i], truth_vec[i]);
+            EDGE_LEARNING_TEST_EQUAL(res_vec[i], truth_vec[i]);
         }
     }
 
@@ -135,9 +135,9 @@ private:
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
-            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
         }
     }
 
@@ -151,9 +151,9 @@ private:
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
-            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
         }
     }
 
@@ -164,17 +164,17 @@ private:
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
-            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
         }
     }
 
     void test_softmax_1() {
         std::vector<NumType> test_vec{-2.0,-1.0,0.0,1.0,2.0};
-        ARIADNE_TEST_FAIL(DLMath::softmax_1_opt<NumType>(test_vec.data(), 
+        EDGE_LEARNING_TEST_FAIL(DLMath::softmax_1_opt<NumType>(test_vec.data(), 
             test_vec.data(), test_vec.size()));
-        ARIADNE_TEST_EXECUTE(DLMath::softmax_1<NumType>(test_vec.data(), 
+        EDGE_LEARNING_TEST_EXECUTE(DLMath::softmax_1<NumType>(test_vec.data(), 
             test_vec.data(), test_vec.size()));
         for (size_t i = 0; i < test_vec.size(); ++i)
         {
@@ -189,12 +189,12 @@ private:
         NumType truth_ce = 0.6931471805599453;
         auto ret = DLMath::cross_entropy(test_y.data(), test_y_hat.data(), 
             test_y_hat.size());
-        ARIADNE_TEST_WITHIN(ret, truth_ce, 0.00000000001);
+        EDGE_LEARNING_TEST_WITHIN(ret, truth_ce, 0.00000000001);
 
         NumType test_val = 0.5;
         NumType truth_val = 0.34657359027997264;
         ret = DLMath::cross_entropy(test_val, test_val);
-        ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
+        EDGE_LEARNING_TEST_WITHIN(ret, truth_val, 0.00000000001);
     }
 
     void test_cross_entropy_1() {
@@ -206,28 +206,28 @@ private:
             test_y_hat.data(), 1.0, test_y_hat.size());
         for (size_t i = 0; i < truth_ce1.size(); ++i)
         {
-            ARIADNE_TEST_WITHIN(ret_vec[i], truth_ce1[i], 0.00000000001);
+            EDGE_LEARNING_TEST_WITHIN(ret_vec[i], truth_ce1[i], 0.00000000001);
         }
         
 
         NumType test_val = 0.5;
         NumType truth_val = -1.0;
         auto ret_val = DLMath::cross_entropy_1(test_val, test_val, 1.0);
-        ARIADNE_TEST_WITHIN(ret_val, truth_val, 0.00000000001);
+        EDGE_LEARNING_TEST_WITHIN(ret_val, truth_val, 0.00000000001);
     }
 
     void test_mean_squared_error() {
         NumType test_val = 1.0;
         NumType truth_val = 0.0;
         auto ret = DLMath::squared_error(test_val, test_val);
-        ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
+        EDGE_LEARNING_TEST_WITHIN(ret, truth_val, 0.00000000001);
 
         std::vector<NumType> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
         std::vector<NumType> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
         NumType truth_mse = 0.272;
         ret = DLMath::mean_squared_error(test_y.data(), test_y_hat.data(), 
             test_y_hat.size());
-        ARIADNE_TEST_WITHIN(ret, truth_mse, 0.00000000001);
+        EDGE_LEARNING_TEST_WITHIN(ret, truth_mse, 0.00000000001);
     }
 
     void test_mean_squared_error_1() {
@@ -235,7 +235,7 @@ private:
         NumType test_val2 = 1.5;
         NumType truth_val = 0.5;
         auto ret = DLMath::squared_error_1(test_val1, test_val2, 0.5);
-        ARIADNE_TEST_WITHIN(ret, truth_val, 0.00000000001);
+        EDGE_LEARNING_TEST_WITHIN(ret, truth_val, 0.00000000001);
 
         std::vector<NumType> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
         std::vector<NumType> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
@@ -245,7 +245,7 @@ private:
             test_y_hat.data(), 1.0, test_y_hat.size());
         for (size_t i = 0; i < truth_mse1.size(); ++i)
         {
-            ARIADNE_TEST_WITHIN(ret_vec[i], truth_mse1[i], 0.00000000001);
+            EDGE_LEARNING_TEST_WITHIN(ret_vec[i], truth_mse1[i], 0.00000000001);
         }
     }
 
@@ -253,17 +253,17 @@ private:
         std::vector<NumType> test_vec{0,1,5,4,3};
         NumType truth_max = 5;
         NumType ret_max = DLMath::max<NumType>(test_vec.data(), test_vec.size());
-        ARIADNE_TEST_EQUAL(ret_max, truth_max);
+        EDGE_LEARNING_TEST_EQUAL(ret_max, truth_max);
 
         NumType truth_argmax = 2;
         NumType ret_argmax = DLMath::argmax<NumType>(test_vec.data(), 
             test_vec.size());
-        ARIADNE_TEST_EQUAL(ret_argmax, truth_argmax);
+        EDGE_LEARNING_TEST_EQUAL(ret_argmax, truth_argmax);
 
         auto ret_tuple = DLMath::max_and_argmax<NumType>(test_vec.data(), 
             test_vec.size());
-        ARIADNE_TEST_EQUAL(std::get<0>(ret_tuple), truth_max);
-        ARIADNE_TEST_EQUAL(std::get<1>(ret_tuple), truth_argmax);
+        EDGE_LEARNING_TEST_EQUAL(std::get<0>(ret_tuple), truth_max);
+        EDGE_LEARNING_TEST_EQUAL(std::get<1>(ret_tuple), truth_argmax);
     }
 
     void test_tanh() {
@@ -273,9 +273,9 @@ private:
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
-            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
         }
     }
 
@@ -287,14 +287,14 @@ private:
             test_vec.size());
         for (size_t i = 0; i < truth_vec.size(); ++i)
         {
-            ARIADNE_TEST_PRINT(std::to_string(i) + ": " 
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
-            ARIADNE_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
         }
     }
 };
 
 int main() {
     TestDLMath().test();
-    return ARIADNE_TEST_FAILURES;
+    return EDGE_LEARNING_TEST_FAILURES;
 }

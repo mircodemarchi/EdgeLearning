@@ -6,35 +6,35 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of EdgeLearning.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  EdgeLearning is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  EdgeLearning is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file mse_loss.hpp
  *  \brief Mean Squared Error Loss layer.
  */
 
-#ifndef ARIADNE_DNN_MSE_LOSS_HPP
-#define ARIADNE_DNN_MSE_LOSS_HPP
+#ifndef EDGE_LEARNING_DNN_MSE_LOSS_HPP
+#define EDGE_LEARNING_DNN_MSE_LOSS_HPP
 
 #include "layer.hpp"
 #include "model.hpp"
 
 #include <string>
 
-namespace Ariadne {
+namespace EdgeLearning {
 
 class MSELossLayer : public Layer {
 public:
@@ -87,6 +87,6 @@ private:
     size_t _incorrect{0};
 };
 
-} // namespace Ariadne
+} // namespace EdgeLearning
  
-#endif // ARIADNE_DNN_MSE_LOSS_HPP
+#endif // EDGE_LEARNING_DNN_MSE_LOSS_HPP

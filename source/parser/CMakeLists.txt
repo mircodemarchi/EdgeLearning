@@ -1,4 +1,4 @@
-set(LIBRARY_NAME ariadnedl-parser)
+set(LIBRARY_NAME edgelearning-parser)
 
 add_library(${LIBRARY_NAME} OBJECT
     csv.cpp

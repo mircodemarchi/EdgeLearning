@@ -6,28 +6,28 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of EdgeLearning.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  EdgeLearning is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  EdgeLearning is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file csv.hpp
  *  \brief CSV Parser header.
  */
 
-#ifndef ARIADNE_PARSER_CSV_HPP
-#define ARIADNE_PARSER_CSV_HPP
+#ifndef EDGE_LEARNING_PARSER_CSV_HPP
+#define EDGE_LEARNING_PARSER_CSV_HPP
 
 #include "parser.hpp"
 
@@ -36,7 +36,7 @@
 #include <cstddef>
 
 
-namespace Ariadne {
+namespace EdgeLearning {
 
 class CSVField
 {
@@ -185,6 +185,6 @@ private:
 };
 
 
-} // namespace Ariadne
+} // namespace EdgeLearning
 
-#endif // ARIADNE_REPLACEME_HPP
+#endif // EDGE_LEARNING_REPLACEME_HPP
