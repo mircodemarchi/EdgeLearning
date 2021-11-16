@@ -74,11 +74,7 @@ public:
         return parse(fields);
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Parser& obj) 
-    {
-        (void) obj;
-        return os;
-    }
+    friend std::ostream& operator<<(std::ostream& os, const Parser& obj);
 
 protected:
     static ParserType parse(const std::string &field);

@@ -47,13 +47,13 @@ public:
     ~CSVField() = default;
 
     template<typename T>
-    void as(T *ptr)
+    void as(T *ptr) const
     {
         convert(this->_field, ptr);
     }
 
     template<typename T>
-    T as()
+    T as() const
     {
         T ret;
         convert(this->_field, &ret);
@@ -84,14 +84,18 @@ public:
     CSVRow(const CSVRow &obj);
     ~CSVRow() = default;
 
+    bool operator==(const CSVRow& rhs) const;
+    bool operator!=(const CSVRow& rhs) const;
+
     CSVField operator[](size_t idx) const;
     CSVRow& operator=(const CSVRow &obj);
     friend std::ostream& operator<<(std::ostream& stream, const CSVRow& obj);
-    operator std::vector<std::string>();
-    operator std::vector<CSVField>();
+    operator std::vector<std::string>() const;
+    operator std::vector<CSVField>() const;
+    operator std::string() const;
 
     template<typename T>
-    operator std::vector<T>()
+    operator std::vector<T>() const
     {
         std::vector<T> ret{};
         std::stringstream ss{_line};
@@ -106,10 +110,17 @@ public:
         return ret;
     }
 
+    template<typename T>
+    std::vector<T> to_vec() const
+    {
+        return operator std::vector<T>();
+    }
+
     size_t size() const { return _cols_amount; }
     bool empty() const { return _cols_amount == 0; }
     const std::vector<ParserType> &types() const { return _types; } 
     size_t idx() const { return _idx; }
+    std::string line() const { return _line; }
 
 private:
     std::string _line;
@@ -161,17 +172,46 @@ public:
     const CSVRow &header() const { return _row_header; }
     const std::vector<ParserType> &types() const { return _types; }
 
-    const CSVRow &operator[](size_t idx);
+    CSVRow operator[](size_t idx);
 
-    CSVIterator begin() 
+    CSVIterator begin()
     { 
         return CSVIterator{_fn, 1, _cols_amount, _types, _separator}; 
     }
     
-    CSVIterator end()   
+    CSVIterator end()
     { 
         return CSVIterator{_fn, _rows_amount - 1, _cols_amount, _types, 
                            _separator}; 
+    }
+
+    operator std::vector<std::string>() const;
+    operator std::vector<CSVRow>();
+
+    template<typename T>
+    operator std::vector<std::vector<T>>()
+    {
+        std::vector<std::vector<T>> ret;
+        ret.resize(_rows_amount);
+
+        auto file = std::ifstream{_fn};
+        std::string line;
+        for (size_t i = 0; i < _rows_amount; ++i)
+        {
+            if (!std::getline(file, line)) break;
+            ret[i] = std::vector<T>(
+                CSVRow{line, i, _cols_amount, _types, _separator}
+            );
+        }
+
+        file.close();
+        return ret;
+    }
+
+    template<typename T>
+    std::vector<std::vector<T>> to_vec()
+    {
+        return operator std::vector<std::vector<T>>();
     }
 
 private:

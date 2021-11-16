@@ -97,6 +97,16 @@ CSVRow::CSVRow(const CSVRow &obj)
 
 }
 
+bool CSVRow::operator==(const CSVRow& rhs) const
+{
+    return _line == rhs._line;
+}
+
+bool CSVRow::operator!=(const CSVRow& rhs) const
+{
+    return _line != rhs._line;
+}
+
 CSVField CSVRow::operator[](size_t idx) const
 {
     if (idx >= this->_cols_amount)
@@ -137,7 +147,7 @@ std::ostream& operator<<(std::ostream& stream, const CSVRow& obj)
     return stream;
 }
 
-CSVRow::operator std::vector<std::string>()
+CSVRow::operator std::vector<std::string>() const
 {
     std::vector<std::string> ret{};
     std::stringstream ss{_line};
@@ -150,7 +160,7 @@ CSVRow::operator std::vector<std::string>()
     return ret;
 }
 
-CSVRow::operator std::vector<CSVField>()
+CSVRow::operator std::vector<CSVField>() const
 {
     std::vector<CSVField> ret{};
     std::stringstream ss{_line};
@@ -161,6 +171,11 @@ CSVRow::operator std::vector<CSVField>()
         ret.push_back(CSVField{s, _types.at(i), i});
     }
     return ret;
+}
+
+CSVRow::operator std::string() const
+{
+    return _line;
 }
 
 CSVIterator::CSVIterator(std::string fn, size_t idx, size_t cols_amount,
@@ -295,7 +310,7 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
     file.close();
 }
 
-const CSVRow &CSV::operator[](size_t idx)
+CSVRow CSV::operator[](size_t idx)
 {
     // Manage row saved in cache.
     if (_row_cache.idx() == idx) return _row_cache;
@@ -313,7 +328,39 @@ const CSVRow &CSV::operator[](size_t idx)
     std::getline(file, line);
     _row_cache = CSVRow{line, idx, _cols_amount, _types, _separator};
     file.close();
-    return _row_cache;
+    return CSVRow{_row_cache};
+}
+
+CSV::operator std::vector<std::string>() const
+{
+    std::vector<std::string> ret;
+
+    auto file = std::ifstream{_fn};
+    std::string line;
+    for (size_t i = 0; i < _rows_amount; ++i)
+    {
+        if (!std::getline(file, line)) break;
+        ret.push_back(line);
+    }
+
+    file.close();
+    return ret;
+}
+
+CSV::operator std::vector<CSVRow>()
+{
+    std::vector<CSVRow> ret;
+
+    auto file = std::ifstream{_fn};
+    std::string line;
+    for (size_t i = 0; i < _rows_amount; ++i)
+    {
+        if (!std::getline(file, line)) break;
+        ret.push_back(CSVRow{line, i, _cols_amount, _types, _separator});
+    }
+
+    file.close();
+    return ret;
 }
 
 } // namespace EdgeLearning
