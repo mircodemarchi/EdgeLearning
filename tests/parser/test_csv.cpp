@@ -78,7 +78,7 @@ private:
     }
 
     void test_csv_row() {
-        auto types = std::vector<ParserType> {ParserType::AUTO};
+        auto types = std::vector<ParserType>{ParserType::AUTO};
         auto csv_row = CSVRow("10,1.3,edge_learning,true", 0, 4, types, ',');
 
         EDGE_LEARNING_TEST_PRINT(csv_row);
@@ -89,6 +89,19 @@ private:
         EDGE_LEARNING_TEST_FAIL(csv_row[4]);
         EDGE_LEARNING_TEST_EXECUTE(auto v = std::vector<float>(csv_row));
         EDGE_LEARNING_TEST_PRINT(std::vector<float>(csv_row).at(2));
+        EDGE_LEARNING_TEST_WITHIN(
+            std::vector<float>(csv_row).at(2), csv_row[2].as<float>(), 
+            0.0000001);
+        EDGE_LEARNING_TEST_EQUAL(
+            csv_row.to_vec<float>().size(), csv_row.size());
+        EDGE_LEARNING_TEST_EQUAL(std::string(csv_row), csv_row.line());
+
+        auto csv_row_compare = CSVRow(
+            "10,1.3,edge_learning,true", 10, 4, types, ',');
+        EDGE_LEARNING_TEST_EQUAL(csv_row, csv_row_compare);
+        auto csv_row_compare_not_equal = CSVRow(
+            "10,1.3,edge_learning,true,notequal", 0, 4, types, ',');
+        EDGE_LEARNING_TEST_NOT_EQUAL(csv_row, csv_row_compare_not_equal);
 
         EDGE_LEARNING_TEST_EQUAL(csv_row.empty(), false);
         EDGE_LEARNING_TEST_EQUAL(csv_row.size(),  4);
@@ -134,6 +147,11 @@ private:
         EDGE_LEARNING_TEST_EQUAL(csv.header().size(), csv.cols_size());
         EDGE_LEARNING_TEST_EQUAL(csv.header().types(), types_groundtruth);
         EDGE_LEARNING_TEST_EQUAL(csv.header().idx(), 0);
+        EDGE_LEARNING_TEST_EQUAL(csv.header(), csv[0]);
+        EDGE_LEARNING_TEST_EQUAL(csv.header(), csv[0]);
+        EDGE_LEARNING_TEST_NOT_EQUAL(csv.header(), csv[1]);
+        EDGE_LEARNING_TEST_EQUAL(csv[1], csv[1]);
+        EDGE_LEARNING_TEST_NOT_EQUAL(csv[1], csv[2]);
     
         EDGE_LEARNING_TEST_PRINT(csv[1]);
         EDGE_LEARNING_TEST_ASSERT(!csv[1].empty());
@@ -159,6 +177,23 @@ private:
         csv = CSV(data_training_fp.string(), 
             std::vector<ParserType>{6, ParserType::FLOAT});
         EDGE_LEARNING_TEST_NOT_EQUAL(csv.types(), types_groundtruth);
+
+        EDGE_LEARNING_TEST_EXECUTE(
+            auto v = std::vector<std::vector<float>>(csv));
+        EDGE_LEARNING_TEST_EQUAL(csv.to_vec<float>().size(), csv.rows_size());
+        EDGE_LEARNING_TEST_EQUAL(csv.to_vec<float>()[0].size(), 
+            csv.cols_size());
+
+        EDGE_LEARNING_TEST_EXECUTE(auto v = std::vector<std::string>(csv));
+        EDGE_LEARNING_TEST_EQUAL(
+            std::vector<std::string>(csv).size(), csv.rows_size());
+        EDGE_LEARNING_TEST_EQUAL(
+            std::vector<std::string>(csv)[0], std::string(csv[0]));
+
+        EDGE_LEARNING_TEST_EXECUTE(auto v = std::vector<CSVRow>(csv));
+        EDGE_LEARNING_TEST_EQUAL(std::vector<CSVRow>(csv).size(), 
+            csv.rows_size());
+        EDGE_LEARNING_TEST_EQUAL(std::vector<CSVRow>(csv)[1], csv[1]);
     }
 
     void test_csv_iterator(const size_t num_lines) {
