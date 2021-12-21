@@ -38,51 +38,51 @@
 
 namespace EdgeLearning {
 
-class CSVField
+class CSVField : public Parser
 {
     friend class CSVRow;
 
 public:
-    CSVField(std::string field, ParserType &type, size_t col_index);
-    ~CSVField() = default;
+    CSVField(std::string field, Type &type, size_t col_index);
+    ~CSVField() {};
 
     template<typename T>
     void as(T *ptr) const
     {
-        convert(this->_field, ptr);
+        _tc(_field, ptr);
     }
 
     template<typename T>
     T as() const
     {
         T ret;
-        convert(this->_field, &ret);
+        _tc(_field, &ret);
         return ret;
     }
 
-    const ParserType &type() const { return _type; }
+    const Type &type() const { return _type; }
     size_t idx() const { return _col_index; }
 
 private:
     std::string _field;
-    ParserType &_type;
+    Type &_type;
     size_t _col_index;
 };
 
 
-class CSVRow 
+class CSVRow : public Parser
 {
     friend class CSV;
     friend class CSVIterator;
 
 public:
     CSVRow(std::string line, size_t row_idx, size_t cols_amount,  
-        std::vector<ParserType> &types, char separator = ',');
-    CSVRow(std::string line, size_t row_idx, std::vector<ParserType> &types, 
+        std::vector<Type> &types, char separator = ',');
+    CSVRow(std::string line, size_t row_idx, std::vector<Type> &types, 
         char separator = ',');
-    CSVRow(std::vector<ParserType> &types, char separator = ',');
+    CSVRow(std::vector<Type> &types, char separator = ',');
     CSVRow(const CSVRow &obj);
-    ~CSVRow() = default;
+    ~CSVRow() {};
 
     bool operator==(const CSVRow& rhs) const;
     bool operator!=(const CSVRow& rhs) const;
@@ -104,7 +104,7 @@ public:
             std::string s;
             std::getline(ss, s, _separator);
             T t;
-            convert(s, &t);
+            _tc(s, &t);
             ret.push_back(t);
         }
         return ret;
@@ -118,7 +118,7 @@ public:
 
     size_t size() const { return _cols_amount; }
     bool empty() const { return _cols_amount == 0; }
-    const std::vector<ParserType> &types() const { return _types; } 
+    const std::vector<Type> &types() const { return _types; } 
     size_t idx() const { return _idx; }
     std::string line() const { return _line; }
 
@@ -126,7 +126,7 @@ private:
     std::string _line;
     size_t _idx;
     size_t _cols_amount;
-    std::vector<ParserType> &_types;
+    std::vector<Type> &_types;
     char _separator;
 };
 
@@ -137,7 +137,7 @@ class CSVIterator
 
 public:
     CSVIterator(std::string fn, size_t idx, size_t cols_amount,
-        std::vector<ParserType> &types, char separator = ',');
+        std::vector<Type> &types, char separator = ',');
     CSVIterator(const CSVIterator &obj);
     ~CSVIterator();
 
@@ -163,14 +163,14 @@ private:
 class CSV : public Parser
 {
 public:
-    CSV(std::string fn, std::vector<ParserType> types = { ParserType::AUTO }, 
+    CSV(std::string fn, std::vector<Type> types = { Type::AUTO }, 
         char separator = ',');
-    ~CSV() = default;
+    ~CSV() {};
 
     size_t cols_size() const { return _cols_amount; }
     size_t rows_size() const { return _rows_amount; }
     const CSVRow &header() const { return _row_header; }
-    const std::vector<ParserType> &types() const { return _types; }
+    const std::vector<Type> &types() const { return _types; }
 
     CSVRow operator[](size_t idx);
 
@@ -216,7 +216,7 @@ public:
 
 private:
     std::string _fn;
-    std::vector<ParserType> _types;
+    std::vector<Type> _types;
     CSVRow _row_header;
     CSVRow _row_cache;
     size_t _cols_amount;

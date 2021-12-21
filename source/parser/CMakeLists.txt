@@ -2,7 +2,6 @@ set(LIBRARY_NAME edgelearning-parser)
 
 add_library(${LIBRARY_NAME} OBJECT
     csv.cpp
-    parser.cpp
 )
 
 if(COVERAGE)

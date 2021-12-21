@@ -36,43 +36,43 @@
 
 namespace EdgeLearning {
 
-CSVField::CSVField(std::string field, ParserType &type, size_t col_index)
-    : _field{field}
+CSVField::CSVField(std::string field, Type &type, size_t col_index)
+    : Parser()
+    , _field{field}
     , _type{type}
     , _col_index{col_index}
 {
-    if (_type == ParserType::AUTO)
+    if (_type == Type::AUTO)
     {
-        auto p = Parser();
-        _type = p(_field);
+        _type = _tc(_field);
     }
 }
 
 CSVRow::CSVRow(std::string line, size_t row_idx, size_t cols_amount, 
-    std::vector<ParserType> &types, char separator)
-    : _line{line}
+    std::vector<Type> &types, char separator)
+    : Parser()
+    , _line{line}
     , _idx{row_idx}
     , _cols_amount{cols_amount}
     , _types{types}
     , _separator{separator}
 {
-    if((std::find(types.begin(), types.end(), ParserType::AUTO) != types.end())
+    if((std::find(types.begin(), types.end(), Type::AUTO) != types.end())
         || types.size() == 0
         || types.size() != cols_amount) 
     {
         std::stringstream ss{line};
-        auto p = Parser();
-        _types = std::vector<ParserType>{};
+        _types = std::vector<Type>{};
         for (size_t i = 0; i < cols_amount; ++i)
         {
             std::string s;
             std::getline(ss, s, separator);
-            _types.push_back(p(s));
+            _types.push_back(_tc(s));
         }
     }
 }
 
-CSVRow::CSVRow(std::string line, size_t row_idx, std::vector<ParserType> &types, 
+CSVRow::CSVRow(std::string line, size_t row_idx, std::vector<Type> &types, 
     char separator) 
     : CSVRow{line, row_idx,
         static_cast<size_t>(std::count(line.begin(), line.end(), separator)+1), 
@@ -81,7 +81,7 @@ CSVRow::CSVRow(std::string line, size_t row_idx, std::vector<ParserType> &types,
 
 }
 
-CSVRow::CSVRow(std::vector<ParserType> &types, char separator)
+CSVRow::CSVRow(std::vector<Type> &types, char separator)
     : CSVRow{std::string{}, size_t{}, size_t{0}, types, separator}
 {
 
@@ -179,7 +179,7 @@ CSVRow::operator std::string() const
 }
 
 CSVIterator::CSVIterator(std::string fn, size_t idx, size_t cols_amount,
-    std::vector<ParserType> &types, char separator)
+    std::vector<Type> &types, char separator)
     : _fn{fn}
     , _row{types, separator}
     , _is_stream_updated{false}
@@ -257,7 +257,7 @@ void CSVIterator::update_row()
     std::getline(_stream, _row._line);
 }
 
-CSV::CSV(std::string fn, std::vector<ParserType> types, char separator) 
+CSV::CSV(std::string fn, std::vector<Type> types, char separator) 
     : Parser()
     , _fn{fn}
     , _types{types}
@@ -288,7 +288,7 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
     _cols_amount = static_cast<size_t>(
         std::count(header.begin(), header.end(), separator)+1);
 
-    if((std::find(types.begin(), types.end(), ParserType::AUTO) != types.end())
+    if((std::find(types.begin(), types.end(), Type::AUTO) != types.end())
         || types.size() == 0
         || types.size() != _cols_amount) 
     {
@@ -297,7 +297,7 @@ CSV::CSV(std::string fn, std::vector<ParserType> types, char separator)
         {
             std::string s;
             std::getline(ss, s, separator);
-            _types.push_back(parse(s));
+            _types.push_back(_tc(s));
         }
     }
     else 
