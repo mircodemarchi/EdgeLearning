@@ -38,7 +38,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_csv_field());
         EDGE_LEARNING_TEST_CALL(test_csv_row());
         EDGE_LEARNING_TEST_CALL(test_csv());
-        EDGE_LEARNING_TEST_CALL(test_csv_iterator(5));
+        EDGE_LEARNING_TEST_CALL(test_csv_iterator(10));
     }
 private:
     const std::string DATA_TRAINING_FN = "execution-time.csv";
@@ -211,11 +211,20 @@ private:
 
         auto iterator = csv.begin();
         EDGE_LEARNING_TEST_EQUAL(iterator->idx(), csv[1].idx());
+        EDGE_LEARNING_TEST_EQUAL(iterator->line(), csv[1].line());
+        EDGE_LEARNING_TEST_EQUAL((*iterator).line(), csv[1].line());
 
-        auto iterator_cpy = CSVIterator{iterator++};
-        iterator_cpy++;
-        EDGE_LEARNING_TEST_EQUAL(iterator_cpy->idx(), csv[2].idx());
-        EDGE_LEARNING_TEST_ASSERT(iterator == iterator_cpy)
+        auto iterator_cpy1 = CSVIterator{iterator++};
+        ++iterator_cpy1;
+        EDGE_LEARNING_TEST_EQUAL(iterator_cpy1->idx(), csv[2].idx());
+        EDGE_LEARNING_TEST_EQUAL((*iterator_cpy1).line(), csv[2].line());
+        EDGE_LEARNING_TEST_ASSERT(iterator == iterator_cpy1);
+
+        auto iterator_cpy2 = CSVIterator{iterator_cpy1--};
+        --iterator_cpy2;
+        EDGE_LEARNING_TEST_EQUAL(iterator_cpy2->idx(), csv[1].idx());
+        EDGE_LEARNING_TEST_EQUAL((*iterator_cpy2).line(), csv[1].line());
+        EDGE_LEARNING_TEST_ASSERT(iterator_cpy1 == iterator_cpy2);
     }
 };
 

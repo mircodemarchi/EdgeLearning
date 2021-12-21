@@ -23,7 +23,7 @@
  */
 
 /*! \file csv.hpp
- *  \brief CSV Parser header.
+ *  \brief CSV Parser implementation.
  */
 
 #ifndef EDGE_LEARNING_PARSER_CSV_HPP
@@ -40,15 +40,26 @@
 #include <limits>
 #include <stdexcept>
 
-
 namespace EdgeLearning {
 
+/**
+ * @brief Single field of a CSV file. 
+ * Composed by its field string, the corresponding type and the column number 
+ * in the CSV file.
+ */
 class CSVField : public Parser
 {
     friend class CSVRow;
 
 public:
-    CSVField(std::string field, Type &type, size_t col_index)
+    /**
+     * @brief Construct a new CSVField object
+     * @param field     The CSV field string.
+     * @param type      The CSV field type.
+     * @param col_index The corresponding column index in CSV file.
+     * The type field is changed if it contains the Type::AUTO.
+     */ 
+    CSVField(std::string field, Type& type, std::size_t col_index)
         : Parser()
         , _field{field}
         , _type{type}
@@ -60,40 +71,78 @@ public:
         }
     }
 
+    /**
+     * @brief Destroy the CSVField object.
+     */
     ~CSVField() {};
 
+    /**
+     * @brief Convert the field in the templated type and put in the ptr.
+     * @tparam T  Field type requested.
+     * @param ptr Pointer in which put the result.
+     */
     template<typename T>
     void as(T *ptr) const
     {
         _tc(_field, ptr);
     }
 
+    /**
+     * @brief Return the converted field as specified by the template type. 
+     * @tparam T Field type requested.
+     * @return T The converted field. 
+     */
     template<typename T>
     T as() const
     {
         T ret;
-        _tc(_field, &ret);
+        _tc(_field,& ret);
         return ret;
     }
 
-    const Type &type() const { return _type; }
-    size_t idx() const { return _col_index; }
+    /**
+     * @brief Field type getter.
+     * @return const Type& 
+     */
+    const Type& type() const { return _type; }
+
+    /**
+     * @brief CSV column index gettere.
+     * @return std::size_t 
+     */
+    std::size_t idx() const { return _col_index; }
 
 private:
-    std::string _field;
-    Type &_type;
-    size_t _col_index;
+    std::string _field;     ///< CSV field string.
+    Type& _type;            ///< CSV field type.
+    std::size_t _col_index; ///> CSV field column index.
 };
 
-
+/**
+ * @brief The CSV row of a CSV file.
+ * Composed by the CSV line string, the row index of the main CSV file, 
+ * the number of columns, the type list of each column and the separator of each 
+ * CSV field.
+ * Composed by CSVField.
+ */
 class CSVRow : public Parser
 {
     friend class CSV;
     friend class CSVIterator;
 
 public:
-    CSVRow(std::string line, size_t row_idx, size_t cols_amount, 
-        std::vector<Type> &types, char separator = ',')
+    /**
+     * @brief Construct a new CSVRow object.
+     * @param line        The CSV line string.
+     * @param row_idx     The CSV row index in the main CSV file.
+     * @param cols_amount The number of columns.
+     * @param types       The list of types of each field.
+     * @param separator   The separator of each field.
+     * The vector of types is changed if it's not compliant to the 
+     * column amount or if it contains the Type::AUTO.
+     */
+    CSVRow(std::string line, std::size_t row_idx, std::size_t cols_amount, 
+        std::vector<Type>& types, char separator = ',')
         : Parser()
         , _line{line}
         , _idx{row_idx}
@@ -107,7 +156,7 @@ public:
         {
             std::stringstream ss{line};
             _types = std::vector<Type>{};
-            for (size_t i = 0; i < cols_amount; ++i)
+            for (std::size_t i = 0; i < cols_amount; ++i)
             {
                 std::string s;
                 std::getline(ss, s, separator);
@@ -116,22 +165,41 @@ public:
         }
     }
 
-    CSVRow(std::string line, size_t row_idx, std::vector<Type> &types, 
+    /**
+     * @brief Construct a new CSVRow object.
+     * @param line      The CSV line string.
+     * @param row_idx   The CSV row index in the main CSV file.
+     * @param types     The list of types of each field.
+     * @param separator The separator of each field.
+     * Automatically calculates the number of columns.
+     */
+    CSVRow(std::string line, std::size_t row_idx, std::vector<Type>& types, 
         char separator = ',') 
         : CSVRow{line, row_idx,
-            static_cast<size_t>(std::count(line.begin(), line.end(), separator)+1), 
+            static_cast<std::size_t>(
+                std::count(line.begin(), line.end(), separator) + 1), 
             types, separator}
     {
 
     }
     
-    CSVRow(std::vector<Type> &types, char separator = ',')
-        : CSVRow{std::string{}, size_t{}, size_t{0}, types, separator}
+    /**
+     * @brief Construct a new CSVRow object.
+     * @param types     The list of types of each field.
+     * @param separator The separator of each field.
+     * Construct an empty CSV Row.
+     */
+    CSVRow(std::vector<Type>& types, char separator = ',')
+        : CSVRow{std::string{}, std::size_t{}, std::size_t{0}, types, separator}
     {
 
     }
 
-    CSVRow(const CSVRow &obj)
+    /**
+     * @brief Construct a new CSVRow object by copy.
+     * @param obj 
+     */
+    CSVRow(const CSVRow& obj)
         : _line{obj._line}
         , _idx{obj._idx}
         , _cols_amount{obj._cols_amount}
@@ -141,19 +209,42 @@ public:
 
     }
 
+    /**
+     * @brief Destroy the CSVRow object.
+     */
     ~CSVRow() {};
 
+    /**
+     * @brief Check if two CSVRow are equal. 
+     * Two CSVRow are equal if the line strings are equal.
+     * @param rhs The CSVRow to compare with this.
+     * @return true  Equals.
+     * @return false Different.
+     */
     bool operator==(const CSVRow& rhs) const
     {
         return _line == rhs._line;
     }
 
+    /**
+     * @brief Check if two CSVRow are differne. 
+     * Two CSVRow are different if the line strings are different.
+     * @param rhs The CSVRow to compare with this.
+     * @return true  Different.
+     * @return false Equals.
+     */
     bool operator!=(const CSVRow& rhs) const
     {
         return _line != rhs._line;
     }
 
-    CSVField operator[](size_t idx) const
+    /**
+     * @brief Get a CSVField from the CSVRow.
+     * @param idx The index of the CSVField.
+     * @return CSVField The field of the CSVRow in the corresponding index.
+     * Could throw a std::runtime_error if index is out of range. 
+     */
+    CSVField operator[](std::size_t idx) const
     {
         if (idx >= this->_cols_amount)
         {
@@ -162,7 +253,7 @@ public:
         }
 
         std::string field;
-        size_t i = 0;
+        std::size_t i = 0;
         std::stringstream ss{_line};
         while(std::getline(ss, field, _separator)) 
         {
@@ -177,7 +268,12 @@ public:
         throw std::runtime_error("CSV bad format: fields missing");
     }
 
-    CSVRow& operator=(const CSVRow &obj)
+    /**
+     * @brief Assignment operator.
+     * @param obj The object to assign.
+     * @return CSVRow& The updated object.
+     */
+    CSVRow& operator=(const CSVRow& obj)
     {
         _line = obj._line;
         _idx = obj._idx;
@@ -187,17 +283,27 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Operator overloading to print a CSVRow.
+     * @param stream The input stream.
+     * @param obj    The object to print.
+     * @return std::ostream& The output stream.
+     */
     friend std::ostream& operator<<(std::ostream& stream, const CSVRow& obj)
     { 
         stream << obj._line;
         return stream;
     }
 
+    /**
+     * @brief Divide the CSVRow in a vector of string fields.
+     * @return std::vector<std::string> 
+     */
     operator std::vector<std::string>() const
     {
         std::vector<std::string> ret{};
         std::stringstream ss{_line};
-        for (size_t i = 0; i < _cols_amount; ++i)
+        for (std::size_t i = 0; i < _cols_amount; ++i)
         {
             std::string s;
             std::getline(ss, s, _separator);
@@ -206,11 +312,15 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Convert the CSVRow in a vector of CSVField objects.
+     * @return std::vector<CSVField> 
+     */
     operator std::vector<CSVField>() const
     {
         std::vector<CSVField> ret{};
         std::stringstream ss{_line};
-        for (size_t i = 0; i < _cols_amount; ++i)
+        for (std::size_t i = 0; i < _cols_amount; ++i)
         {
             std::string s;
             std::getline(ss, s, _separator);
@@ -219,109 +329,200 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Return the row in string.
+     * @return std::string The CSV line.
+     */
     operator std::string() const
     {
         return _line;
     }
 
+    /**
+     * @brief Convert each field of the CSVRow in the templated type and return
+     * in a vector.
+     * @tparam T The specified type of each row field. 
+     * @return std::vector<T> The converted vector of fields.
+     */
     template<typename T>
     operator std::vector<T>() const
     {
         std::vector<T> ret{};
         std::stringstream ss{_line};
-        for (size_t i = 0; i < _cols_amount; ++i)
+        for (std::size_t i = 0; i < _cols_amount; ++i)
         {
             std::string s;
             std::getline(ss, s, _separator);
             T t;
-            _tc(s, &t);
+            _tc(s,& t);
             ret.push_back(t);
         }
         return ret;
     }
 
+    /**
+     * @brief Convert each field in the templated type 
+     * (see operator std::vector<T>()).
+     * @tparam T The specified type of each row field. 
+     * @return std::vector<T> The converted vector of fields.
+     */
     template<typename T>
     std::vector<T> to_vec() const
     {
         return operator std::vector<T>();
     }
 
-    size_t size() const { return _cols_amount; }
+    /**
+     * @brief Column amount getter.
+     * @return std::size_t 
+     */
+    std::size_t size() const { return _cols_amount; }
+    
+    /**
+     * @brief Check if the CSVRow is empty. It is empty if the column amount is 
+     * zero.
+     * @return true  Column amount greater than 0.
+     * @return false Column amount equals than 0.
+     */
     bool empty() const { return _cols_amount == 0; }
-    const std::vector<Type> &types() const { return _types; } 
-    size_t idx() const { return _idx; }
+    
+    /**
+     * @brief Column types getter. 
+     * @return const std::vector<Type>& The vector of column types.
+     */
+    const std::vector<Type>& types() const { return _types; } 
+    
+    /**
+     * @brief Getter of CSVRow index.
+     * @return std::size_t Index of the line in CSV file.
+     */
+    std::size_t idx() const { return _idx; }
+    
+    /**
+     * @brief Getter of CSVRow line.
+     * @return std::string
+     */
     std::string line() const { return _line; }
 
 private:
-    std::string _line;
-    size_t _idx;
-    size_t _cols_amount;
-    std::vector<Type> &_types;
-    char _separator;
+    std::string _line;         ///< The line in string. 
+    std::size_t _idx;          ///< The index of the CSV row.
+    std::size_t _cols_amount;  ///< The column amount of the row.
+    std::vector<Type>& _types; ///< The types of each field in the row.
+    char _separator;           ///< The separator of each field.
 };
 
-
+/**
+ * @brief Iterator pattern for CSV class.
+ */
 class CSVIterator 
 {
     using iterator_category = std::forward_iterator_tag;
 
 public:
     
-    CSVIterator(std::string fn, size_t idx, size_t cols_amount,
-        std::vector<Type> &types, char separator = ',')
+    /**
+     * @brief Construct a new CSVIterator object.
+     * @param fn          Filename of CSV file.
+     * @param idx         Index of CSV row.
+     * @param cols_amount Number of columns.
+     * @param types       The list of types of each field.
+     * @param separator   The separator of each field.
+     * Initialize the internal CSVRow with the types list, the separator, the 
+     * column amount and the requested row index. 
+     * Open a file stream to input path fn. 
+     */
+    CSVIterator(std::string fn, std::size_t idx, std::size_t cols_amount,
+        std::vector<Type>& types, char separator = ',')
         : _fn{fn}
-        , _row{types, separator}
-        , _is_stream_updated{false}
+        , _row{std::string(), 0, cols_amount, types, separator}
+        , _req_row_idx{idx}
         , _stream{fn}
     {
-        _row._idx = idx;
-        _row._cols_amount = cols_amount;
+        std::getline(_stream, _row._line);
     }
 
-    CSVIterator(const CSVIterator &obj)
+    /**
+     * @brief Construct a new CSVIterator object by copy.
+     * @param obj Object to copy.
+     */
+    CSVIterator(const CSVIterator& obj)
         : _fn{obj._fn}
-        , _row{obj._row}
-        , _is_stream_updated{false}
+        , _row{std::string(), 0, obj._row._cols_amount, 
+            obj._row._types, obj._row._separator}
+        , _req_row_idx{obj._req_row_idx}
         , _stream{obj._fn}
     {
-
+        std::getline(_stream, _row._line);
     }
 
+    /**
+     * @brief Destroy the CSVIterator object
+     * Clone file stream.
+     */
     ~CSVIterator()
     {
         _stream.close();
     }
 
-    CSVRow &operator*()
+    /**
+     * @brief Access the requested CSVRow reference in CSV file and index. 
+     * @return CSVRow& The CSVRow reference.
+     */
+    CSVRow& operator*()
     {
-        update_stream();
         update_row();
         return _row;
     }
 
-    CSVRow *operator->()
+    /**
+     * @brief Access the requested CSVRow pointer in CSV file and index. 
+     * @return CSVRow* The CSVRow pointer.
+     */
+    CSVRow* operator->()
     {
-        update_stream();
         update_row();
-        return &_row;
+        return& _row;
     }
 
-    bool operator==(const CSVIterator &rhs) const
+    /**
+     * @brief Check if iterators are equal. Two iterators are equals if they 
+     * consider the same request row index. 
+     * @param rhs The object to compare with this.
+     * @return true  Equals.
+     * @return false Different.
+     */
+    bool operator==(const CSVIterator& rhs) const
     {
-        return _row._idx == rhs._row._idx;
+        return _req_row_idx == rhs._req_row_idx;
     }
 
-    bool operator!=(const CSVIterator &rhs) const
+    /**
+     * @brief Check if iterators are different. Two iterators are different if 
+     * they consider different request row index. 
+     * @param rhs The object to compare with this.
+     * @return true  Different.
+     * @return false Equals.
+     */
+    bool operator!=(const CSVIterator& rhs) const
     {
-        return _row._idx != rhs._row._idx;
+        return _req_row_idx != rhs._req_row_idx;
     }
 
-    CSVIterator &operator++()
+    /**
+     * @brief Increment the iterator by 1 row.
+     * @return CSVIterator& The reference to the updated iterator.
+     */
+    CSVIterator& operator++()
     {
-        _row._idx++;
+        _req_row_idx++;
         return *this;
     }
 
+    /**
+     * @brief Increment the iterator by 1 row.
+     * @return CSVIterator& The copy to the updated iterator.
+     */
     CSVIterator operator++(int)
     {
         CSVIterator tmp(*this);
@@ -329,27 +530,71 @@ public:
         return tmp;
     }
 
-private:
-    void update_stream()
+    /**
+     * @brief Decrement the iterator by 1 row.
+     * @return CSVIterator& The reference to the updated iterator.
+     */
+    CSVIterator& operator--()
     {
-        if (!_is_stream_updated)
+        _req_row_idx--;
+        return *this;
+    }
+
+    /**
+     * @brief Decrement the iterator by 1 row.
+     * @return CSVIterator& The copy to the updated iterator.
+     */
+    CSVIterator operator--(int)
+    {
+        CSVIterator tmp(*this);
+        operator--();
+        return tmp;
+    }
+
+private:
+    /**
+     * @brief Read the right row line according to the requested row.
+     */
+    void update_row()
+    {
+        if (_req_row_idx < _row._idx) 
         {
-            for (size_t i = 0; i < _row._idx; ++i)
-            {
-                _stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
-            _is_stream_updated = true;
+            _row._idx = 0;
+            _stream.seekg(0);
+            std::getline(_stream, _row._line);
+        }
+
+        for (std::size_t i = _row._idx + 1; i < _req_row_idx; ++i)
+        {
+            _stream.ignore(
+                std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+
+        if (_row._idx != _req_row_idx)
+        {
+            std::getline(_stream, _row._line);
+            _row._idx = _req_row_idx;
         }
     }
 
-    void update_row()
-    {
-        std::getline(_stream, _row._line);
-    }
+    /**
+     * @brief Path of the CSV file.
+     */
+    std::string _fn; 
 
-    std::string _fn;
+    /**
+     * @brief CSVRow object updated and returned on iterator request. 
+     */
     CSVRow _row;
-    bool _is_stream_updated;
+    
+    /**
+     * @brief 
+     */
+    std::size_t _req_row_idx;
+    
+    /**
+     * @brief Input stream used to read the CSV file.
+     */
     std::ifstream _stream;
 };
 
@@ -357,6 +602,16 @@ private:
 class CSV : public Parser
 {
 public:
+    /**
+     * @brief Construct a new CSV object.
+     * @param fn        The path of the CSV file.
+     * @param types     The list of types of each field.
+     * @param separator The separator of each field.
+     * If the list of types is not compliant to the colums amount of the CSV 
+     * file or it contains the Type::AUTO, then the types list is automatically
+     * computed using the second line of the CSV file.
+     * The constructor throws a std::runtime_error if the file fails on open.
+     */
     CSV(std::string fn, std::vector<Type> types = { Type::AUTO }, 
         char separator = ',') 
         : Parser()
@@ -374,7 +629,7 @@ public:
 
         // Get number of rows.
         file.unsetf(std::ios_base::skipws);
-        _rows_amount = static_cast<size_t>(
+        _rows_amount = static_cast<std::size_t>(
             std::count(std::istream_iterator<char>(file), 
                 std::istream_iterator<char>(), '\n'));
         file.clear();
@@ -386,7 +641,7 @@ public:
         std::getline(file, first_line);
 
         // Get number of columns.
-        _cols_amount = static_cast<size_t>(
+        _cols_amount = static_cast<std::size_t>(
             std::count(header.begin(), header.end(), separator)+1);
 
         if((std::find(types.begin(), types.end(), Type::AUTO) != types.end())
@@ -394,7 +649,7 @@ public:
             || types.size() != _cols_amount) 
         {
             std::stringstream ss{first_line};
-            for (size_t i = 0; i < _cols_amount; ++i)
+            for (std::size_t i = 0; i < _cols_amount; ++i)
             {
                 std::string s;
                 std::getline(ss, s, separator);
@@ -410,15 +665,42 @@ public:
         _row_cache  = CSVRow{first_line, 1, _cols_amount, _types, separator};
         file.close();
     }
-    
+
+    /**
+     * @brief Destroy the CSV object.
+     */
     ~CSV() {};
 
-    size_t cols_size() const { return _cols_amount; }
-    size_t rows_size() const { return _rows_amount; }
-    const CSVRow &header() const { return _row_header; }
-    const std::vector<Type> &types() const { return _types; }
+    /**
+     * @brief Getter of the column size of the CSV file.
+     * @return std::size_t The columns amount.
+     */
+    std::size_t cols_size() const { return _cols_amount; }
+
+    /**
+     * @brief Getter of the row size of the CSV file.
+     * @return std::size_t The rows amount.
+     */
+    std::size_t rows_size() const { return _rows_amount; }
+
+    /**
+     * @brief Getter of the header row: the first line of the CSV file.
+     * @return const CSVRow& 
+     */
+    const CSVRow& header() const { return _row_header; }
+
+    /**
+     * @brief Getter of the types list of each field. 
+     * @return const std::vector<Type>& Vector of types.
+     */
+    const std::vector<Type>& types() const { return _types; }
     
-    CSVRow operator[](size_t idx)
+    /**
+     * @brief Get a CSVRow at the index row specified.
+     * @param idx The index row.
+     * @return CSVRow The requested row. 
+     */
+    CSVRow operator[](std::size_t idx)
     {
         // Manage row saved in cache.
         if (_row_cache.idx() == idx) return _row_cache;
@@ -427,7 +709,7 @@ public:
 
         auto file = std::ifstream{_fn};
         // file.seekg(_row_header._line.size() + 1);
-        for (size_t i = 0; i < idx; ++i)
+        for (std::size_t i = 0; i < idx; ++i)
         {
             file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
@@ -439,24 +721,37 @@ public:
         return CSVRow{_row_cache};
     }
 
+    /**
+     * @brief Get the first CSVIterator that is the second line of the CSV
+     * file (it skips the header row).
+     * @return CSVIterator 
+     */
     CSVIterator begin()
     { 
         return CSVIterator{_fn, 1, _cols_amount, _types, _separator}; 
     }
     
+    /**
+     * @brief Get the last CSVIterator.
+     * @return CSVIterator 
+     */
     CSVIterator end()
     { 
         return CSVIterator{_fn, _rows_amount - 1, _cols_amount, _types, 
                            _separator}; 
     }
 
+    /**
+     * @brief Convert the CSV file in a vector of string for each row.
+     * @return std::vector<std::string> Vector of CSV lines.
+     */
     operator std::vector<std::string>() const
     {
         std::vector<std::string> ret;
 
         auto file = std::ifstream{_fn};
         std::string line;
-        for (size_t i = 0; i < _rows_amount; ++i)
+        for (std::size_t i = 0; i < _rows_amount; ++i)
         {
             if (!std::getline(file, line)) break;
             ret.push_back(line);
@@ -466,13 +761,17 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Convert the CSV file in a vector of CSVRow for each row.
+     * @return std::vector<CSVRow>
+     */
     operator std::vector<CSVRow>()
     {
         std::vector<CSVRow> ret;
 
         auto file = std::ifstream{_fn};
         std::string line;
-        for (size_t i = 0; i < _rows_amount; ++i)
+        for (std::size_t i = 0; i < _rows_amount; ++i)
         {
             if (!std::getline(file, line)) break;
             ret.push_back(CSVRow{line, i, _cols_amount, _types, _separator});
@@ -482,6 +781,12 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Convert the CSV file in a vector of vector with element converted 
+     * in the type specified by the template.
+     * @tparam T The requested type of each CSV field.
+     * @return std::vector<std::vector<T>> A vector of vector for each field.
+     */
     template<typename T>
     operator std::vector<std::vector<T>>()
     {
@@ -490,7 +795,7 @@ public:
 
         auto file = std::ifstream{_fn};
         std::string line;
-        for (size_t i = 0; i < _rows_amount; ++i)
+        for (std::size_t i = 0; i < _rows_amount; ++i)
         {
             if (!std::getline(file, line)) break;
             ret[i] = std::vector<T>(
@@ -502,6 +807,12 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Convert the CSV file in a vector of vector for each file. 
+     * Wrapper of operator std::vector<std::vector<T>>().
+     * @tparam T The requested type of each CSV field.
+     * @return std::vector<std::vector<T>> A vector of vector for each field.
+     */
     template<typename T>
     std::vector<std::vector<T>> to_vec()
     {
@@ -509,13 +820,13 @@ public:
     }
 
 private:
-    std::string _fn;
-    std::vector<Type> _types;
-    CSVRow _row_header;
-    CSVRow _row_cache;
-    size_t _cols_amount;
-    size_t _rows_amount;
-    char _separator;
+    std::string _fn;          ///< The CSV file path.
+    std::vector<Type> _types; ///< The types vector of each field.
+    CSVRow _row_header;       ///< The header of the CSV file.
+    CSVRow _row_cache;        ///< A Row cache used for optimization.
+    std::size_t _cols_amount; ///< Number of columns in CSV file.
+    std::size_t _rows_amount; ///< Number of rows in CSV file.
+    char _separator;          ///< Separator character of each field.
 };
 
 
