@@ -29,7 +29,6 @@
 #ifndef EDGE_LEARNING_PARSER_TYPE_CHECKER_HPP
 #define EDGE_LEARNING_PARSER_TYPE_CHECKER_HPP
 
-
 #include <string>
 #include <sstream>
 #include <vector>
@@ -71,6 +70,15 @@ const std::regex _boolean_regex { "^(true|false)$" };
  */
 const std::regex _string_regex  { "^\".*\"$" };
 
+/**
+ * @brief Convert a string in the templated type T and put the result in the 
+ * pointer.
+ * @tparam T  The type to convert to.
+ * @param s   The string to convert. 
+ * @param ptr The pointer to the memory in which put the result.
+ * @return true  If convertion succeedes.
+ * @return false If convertion fails.
+ */
 template<typename T>
 bool convert(const std::string &s, T *ptr)
 {
@@ -79,6 +87,14 @@ bool convert(const std::string &s, T *ptr)
     return !ss.fail() && ss.eof();
 }
 
+/**
+ * @brief Template specialization for boolean of convert<T>
+ * @tparam bool
+ * @param s   The string to convert. 
+ * @param ptr The pointer to the memory in which put the result.
+ * @return true  If convertion succeedes.
+ * @return false If convertion fails.
+ */
 template<>
 bool convert<bool>(const std::string &s, bool *ptr)
 {
@@ -145,7 +161,14 @@ public:
     static bool is_string(const std::string& in) 
         { return parse(in) == Type::STRING; };
     
-
+    /**
+     * @brief Operator overloading for string convertion (see convert). 
+     * @tparam T 
+     * @param s   The string to convert. 
+     * @param ptr The pointer to the memory in which put the result.
+     * @return true  If convertion succeedes.
+     * @return false If convertion fails.
+     */
     template<typename T> 
     bool operator()(const std::string &s, T *ptr) const 
     {
@@ -153,7 +176,7 @@ public:
     }
 
     /**
-     * @brief Operator () overloading that parse a string. 
+     * @brief Operator overloading that parse a string (see parse). 
      * @param field The string field.
      * @return Type The type of the parsed field.
      */
@@ -173,12 +196,25 @@ public:
         return parse(fields);
     }
 
+    /**
+     * @brief Convert a string in the specified template type (see convert). 
+     * @tparam T  The specified type. 
+     * @param s   The string to convert. 
+     * @param ptr The pointer to the memory in which put the result.
+     * @return true  If convertion succeedes.
+     * @return false If convertion fails.
+     */
     template<typename T>
     static bool parse(const std::string &s, T *ptr)
     {
         return convert<T>(s, ptr);
     }
     
+    /**
+     * @brief Parse the type of the given string field.
+     * @param field The string to parse.
+     * @return Type The type of the converted string.
+     */
     static Type parse(const std::string &field)
     {
         if (field.empty())
@@ -208,6 +244,11 @@ public:
         }
     }
 
+    /**
+     * @brief Parse a vector of string fields.
+     * @param fields The string fields to parse.
+     * @return std::vector<Type> The resulting types of string fields.
+     */
     static std::vector<Type> parse(
         const std::vector<std::string> &fields)
     {
@@ -221,6 +262,12 @@ public:
     }
 };
 
+/**
+ * @brief Operator overloading to cout the type.
+ * @param os  Input stream.
+ * @param obj Type to print.
+ * @return std::ostream& Output stream.
+ */
 std::ostream& operator<<(std::ostream& os, const Type& obj)
 {
    switch(obj)
@@ -238,6 +285,12 @@ std::ostream& operator<<(std::ostream& os, const Type& obj)
    return os;
 }
 
+/**
+ * @brief Operator overloading to cout a vector of types.
+ * @param os  Input stream.
+ * @param obj Types to print.
+ * @return std::ostream& Output stream.
+ */
 std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
 {
     os << "{";
@@ -249,10 +302,17 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
     return os;
 }
 
+/**
+ * @brief Check if two vectors of types are equals.
+ * @param lhs Vector of types first operand.
+ * @param rhs Vector of types second operand.
+ * @return true  Equals.
+ * @return false Not equals.
+ */
 bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
 {
     if (lhs.size() != rhs.size()) return false;
-    for (size_t i = 0; i < lhs.size(); ++i)
+    for (std::size_t i = 0; i < lhs.size(); ++i)
     {
         if (lhs.at(i) != rhs.at(i))
         {
@@ -262,6 +322,13 @@ bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
     return true;
 }
 
+/**
+ * @brief Check if two vectors of types are different.
+ * @param lhs Vector of types first operand.
+ * @param rhs Vector of types second operand.
+ * @return true  Different.
+ * @return false Equals.
+ */
 bool operator!=(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
 {
     return !operator==(lhs, rhs);

@@ -23,7 +23,7 @@
  */
 
 /*! \file parser.hpp
- *  \brief Simply replace me.
+ *  \brief Generic parser implementation.
  */
 
 #ifndef EDGE_LEARNING_PARSER_PARSER_HPP
@@ -33,14 +33,24 @@
 
 namespace EdgeLearning {
 
+/**
+ * @brief Generic class for parser the shares the TypeChecker entity.
+ */
 class Parser 
 {
 public:
+    /**
+     * @brief Construct a new Parser object.
+     */
     Parser() : _tc() {}
+
+    /**
+     * @brief Destroy the Parser object.
+     */
     virtual ~Parser() {};
 
 protected:
-    TypeChecker _tc;
+    TypeChecker _tc; ///< TypeChecker entity to perform parsing and convertion.
 };
 
 } // namespace EdgeLearning
