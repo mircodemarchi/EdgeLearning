@@ -47,10 +47,10 @@ private:
             / ".." / ".." / "data" / DATA_TRAINING_FN;
 
     void test_csv_field() {
-        auto csv_field_int_t   = ParserType::AUTO;
-        auto csv_field_str_t   = ParserType::AUTO;
-        auto csv_field_float_t = ParserType::FLOAT;
-        auto csv_field_bool_t  = ParserType::BOOL;
+        auto csv_field_int_t   = Type::AUTO;
+        auto csv_field_str_t   = Type::AUTO;
+        auto csv_field_float_t = Type::FLOAT;
+        auto csv_field_bool_t  = Type::BOOL;
 
         auto csv_field_int     = CSVField{"123",   csv_field_int_t,   0};
         auto csv_field_str     = CSVField{"\"\"",  csv_field_str_t,   1};
@@ -69,8 +69,8 @@ private:
         EDGE_LEARNING_TEST_EQUAL(csv_field_float.idx(), 2);
         EDGE_LEARNING_TEST_EQUAL(csv_field_bool.idx(),  3);
 
-        EDGE_LEARNING_TEST_EQUAL(csv_field_int.type(), ParserType::INT);
-        EDGE_LEARNING_TEST_EQUAL(csv_field_str.type(), ParserType::STRING);
+        EDGE_LEARNING_TEST_EQUAL(csv_field_int.type(), Type::INT);
+        EDGE_LEARNING_TEST_EQUAL(csv_field_str.type(), Type::STRING);
 
         auto csv_field_cpy = CSVField{csv_field_int};
         EDGE_LEARNING_TEST_EQUAL(csv_field_cpy.idx(), csv_field_int.idx());
@@ -78,7 +78,7 @@ private:
     }
 
     void test_csv_row() {
-        auto types = std::vector<ParserType>{ParserType::AUTO};
+        auto types = std::vector<Type>{Type::AUTO};
         auto csv_row = CSVRow("10,1.3,edge_learning,true", 0, 4, types, ',');
 
         EDGE_LEARNING_TEST_PRINT(csv_row);
@@ -106,9 +106,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(csv_row.empty(), false);
         EDGE_LEARNING_TEST_EQUAL(csv_row.size(),  4);
         EDGE_LEARNING_TEST_EQUAL(csv_row.idx(),   0);
-        auto types_groundtruth = std::vector<ParserType>{
-            ParserType::INT, ParserType::FLOAT,
-            ParserType::STRING, ParserType::BOOL};
+        auto types_groundtruth = std::vector<Type>{
+            Type::INT, Type::FLOAT,
+            Type::STRING, Type::BOOL};
         auto types_to_test = csv_row.types();
         EDGE_LEARNING_TEST_EQUAL(types_groundtruth, types_to_test);
 
@@ -136,7 +136,7 @@ private:
 
     void test_csv() {
         auto csv = CSV(data_training_fp.string());
-        auto types_groundtruth = std::vector<ParserType>{6, ParserType::INT};
+        auto types_groundtruth = std::vector<Type>{6, Type::INT};
 
         EDGE_LEARNING_TEST_EQUAL(csv.cols_size(), 6);
         EDGE_LEARNING_TEST_EQUAL(csv.rows_size(), 3201);
@@ -167,15 +167,15 @@ private:
 
         EDGE_LEARNING_TEST_THROWS(CSV{""}, std::runtime_error);
 
-        csv = CSV(data_training_fp.string(), std::vector<ParserType>{});
+        csv = CSV(data_training_fp.string(), std::vector<Type>{});
         EDGE_LEARNING_TEST_EQUAL(csv.types(), types_groundtruth);
 
         csv = CSV(data_training_fp.string(), 
-            std::vector<ParserType>{ParserType::INT});
+            std::vector<Type>{Type::INT});
         EDGE_LEARNING_TEST_EQUAL(csv.types(), types_groundtruth);
 
         csv = CSV(data_training_fp.string(), 
-            std::vector<ParserType>{6, ParserType::FLOAT});
+            std::vector<Type>{6, Type::FLOAT});
         EDGE_LEARNING_TEST_NOT_EQUAL(csv.types(), types_groundtruth);
 
         EDGE_LEARNING_TEST_EXECUTE(
