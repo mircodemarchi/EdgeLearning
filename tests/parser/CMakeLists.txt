@@ -1,4 +1,5 @@
 set(UNIT_TESTS
+    test_type_checker
     test_parser
     test_csv
 )
