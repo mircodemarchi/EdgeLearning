@@ -81,7 +81,6 @@ add_subdirectory(source)
 add_subdirectory(tests)
 
 add_library(edgelearning SHARED
-    $<TARGET_OBJECTS:edgelearning-parser>
     $<TARGET_OBJECTS:edgelearning-dnn>
     $<TARGET_OBJECTS:edgelearning-middleware>
 )
