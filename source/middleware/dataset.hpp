@@ -34,6 +34,9 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#if ENABLE_MLPACK
+#include <armadillo>
+#endif // ENABLE_MLPACK
 
 namespace EdgeLearning {
 
@@ -51,18 +54,22 @@ public:
         std::size_t feature_size = 0, 
         std::size_t sequence_size = 1)
         : _data{data}
-        , _feature_size{std::min(feature_size, data.size())}
-        , _dataset_size{std::ceil((data.size() - 1) / _feature_size) + 1}
-        , _sequence_size{std::min(sequence_size, _dataset_size)}
+        , _feature_size{std::min(feature_size, _data.size())}
+        , _sequence_size{std::min(sequence_size, 
+            std::size_t(_data.size() / _feature_size))}
+        , _dataset_size{std::ceil(
+            (_data.size() - 1) / (_feature_size * _sequence_size))
+            * (_feature_size * _sequence_size)}
+        , _feature_amount{_dataset_size / _feature_size}
+        , _sequence_amount{_dataset_size / (_feature_size * _sequence_size)}
     {
-        // Ceil the dataset size.
-        _data.resize(_dataset_size * _feature_size);   
+        _data.resize(_dataset_size);
     }
 
     Dataset(Mat data = Mat(), std::size_t sequence_size = 1) 
         : _data{}
-        , _dataset_size{data.size()}
-        , _sequence_size{std::min(sequence_size, _dataset_size)}
+        , _feature_amount{data.size()}
+        , _sequence_size{std::min(sequence_size, _feature_amount)}
     {
         if (data.empty())
         {
@@ -84,11 +91,13 @@ public:
                 }
             }
         }
+        _dataset_size = _feature_amount * _feature_size;
+        _sequence_amount = _feature_amount / _sequence_size;
     } 
 
     Dataset(Cub data = Cub()) 
         : _data{}
-        , _dataset_size{0}
+        , _sequence_amount{data.size()}
     {
         if (data.empty())
         {
@@ -116,17 +125,49 @@ public:
             {
                 for (const auto& m: data)
                 {
-                    for (const auto& v: m)
+                    for (std::size_t i = 0; i < _sequence_size; ++i)
                     {
+                        const auto& v = m[i];
                         _data.insert(data.end(), 
                             v.begin(), v.begin() + _feature_size);
                     }
                 }
             }
         }
+        _feature_amount = _sequence_amount * _sequence_size;
+        _dataset_size = _feature_amount * _feature_size;
     } 
 
     ~Dataset() {};
+
+#if ENABLE_MLPACK
+    operator arma::Vec<T>()
+    {   
+        arma::Mat<T> ret(_data);
+        ret.reshape(_feature_amount, _feature_size);
+        return ret;
+    }
+
+    operator arma::Mat<T>()
+    {   
+        arma::Mat<T> ret(_data);
+        ret.reshape(_feature_amount, _feature_size);
+        return ret;
+    }
+
+    operator arma::Cube<T>()
+    {   
+        arma::Cube<T> ret(_data);
+        ret.reshape(_sequence_amount, _sequence_size, _feature_size);
+        return ret;
+    }
+
+    template<typename ARMA_T>
+    ARMA_T to_arma()
+    {
+        return operator ARMA_T();
+    }
+#endif // ENABLE_MLPACK
 
     /**
      * @brief Getter and setter of feature_size param.
@@ -146,13 +187,15 @@ public:
      * @brief Return the number of entries of the dataset.
      * @return std::size_t the number of entries of the dataset.
      */
-    std::size_t size() const { return _dataset_size; };
+    std::size_t size() const { return _feature_amount; };
 
 private:
     std::vector<T> _data;
     std::size_t _feature_size;
-    std::size_t _dataset_size;
+    std::size_t _feature_amount;
     std::size_t _sequence_size;
+    std::size_t _sequence_amount;
+    std::size_t _dataset_size;
 };
 
 } // namespace EdgeLearning
