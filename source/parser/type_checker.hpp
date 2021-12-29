@@ -88,6 +88,21 @@ bool convert(const std::string &s, T *ptr)
 }
 
 /**
+ * @brief Template specialization for string of convert<T>
+ * @tparam std::string
+ * @param s   The string to convert. 
+ * @param ptr The pointer to the memory in which put the result.
+ * @return true  If convertion succeedes.
+ * @return false If convertion fails.
+ */
+template<>
+bool convert<std::string>(const std::string &s, std::string *ptr)
+{
+    *ptr = s;
+    return true;
+}
+
+/**
  * @brief Template specialization for boolean of convert<T>
  * @tparam bool
  * @param s   The string to convert. 

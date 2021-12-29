@@ -179,9 +179,14 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(csv.types(), types_groundtruth);
 
         EDGE_LEARNING_TEST_EXECUTE(
+            auto v = std::vector<float>(csv));
+        EDGE_LEARNING_TEST_EQUAL(csv.to_vec<float>().size(), 
+            csv.rows_size() * csv.cols_size());
+
+        EDGE_LEARNING_TEST_EXECUTE(
             auto v = std::vector<std::vector<float>>(csv));
-        EDGE_LEARNING_TEST_EQUAL(csv.to_vec<float>().size(), csv.rows_size());
-        EDGE_LEARNING_TEST_EQUAL(csv.to_vec<float>()[0].size(), 
+        EDGE_LEARNING_TEST_EQUAL(csv.to_mat<float>().size(), csv.rows_size());
+        EDGE_LEARNING_TEST_EQUAL(csv.to_mat<float>()[0].size(), 
             csv.cols_size());
 
         EDGE_LEARNING_TEST_EXECUTE(auto v = std::vector<std::string>(csv));

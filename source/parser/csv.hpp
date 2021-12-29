@@ -72,6 +72,19 @@ public:
     }
 
     /**
+     * @brief Assignment operator.
+     * @param obj The object to assign.
+     * @return CSVField& The updated object.
+     */
+    CSVField& operator=(const CSVField& obj)
+    {
+        _field = obj._field;
+        _type = obj._type;
+        _col_index = obj._col_index;
+        return *this;
+    }
+
+    /**
      * @brief Destroy the CSVField object.
      */
     ~CSVField() {};
@@ -301,13 +314,14 @@ public:
      */
     operator std::vector<std::string>() const
     {
-        std::vector<std::string> ret{};
+        std::vector<std::string> ret;
+        ret.resize(_cols_amount);
         std::stringstream ss{_line};
         for (std::size_t i = 0; i < _cols_amount; ++i)
         {
             std::string s;
             std::getline(ss, s, _separator);
-            ret.push_back(s);
+            ret[i] = s;
         }
         return ret;
     }
@@ -347,15 +361,16 @@ public:
     template<typename T>
     operator std::vector<T>() const
     {
-        std::vector<T> ret{};
+        std::vector<T> ret;
+        ret.resize(_cols_amount);
         std::stringstream ss{_line};
         for (std::size_t i = 0; i < _cols_amount; ++i)
         {
             std::string s;
             std::getline(ss, s, _separator);
             T t;
-            _tc(s,& t);
-            ret.push_back(t);
+            _tc.template operator()<T>(s, &t);
+            ret[i] = t;
         }
         return ret;
     }
@@ -745,16 +760,17 @@ public:
      * @brief Convert the CSV file in a vector of string for each row.
      * @return std::vector<std::string> Vector of CSV lines.
      */
-    operator std::vector<std::string>() const
+    operator std::vector<std::string>()
     {
         std::vector<std::string> ret;
+        ret.resize(_rows_amount);
 
         auto file = std::ifstream{_fn};
         std::string line;
         for (std::size_t i = 0; i < _rows_amount; ++i)
         {
             if (!std::getline(file, line)) break;
-            ret.push_back(line);
+            ret[i] = line;
         }
 
         file.close();
@@ -767,7 +783,7 @@ public:
      */
     operator std::vector<CSVRow>()
     {
-        std::vector<CSVRow> ret;
+        std::vector<CSVRow> ret{};
 
         auto file = std::ifstream{_fn};
         std::string line;
@@ -798,9 +814,8 @@ public:
         for (std::size_t i = 0; i < _rows_amount; ++i)
         {
             if (!std::getline(file, line)) break;
-            ret[i] = std::vector<T>(
-                CSVRow{line, i, _cols_amount, _types, _separator}
-            );
+            ret[i] = CSVRow{line, i, _cols_amount, _types, _separator}
+                .to_vec<T>();
         }
 
         file.close();
@@ -808,15 +823,52 @@ public:
     }
 
     /**
-     * @brief Convert the CSV file in a vector of vector for each file. 
-     * Wrapper of operator std::vector<std::vector<T>>().
+     * @brief Convert the CSV file in a vector with each element converted 
+     * in the type specified by the template.
      * @tparam T The requested type of each CSV field.
      * @return std::vector<std::vector<T>> A vector of vector for each field.
      */
     template<typename T>
-    std::vector<std::vector<T>> to_vec()
+    operator std::vector<T>()
+    {
+        std::vector<T> ret{};
+
+        auto file = std::ifstream{_fn};
+        std::string line;
+        for (std::size_t i = 0; i < _rows_amount; ++i)
+        {
+            if (!std::getline(file, line)) break;
+            auto line_vec = CSVRow{line, i, _cols_amount, _types, _separator}
+                .to_vec<T>();
+            ret.insert(ret.end(), line_vec.begin(), line_vec.end());
+        }
+
+        file.close();
+        return ret;
+    }
+
+    /**
+     * @brief Convert the CSV file in a vector of vector for each line. 
+     * Wrapper of operator std::vector<std::vector<T>>().
+     * @tparam T The requested type of each CSV field.
+     * @return std::vector<std::vector<T>> A vector of vector for each line.
+     */
+    template<typename T>
+    std::vector<std::vector<T>> to_mat()
     {
         return operator std::vector<std::vector<T>>();
+    }
+
+    /**
+     * @brief Convert the CSV file in a vector for each field. 
+     * Wrapper of operator std::vector<std::vector<T>>().
+     * @tparam T The requested type of each CSV field.
+     * @return std::vector<T> A vector for each field.
+     */
+    template<typename T>
+    std::vector<T> to_vec()
+    {
+        return operator std::vector<T>();
     }
 
 private:
