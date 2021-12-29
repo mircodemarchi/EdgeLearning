@@ -33,9 +33,15 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 
-foreach(WARN ${ANY_TARGET_WARN})
-    add_compile_options(-W${WARN})
-endforeach()
+# Options
+set(ENABLE_MLPACK false CACHE BOOL "Enable MLPACK library. Warning: not supported.")
+add_definitions(-DENABLE_MLPACK=${ENABLE_MLPACK})
+
+if (NOT ENABLE_MLPACK)
+    foreach(WARN ${ANY_TARGET_WARN})
+        add_compile_options(-W${WARN})
+    endforeach()
+endif()
 
 option(COVERAGE "Enable coverage reporting" OFF)
 add_library(coverage_config INTERFACE)
@@ -51,10 +57,6 @@ endif()
 
 enable_testing()
 include(CTest)
-
-# Options
-set(ENABLE_MLPACK false CACHE BOOL "Enable MLPACK library. Warning: not supported.")
-add_definitions(-DENABLE_MLPACK=${ENABLE_MLPACK})
 
 # Find MLPACK and dependencies
 message(STATUS "MLPACK enabled: ${ENABLE_MLPACK}")
