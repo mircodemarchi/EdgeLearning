@@ -99,13 +99,14 @@ public:
             {
                 for (const auto& v: data)
                 {
-                    _data.insert(data.end(), 
+                    _data.insert(_data.end(), 
                         v.begin(), v.begin() + _feature_size);
                 }
             }
         }
-        _dataset_size = _feature_amount * _feature_size;
         _sequence_amount = _feature_amount / _sequence_size;
+        _dataset_size = _sequence_amount * _sequence_size * _feature_size;
+        _data.resize(_dataset_size);
     } 
 
     /**
@@ -145,7 +146,7 @@ public:
                     for (std::size_t i = 0; i < _sequence_size; ++i)
                     {
                         const auto& v = m[i];
-                        _data.insert(data.end(), 
+                        _data.insert(_data.end(), 
                             v.begin(), v.begin() + _feature_size);
                     }
                 }
@@ -163,12 +164,21 @@ public:
 #if ENABLE_MLPACK
     /**
      * @brief Convert the dataset in Armadillo Vector. 
-     * @return arma::Vec<T> 
+     * @return arma::Col<T> 
      */
-    operator arma::Vec<T>()
+    operator arma::Col<T>()
     {   
-        arma::Mat<T> ret(_data);
-        ret.reshape(_feature_amount, _feature_size);
+        arma::Col<T> ret(_data);
+        return ret;
+    }
+
+    /**
+     * @brief Convert the dataset in Armadillo Vector. 
+     * @return arma::Row<T> 
+     */
+    operator arma::Row<T>()
+    {   
+        arma::Row<T> ret(_data);
         return ret;
     }
 
@@ -179,8 +189,8 @@ public:
     operator arma::Mat<T>()
     {   
         arma::Mat<T> ret(_data);
-        ret.reshape(_feature_amount, _feature_size);
-        return ret;
+        ret.reshape(_feature_size, _feature_amount);
+        return ret.t();
     }
 
     /**
@@ -189,15 +199,16 @@ public:
      */
     operator arma::Cube<T>()
     {   
-        arma::Cube<T> ret(_data);
-        ret.reshape(_sequence_amount, _sequence_size, _feature_size);
+        arma::Cube<T> ret(1, 1, _dataset_size);
+        ret.row(0) = arma::conv_to<arma::Mat<T>>::from(_data);
+        ret.reshape(_sequence_amount, _feature_size, _sequence_size);
         return ret;
     }
 
     /**
      * @brief Convert the dataset in Armadillo format. 
-     * @tparam ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Vec<T>
-     * @return ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Vec<T>
+     * @tparam ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Col<T>
+     * @return ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Col<T>
      */
     template<typename ARMA_T>
     ARMA_T to_arma()
@@ -220,7 +231,8 @@ public:
     {
         _sequence_size = std::min(s, _feature_amount);
         _sequence_amount = _feature_amount / _sequence_size;
-        _dataset_size = _sequence_size * _sequence_amount;
+        _dataset_size = _sequence_size * _sequence_amount * _feature_size;
+        _feature_amount = _dataset_size / _feature_size;
         _data.resize(_dataset_size);
     }
     const std::size_t& sequence_size() const { return _sequence_size; };
@@ -230,6 +242,12 @@ public:
      * @return std::size_t the number of entries of the dataset.
      */
     std::size_t size() const { return _feature_amount; };
+
+    /**
+     * @brief Return the data vector. 
+     * @return const std::vector<T>& The data vector reference.
+     */
+    const std::vector<T>& data() const { return _data; };
 
 private:
     std::vector<T> _data;
