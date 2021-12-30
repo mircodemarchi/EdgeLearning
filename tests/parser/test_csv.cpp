@@ -231,6 +231,15 @@ private:
         EDGE_LEARNING_TEST_EQUAL(iterator_cpy2->idx(), csv[0].idx());
         EDGE_LEARNING_TEST_EQUAL((*iterator_cpy2).line(), csv[0].line());
         EDGE_LEARNING_TEST_ASSERT(--iterator_cpy1 == iterator_cpy2);
+
+        auto iterator_cpy3 = CSVIterator{iterator};
+        EDGE_LEARNING_TEST_EQUAL(iterator_cpy3->idx(), csv[2].idx());
+        EDGE_LEARNING_TEST_EQUAL((*iterator_cpy3).line(), csv[2].line());
+        iterator_cpy3--;
+        iterator_cpy3--;
+        EDGE_LEARNING_TEST_EQUAL(iterator_cpy3->idx(), csv[0].idx());
+        EDGE_LEARNING_TEST_EQUAL((*iterator_cpy3).line(), csv[0].line());
+        EDGE_LEARNING_TEST_ASSERT(iterator_cpy1 == iterator_cpy3);
     }
 };
 
