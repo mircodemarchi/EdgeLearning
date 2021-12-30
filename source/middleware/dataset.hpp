@@ -82,8 +82,8 @@ public:
     Dataset(Mat data = Mat(), std::size_t sequence_size = 1) 
         : _data{}
         , _feature_amount{data.size()}
-        , _sequence_size{std::min(sequence_size, _feature_amount)}
     {
+        _sequence_size = std::min(sequence_size, _feature_amount);
         if (data.empty())
         {
             _feature_size = 0;
@@ -100,7 +100,7 @@ public:
                 for (const auto& v: data)
                 {
                     _data.insert(_data.end(), 
-                        v.begin(), v.begin() + _feature_size);
+                        v.begin(), v.begin() + long(_feature_size));
                 }
             }
         }
@@ -146,8 +146,8 @@ public:
                     for (std::size_t i = 0; i < _sequence_size; ++i)
                     {
                         const auto& v = m[i];
-                        _data.insert(_data.end(), 
-                            v.begin(), v.begin() + _feature_size);
+                        _data.insert(_data.end(), v.begin(), 
+                            v.begin() + long(_feature_size));
                     }
                 }
             }
