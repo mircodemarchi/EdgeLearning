@@ -227,9 +227,10 @@ private:
 
         auto iterator_cpy2 = CSVIterator{iterator_cpy1--};
         --iterator_cpy2;
-        EDGE_LEARNING_TEST_EQUAL(iterator_cpy2->idx(), csv[1].idx());
-        EDGE_LEARNING_TEST_EQUAL((*iterator_cpy2).line(), csv[1].line());
-        EDGE_LEARNING_TEST_ASSERT(iterator_cpy1 == iterator_cpy2);
+        --iterator_cpy2;
+        EDGE_LEARNING_TEST_EQUAL(iterator_cpy2->idx(), csv[0].idx());
+        EDGE_LEARNING_TEST_EQUAL((*iterator_cpy2).line(), csv[0].line());
+        EDGE_LEARNING_TEST_ASSERT(--iterator_cpy1 == iterator_cpy2);
     }
 };
 

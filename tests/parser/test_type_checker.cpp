@@ -36,12 +36,28 @@ using namespace EdgeLearning;
 class TestTypeChecker {
 public:
     void test() {
+        EDGE_LEARNING_TEST_CALL(test_type());
         EDGE_LEARNING_TEST_CALL(test_parse());
         EDGE_LEARNING_TEST_CALL(test_is());
         EDGE_LEARNING_TEST_CALL(test_convert());
     }
 
 private:
+    void test_type() {
+        std::vector<Type> type_vec({
+            Type::NONE,
+            Type::AUTO,
+            Type::FLOAT,
+            Type::INT,
+            Type::BOOL,
+            Type::STRING,
+            Type::OBJECT,
+            static_cast<Type>(100)
+        });
+        EDGE_LEARNING_TEST_PRINT(type_vec);
+    }
+
+
     void test_parse() {
         auto parser = TypeChecker();
         auto test_vec = std::map<std::string, Type>{
