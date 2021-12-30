@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_dlmath
+    test_layer
     test_model
 )
 
