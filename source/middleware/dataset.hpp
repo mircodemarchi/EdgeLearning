@@ -207,7 +207,9 @@ public:
     {   
         arma::Mat<T> ret(_data);
         ret.reshape(_feature_size, _feature_amount);
-        return ret.t();
+        // // Uncomment to transpose the matrix.
+        // return ret.t();
+        return ret;
     }
 
     /**
@@ -218,7 +220,17 @@ public:
     {   
         arma::Cube<T> ret(1, 1, _dataset_size);
         ret.row(0) = arma::conv_to<arma::Mat<T>>::from(_data);
-        ret.reshape(_sequence_amount, _feature_size, _sequence_size);
+        ret.reshape(_feature_size, _sequence_size, _sequence_amount);
+
+        // // Uncomment to transpose the cube.
+        // arma::Cube<T> ret_trans(
+        //     _sequence_size, _feature_size, _sequence_amount);
+        // for (std::size_t s = 0; s < _sequence_amount; ++s)
+        // {
+        //     ret_trans.slice(s) = ret.slice(s).t();
+        // } 
+        // return ret_trans;
+
         return ret;
     }
 

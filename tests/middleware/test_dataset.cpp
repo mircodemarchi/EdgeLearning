@@ -181,8 +181,8 @@ private:
 
         auto arma_mat = Dataset<double>(data).to_arma<arma::Mat<double>>();
         EDGE_LEARNING_TEST_PRINT(arma_mat);
-        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_rows, 5);
-        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_cols, 2);
+        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_rows, 2);
+        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_cols, 5);
 #endif // ENABLE_MLPACK
 
         Dataset<double>::Mat data_empty1{};
@@ -242,14 +242,26 @@ private:
 
         auto arma_mat = Dataset<double>(data).to_arma<arma::Mat<double>>();
         EDGE_LEARNING_TEST_PRINT(arma_mat);
-        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_rows, 4);
-        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_cols, 2);
+        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_rows, 2);
+        EDGE_LEARNING_TEST_EQUAL(arma_mat.n_cols, 4);
 
         auto arma_cub = Dataset<double>(data).to_arma<arma::Cube<double>>();
         EDGE_LEARNING_TEST_PRINT(arma_cub);
         EDGE_LEARNING_TEST_EQUAL(arma_cub.n_rows, 2);
         EDGE_LEARNING_TEST_EQUAL(arma_cub.n_cols, 2);
         EDGE_LEARNING_TEST_EQUAL(arma_cub.n_slices, 2);
+
+        Dataset<double>::Cub struct_data = {
+            {{0, 1, 2, 4}, {1, 2, 3, 4}, {2, 3, 4, 5}}, 
+            {{3, 4, 5, 6}, {4, 5, 6, 7}, {5, 6, 7, 8}}
+        };
+        auto arma_struct_cub = Dataset<double>(struct_data)
+            .to_arma<arma::Cube<double>>();
+        EDGE_LEARNING_TEST_PRINT(arma_struct_cub);
+        EDGE_LEARNING_TEST_EQUAL(arma_struct_cub.n_rows, 4);
+        EDGE_LEARNING_TEST_EQUAL(arma_struct_cub.n_cols, 3);
+        EDGE_LEARNING_TEST_EQUAL(arma_struct_cub.n_slices, 2);
+
 #endif // ENABLE_MLPACK
 
         Dataset<double>::Cub data_empty1{};
