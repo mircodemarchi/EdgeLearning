@@ -123,6 +123,17 @@ private:
         EDGE_LEARNING_TEST_EQUAL(arma_row.n_rows, 1);
         EDGE_LEARNING_TEST_EQUAL(arma_row.n_cols, 10);
 #endif // ENABLE_MLPACK
+
+        Dataset<double> d_empty;
+        EDGE_LEARNING_TEST_EQUAL(d_empty.feature_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty.data().size(), 0);
+
+        Dataset<double>::Vec data_empty1{};
+        Dataset<double> d_empty1(data_empty1);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.feature_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.data().size(), 0);
     }
 
     void test_dataset_mat() {
@@ -173,6 +184,17 @@ private:
         EDGE_LEARNING_TEST_EQUAL(arma_mat.n_rows, 5);
         EDGE_LEARNING_TEST_EQUAL(arma_mat.n_cols, 2);
 #endif // ENABLE_MLPACK
+
+        Dataset<double>::Mat data_empty1{};
+        Dataset<double> d_empty1(data_empty1);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.feature_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.data().size(), 0);
+
+        Dataset<double> d_empty2((Dataset<double>::Mat({})));
+        EDGE_LEARNING_TEST_EQUAL(d_empty2.feature_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty2.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty2.data().size(), 0);
     }
 
     void test_dataset_cub() {
@@ -229,6 +251,22 @@ private:
         EDGE_LEARNING_TEST_EQUAL(arma_cub.n_cols, 2);
         EDGE_LEARNING_TEST_EQUAL(arma_cub.n_slices, 2);
 #endif // ENABLE_MLPACK
+
+        Dataset<double>::Cub data_empty1{};
+        Dataset<double> d_empty1(data_empty1);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.feature_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty1.data().size(), 0);
+
+        Dataset<double> d_empty2((Dataset<double>::Cub({})));
+        EDGE_LEARNING_TEST_EQUAL(d_empty2.feature_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty2.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty2.data().size(), 0);
+
+        Dataset<double> d_empty3((Dataset<double>::Cub({{}})));
+        EDGE_LEARNING_TEST_EQUAL(d_empty3.feature_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_empty3.sequence_size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_empty3.data().size(), 0);
     }
 };
 

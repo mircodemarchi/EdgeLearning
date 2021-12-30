@@ -53,23 +53,39 @@ public:
     using Cub = std::vector<Mat>;
 
     /**
+     * @brief Empty construct a new Dataset object.
+     */
+    Dataset()
+        : _data{}
+        , _feature_size{0}
+        , _sequence_size{0}
+        , _dataset_size{0}
+        , _feature_amount{0}
+        , _sequence_amount{0}
+    {
+
+    }
+
+    /**
      * @brief Construct a new Dataset object.
      * @param data          The vector dataset. 
      * @param feature_size  The size of the features in number of elements. 
      * @param sequence_size The size of the sequence in number of feature entry. 
      */
-    Dataset(Vec data = Vec(), 
+    Dataset(Vec data, 
         std::size_t feature_size = 1, 
         std::size_t sequence_size = 1)
         : _data{data}
         , _feature_size{std::min(feature_size, _data.size())}
         , _sequence_size{std::min(sequence_size, 
-            std::size_t(_data.size() / _feature_size))}
+            std::size_t(_data.size() / std::max(_feature_size, size_t(1))))}
         , _dataset_size{
-            std::size_t(_data.size() / (_feature_size * _sequence_size))
+            std::size_t(_data.size() 
+                / std::max(_feature_size * _sequence_size, size_t(1)))
             * (_feature_size * _sequence_size)}
-        , _feature_amount{_dataset_size / _feature_size}
-        , _sequence_amount{_dataset_size / (_feature_size * _sequence_size)}
+        , _feature_amount{_dataset_size / std::max(_feature_size, size_t(1))}
+        , _sequence_amount{_dataset_size 
+            / std::max(_feature_size * _sequence_size, size_t(1))}
     {
         _data.resize(_dataset_size);
     }
@@ -79,7 +95,7 @@ public:
      * @param data          The matrix dataset. 
      * @param sequence_size The size of the sequence in number of feature entry. 
      */
-    Dataset(Mat data = Mat(), std::size_t sequence_size = 1) 
+    Dataset(Mat data, std::size_t sequence_size = 1) 
         : _data{}
         , _feature_amount{data.size()}
     {
@@ -104,7 +120,8 @@ public:
                 }
             }
         }
-        _sequence_amount = _feature_amount / _sequence_size;
+        _sequence_amount = _feature_amount 
+            / std::max(_sequence_size, size_t(1));
         _dataset_size = _sequence_amount * _sequence_size * _feature_size;
         _data.resize(_dataset_size);
     } 
@@ -113,7 +130,7 @@ public:
      * @brief Construct a new Dataset object.
      * @param data The cube dataset. 
      */
-    Dataset(Cub data = Cub()) 
+    Dataset(Cub data) 
         : _data{}
         , _sequence_amount{data.size()}
     {
