@@ -45,6 +45,21 @@ private:
     Model _m;
 };
 
+class CustomLayerNoName: public Layer {
+public:
+    CustomLayerNoName() 
+        : Layer(_m)
+        , _m{"model_layer_test"}
+    { }
+    void init(RneType& rne) override { (void) rne; }
+    void forward(NumType* inputs) override { (void) inputs; }
+    void reverse(NumType* gradients) override { (void) gradients; }
+    void print() const override {}
+
+private:
+    Model _m;
+};
+
 
 class TestLayer {
 public:
@@ -69,6 +84,12 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.gradient(0), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l.gradient(10), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l.name(), "custom_layer_test");
+
+        EDGE_LEARNING_TEST_EXECUTE(auto l = CustomLayerNoName());
+        EDGE_LEARNING_TEST_TRY(auto l = CustomLayerNoName());
+        auto l_noname = CustomLayerNoName();
+        EDGE_LEARNING_TEST_PRINT(l_noname.name());
+        EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
     }
 
 };

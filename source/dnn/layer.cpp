@@ -24,13 +24,20 @@
 
 #include "layer.hpp"
 
+#include "dlmath.hpp"
+
 
 namespace EdgeLearning {
 
 Layer::Layer(Model& model, std::string name)
     : _model(model)
     , _name{std::move(name)}
-{ }
+{ 
+    if (_name.empty())
+    {
+        _name = "layer_" + std::to_string(DLMath::unique());
+    }
+}
 
 
 } // namespace EdgeLearning

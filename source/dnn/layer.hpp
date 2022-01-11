@@ -46,8 +46,8 @@ class Model;
 class Layer 
 {
 public:
-    Layer(Model& model, std::string name);
-    virtual ~Layer() = default;
+    Layer(Model& model, std::string name = std::string());
+    virtual ~Layer() {};
 
     /**
      * \brief Virtual method used to describe how a layer should be 
