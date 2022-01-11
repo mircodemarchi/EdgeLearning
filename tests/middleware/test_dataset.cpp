@@ -36,6 +36,9 @@ public:
         EDGE_LEARNING_TEST_CALL(test_dataset_vec());
         EDGE_LEARNING_TEST_CALL(test_dataset_mat());
         EDGE_LEARNING_TEST_CALL(test_dataset_cub());
+        EDGE_LEARNING_TEST_CALL(test_dataset_entry());
+        EDGE_LEARNING_TEST_CALL(test_dataset_labels());
+        EDGE_LEARNING_TEST_CALL(test_dataset_trainset());
     }
 private:
 
@@ -279,6 +282,337 @@ private:
         EDGE_LEARNING_TEST_EQUAL(d_empty3.feature_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(d_empty3.sequence_size(), 1);
         EDGE_LEARNING_TEST_EQUAL(d_empty3.data().size(), 0);
+    }
+
+    void test_dataset_entry() {
+        Dataset<double>::Vec data_vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_vec));
+        Dataset<double> d_vec(data_vec, 2);
+
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.entry(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry(2)[1], 5);
+
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.entry_seq(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry_seq(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry_seq(2)[1], 5);
+        d_vec.sequence_size(2);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry_seq(0).size(), 4);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.entry_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry_seq(1)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.entry_seq(1)[1], 5);
+
+        Dataset<double>::Mat data_mat = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_mat));
+        Dataset<double> d_mat(data_mat);
+
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.entry(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry(2)[1], 5);
+
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.entry_seq(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(2)[1], 5);
+        d_mat.sequence_size(2);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(0).size(), 4);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.entry_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(1)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(1)[1], 5);
+
+        Dataset<double>::Cub data_cub = {{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_cub));
+        Dataset<double> d_cub(data_cub);
+
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.entry(4).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry(2)[1], 5);
+
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(0).size(), 4);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.entry_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(1)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(1)[1], 5);
+        d_mat.sequence_size(4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(0).size(), 8);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.entry_seq(1).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(0)[4], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.entry_seq(0)[5], 5);
+    }
+
+    void test_dataset_labels() {
+        Dataset<double>::Vec data_vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_vec, 2, 1, {1}));
+        Dataset<double> d_vec(data_vec, 2, 1, {1});
+
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_idx()[0], 1);
+        d_vec.labels_idx({1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_idx()[0], 1);
+        d_vec.labels_idx({0, 1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_idx().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_idx()[1], 1);
+        d_vec.labels_idx({});
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels_idx().empty());
+
+        d_vec.labels_idx({0, 1});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels(2)[1], 5);
+        d_vec.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels(2)[0], 5);
+        d_vec.labels_idx({0});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels(2)[0], 4);
+        d_vec.labels_idx({});
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels(0).empty());
+
+        d_vec.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_seq(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels_seq(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_seq(2)[0], 5);
+        d_vec.sequence_size(2);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_seq(1)[0], 5);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.labels_seq(1)[1], 7);
+        d_vec.labels_idx({});
+        EDGE_LEARNING_TEST_ASSERT(d_vec.labels_seq(0).empty());
+
+        Dataset<double>::Mat data_mat = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_mat, 1, {1}));
+        Dataset<double> d_mat(data_mat, 1, {1});
+
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_idx()[0], 1);
+        d_mat.labels_idx({1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_idx()[0], 1);
+        d_mat.labels_idx({0, 1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_idx().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_idx()[1], 1);
+
+        d_mat.labels_idx({0, 1});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.labels(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels(2)[1], 5);
+        d_mat.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.labels(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels(2)[0], 5);
+        d_mat.labels_idx({0});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.labels(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels(2)[0], 4);
+        d_mat.labels_idx({});
+        EDGE_LEARNING_TEST_ASSERT(d_mat.labels(0).empty());
+
+        d_mat.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_seq(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.labels_seq(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_seq(2)[0], 5);
+        d_mat.sequence_size(2);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.labels_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_seq(1)[0], 5);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.labels_seq(1)[1], 7);
+        d_mat.labels_idx({});
+        EDGE_LEARNING_TEST_ASSERT(d_mat.labels_seq(0).empty());
+
+        Dataset<double>::Cub data_cub = {{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_cub, {1}));
+        Dataset<double> d_cub(data_cub, {1});
+
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_idx()[0], 1);
+        d_cub.labels_idx({1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_idx()[0], 1);
+        d_cub.labels_idx({0, 1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_idx().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_idx()[1], 1);
+
+        d_cub.labels_idx({0, 1});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.labels(4).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels(2)[1], 5);
+        d_cub.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.labels(4).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels(2)[0], 5);
+        d_cub.labels_idx({0});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.labels(4).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels(2)[0], 4);
+        d_cub.labels_idx({});
+        EDGE_LEARNING_TEST_ASSERT(d_cub.labels(0).empty());
+
+        d_cub.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.labels_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_seq(1)[0], 5);
+        d_cub.sequence_size(4);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_seq(0).size(), 4);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.labels_seq(1).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_seq(0)[0], 1);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.labels_seq(0)[1], 3);
+        d_cub.labels_idx({});
+        EDGE_LEARNING_TEST_ASSERT(d_cub.labels_seq(0).empty());
+    }
+
+    void test_dataset_trainset() {
+        Dataset<double>::Vec data_vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_vec, 2, 1, {1}));
+        Dataset<double> d_vec(data_vec, 2, 1, {1});
+
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_idx()[0], 0);
+        d_vec.labels_idx({1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_idx()[0], 0);
+        d_vec.labels_idx({0, 1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_ASSERT(d_vec.trainset_idx().empty());
+        d_vec.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_idx().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_idx()[1], 1);
+
+        d_vec.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(
+            d_vec.trainset(0).size(), d_vec.feature_size());
+        EDGE_LEARNING_TEST_ASSERT(d_vec.trainset(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset(2)[1], 5);
+        d_vec.labels_idx({0});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.trainset(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset(2)[0], 5);
+        d_vec.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.trainset(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset(2)[0], 4);
+        d_vec.labels_idx({0, 1});
+        EDGE_LEARNING_TEST_ASSERT(d_vec.trainset(0).empty());
+
+        d_vec.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_seq(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.trainset_seq(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_seq(2)[0], 4);
+        d_vec.sequence_size(2);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_vec.trainset_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_seq(1)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_vec.trainset_seq(1)[1], 6);
+        d_vec.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(
+            d_vec.trainset_seq(0).size(), 
+            d_vec.sequence_size() * d_vec.feature_size());
+
+        Dataset<double>::Mat data_mat = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_mat, 1, {1}));
+        Dataset<double> d_mat(data_mat, 1, {1});
+
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_idx()[0], 0);
+        d_mat.labels_idx({1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_idx()[0], 0);
+        d_mat.labels_idx({0, 1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_ASSERT(d_mat.trainset_idx().empty());
+        d_mat.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_idx().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_idx()[1], 1);
+
+        d_mat.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(
+            d_mat.trainset(0).size(), d_mat.feature_size());
+        EDGE_LEARNING_TEST_ASSERT(d_mat.trainset(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset(2)[1], 5);
+        d_mat.labels_idx({0});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.trainset(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset(2)[0], 5);
+        d_mat.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.trainset(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset(2)[0], 4);
+        d_mat.labels_idx({0, 1});
+        EDGE_LEARNING_TEST_ASSERT(d_mat.trainset(0).empty());
+
+        d_mat.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_seq(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.trainset_seq(5).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_seq(2)[0], 4);
+        d_mat.sequence_size(2);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_mat.trainset_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_seq(1)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_mat.trainset_seq(1)[1], 6);
+        d_mat.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(
+            d_mat.trainset_seq(0).size(), 
+            d_mat.sequence_size() * d_mat.feature_size());
+
+        Dataset<double>::Cub data_cub = {{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}};
+        EDGE_LEARNING_TEST_TRY(Dataset<double> d(data_cub, {1}));
+        Dataset<double> d_cub(data_cub, {1});
+
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_idx()[0], 0);
+        d_cub.labels_idx({1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_idx()[0], 0);
+        d_cub.labels_idx({0, 1, 2, 3, 4, 5, 6});
+        EDGE_LEARNING_TEST_ASSERT(d_cub.trainset_idx().empty());
+        d_cub.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_idx().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_idx()[1], 1);
+
+        d_cub.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.trainset(4).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset(2)[0], 4);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset(2)[1], 5);
+        d_cub.labels_idx({0});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.trainset(4).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset(2)[0], 5);
+        d_cub.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset(0).size(), 1);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.trainset(4).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset(2)[0], 4);
+        d_cub.labels_idx({0, 1});
+        EDGE_LEARNING_TEST_ASSERT(d_cub.trainset(0).empty());
+
+        d_cub.labels_idx({1});
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_seq(0).size(), 2);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.trainset_seq(2).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_seq(1)[0], 4);
+        d_cub.sequence_size(4);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_seq(0).size(), 4);
+        EDGE_LEARNING_TEST_ASSERT(d_cub.trainset_seq(1).empty());
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_seq(0)[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(d_cub.trainset_seq(0)[1], 2);
+        d_cub.labels_idx({});
+        EDGE_LEARNING_TEST_EQUAL(
+            d_cub.trainset_seq(0).size(),
+            d_cub.sequence_size() * d_cub.feature_size());
     }
 };
 
