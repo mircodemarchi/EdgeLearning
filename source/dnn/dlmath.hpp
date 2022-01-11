@@ -90,6 +90,12 @@ public:
         return dst;
     }
 
+    static size_t unique()
+    {
+        static std::size_t id = 0;
+        return id++;
+    }
+
     /**
      * \brief Element wise summation between two arrays.
      * \tparam T     Type of each source and destination elements.

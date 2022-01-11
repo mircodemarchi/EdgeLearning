@@ -40,6 +40,7 @@ class TestDLMath {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
+        EDGE_LEARNING_TEST_CALL(test_unique());
         EDGE_LEARNING_TEST_CALL(test_arr_sum());
         EDGE_LEARNING_TEST_CALL(test_arr_mul());
         EDGE_LEARNING_TEST_CALL(test_matarr_mul());
@@ -85,6 +86,13 @@ private:
         }
         EDGE_LEARNING_TEST_PRINT("Normal distribution >0 count similar to <=0 count:"
             + std::to_string(gt1_count) + ", " + std::to_string(lt1_count));
+    }
+
+    void test_unique() {
+        for (std::size_t i = 0; i < 100; ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(DLMath::unique(), i);
+        }
     }
 
     void test_arr_sum() {
