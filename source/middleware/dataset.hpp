@@ -81,7 +81,7 @@ public:
     Dataset(Vec data, 
         std::size_t feature_size = 1, 
         std::size_t sequence_size = 1,
-        std::vector<std::size_t> labels_idx = {})
+        std::set<std::size_t> labels_idx = {})
         : _data{data}
         , _entry_labels_cache{}
         , _entry_trainset_cache{}
@@ -96,20 +96,20 @@ public:
         , _sequence_amount{_dataset_size 
             / std::max(_feature_size * _sequence_size, size_t(1))}
         , _labels_idx{labels_idx}
-        , _trainset_idx{_feature_size - _labels_idx.size()}
+        , _trainset_idx{}
     {
         _data.resize(_dataset_size);
 
-        _labels_idx.erase(std::remove_if(
-            _labels_idx.begin(), 
-            _labels_idx.end(),
-            [](std::size_t x){return x >= _feature_size;}));
-        std::size_t ts_i = 0;
+        // Init indexes set.
+        for (auto it = _labels_idx.begin(); it != _labels_idx.end(); )
+        {
+            if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
+        }
         for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx[ts_i++] = idx_val;
+                _trainset_idx.insert(idx_val);
             }
         }
     }
@@ -121,7 +121,7 @@ public:
      * @param labels_idx The index of the feature to use as ground truth.
      */
     Dataset(Mat data, std::size_t sequence_size = 1,
-        std::vector<std::size_t> labels_idx = {}) 
+        std::set<std::size_t> labels_idx = {}) 
         : _data{}
         , _entry_labels_cache{}
         , _entry_trainset_cache{}
@@ -155,17 +155,16 @@ public:
         _dataset_size = _sequence_amount * _sequence_size * _feature_size;
         _data.resize(_dataset_size);
 
-        _labels_idx.erase(std::remove_if(
-            _labels_idx.begin(), 
-            _labels_idx.end(),
-            [](std::size_t x){return x >= _feature_size;}));
-        _trainset_idx.resize(_feature_size - _labels_idx.size());
-        std::size_t ts_i = 0;
+        // Init indexes set.
+        for (auto it = _labels_idx.begin(); it != _labels_idx.end(); )
+        {
+            if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
+        }
         for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx[ts_i++] = idx_val;
+                _trainset_idx.insert(idx_val);
             }
         }
     } 
@@ -176,7 +175,7 @@ public:
      * @param labels_idx The index of the feature to use as ground truth.
      */
     Dataset(Cub data,
-        std::vector<std::size_t> labels_idx = {}) 
+        std::set<std::size_t> labels_idx = {}) 
         : _data{}
         , _entry_labels_cache{}
         , _entry_trainset_cache{}
@@ -222,17 +221,16 @@ public:
         _feature_amount = _sequence_amount * _sequence_size;
         _dataset_size = _feature_amount * _feature_size;
 
-        _labels_idx.erase(std::remove_if(
-            _labels_idx.begin(), 
-            _labels_idx.end(),
-            [](std::size_t x){return x >= _feature_size;}));
-        _trainset_idx.resize(_feature_size - _labels_idx.size());
-        std::size_t ts_i = 0;
+        // Init indexes set.
+        for (auto it = _labels_idx.begin(); it != _labels_idx.end(); )
+        {
+            if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
+        }
         for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx[ts_i++] = idx_val;
+                _trainset_idx.insert(idx_val);
             }
         }
     } 
@@ -375,9 +373,10 @@ public:
         return _entry_trainset_cache;
     }
 
-    const std::vector<std::size_t>& trainset_idx() const 
+    std::vector<std::size_t> trainset_idx() const 
     { 
-        return _trainset_idx; 
+        return std::vector<std::size_t>(
+            _trainset_idx.begin(), _trainset_idx.end());
     }
 
     const std::vector<T>& trainset(std::size_t row_idx)
@@ -387,23 +386,12 @@ public:
             _entry_trainset_cache.clear();
             return _entry_trainset_cache;
         } 
-        _entry_trainset_cache.resize(_trainset_idx.size());
-
         if (_trainset_idx.size() == _feature_size)
         {
-            std::copy(
-                _data.begin() + row_idx * _feature_size,
-                _data.begin() + row_idx * _feature_size + _feature_size,
-                _entry_trainset_cache.begin());
-            return _entry_trainset_cache;
+            return entry(row_idx);
         }
-
-        auto data_entry_idx = row_idx * _feature_size;
-        for (std::size_t i = 0; i < _trainset_idx.size(); ++i)
-        {
-            _entry_trainset_cache[i] = _data[data_entry_idx + _trainset_idx[i]];
-        }
-        return _entry_trainset_cache;
+        return field_from_row_idx(
+            _entry_trainset_cache, row_idx, _trainset_idx);
     }
 
     const std::vector<T>& trainset_seq(std::size_t seq_idx)
@@ -412,50 +400,33 @@ public:
         {
             _entry_trainset_cache.clear();
             return _entry_trainset_cache;
-        } 
-        _entry_trainset_cache.resize(_sequence_size * _trainset_idx.size());
-
+        }
         if (_trainset_idx.size() == _feature_size)
         {
-            std::copy(
-                _data.begin() + seq_idx * _sequence_size * _feature_size,
-                _data.begin() + seq_idx * _sequence_size * _feature_size 
-                    + _sequence_size * _feature_size,
-                _entry_trainset_cache.begin());
-            return _entry_trainset_cache;
+            return entry_seq(seq_idx);
         }
+        return field_from_seq_idx(
+            _entry_trainset_cache, seq_idx, _trainset_idx);
+    }
 
-        auto data_entry_idx = seq_idx * _sequence_size * _feature_size;
-        for (std::size_t t = 0; t < _sequence_size; ++t)
+    std::vector<std::size_t> labels_idx() const 
+    { 
+        return std::vector<std::size_t>(_labels_idx.begin(), _labels_idx.end()); 
+    }
+
+    void labels_idx(std::set<std::size_t> set) 
+    { 
+        _labels_idx = set;
+        for (auto it = _labels_idx.begin(); it != _labels_idx.end(); )
         {
-            for (std::size_t i = 0; i < _trainset_idx.size(); ++i)
-            {
-                _entry_trainset_cache[i] 
-                    = _data[data_entry_idx + _trainset_idx[i]];
-            }
-            data_entry_idx += _feature_size;
+            if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
         }
-        return _entry_trainset_cache;
-    }
-
-    const std::vector<std::size_t>& labels_idx() const 
-    { 
-        return _labels_idx; 
-    }
-
-    void labels_idx(const std::vector<std::size_t>& v) 
-    { 
-        _labels_idx = v;
-        _labels_idx.erase(std::remove_if(
-            _labels_idx.begin(), 
-            _labels_idx.end(),
-            [](std::size_t x){return x >= _feature_size;}));
-        std::size_t ts_i = 0;
+        _trainset_idx.clear();
         for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx[ts_i++] = idx_val;
+                _trainset_idx.insert(idx_val);
             }
         }
     }
@@ -467,14 +438,7 @@ public:
             _entry_labels_cache.clear();
             return _entry_labels_cache;
         } 
-        _entry_labels_cache.resize(_labels_idx.size());
-
-        auto data_entry_idx = row_idx * _feature_size;
-        for (std::size_t i = 0; i < _labels_idx.size(); ++i)
-        {
-            _entry_labels_cache[i] = _data[data_entry_idx + _labels_idx[i]];
-        }
-        return _entry_labels_cache;
+        return field_from_row_idx(_entry_labels_cache, row_idx, _labels_idx);
     }
 
     const std::vector<T>& labels_seq(std::size_t seq_idx)
@@ -484,21 +448,44 @@ public:
             _entry_labels_cache.clear();
             return _entry_labels_cache;
         } 
-        _entry_labels_cache.resize(_sequence_size * _labels_idx.size());
-
-        auto data_entry_idx = seq_idx * _sequence_size * _feature_size;
-        for (std::size_t t = 0; t < _sequence_size; ++t)
-        {
-            for (std::size_t i = 0; i < _labels_idx.size(); ++i)
-            {
-                _entry_labels_cache[i] = _data[data_entry_idx + _labels_idx[i]];
-            }
-            data_entry_idx += _feature_size;
-        }
-        return _entry_labels_cache;
+        return field_from_seq_idx(_entry_labels_cache, seq_idx, _labels_idx);
     }
 
 private:
+    const std::vector<T>& field_from_row_idx(
+        std::vector<T>& dst, 
+        std::size_t row_idx, 
+        const std::set<std::size_t>& set_idx)
+    {
+        dst.resize(set_idx.size());
+        auto data_entry_idx = row_idx * _feature_size;
+        std::size_t i = 0;
+        for (const auto& idx: set_idx)
+        {
+            dst[i++] = _data[data_entry_idx + idx];
+        }
+        return dst;
+    }
+
+    const std::vector<T>& field_from_seq_idx(
+        std::vector<T>& dst, 
+        std::size_t seq_idx, 
+        const std::set<std::size_t>& set_idx)
+    {
+        dst.resize(_sequence_size * set_idx.size());
+        auto data_entry_idx = seq_idx * _sequence_size * _feature_size;
+        std::size_t i = 0;
+        for (std::size_t t = 0; t < _sequence_size; ++t)
+        {
+            for (const auto& idx: set_idx)
+            {
+                dst[i++] = _data[data_entry_idx + idx];
+            }
+            data_entry_idx += _feature_size;
+        }
+        return dst;
+    }
+
     std::vector<T> _data;
     std::vector<T> _entry_labels_cache;
     std::vector<T> _entry_trainset_cache;
