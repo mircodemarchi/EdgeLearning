@@ -48,7 +48,25 @@ namespace EdgeLearning {
 class Model
 {
 public:
-    Model(std::string name);
+    /**
+     * @brief Construct a new Model object.
+     * @param name 
+     */
+    Model(std::string name = std::string());
+
+    /**
+     * @brief Assignment operator of a Model object.
+     * @param obj 
+     * @return Model& 
+     */
+    Model& operator=(Model obj);
+
+    /**
+     * @brief Swap method of Model object.
+     * @param lop 
+     * @param rop 
+     */
+    friend void swap(Model& lop, Model& rop);
 
     /**
      * \brief Append a layer to the model, forward its parameters to the layer 
@@ -64,7 +82,7 @@ public:
     Layer_t& add_node(T&&... args)
     {
         _layers.push_back(
-            std::make_unique<Layer_t>(*this, std::forward<T>(args)...)
+            std::make_shared<Layer_t>(*this, std::forward<T>(args)...)
         );
         return reinterpret_cast<Layer_t&>(*_layers.back());
     }
@@ -133,7 +151,7 @@ private:
     friend class Layer;
 
     std::string _name;                           ///< Model name;
-    std::vector<std::unique_ptr<Layer>> _layers; ///< List of layers pointers;
+    std::vector<std::shared_ptr<Layer>> _layers; ///< List of layers pointers;
 };
 
 } // namespace EdgeLearning

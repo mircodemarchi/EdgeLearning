@@ -24,15 +24,35 @@
 
 #include "model.hpp"
 
+#include "dlmath.hpp"
+
 #include <cstdio>
 #include <cassert>
 
 namespace EdgeLearning {
 
 Model::Model(std::string name)
-    : _name{name}
+    : _name{std::move(name)}
     , _layers{}
-{ }
+{ 
+    if (_name.empty())
+    {
+        _name = "model_" + std::to_string(DLMath::unique());
+    }
+}
+
+Model& Model::operator=(Model obj)
+{
+    swap(*this, obj);
+    return *this;
+}
+
+void swap(Model& lop, Model& rop)
+{
+    using std::swap;
+    swap(lop._name, rop._name);
+    swap(lop._layers, rop._layers);
+}
 
 void Model::create_edge(Layer& dst, Layer& src)
 {

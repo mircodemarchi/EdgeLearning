@@ -39,6 +39,7 @@ using namespace EdgeLearning;
 class TestModel {
 public:
     void test() {
+        EDGE_LEARNING_TEST_CALL(test_model());
         EDGE_LEARNING_TEST_CALL(test_classifier_model());
         EDGE_LEARNING_TEST_CALL(test_classifier_model_predict());
         EDGE_LEARNING_TEST_CALL(test_regressor_model());
@@ -49,6 +50,29 @@ public:
 private:
     const size_t BATCH_SIZE = 2;
     const size_t EPOCHS     = 50;
+
+    void test_model() 
+    {
+        EDGE_LEARNING_TEST_EXECUTE(auto m = Model{"model"});
+        EDGE_LEARNING_TEST_TRY(auto m = Model{"model"});
+        Model m{"model"};
+        EDGE_LEARNING_TEST_EQUAL(m.name(), "model");
+
+        EDGE_LEARNING_TEST_EXECUTE(auto m_noname = Model{});
+        EDGE_LEARNING_TEST_TRY(auto m_noname = Model{});
+        Model m_noname{};
+        EDGE_LEARNING_TEST_ASSERT(!m_noname.name().empty());
+
+        EDGE_LEARNING_TEST_EXECUTE(Model m_copy{m});
+        EDGE_LEARNING_TEST_TRY(Model m_copy{m});
+        Model m_copy{m};
+        EDGE_LEARNING_TEST_EQUAL(m_copy.name(), "model");
+
+        EDGE_LEARNING_TEST_EXECUTE(Model m_assign; m_assign = m);
+        EDGE_LEARNING_TEST_TRY(Model m_assign; m_assign = m);
+        Model m_assign; m_assign = m;
+        EDGE_LEARNING_TEST_EQUAL(m_assign.name(), "model");
+    }
 
     void test_classifier_model() {
         // Input definition.
