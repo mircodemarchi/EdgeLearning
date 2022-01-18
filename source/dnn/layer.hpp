@@ -34,6 +34,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 
 namespace EdgeLearning {
@@ -46,8 +47,24 @@ class Model;
 class Layer 
 {
 public:
+    /**
+     * @brief Construct a new Layer object.
+     * @param model 
+     * @param name 
+     */
     Layer(Model& model, std::string name = std::string());
+
+    /**
+     * @brief Destroy the Layer object.
+     */
     virtual ~Layer() {};
+
+    /**
+     * @brief Assignment operator of a Layer object.
+     * @param obj 
+     * @return Layer& 
+     */
+    Layer& operator=(const Layer& obj);
 
     /**
      * \brief Virtual method used to describe how a layer should be 

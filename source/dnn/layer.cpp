@@ -24,6 +24,8 @@
 
 #include "layer.hpp"
 
+#include "model.hpp"
+
 #include "dlmath.hpp"
 
 
@@ -39,5 +41,14 @@ Layer::Layer(Model& model, std::string name)
     }
 }
 
+Layer& Layer::operator=(const Layer& obj)
+{
+    if (this == &obj) return *this;
+    _model = obj._model;
+    _name = obj._name;
+    _antecedents = obj._antecedents;
+    _subsequents = obj._subsequents;
+    return *this;
+}
 
 } // namespace EdgeLearning
