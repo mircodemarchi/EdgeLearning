@@ -29,23 +29,24 @@
 #ifndef EDGE_LEARNING_DNN_CCE_LOSS_HPP
 #define EDGE_LEARNING_DNN_CCE_LOSS_HPP
 
-#include "layer.hpp"
+#include "loss.hpp"
 #include "model.hpp"
 
 #include <string>
 
 namespace EdgeLearning {
 
-class CCELossLayer : public Layer {
+class CCELossLayer : public LossLayer {
 public:
-    CCELossLayer(Model& model, std::string name, uint16_t input_size, 
-        size_t batch_size);
-
     /**
-     * \brief No initiallization is needed for this layer.
-     * \param rne
+     * @brief Construct a new CCELossLayer object.
+     * @param model 
+     * @param name 
+     * @param input_size 
+     * @param batch_size 
      */
-    void init(RneType& rne) override { (void) rne; };
+    CCELossLayer(Model& model, std::string name = std::string(), 
+        uint16_t input_size = 0, size_t batch_size = 1);
 
     void forward(NumType* inputs) override;
 
@@ -56,20 +57,6 @@ public:
      */
     void reverse(NumType* gradients = nullptr) override;
 
-    void print() const override;
-
-    /**
-     * \brief Set the target object.
-     * During training, this must be set to the expected target distribution for 
-     * a given sample.
-     * \param target
-     */
-    void set_target(NumType const* target);
-
-    NumType accuracy() const;
-    NumType avg_loss() const;
-    void reset_score();
-
 private:
     /**
      * \brief Find the argument of _target array that is active.
@@ -77,22 +64,8 @@ private:
      */
     size_t _argactive() const;
 
-    uint16_t _input_size;
-    NumType _loss;
-    const NumType* _target;
-    NumType* _last_input;
-
-    std::vector<NumType> _gradients;
-
-    NumType _inv_batch_size; ///< Used to scale with batch size.
-
     // Last active classification in the target one-hot encoding. 
     size_t _active; 
-    NumType _cumulative_loss{0.0};
-    
-    // Running counts of correct and incorrect predictions.
-    size_t _correct{0};
-    size_t _incorrect{0};
 };
 
 } // namespace EdgeLearning

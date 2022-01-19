@@ -34,15 +34,10 @@ namespace EdgeLearning {
 
 CCELossLayer::CCELossLayer(Model& model, std::string name, 
     uint16_t input_size, size_t batch_size)
-    : Layer(model, name)
-    , _input_size{input_size}
-    , _inv_batch_size{NumType{1.0} / batch_size}
+    : LossLayer(model, name, _input_size, batch_size)
+    , _active{}
 { 
-    /* 
-     * When we deliver a gradient back, we deliver just the loss gradient with
-     * respect to any input and the index that was "hot" in the second argument.
-     */
-    _gradients.resize(_input_size);
+
 }
 
 void CCELossLayer::forward(NumType* inputs)
@@ -80,35 +75,6 @@ void CCELossLayer::reverse(NumType* gradients)
     {
         l->reverse(_gradients.data());
     }
-}
-
-void CCELossLayer::print() const
-{
-    std::printf("avg loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
-}
-
-void CCELossLayer::set_target(NumType const* target)
-{
-    _target = target;
-}
-
-NumType CCELossLayer::accuracy() const
-{
-    return static_cast<NumType>(_correct) 
-         / static_cast<NumType>(_correct + _incorrect);
-}
-
-NumType CCELossLayer::avg_loss() const
-{
-    return static_cast<NumType>(_cumulative_loss) 
-         / static_cast<NumType>(_correct + _incorrect);
-}
-
-void CCELossLayer::reset_score()
-{
-    _cumulative_loss = 0.0;
-    _correct         = 0.0;
-    _incorrect       = 0.0;
 }
 
 size_t CCELossLayer::_argactive() const
