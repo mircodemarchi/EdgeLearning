@@ -30,16 +30,10 @@ namespace EdgeLearning {
 
 MSELossLayer::MSELossLayer(Model& model, std::string name, 
     uint16_t input_size, size_t batch_size, NumType loss_tolerance)
-    : Layer(model, name)
-    , _input_size{input_size}
+    : LossLayer(model, name, input_size, batch_size)
     , _loss_tolerance{loss_tolerance}
-    , _inv_batch_size{NumType{1.0} / batch_size}
 { 
-    /* 
-     * When we deliver a gradient back, we deliver just the loss gradient with
-     * respect to any input and the index that was "hot" in the second argument.
-     */
-    _gradients.resize(_input_size);
+
 }
 
 void MSELossLayer::forward(NumType* inputs)
@@ -73,35 +67,5 @@ void MSELossLayer::reverse(NumType* gradients)
         l->reverse(_gradients.data());
     }
 }
-
-void MSELossLayer::print() const
-{
-    std::printf("Avg Loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
-}
-
-void MSELossLayer::set_target(NumType const* target)
-{
-    _target = target;
-}
-
-NumType MSELossLayer::accuracy() const
-{
-    return static_cast<NumType>(_correct) 
-         / static_cast<NumType>(_correct + _incorrect);
-}
-
-NumType MSELossLayer::avg_loss() const
-{
-    return static_cast<NumType>(_cumulative_loss) 
-         / static_cast<NumType>(_correct + _incorrect);
-}
-
-void MSELossLayer::reset_score()
-{
-    _cumulative_loss = 0.0;
-    _correct         = 0.0;
-    _incorrect       = 0.0;
-}
-
 
 } // namespace EdgeLearning

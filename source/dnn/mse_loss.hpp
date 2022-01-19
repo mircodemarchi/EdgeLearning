@@ -29,14 +29,15 @@
 #ifndef EDGE_LEARNING_DNN_MSE_LOSS_HPP
 #define EDGE_LEARNING_DNN_MSE_LOSS_HPP
 
-#include "layer.hpp"
+#include "loss.hpp"
+
 #include "model.hpp"
 
 #include <string>
 
 namespace EdgeLearning {
 
-class MSELossLayer : public Layer {
+class MSELossLayer : public LossLayer {
 public:
     MSELossLayer(Model& model, std::string name, uint16_t input_size, 
         size_t batch_size, NumType loss_tolerance=0.1);
@@ -55,36 +56,10 @@ public:
      * \param gradients
      */
     void reverse(NumType* gradients = nullptr) override;
-
-    void print() const override;
-
-    /**
-     * \brief Set the target object.
-     * During training, this must be set to the expected target distribution for 
-     * a given sample.
-     * \param target
-     */
-    void set_target(NumType const* target);
-
-    NumType accuracy() const;
-    NumType avg_loss() const;
-    void reset_score();
-
-private:
-    uint16_t _input_size;
-    NumType _loss;
-    NumType _cumulative_loss{0.0};
-    NumType _loss_tolerance;
-    const NumType* _target;
-    NumType* _last_input;
-
-    std::vector<NumType> _gradients;
-
-    NumType _inv_batch_size; ///< Used to scale with batch size.
     
-    // Running counts of correct and incorrect predictions.
-    size_t _correct{0};
-    size_t _incorrect{0};
+private:
+    /// @brief Tollerange to ensure that the prediction produced is correct. 
+    NumType _loss_tolerance;
 };
 
 } // namespace EdgeLearning
