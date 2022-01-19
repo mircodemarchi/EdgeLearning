@@ -103,7 +103,16 @@ public:
      * @return NumType 
      */
     NumType avg_loss() const;
+
+    /**
+     * @brief Reset loss statistics. 
+     */
     void reset_score();
+
+    /**
+     * @brief Print loss info.
+     */
+    virtual void print() const override;
 
 protected:
     uint16_t _input_size;
