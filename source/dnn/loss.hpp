@@ -30,12 +30,9 @@
 #define EDGE_LEARNING_DNN_LOSS_HPP
 
 #include "layer.hpp"
-#include "model.hpp"
 
 
 namespace EdgeLearning {
-
-class Model;
 
 /**
  * \brief Base class of computational LossLayers in a model.
@@ -61,6 +58,18 @@ public:
      * \param rne Not used.
      */
     void init(RneType& rne) override { (void) rne; };
+
+    /**
+     * @brief Method inheritance. 
+     * @param inputs 
+     */
+    virtual void forward(NumType* inputs) override = 0;
+
+    /**
+     * \brief Method inheritance with default parameter overriding. 
+     * \param gradients
+     */
+    virtual void reverse(NumType* gradients = nullptr) override = 0;
 
     /**
      * @brief Loss layers do not have params.

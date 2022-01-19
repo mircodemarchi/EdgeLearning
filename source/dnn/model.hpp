@@ -30,6 +30,7 @@
 #define EDGE_LEARNING_DNN_MODEL_HPP
 
 #include "layer.hpp"
+#include "loss.hpp"
 #include "optimizer.hpp"
 #include "type.hpp"
 
@@ -94,11 +95,29 @@ public:
     }
 
     /**
-     * \brief Create a dependency between two constituent layers.
-     * \param dst Destination layer.
-     * \param src Source layer.
+     * \brief Append a loss layer to the model, forward its parameters to the 
+     * layer constructor and return its reference.
+     * \tparam LossLayer_t The class name of the loss layer to append.
+     * \tparam T           The list types of arguments to forward to 
+     *                     the loss layer constructor.
+     * \param args The list of arguments that will be forwarded to the loss 
+     * layer constructor.
+     * \return LossLayer_t& The reference to the layer inserted.
      */
-    void create_edge(Layer& dst, Layer& src);
+    template <class LossLayer_t, typename... T>
+    LossLayer_t& add_loss(T&&... args)
+    {
+        auto _loss_layer = std::make_shared<LossLayer_t>(
+            *this, std::forward<T>(args)...);
+        return reinterpret_cast<LossLayer_t&>(*_loss_layer);
+    }
+
+    /**
+     * \brief Create a dependency between two constituent layers.
+     * \param src Source layer.
+     * \param dst Destination layer.
+     */
+    void create_edge(Layer& src, Layer& dst);
 
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 
@@ -114,6 +133,15 @@ public:
      * \param optimizer Provided optimizer.
      */
     void train(Optimizer& optimizer);
+
+    /**
+     * @brief Train step: forward and backward.
+     * This function does not update the layers parameter, this operation will
+     * be done by the train function.  
+     * @param input  Inputs data.
+     * @param target Labels data.
+     */
+    void step(NumType* input, const NumType* target);
 
     /**
      * \brief Model name provided for debugging purposes.
@@ -158,6 +186,7 @@ private:
 
     std::string _name;                           ///< Model name;
     std::vector<std::shared_ptr<Layer>> _layers; ///< List of layers pointers;
+    std::shared_ptr<LossLayer> _loss_layer;      ///< Loss of the model; 
 };
 
 } // namespace EdgeLearning

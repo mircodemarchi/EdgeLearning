@@ -34,6 +34,7 @@ namespace EdgeLearning {
 Model::Model(std::string name)
     : _name{std::move(name)}
     , _layers{}
+    , _loss_layer{}
 { 
     if (_name.empty())
     {
@@ -44,6 +45,7 @@ Model::Model(std::string name)
 Model::Model(const Model& obj)
     : _name{obj._name}
     , _layers{obj._layers}
+    , _loss_layer{obj._loss_layer}
 {
 
 }
@@ -59,9 +61,10 @@ void swap(Model& lop, Model& rop)
     using std::swap;
     swap(lop._name, rop._name);
     swap(lop._layers, rop._layers);
+    swap(lop._loss_layer, rop._loss_layer);
 }
 
-void Model::create_edge(Layer& dst, Layer& src)
+void Model::create_edge(Layer& src, Layer& dst)
 {
     // NOTE: No validation is done to ensure the edge doesn't already exist
     dst._antecedents.push_back(&src);
@@ -83,6 +86,7 @@ RneType::result_type Model::init(RneType::result_type seed)
     {
         layer->init(rne);
     }
+    _loss_layer->init(rne);
 
     return seed;
 }
@@ -93,6 +97,14 @@ void Model::train(Optimizer& optimizer)
     {
         optimizer.train(*layer);
     }
+    optimizer.train(*_loss_layer);
+}
+
+void Model::step(NumType* input, const NumType* target)
+{
+    _loss_layer->set_target(target);
+    _layers.front()->forward(input); //< TODO: how many input layers there are?
+    _loss_layer->reverse();
 }
 
 void Model::print() const
@@ -101,6 +113,7 @@ void Model::print() const
     {
         layer->print();
     }
+    _loss_layer->print();
 }
 
 void Model::save(std::ofstream& out)
@@ -110,9 +123,15 @@ void Model::save(std::ofstream& out)
         size_t param_count = layer->param_count();
         for (size_t i = 0; i < param_count; ++i)
         {
-            out.write(reinterpret_cast<char const*>(layer->param(i)), 
-                sizeof(NumType));
+            out.write(reinterpret_cast<char const*>(
+                layer->param(i)), sizeof(NumType));
         }
+    }
+    size_t param_count = _loss_layer->param_count();
+    for (size_t i = 0; i < param_count; ++i)
+    {
+        out.write(reinterpret_cast<char const*>(
+            _loss_layer->param(i)), sizeof(NumType));
     }
 }
 
@@ -125,6 +144,12 @@ void Model::load(std::ifstream& in)
         {
             in.read(reinterpret_cast<char*>(layer->param(i)), sizeof(NumType));
         }
+    }
+    size_t param_count = _loss_layer->param_count();
+    for (size_t i = 0; i < param_count; ++i)
+    {
+        in.read(reinterpret_cast<char*>(
+            _loss_layer->param(i)), sizeof(NumType));
     }
 }
 
