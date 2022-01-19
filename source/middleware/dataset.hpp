@@ -304,7 +304,7 @@ public:
     template<typename ARMA_T>
     ARMA_T to_arma()
     {
-        return operator ARMA_T();
+        return ARMA_T(*this);
     }
 #endif // ENABLE_MLPACK
 
