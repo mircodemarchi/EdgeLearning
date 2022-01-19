@@ -55,6 +55,12 @@ public:
     Layer(Model& model, std::string name = std::string());
 
     /**
+     * @brief Copy constructor of a new Layer object.
+     * @param obj 
+     */
+    Layer(const Layer& obj);
+
+    /**
      * @brief Destroy the Layer object.
      */
     virtual ~Layer() {};

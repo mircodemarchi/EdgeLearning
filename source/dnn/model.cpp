@@ -41,6 +41,13 @@ Model::Model(std::string name)
     }
 }
 
+Model::Model(const Model& obj)
+    : _name{obj._name}
+    , _layers{obj._layers}
+{
+
+}
+
 Model& Model::operator=(Model obj)
 {
     swap(*this, obj);

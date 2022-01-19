@@ -41,6 +41,15 @@ Layer::Layer(Model& model, std::string name)
     }
 }
 
+Layer::Layer(const Layer& obj)
+    : _model{obj._model}
+    , _name{obj._name}
+    , _antecedents{obj._antecedents}
+    , _subsequents{obj._subsequents}
+{
+
+}
+
 Layer& Layer::operator=(const Layer& obj)
 {
     if (this == &obj) return *this;

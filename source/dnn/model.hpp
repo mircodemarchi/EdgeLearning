@@ -55,6 +55,12 @@ public:
     Model(std::string name = std::string());
 
     /**
+     * @brief Copy constructor of a new Model object.
+     * @param obj 
+     */
+    Model(const Model& obj);
+
+    /**
      * @brief Assignment operator of a Model object.
      * @param obj 
      * @return Model& 

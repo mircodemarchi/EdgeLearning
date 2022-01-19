@@ -350,8 +350,8 @@ public:
         _entry_trainset_cache.resize(_feature_size);
 
         std::copy(
-            _data.begin() + row_idx * _feature_size,
-            _data.begin() + row_idx * _feature_size + _feature_size,
+            _data.begin() + long(row_idx * _feature_size),
+            _data.begin() + long(row_idx * _feature_size) + long(_feature_size),
             _entry_trainset_cache.begin());
         return _entry_trainset_cache;
     }
@@ -366,9 +366,9 @@ public:
         _entry_trainset_cache.resize(_sequence_size * _feature_size);
 
         std::copy(
-            _data.begin() + seq_idx * _sequence_size * _feature_size,
-            _data.begin() + seq_idx * _sequence_size * _feature_size 
-                + _sequence_size * _feature_size,
+            _data.begin() + long(seq_idx * _sequence_size * _feature_size),
+            _data.begin() + long(seq_idx * _sequence_size * _feature_size) 
+                + long(_sequence_size * _feature_size),
             _entry_trainset_cache.begin());
         return _entry_trainset_cache;
     }
