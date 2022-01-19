@@ -1,5 +1,5 @@
 /***************************************************************************
- *            layer.cpp
+ *            loss.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,41 +22,55 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "layer.hpp"
+#include "loss.hpp"
 
-#include "model.hpp"
 #include "dlmath.hpp"
 
 
 namespace EdgeLearning {
 
-Layer::Layer(Model& model, std::string name)
-    : _model(model)
-    , _name{std::move(name)}
+LossLayer::LossLayer(Model& model, std::string name, 
+    uint16_t input_size, size_t batch_size)
+    : Layer(model, name)
+    , _input_size{input_size}
+    , _loss{}
+    , _target{nullptr}
+    , _last_input{nullptr}
+    , _gradients{}
+    , _inv_batch_size{NumType{1.0} / batch_size}
+    , _cumulative_loss{0.0}
+    , _correct{0}
+    , _incorrect{0}
 { 
     if (_name.empty())
     {
-        _name = "layer_" + std::to_string(DLMath::unique());
+        _name = "loss_layer_" + std::to_string(DLMath::unique());
     }
+    _gradients.resize(_input_size);
 }
 
-Layer::Layer(const Layer& obj)
-    : _model{obj._model}
-    , _name{obj._name}
-    , _antecedents{obj._antecedents}
-    , _subsequents{obj._subsequents}
+void LossLayer::set_target(NumType const* target)
 {
-
+    _target = target;
 }
 
-Layer& Layer::operator=(const Layer& obj)
+NumType LossLayer::accuracy() const
 {
-    if (this == &obj) return *this;
-    _model = obj._model;
-    _name = obj._name;
-    _antecedents = obj._antecedents;
-    _subsequents = obj._subsequents;
-    return *this;
+    return static_cast<NumType>(_correct) 
+         / static_cast<NumType>(_correct + _incorrect);
+}
+
+NumType LossLayer::avg_loss() const
+{
+    return static_cast<NumType>(_cumulative_loss) 
+         / static_cast<NumType>(_correct + _incorrect);
+}
+
+void LossLayer::reset_score()
+{
+    _cumulative_loss = 0.0;
+    _correct         = 0;
+    _incorrect       = 0;
 }
 
 } // namespace EdgeLearning
