@@ -76,9 +76,6 @@ private:
 
     void test_classifier_model() {
         // Input definition.
-        NumType* input  = nullptr;
-        NumType* target = nullptr;
-
         std::vector<std::vector<NumType>> inputs = {
             {10.0, 1.0, 10.0, 1.0},
             {1.0,  3.0, 8.0,  3.0},
@@ -94,11 +91,8 @@ private:
         };
         
         // Model definition.
-        DenseLayer* input_layer;
-        CCELossLayer* loss_layer;
         GDOptimizer o{NumType{0.5}};
-        Model m = TestModel::_create_binary_classifier_model(&input_layer, 
-            &loss_layer);
+        Model m = TestModel::_create_binary_classifier_model();
         m.init();
         m.print();
 
@@ -107,26 +101,18 @@ private:
             std::printf("EPOCH %zu\n", e);
             for (size_t i = 0; i < inputs.size();)
             {
-                loss_layer->reset_score();
-
                 for (size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
-                    input = inputs[i].data();
-                    target = targets[i].data();
-                    loss_layer->set_target(target);
-                    input_layer->forward(input);
-                    loss_layer->reverse();
+                    m.step(inputs[i].data(), targets[i].data());
                 }
 
-                std::printf("Step %zu - ", i);
-                loss_layer->print();
-
+                std::printf("Step %zu - loss: %.3f, accuracy: %.3f", 
+                    i, m.avg_loss(), m.accuracy());
                 m.train(o);
             }
         }
 
         std::printf("Final result - ");
-        loss_layer->print();
         m.print();
 
         std::ofstream params_file{
@@ -136,11 +122,8 @@ private:
     }
 
     void test_classifier_model_predict() {
-        DenseLayer* input_layer;
-        CCELossLayer* loss_layer;
         GDOptimizer o{NumType{0.3}};
-        Model m = TestModel::_create_binary_classifier_model(&input_layer, 
-            &loss_layer);
+        Model m = TestModel::_create_binary_classifier_model();
 
         std::ifstream params_file{
             std::filesystem::path{"classifier.weight"}, 
@@ -150,8 +133,6 @@ private:
 
     void test_regressor_model() {
         // Input definition.
-        NumType* input  = nullptr;
-        NumType* target = nullptr;
 
         std::vector<std::vector<NumType>> inputs = {
             {10.0, 1.0, 10.0, 1.0},
@@ -168,11 +149,8 @@ private:
         };
         
         // Model definition.
-        DenseLayer* input_layer;
-        MSELossLayer* loss_layer;
         GDOptimizer o{NumType{0.01}};
-        Model m = TestModel::_create_regressor_model(&input_layer, 
-            &loss_layer);
+        Model m = TestModel::_create_regressor_model();
         m.init();
         m.print();
 
@@ -181,26 +159,18 @@ private:
             std::printf("EPOCH %zu\n", e);
             for (size_t i = 0; i < inputs.size();)
             {
-                loss_layer->reset_score();
-
                 for (size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
-                    input = inputs[i].data();
-                    target = targets[i].data();
-                    loss_layer->set_target(target);
-                    input_layer->forward(input);
-                    loss_layer->reverse();
+                    m.step(inputs[i].data(), targets[i].data());
                 }
 
-                std::printf("Step %zu - ", i);
-                loss_layer->print();
-
+                std::printf("Step %zu - loss: %.3f, accuracy: %.3f", 
+                    i, m.avg_loss(), m.accuracy());
                 m.train(o);
             }
         }
 
         std::printf("Final result - ");
-        loss_layer->print();
         m.print();
 
         std::ofstream params_file{
@@ -210,11 +180,8 @@ private:
     }
 
     void test_regressor_model_predict() {
-        DenseLayer* input_layer;
-        MSELossLayer* loss_layer;
         GDOptimizer o{NumType{0.3}};
-        Model m = TestModel::_create_regressor_model(&input_layer, 
-            &loss_layer);
+        Model m = TestModel::_create_regressor_model();
 
         std::ifstream params_file{
             std::filesystem::path{"regressor.weight"}, 
@@ -224,8 +191,6 @@ private:
 
     void test_recurisive_model() {
         // Input definition.
-        NumType* input  = nullptr;
-        NumType* target = nullptr;
         size_t time_steps = 2;
 
         size_t input_size = 3;
@@ -246,15 +211,15 @@ private:
         
         // Model definition.
         Model m{"recurrent"};
-        RecurrentLayer& input_layer = m.add_node<RecurrentLayer>("hidden", 
+        auto input_layer = m.add_node<RecurrentLayer>("hidden", 
             output_size, input_size, 2);
-        input_layer.set_initial_hidden_state({0.01, 0.01});
-        input_layer.set_time_steps(time_steps);
-        input_layer.set_initial_hidden_state({0.0, 0.0});
-        MSELossLayer& loss_layer = m.add_node<MSELossLayer>("loss", 
+        input_layer->set_initial_hidden_state({0.01, 0.01});
+        input_layer->set_time_steps(time_steps);
+        input_layer->set_initial_hidden_state({0.0, 0.0});
+        auto loss_layer = m.add_loss<MSELossLayer>("loss", 
             time_steps * output_size, BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
-        m.create_edge(loss_layer, input_layer);
+        m.create_edge(input_layer, loss_layer);
         m.init();
         m.print();
 
@@ -263,58 +228,48 @@ private:
             std::printf("EPOCH %zu\n", e);
             for (size_t i = 0; i < inputs.size();)
             {
-                loss_layer.reset_score();
-
                 for (size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
-                    input = inputs[i].data();
-                    target = targets[i].data();
-                    loss_layer.set_target(target);
-                    input_layer.forward(input);
-                    loss_layer.reverse();
+                    m.step(inputs[i].data(), targets[i].data());
                 }
 
-                std::printf("Step %zu - ", i);
-                loss_layer.print();
-
+                std::printf("Step %zu - loss: %.3f, accuracy: %.3f", 
+                    i, m.avg_loss(), m.accuracy());
                 m.train(o);
             }
         }
 
         std::printf("Final result - ");
-        loss_layer.print();
         m.print();
 
-        input_layer.reset_hidden_state();
+        input_layer->reset_hidden_state();
     }
 
-    Model _create_binary_classifier_model(DenseLayer** first_layer, 
-        CCELossLayer** loss_layer)
+    Model _create_binary_classifier_model()
     {
         Model m{"binary_classifier"};
-        *first_layer = &m.add_node<DenseLayer>("hidden", 
-            Activation::ReLU, 8, 4);
-        DenseLayer& output_layer = m.add_node<DenseLayer>("output", 
-            Activation::Softmax, 2, 8);
-
-        *loss_layer = &m.add_node<CCELossLayer>("loss", 2, BATCH_SIZE);
-        m.create_edge(output_layer, **first_layer);
-        m.create_edge(**loss_layer, output_layer);
+        auto first_layer = m.add_node<DenseLayer>(
+            "hidden", Activation::ReLU, 8, 4);
+        auto output_layer = m.add_node<DenseLayer>(
+            "output", Activation::Softmax, 2, 8);
+        auto loss_layer = m.add_loss<CCELossLayer>(
+            "loss", 2, BATCH_SIZE);
+        m.create_edge(first_layer, output_layer);
+        m.create_edge(output_layer, loss_layer);
         return m;
     }
 
-    Model _create_regressor_model(DenseLayer** first_layer, 
-        MSELossLayer** loss_layer)
+    Model _create_regressor_model()
     {
         Model m{"regressor"};
-        *first_layer = &m.add_node<DenseLayer>("hidden", 
-            Activation::ReLU, 8, 4);
-        DenseLayer& output_layer = m.add_node<DenseLayer>("output", 
-            Activation::Linear, 2, 8);
-
-        *loss_layer = &m.add_node<MSELossLayer>("loss", 2, BATCH_SIZE, 0.5);
-        m.create_edge(output_layer, **first_layer);
-        m.create_edge(**loss_layer, output_layer);
+        auto first_layer = m.add_node<DenseLayer>(
+            "hidden", Activation::ReLU, 8, 4);
+        auto output_layer = m.add_node<DenseLayer>(
+            "output", Activation::Linear, 2, 8);
+        auto loss_layer = m.add_loss<MSELossLayer>(
+            "loss", 2, BATCH_SIZE, 0.5);
+        m.create_edge(first_layer, output_layer);
+        m.create_edge(output_layer, loss_layer);
         return m;
     }
 };
