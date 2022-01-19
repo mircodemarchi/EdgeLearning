@@ -64,11 +64,11 @@ void swap(Model& lop, Model& rop)
     swap(lop._loss_layer, rop._loss_layer);
 }
 
-void Model::create_edge(Layer& src, Layer& dst)
+void Model::create_edge(Layer* src, Layer* dst)
 {
     // NOTE: No validation is done to ensure the edge doesn't already exist
-    dst._antecedents.push_back(&src);
-    src._subsequents.push_back(&dst);
+    dst->_antecedents.push_back(src);
+    src->_subsequents.push_back(dst);
 }
 
 RneType::result_type Model::init(RneType::result_type seed)
@@ -98,12 +98,13 @@ void Model::train(Optimizer& optimizer)
         optimizer.train(*layer);
     }
     optimizer.train(*_loss_layer);
+    _loss_layer->reset_score();
 }
 
 void Model::step(NumType* input, const NumType* target)
 {
     _loss_layer->set_target(target);
-    _layers.front()->forward(input); //< TODO: how many input layers there are?
+    _layers[0]->forward(input); //< TODO: how many input layers there are?
     _loss_layer->reverse();
 }
 
@@ -114,6 +115,16 @@ void Model::print() const
         layer->print();
     }
     _loss_layer->print();
+}
+
+NumType Model::accuracy() const
+{
+    return _loss_layer->accuracy();
+}
+
+NumType Model::avg_loss() const
+{
+    return _loss_layer->avg_loss();
 }
 
 void Model::save(std::ofstream& out)

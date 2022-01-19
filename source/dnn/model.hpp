@@ -86,12 +86,12 @@ public:
      * \return Layer_t& The reference to the layer inserted.
      */
     template <class Layer_t, typename... T>
-    Layer_t& add_node(T&&... args)
+    Layer_t* add_node(T&&... args)
     {
         _layers.push_back(
             std::make_shared<Layer_t>(*this, std::forward<T>(args)...)
         );
-        return reinterpret_cast<Layer_t&>(*_layers.back());
+        return reinterpret_cast<Layer_t*>(_layers.back().get());
     }
 
     /**
@@ -105,11 +105,11 @@ public:
      * \return LossLayer_t& The reference to the layer inserted.
      */
     template <class LossLayer_t, typename... T>
-    LossLayer_t& add_loss(T&&... args)
+    LossLayer_t* add_loss(T&&... args)
     {
-        auto _loss_layer = std::make_shared<LossLayer_t>(
+        _loss_layer = std::make_shared<LossLayer_t>(
             *this, std::forward<T>(args)...);
-        return reinterpret_cast<LossLayer_t&>(*_loss_layer);
+        return reinterpret_cast<LossLayer_t*>(_loss_layer.get());
     }
 
     /**
@@ -117,7 +117,7 @@ public:
      * \param src Source layer.
      * \param dst Destination layer.
      */
-    void create_edge(Layer& src, Layer& dst);
+    void create_edge(Layer* src, Layer* dst);
 
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 
@@ -130,6 +130,7 @@ public:
     /**
      * \brief Adjust all model parameters of constituent layers using the 
      * provided optimizer. 
+     * Finally it reset the loss score. 
      * \param optimizer Provided optimizer.
      */
     void train(Optimizer& optimizer);
@@ -153,9 +154,21 @@ public:
     }
 
     /**
-     * \brief Print.
+     * \brief Print the layers weights.
      */
     void print() const;
+
+    /**
+     * @brief Return the accuracy provided by the loss layer.
+     * @return NumType 
+     */
+    NumType accuracy() const;
+
+    /**
+     * @brief Return the loss provided by the loss layer.
+     * @return NumType 
+     */
+    NumType avg_loss() const;
 
     /**
      * \brief Save the model weights to disk.
