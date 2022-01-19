@@ -4,6 +4,7 @@ add_library(${LIBRARY_NAME} OBJECT
     layer.cpp
     model.cpp
     dense.cpp
+    loss.cpp
     cce_loss.cpp
     mse_loss.cpp
     gd_optimizer.cpp
