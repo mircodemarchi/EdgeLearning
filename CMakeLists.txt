@@ -95,3 +95,8 @@ endif()
 if(COVERAGE)
     target_link_libraries(edgelearning coverage_config)
 endif()
+
+set(BUILD_EXAMPLE true CACHE BOOL "Build EdgeLearning examples code")
+if(BUILD_EXAMPLE)
+    add_subdirectory(example)
+endif()
