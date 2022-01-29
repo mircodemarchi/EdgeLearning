@@ -20,9 +20,16 @@ else()
             only been tested with Clang and GCC.")
 endif()
 
-set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual
-    disabled-optimization init-self missing-include-dirs sign-promo
-    switch-default undef redundant-decls)
+if(NOT WIN32)
+    set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
+            init-self missing-include-dirs sign-promo switch-default undef redundant-decls
+            strict-aliasing unused-parameter shadow error)
+    foreach(WARN ${ANY_TARGET_WARN})
+        add_compile_options(-W${WARN})
+    endforeach()
+else()
+    add_compile_options(/WX)
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MACOSX_RPATH 1)
@@ -32,6 +39,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
+
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    set(LIBRARY_KIND STATIC)
+else()
+    set(LIBRARY_KIND SHARED)
+endif()
 
 # Options
 set(ENABLE_MLPACK false CACHE BOOL "Enable MLPACK library. Warning: not supported.")
@@ -82,12 +96,11 @@ endif()
 add_subdirectory(source)
 add_subdirectory(tests)
 
-add_library(edgelearning SHARED
+add_library(edgelearning ${LIBRARY_KIND}
     $<TARGET_OBJECTS:edgelearning-dnn>
     $<TARGET_OBJECTS:edgelearning-middleware>
 )
 
-target_link_libraries(edgelearning dl)
 if(ENABLE_MLPACK)
     target_link_libraries(edgelearning ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
 endif()

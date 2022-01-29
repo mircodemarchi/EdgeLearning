@@ -1,0 +1,64 @@
+name: Windows
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows Server 2019 [Release] [MLPACK]",
+            os: windows-2019,
+            mlpack: true,
+            build-type: "Release",
+            vcpkg-deps: "mlpack:x64-windows"
+          }
+          - {
+            name: "Windows Server 2019 [Release] [NO MLPACK]",
+            os: windows-2019,
+            mlpack: false,
+            build-type: "Release",
+            vcpkg-deps: "mlpack:x64-windows"
+          }
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Cache/Restore Dependencies
+      id: cache-deps
+      uses: actions/cache@v2
+      with:
+          path: |
+            C:/vcpkg/buildtrees
+            C:/vcpkg/installed
+            C:/vcpkg/packages
+          key: vcpkg-${{matrix.config.os}}
+
+    - name: Set Up Dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: vcpkg install ${{matrix.config.vcpkg-deps}}
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      working-directory: ${{runner.workspace}}/build
+      run: cmake ${{runner.workspace}}/EdgeLearning -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_MLPACK=${{matrix.config.mlpack}}
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      run: cmake --build . --parallel --config ${{matrix.config.build-type}}
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      run: ctest --output-on-failure
