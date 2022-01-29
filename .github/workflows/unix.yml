@@ -20,28 +20,28 @@ jobs:
         config:
           # Without MLPACK
           - {
-            name: "macOS 10.15 AppleClang",
+            name: "macOS 10.15 AppleClang [NO MLPACK]",
             mlpack: false,
             os: macos-10.15,
             cxx: "clang++",
             c: "clang"
           }
           - {
-            name: "macOS 10.15 GCC 9",
+            name: "macOS 10.15 GCC 9 [NO MLPACK]",
             mlpack: false,
             os: macos-10.15,
             cxx: "g++-9",
             c: "gcc-9"
           }
           - {
-            name: "Ubuntu 20.04 Clang 11",
+            name: "Ubuntu 20.04 Clang 11 [NO MLPACK]",
             mlpack: false,
             os: ubuntu-20.04,
             cxx: "clang++-11",
             c: "clang-11"
           }
           - {
-            name: "Ubuntu 20.04 GCC 10",
+            name: "Ubuntu 20.04 GCC 10 [NO MLPACK]",
             mlpack: false,
             os: ubuntu-20.04,
             cxx: "g++-10",
@@ -49,28 +49,28 @@ jobs:
           }
           # With MLPACK
           - {
-            name: "macOS 10.15 AppleClang",
+            name: "macOS 10.15 AppleClang [MLPACK]",
             mlpack: true,
             os: macos-10.15,
             cxx: "clang++",
             c: "clang"
           }
           # - {
-          #   name: "macOS 10.15 GCC 9",
+          #   name: "macOS 10.15 GCC 9 [MLPACK]",
           #   mlpack: true,
           #   os: macos-10.15,
           #   cxx: "g++-9",
           #   c: "gcc-9"
           # }
           - {
-            name: "Ubuntu 20.04 Clang 11",
+            name: "Ubuntu 20.04 Clang 11 [MLPACK]",
             mlpack: true,
             os: ubuntu-20.04,
             cxx: "clang++-11",
             c: "clang-11"
           }
           - {
-            name: "Ubuntu 20.04 GCC 10",
+            name: "Ubuntu 20.04 GCC 10 [MLPACK]",
             mlpack: true,
             os: ubuntu-20.04,
             cxx: "g++-10",

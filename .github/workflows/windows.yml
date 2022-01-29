@@ -16,16 +16,16 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows Server 2019 [Release] [MLPACK]",
+            name: "Windows Server 2019 [Release] [NO MLPACK]",
             os: windows-2019,
-            mlpack: true,
+            mlpack: false,
             build-type: "Release",
             vcpkg-deps: "mlpack:x64-windows"
           }
           - {
-            name: "Windows Server 2019 [Release] [NO MLPACK]",
+            name: "Windows Server 2019 [Release] [MLPACK]",
             os: windows-2019,
-            mlpack: false,
+            mlpack: true,
             build-type: "Release",
             vcpkg-deps: "mlpack:x64-windows"
           }
