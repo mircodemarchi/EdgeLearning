@@ -111,8 +111,8 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.gradient(10), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_assign.name(), "custom_layer_test");
 
-        EDGE_LEARNING_TEST_EXECUTE(auto l = CustomLayerNoName());
-        EDGE_LEARNING_TEST_TRY(auto l = CustomLayerNoName());
+        EDGE_LEARNING_TEST_EXECUTE(auto l2 = CustomLayerNoName());
+        EDGE_LEARNING_TEST_TRY(auto l2 = CustomLayerNoName());
         auto l_noname = CustomLayerNoName();
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
