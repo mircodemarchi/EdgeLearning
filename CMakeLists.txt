@@ -20,17 +20,6 @@ else()
             only been tested with Clang and GCC.")
 endif()
 
-if(NOT WIN32)
-    set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
-            init-self missing-include-dirs sign-promo switch-default undef redundant-decls
-            strict-aliasing unused-parameter shadow error)
-    foreach(WARN ${ANY_TARGET_WARN})
-        add_compile_options(-W${WARN})
-    endforeach()
-else()
-    add_compile_options(/WX)
-endif()
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MACOSX_RPATH 1)
 set(BUILD_SHARED_LIBS ON)
@@ -52,9 +41,16 @@ set(ENABLE_MLPACK false CACHE BOOL "Enable MLPACK library. Warning: not supporte
 add_definitions(-DENABLE_MLPACK=${ENABLE_MLPACK})
 
 if (NOT ENABLE_MLPACK)
-    foreach(WARN ${ANY_TARGET_WARN})
-        add_compile_options(-W${WARN})
-    endforeach()
+    if(NOT WIN32)
+        set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
+                init-self missing-include-dirs sign-promo switch-default undef redundant-decls
+                strict-aliasing unused-parameter shadow error)
+        foreach(WARN ${ANY_TARGET_WARN})
+            add_compile_options(-W${WARN})
+        endforeach()
+    else()
+        add_compile_options(/WX)
+    endif()
 endif()
 
 option(COVERAGE "Enable coverage reporting" OFF)
