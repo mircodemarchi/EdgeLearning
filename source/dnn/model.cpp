@@ -79,9 +79,9 @@ RneType::result_type Model::init(RneType::result_type seed)
         std::random_device rd{};
         seed = rd();
     }
-    std::printf("Initializing model parameters with seed: %llu\n", seed);
+    std::cout << "Initializing model parameters with seed: " << seed << "\n";
 
-    RneType rne{seed};
+    RneType rne{seed};  
     for (auto& layer: _layers)
     {
         layer->init(rne);
