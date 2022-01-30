@@ -48,8 +48,6 @@ private:
         Dataset<double> d(data);
         EDGE_LEARNING_TEST_TRY(d.feature_size());
         EDGE_LEARNING_TEST_TRY(d.size());
-        EDGE_LEARNING_TEST_TRY(d.data().size());
-        EDGE_LEARNING_TEST_TRY(d.data()[0]);
         EDGE_LEARNING_TEST_TRY(d.sequence_size());
 
         EDGE_LEARNING_TEST_EQUAL(
@@ -144,8 +142,6 @@ private:
         Dataset<double> d(data);
         EDGE_LEARNING_TEST_TRY(d.feature_size());
         EDGE_LEARNING_TEST_TRY(d.size());
-        EDGE_LEARNING_TEST_TRY(d.data().size());
-        EDGE_LEARNING_TEST_TRY(d.data()[0]);
         EDGE_LEARNING_TEST_TRY(d.sequence_size());
 
         EDGE_LEARNING_TEST_EQUAL(
@@ -205,8 +201,6 @@ private:
         Dataset<double> d(data);
         EDGE_LEARNING_TEST_TRY(d.feature_size());
         EDGE_LEARNING_TEST_TRY(d.size());
-        EDGE_LEARNING_TEST_TRY(d.data().size());
-        EDGE_LEARNING_TEST_TRY(d.data()[0]);
         EDGE_LEARNING_TEST_TRY(d.sequence_size());
 
         EDGE_LEARNING_TEST_EQUAL(Dataset<double>(data).feature_size(), 2);
