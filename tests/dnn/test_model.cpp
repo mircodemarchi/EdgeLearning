@@ -212,12 +212,12 @@ private:
         // Model definition.
         Model m{"recurrent"};
         auto input_layer = m.add_node<RecurrentLayer>("hidden", 
-            output_size, input_size, 2);
+            static_cast<uint16_t>(output_size), static_cast<uint16_t>(input_size), 2);
         input_layer->set_initial_hidden_state({0.01, 0.01});
         input_layer->set_time_steps(time_steps);
         input_layer->set_initial_hidden_state({0.0, 0.0});
         auto loss_layer = m.add_loss<MSELossLayer>("loss", 
-            time_steps * output_size, BATCH_SIZE, 0.5);
+            static_cast<uint16_t>(time_steps * output_size), BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
         m.create_edge(input_layer, loss_layer);
         m.init();
