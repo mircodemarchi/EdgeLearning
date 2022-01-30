@@ -83,8 +83,8 @@ public:
      */
     size_t param_count() const noexcept override
     {
-        return (_input_size + _hidden_size + 1UL) * _hidden_size 
-             + (_hidden_size + 1UL) * _output_size;
+        return (static_cast<size_t>(_input_size) + static_cast<size_t>(_hidden_size + 1UL)) * static_cast<size_t>(_hidden_size)
+             + static_cast<size_t>(_hidden_size + 1UL) * static_cast<size_t>(_output_size);
     }
 
     NumType* param(size_t index) override;
@@ -105,11 +105,10 @@ public:
     void set_time_steps(uint16_t time_steps)
     {
         _time_steps = time_steps;
-        _hidden_state.resize(
-            _hidden_size * std::max(_time_steps, uint16_t(1U)));
-        _activations.resize(_output_size * _time_steps);
-        _activation_gradients.resize(_output_size * _time_steps);
-        _input_gradients.resize(_input_size * _time_steps);
+        _hidden_state.resize(static_cast<size_t>(_hidden_size) * static_cast<size_t>(std::max(_time_steps, uint16_t(1U))));
+        _activations.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_time_steps));
+        _activation_gradients.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_time_steps));
+        _input_gradients.resize(static_cast<size_t>(_input_size) * static_cast<size_t>(_time_steps));
     }
 
     void reset_hidden_state()
