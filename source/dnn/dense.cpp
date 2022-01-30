@@ -41,7 +41,7 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     std::printf("%s: %d -> %d\n", _name.c_str(), _input_size, _output_size);
 
     // The weight parameters of a FF-layer are an NxM matrix.
-    _weights.resize(_output_size * _input_size);
+    _weights.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_input_size));
 
     // Each node in this layer is assigned a bias.
     _biases.resize(_output_size);
@@ -50,7 +50,7 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     _activations.resize(_output_size);
 
     _activation_gradients.resize(_output_size);
-    _weight_gradients.resize(_output_size * _input_size);
+    _weight_gradients.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_input_size));
     _bias_gradients.resize(_output_size);
     _input_gradients.resize(_input_size);
 }
