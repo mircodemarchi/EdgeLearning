@@ -3,21 +3,20 @@ message(STATUS "CMake version ${CMAKE_VERSION}")
 
 project(EdgeLearning VERSION 0.1)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    message(WARNING "Intel compiler not supported.")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    message(WARNING "Microsoft compiler not supported.")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0) # 10.2
-        message(FATAL_ERROR "GCC version must be at least 9.0!")  # 10.2
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.20)
+        message(FATAL_ERROR "MSVC version must be at least 19.20!")
     endif()
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        message(FATAL_ERROR "GCC version must be at least 9.0!")
+    endif()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
         message(FATAL_ERROR "Clang version must be at least 11.0!")
     endif()
 else()
-    message(WARNING "You are using an unsupported compiler! Compilation has
-            only been tested with Clang and GCC.")
+    message(WARNING "You are using an unsupported compiler! MSVC, GCC and Clang are supported.")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
