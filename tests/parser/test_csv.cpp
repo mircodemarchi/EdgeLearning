@@ -72,7 +72,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(csv_field_int.type(), Type::INT);
         EDGE_LEARNING_TEST_EQUAL(csv_field_str.type(), Type::STRING);
 
-        auto csv_field_cpy = CSVField{csv_field_int};
+        auto csv_field_cpy = csv_field_int;
         EDGE_LEARNING_TEST_EQUAL(csv_field_cpy.idx(), csv_field_int.idx());
         EDGE_LEARNING_TEST_EQUAL(csv_field_cpy.type(), csv_field_int.type());
     }

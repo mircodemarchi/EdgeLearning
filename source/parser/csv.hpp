@@ -72,6 +72,17 @@ public:
     }
 
     /**
+     * @brief Construct a new CSVField object from another
+     * @param other     Another CSVField object.
+    */
+    CSVField(CSVField const& other)
+            : Parser()
+            , _field{other._field}
+            , _type{other._type}
+            , _col_index{other._col_index}
+    { }
+
+    /**
      * @brief Assignment operator.
      * @param obj The object to assign.
      * @return CSVField& The updated object.
@@ -87,7 +98,7 @@ public:
     /**
      * @brief Destroy the CSVField object.
      */
-    ~CSVField() {};
+    ~CSVField() = default;
 
     /**
      * @brief Convert the field in the templated type and put in the ptr.
