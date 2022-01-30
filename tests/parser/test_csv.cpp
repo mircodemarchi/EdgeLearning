@@ -89,11 +89,8 @@ private:
         EDGE_LEARNING_TEST_FAIL(csv_row[4]);
         EDGE_LEARNING_TEST_EXECUTE(auto v = std::vector<float>(csv_row));
         EDGE_LEARNING_TEST_PRINT(std::vector<float>(csv_row).at(2));
-        EDGE_LEARNING_TEST_WITHIN(
-            std::vector<float>(csv_row).at(2), csv_row[2].as<float>(), 
-            0.0000001);
-        EDGE_LEARNING_TEST_EQUAL(
-            csv_row.to_vec<float>().size(), csv_row.size());
+        EDGE_LEARNING_TEST_WITHIN(std::vector<float>(csv_row).at(2), csv_row[2].as<float>(),0.0000001);
+        EDGE_LEARNING_TEST_EQUAL(std::vector<float>(csv_row).size(), csv_row.size());
         EDGE_LEARNING_TEST_EQUAL(std::string(csv_row), csv_row.line());
 
         auto csv_row_compare = CSVRow(
@@ -180,7 +177,7 @@ private:
 
         EDGE_LEARNING_TEST_EXECUTE(
             auto v = std::vector<float>(csv));
-        EDGE_LEARNING_TEST_EQUAL(csv.to_vec<float>().size(), 
+        EDGE_LEARNING_TEST_EQUAL(std::vector<float>(csv).size(),
             csv.rows_size() * csv.cols_size());
 
         EDGE_LEARNING_TEST_EXECUTE(
