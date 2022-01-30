@@ -64,7 +64,7 @@ public:
         std::function<T(RneType&)> ret = 
             [std_dev_coverage, mean](RneType& x) 
         {
-            T rand = ((static_cast<T>(x()) / max_rand) * T{2.0}) - T{1.0};
+            T rand = ((static_cast<T>(x()) / static_cast<T>(max_rand)) * T{2.0}) - T{1.0};
             rand = (rand * std_dev_coverage) + mean;
             return rand;
         };
