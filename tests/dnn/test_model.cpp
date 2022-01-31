@@ -215,12 +215,13 @@ private:
         
         // Model definition.
         Model m{"recurrent"};
-        auto input_layer = m.add_node<RecurrentLayer>("hidden", 
-            static_cast<SizeType>(output_size), static_cast<SizeType>(input_size), 2);
-        input_layer->set_initial_hidden_state({0.01, 0.01});
-        input_layer->set_time_steps(time_steps);
-        input_layer->set_initial_hidden_state({0.0, 0.0});
-        auto loss_layer = m.add_loss<MSELossLayer>("loss", 
+        auto& input_layer = m.add_layer<RecurrentLayer>("hidden",
+                                                        static_cast<SizeType>(output_size),
+                                                        static_cast<SizeType>(input_size), 2);
+        input_layer.set_initial_hidden_state({0.01, 0.01});
+        input_layer.set_time_steps(time_steps);
+        input_layer.set_initial_hidden_state({0.0, 0.0});
+        auto& loss_layer = m.add_loss<MSELossLayer>("loss",
             static_cast<SizeType>(time_steps * output_size), BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
         m.create_edge(input_layer, loss_layer);
@@ -248,17 +249,17 @@ private:
         std::cout << "Final result - " << std::endl;
         m.print();
 
-        input_layer->reset_hidden_state();
+        input_layer.reset_hidden_state();
     }
 
     Model _create_binary_classifier_model()
     {
         Model m{"binary_classifier"};
-        auto first_layer = m.add_node<DenseLayer>(
-            "hidden", Activation::ReLU, 8, 4);
-        auto output_layer = m.add_node<DenseLayer>(
-            "output", Activation::Softmax, 2, 8);
-        auto loss_layer = m.add_loss<CCELossLayer>(
+        auto& first_layer = m.add_layer<DenseLayer>(
+                "hidden", Activation::ReLU, 8, 4);
+        auto& output_layer = m.add_layer<DenseLayer>(
+                "output", Activation::Softmax, 2, 8);
+        auto& loss_layer = m.add_loss<CCELossLayer>(
             "loss", 2, BATCH_SIZE);
         m.create_edge(first_layer, output_layer);
         m.create_edge(output_layer, loss_layer);
@@ -268,11 +269,11 @@ private:
     Model _create_regressor_model()
     {
         Model m{"regressor"};
-        auto first_layer = m.add_node<DenseLayer>(
-            "hidden", Activation::ReLU, 8, 4);
-        auto output_layer = m.add_node<DenseLayer>(
-            "output", Activation::Linear, 2, 8);
-        auto loss_layer = m.add_loss<MSELossLayer>(
+        auto& first_layer = m.add_layer<DenseLayer>(
+                "hidden", Activation::ReLU, 8, 4);
+        auto& output_layer = m.add_layer<DenseLayer>(
+                "output", Activation::Linear, 2, 8);
+        auto& loss_layer = m.add_loss<MSELossLayer>(
             "loss", 2, BATCH_SIZE, 0.5);
         m.create_edge(first_layer, output_layer);
         m.create_edge(output_layer, loss_layer);

@@ -86,12 +86,12 @@ public:
      * \return Layer_t& The reference to the layer inserted.
      */
     template <class Layer_t, typename... T>
-    Layer_t* add_node(T&&... args)
+    Layer_t& add_layer(T&&... args)
     {
         _layers.push_back(
             std::make_shared<Layer_t>(*this, std::forward<T>(args)...)
         );
-        return reinterpret_cast<Layer_t*>(_layers.back().get());
+        return reinterpret_cast<Layer_t&>(*_layers.back());
     }
 
     /**
@@ -105,11 +105,11 @@ public:
      * \return LossLayer_t& The reference to the layer inserted.
      */
     template <class LossLayer_t, typename... T>
-    LossLayer_t* add_loss(T&&... args)
+    LossLayer_t& add_loss(T&&... args)
     {
         _loss_layer = std::make_shared<LossLayer_t>(
             *this, std::forward<T>(args)...);
-        return reinterpret_cast<LossLayer_t*>(_loss_layer.get());
+        return reinterpret_cast<LossLayer_t&>(*_loss_layer);
     }
 
     /**
@@ -117,7 +117,7 @@ public:
      * \param src Source layer.
      * \param dst Destination layer.
      */
-    void create_edge(Layer* src, Layer* dst);
+    void create_edge(Layer& src, Layer& dst);
 
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 
@@ -162,13 +162,13 @@ public:
      * @brief Return the accuracy provided by the loss layer.
      * @return NumType 
      */
-    NumType accuracy() const;
+    [[nodiscard]] NumType accuracy() const;
 
     /**
      * @brief Return the loss provided by the loss layer.
      * @return NumType 
      */
-    NumType avg_loss() const;
+    [[nodiscard]] NumType avg_loss() const;
 
     /**
      * \brief Save the model weights to disk.

@@ -48,11 +48,11 @@ int main()
     // Model definition.
     GDOptimizer o{NumType{0.01}};
     Model m{"regressor"};
-    auto first_layer = m.add_node<DenseLayer>(
-        "hidden", Activation::ReLU, 8, 4);
-    auto output_layer = m.add_node<DenseLayer>(
-        "output", Activation::Linear, 2, 8);
-    auto loss_layer = m.add_loss<MSELossLayer>(
+    auto& first_layer = m.add_layer<DenseLayer>(
+            "hidden", Activation::ReLU, 8, 4);
+    auto& output_layer = m.add_layer<DenseLayer>(
+            "output", Activation::Linear, 2, 8);
+    auto& loss_layer = m.add_loss<MSELossLayer>(
         "loss", 2, BATCH_SIZE, 0.5);
     m.create_edge(first_layer, output_layer);
     m.create_edge(output_layer, loss_layer);
