@@ -98,7 +98,7 @@ private:
 
         for (std::size_t e = 0; e < EPOCHS; ++e)
         {
-            std::printf("EPOCH %zu\n", e);
+            std::cout << "EPOCH " << e << std::endl;
             for (std::size_t i = 0; i < inputs.size();)
             {
                 for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
@@ -106,13 +106,15 @@ private:
                     m.step(inputs[i].data(), targets[i].data());
                 }
 
-                std::printf("Step %zu - loss: %.3f, accuracy: %.3f", 
-                    i, m.avg_loss(), m.accuracy());
+                std::cout << "Step " << i 
+                    << " - loss: " << m.avg_loss()
+                    << ", accuracy: " << m.accuracy()
+                    << std::endl;
                 m.train(o);
             }
         }
 
-        std::printf("Final result - ");
+        std::cout << "Final result - " << std::endl;
         m.print();
 
         std::ofstream params_file{
@@ -156,7 +158,7 @@ private:
 
         for (std::size_t e = 0; e < EPOCHS; ++e)
         {
-            std::printf("EPOCH %zu\n", e);
+            std::cout << "EPOCH " << e << std::endl;
             for (std::size_t i = 0; i < inputs.size();)
             {
                 for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
@@ -164,13 +166,15 @@ private:
                     m.step(inputs[i].data(), targets[i].data());
                 }
 
-                std::printf("Step %zu - loss: %.3f, accuracy: %.3f", 
-                    i, m.avg_loss(), m.accuracy());
+                std::cout << "Step " << i 
+                    << " - loss: " << m.avg_loss()
+                    << ", accuracy: " << m.accuracy()
+                    << std::endl;
                 m.train(o);
             }
         }
 
-        std::printf("Final result - ");
+        std::cout << "Final result - " << std::endl;
         m.print();
 
         std::ofstream params_file{
@@ -225,7 +229,7 @@ private:
 
         for (std::size_t e = 0; e < EPOCHS; ++e)
         {
-            std::printf("EPOCH %zu\n", e);
+            std::cout << "EPOCH " << e << std::endl;
             for (std::size_t i = 0; i < inputs.size();)
             {
                 for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
@@ -233,13 +237,15 @@ private:
                     m.step(inputs[i].data(), targets[i].data());
                 }
 
-                std::printf("Step %zu - loss: %.3f, accuracy: %.3f", 
-                    i, m.avg_loss(), m.accuracy());
+                std::cout << "Step " << i 
+                    << " - loss: " << m.avg_loss()
+                    << ", accuracy: " << m.accuracy()
+                    << std::endl;
                 m.train(o);
             }
         }
 
-        std::printf("Final result - ");
+        std::cout << "Final result - " << std::endl;
         m.print();
 
         input_layer->reset_hidden_state();

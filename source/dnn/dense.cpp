@@ -38,7 +38,8 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     , _output_size{output_size}
     , _input_size{input_size}
 {
-    std::printf("%s: %lu -> %lu\n", _name.c_str(), _input_size, _output_size);
+    std::cout << _name << ": " << _input_size 
+        << " -> " << _output_size << std::endl;
 
     // The weight parameters of a FF-layer are an NxM matrix.
     _weights.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_input_size));
@@ -273,24 +274,25 @@ NumType* DenseLayer::gradient(SizeType index)
 
 void DenseLayer::print() const 
 {
-    std::printf("%s\n", _name.c_str());
-
-    std::printf("Weights (%lu x %lu)\n", _output_size, _input_size);
+    std::cout << _name << std::endl;
+    std::cout << "Weights (" << _output_size << " x " << _input_size << ")"
+        << std::endl;
     for (SizeType i = 0; i < _output_size; ++i)
     {
         SizeType offset = i * _input_size;
         for (SizeType j = 0; j < _input_size; ++j)
         {
-            std::printf("\t[%zu]%f", offset + j, _weights[offset + j]);
+            std::cout << "\t[" << (offset + j) << "]" << _weights[offset + j]
+                << std::endl;
         }
-        std::printf("\n");
+        std::cout << std::endl;
     }
-    std::printf("Biases (%lu x 1)\n", _output_size);
+    std::cout << "Biases (" << _output_size << " x 1)" << std::endl;
     for (SizeType i = 0; i < _output_size; ++i)
     {
-        std::printf("\t%f\n", _biases[i]);
+        std::cout << "\t" << _biases[i] << std::endl;
     }
-    std::printf("\n");
+    std::cout << std::endl;
 }
 
 } // namespace EdgeLearning

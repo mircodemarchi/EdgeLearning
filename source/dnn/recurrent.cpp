@@ -44,8 +44,8 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     , _time_steps{time_steps}
     , _last_input{}
 {
-    std::printf("%s: %lu -{%lu}-> %lu\n", 
-        _name.c_str(), _input_size, _hidden_size, _output_size);
+    std::cout << _name << ": " << _input_size 
+        << " -{" << _hidden_size << "}-> " << _output_size << std::endl;
 
     auto ih_size = static_cast<SizeType>(_input_size)*static_cast<SizeType>(_hidden_size);
     auto hh_size = static_cast<SizeType>(_hidden_size)*static_cast<SizeType>(_hidden_size);
@@ -507,52 +507,54 @@ NumType* RecurrentLayer::gradient(SizeType index)
 
 void RecurrentLayer::print() const 
 {
-    std::printf("%s\n", _name.c_str());
-
-    std::printf("Weights input to hidden (%lu x %lu)\n", 
-        _hidden_size, _input_size);
+    std::cout << _name << std::endl;
+    std::cout << "Weights input to hidden (" 
+        << _hidden_size << " x " << _input_size << ")" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
         SizeType offset = i * _input_size;
         for (SizeType j = 0; j < _input_size; ++j)
         {
-            std::printf("\t[%zu]%f", offset + j, _weights_i_to_h[offset + j]);
+            std::cout << "\t[" << (offset + j) << "]" 
+                << _weights_i_to_h[offset + j];
         }
-        std::printf("\n");
+        std::cout << std::endl;
     }
-    std::printf("Weights hidden to hidden (%lu x %lu)\n", 
-        _hidden_size, _hidden_size);
+    std::cout << "Weights hidden to hidden (" 
+        << _hidden_size << " x " << _input_size << ")" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
         SizeType offset = i * _hidden_size;
         for (SizeType j = 0; j < _hidden_size; ++j)
         {
-            std::printf("\t[%zu]%f", offset + j, _weights_h_to_h[offset + j]);
+            std::cout << "\t[" << (offset + j) << "]" 
+                << _weights_h_to_h[offset + j];
         }
-        std::printf("\n");
+        std::cout << std::endl;
     }
-    std::printf("Weights hidden to output (%lu x %lu)\n", 
-        _output_size, _hidden_size);
+    std::cout << "Weights hidden to output (" 
+        << _output_size << " x " << _input_size << ")" << std::endl;
     for (SizeType i = 0; i < _output_size; ++i)
     {
         SizeType offset = i * _hidden_size;
         for (SizeType j = 0; j < _hidden_size; ++j)
         {
-            std::printf("\t[%zu]%f", offset + j, _weights_h_to_o[offset + j]);
+            std::cout << "\t[" << (offset + j) << "]" 
+                << _weights_h_to_o[offset + j];
         }
-        std::printf("\n");
+        std::cout << std::endl;
     }
-    std::printf("Biases to hidden (%lu x 1)\n", _hidden_size);
+    std::cout << "Biases to hidden (" << _hidden_size << " x 1)" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
-        std::printf("\t%f\n", _biases_to_h[i]);
+        std::cout << "\t" << _biases_to_h[i] << std::endl;
     }
-    std::printf("Biases to output (%lu x 1)\n", _output_size);
+    std::cout << "Biases to output (" << _output_size << " x 1)" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
-        std::printf("\t%f\n", _biases_to_o[i]);
+        std::cout << "\t" << _biases_to_h[i] << std::endl;
     }
-    std::printf("\n");
+    std::cout << std::endl;
 }
 
 } // namespace EdgeLearning

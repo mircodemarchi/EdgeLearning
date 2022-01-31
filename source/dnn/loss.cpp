@@ -75,7 +75,8 @@ void LossLayer::reset_score()
 
 void LossLayer::print() const
 {
-    std::printf("Avg Loss: %f\t%f%% correct\n", avg_loss(), accuracy() * 100.0);
+    std::cout << "Avg Loss: " << avg_loss()
+        << "\t" << (accuracy() * 100.0) << "%% correct" << std::endl;
 }
 
 } // namespace EdgeLearning
