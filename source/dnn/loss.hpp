@@ -46,7 +46,7 @@ public:
      * @param name 
      */
     LossLayer(Model& model, std::string name = std::string(), 
-        uint16_t input_size = 0, size_t batch_size = 1);
+        SizeType input_size = 0, SizeType batch_size = 1);
 
     /**
      * @brief Destroy the LossLayer object.
@@ -73,23 +73,23 @@ public:
 
     /**
      * @brief Loss layers do not have params.
-     * @return size_t 0
+     * @return SizeType 0
      */
-    size_t param_count() const noexcept override { return 0; }
+    SizeType param_count() const noexcept override { return 0; }
 
     /**
      * @brief Loss layers do not have params.
      * @param index Not used.
      * @return NumType* nullptr
      */
-    NumType* param(size_t index) override { (void) index; return nullptr; }
+    NumType* param(SizeType index) override { (void) index; return nullptr; }
 
     /**
      * @brief Loss layers do not have gradients.
      * @param index Not used.
      * @return NumType* nullptr
      */
-    NumType* gradient(size_t index) override { (void) index; return nullptr; }
+    NumType* gradient(SizeType index) override { (void) index; return nullptr; }
 
     /**
      * \brief Setter of the target object.
@@ -124,7 +124,7 @@ public:
     virtual void print() const override;
 
 protected:
-    uint16_t _input_size;
+    SizeType _input_size;
     NumType _loss;
     const NumType* _target;
     NumType* _last_input;
@@ -140,8 +140,8 @@ protected:
     NumType _cumulative_loss;
     
     /// Running counts of correct and incorrect predictions.
-    size_t _correct;
-    size_t _incorrect;
+    SizeType _correct;
+    SizeType _incorrect;
 };
 
 } // namespace EdgeLearning

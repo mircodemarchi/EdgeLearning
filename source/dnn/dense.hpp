@@ -48,7 +48,7 @@ class DenseLayer : public Layer
 {
 public: 
     DenseLayer(Model& model, std::string name, Activation activation, 
-        uint16_t output_size, uint16_t input_size);
+        SizeType output_size, SizeType input_size);
 
     void init(RneType& rne) override;
 
@@ -70,22 +70,22 @@ public:
 
     /**
      * \brief Weight matrix entries + bias entries.
-     * \return size_t
+     * \return SizeType
      */
-    size_t param_count() const noexcept override
+    SizeType param_count() const noexcept override
     {
         return (_input_size + 1UL) * _output_size;
     }
 
-    NumType* param(size_t index) override;
-    NumType* gradient(size_t index) override;
+    NumType* param(SizeType index) override;
+    NumType* gradient(SizeType index) override;
 
     void print() const override;
 
 private:
     Activation _activation;
-    uint16_t _output_size;
-    uint16_t _input_size;
+    SizeType _output_size;
+    SizeType _input_size;
 
     // == Layer parameters ==
     /// \brief Weights of the layer. Size: _output_size * _input_size.

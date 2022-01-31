@@ -32,16 +32,16 @@
 namespace EdgeLearning {
 
 DenseLayer::DenseLayer(Model& model, std::string name, Activation activation, 
-    uint16_t output_size, uint16_t input_size)
+    SizeType output_size, SizeType input_size)
     : Layer(model, std::move(name))
     , _activation{activation}
     , _output_size{output_size}
     , _input_size{input_size}
 {
-    std::printf("%s: %d -> %d\n", _name.c_str(), _input_size, _output_size);
+    std::printf("%s: %lu -> %lu\n", _name.c_str(), _input_size, _output_size);
 
     // The weight parameters of a FF-layer are an NxM matrix.
-    _weights.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_input_size));
+    _weights.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_input_size));
 
     // Each node in this layer is assigned a bias.
     _biases.resize(_output_size);
@@ -50,7 +50,7 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     _activations.resize(_output_size);
 
     _activation_gradients.resize(_output_size);
-    _weight_gradients.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_input_size));
+    _weight_gradients.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_input_size));
     _bias_gradients.resize(_output_size);
     _input_gradients.resize(_input_size);
 }
@@ -128,13 +128,13 @@ void DenseLayer::forward(NumType* inputs)
         case Activation::ReLU:
         {
             DLMath::relu<NumType>(_activations.data(), _activations.data(), 
-                size_t(_output_size));
+                SizeType(_output_size));
             break;
         }
         case Activation::Softmax:
         {
             DLMath::softmax<NumType>(_activations.data(), _activations.data(), 
-                size_t(_output_size));
+                SizeType(_output_size));
             break;
         }
         case Activation::Linear:
@@ -219,9 +219,9 @@ void DenseLayer::reverse(NumType* gradients)
      *                     = dJ/dg(z) * dg(z)/dz * x_j
      *                     = dJ/dz * x_j
      */
-    for (size_t i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < _output_size; ++i)
     {
-        for (size_t j = 0; j < _input_size; ++j)
+        for (SizeType j = 0; j < _input_size; ++j)
         {
             _weight_gradients[(i * _input_size) + j] += 
                 _activation_gradients[i] * _last_input[j];
@@ -238,9 +238,9 @@ void DenseLayer::reverse(NumType* gradients)
      *                 = dJ/dz * W
      */
     std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
-    for (size_t i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < _output_size; ++i)
     {
-        for (size_t j = 0; j < _input_size; ++j)
+        for (SizeType j = 0; j < _input_size; ++j)
         {
             _input_gradients[j] += 
                 _activation_gradients[i] * _weights[(i * _input_size) + j];
@@ -253,7 +253,7 @@ void DenseLayer::reverse(NumType* gradients)
     }
 }
 
-NumType* DenseLayer::param(size_t index)
+NumType* DenseLayer::param(SizeType index)
 {
     if (index < _weights.size())
     {
@@ -262,7 +262,7 @@ NumType* DenseLayer::param(size_t index)
     return &_biases[index - _weights.size()];
 }
 
-NumType* DenseLayer::gradient(size_t index)
+NumType* DenseLayer::gradient(SizeType index)
 {
     if (index < _weight_gradients.size())
     {
@@ -275,18 +275,18 @@ void DenseLayer::print() const
 {
     std::printf("%s\n", _name.c_str());
 
-    std::printf("Weights (%d x %d)\n", _output_size, _input_size);
-    for (size_t i = 0; i < _output_size; ++i)
+    std::printf("Weights (%lu x %lu)\n", _output_size, _input_size);
+    for (SizeType i = 0; i < _output_size; ++i)
     {
-        size_t offset = i * _input_size;
-        for (size_t j = 0; j < _input_size; ++j)
+        SizeType offset = i * _input_size;
+        for (SizeType j = 0; j < _input_size; ++j)
         {
             std::printf("\t[%zu]%f", offset + j, _weights[offset + j]);
         }
         std::printf("\n");
     }
-    std::printf("Biases (%d x 1)\n", _output_size);
-    for (size_t i = 0; i < _output_size; ++i)
+    std::printf("Biases (%lu x 1)\n", _output_size);
+    for (SizeType i = 0; i < _output_size; ++i)
     {
         std::printf("\t%f\n", _biases[i]);
     }

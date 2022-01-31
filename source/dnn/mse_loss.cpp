@@ -29,7 +29,7 @@
 namespace EdgeLearning {
 
 MSELossLayer::MSELossLayer(Model& model, std::string name, 
-    uint16_t input_size, size_t batch_size, NumType loss_tolerance)
+    SizeType input_size, SizeType batch_size, NumType loss_tolerance)
     : LossLayer(model, name, input_size, batch_size)
     , _loss_tolerance{loss_tolerance}
 { 

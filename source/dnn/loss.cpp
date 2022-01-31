@@ -30,7 +30,7 @@
 namespace EdgeLearning {
 
 LossLayer::LossLayer(Model& model, std::string name, 
-    uint16_t input_size, size_t batch_size)
+    SizeType input_size, SizeType batch_size)
     : Layer(model, name)
     , _input_size{input_size}
     , _loss{}

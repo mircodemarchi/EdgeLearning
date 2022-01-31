@@ -81,18 +81,18 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* arr_mul(T* dst, const T* src1, const T* src2, size_t length)
+    static T* arr_mul(T* dst, const T* src1, const T* src2, SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = src1[i] * src2[i];
         }
         return dst;
     }
 
-    static size_t unique()
+    static SizeType unique()
     {
-        static std::size_t id = 0;
+        static SizeType id = 0;
         return id++;
     }
 
@@ -106,9 +106,9 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* arr_sum(T* dst, const T* src1, const T* src2, size_t length)
+    static T* arr_sum(T* dst, const T* src1, const T* src2, SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = src1[i] + src2[i];
         }
@@ -128,7 +128,7 @@ public:
      */
     template <typename T>
     static T* matarr_mul(T* arr_dst, const T* mat_src, const T* arr_src, 
-        size_t rows, size_t cols)
+        SizeType rows, SizeType cols)
     {
         if (arr_src == arr_dst) 
         {
@@ -136,10 +136,10 @@ public:
                                      "in order to perform matarr_mul");
         }
 
-        for (size_t i = 0; i < rows; ++i)
+        for (SizeType i = 0; i < rows; ++i)
         {
             arr_dst[i] = T{0};
-            for (size_t j = 0; j < cols; ++j)
+            for (SizeType j = 0; j < cols; ++j)
             {
                 arr_dst[i] += mat_src[(i * cols) + j] * arr_src[j];
             }
@@ -170,9 +170,9 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* relu(T* dst, const T* src, size_t length)
+    static T* relu(T* dst, const T* src, SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = relu(src[i]);
         }
@@ -189,11 +189,11 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* softmax(T* dst, const T* src, size_t length)
+    static T* softmax(T* dst, const T* src, SizeType length)
     {
         // Compute the exponential of each value and compute the sum. 
         T sum_exp_z{0};
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = std::exp(src[i]);
             sum_exp_z += dst[i];
@@ -203,7 +203,7 @@ public:
         T inv_sum_exp_z = T{1} / sum_exp_z;
 
         // Multiply the inverse of the sum for each value.
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] *= inv_sum_exp_z;
         }
@@ -220,9 +220,9 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* relu_1(T* dst, const T* src, size_t length)
+    static T* relu_1(T* dst, const T* src, SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = (src[i] > T{0}) ? T{1} : T{0};
         }
@@ -242,7 +242,7 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* softmax_1_opt(T* dst, const T* src, size_t length)
+    static T* softmax_1_opt(T* dst, const T* src, SizeType length)
     {
         if (src == dst) 
         {
@@ -250,10 +250,10 @@ public:
                                     "in order to perform softmax_1_opt");
         }
 
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = T{0.0};
-            for(size_t j = 0; j < length; ++j)
+            for(SizeType j = 0; j < length; ++j)
             {
                 dst[i] += (i == j) 
                     ? src[i] * (T{1.0} - src[i]) 
@@ -274,7 +274,7 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* softmax_1(T* dst, const T* src, size_t length)
+    static T* softmax_1(T* dst, const T* src, SizeType length)
     {
         T* tmp = new T[length];
         assert(tmp);
@@ -309,10 +309,10 @@ public:
      * \return T The resulting Cross-Entropy.
      */
     template <typename T>
-    static T cross_entropy(const T* y, const T* y_hat, size_t length)
+    static T cross_entropy(const T* y, const T* y_hat, SizeType length)
     {
         T ret{0.0};
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             ret += cross_entropy(y[i], y_hat[i]);
         }
@@ -348,9 +348,9 @@ public:
      */
     template <typename T>
     static T* cross_entropy_1(T* dst, const T* y, const T* y_hat, T norm, 
-        size_t length)
+        SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = cross_entropy_1(y[i], y_hat[i], norm);
         }
@@ -382,10 +382,10 @@ public:
      * \return T The mean squared error value.
      */
     template <typename T>
-    static T mean_squared_error(const T* y, const T* y_hat, size_t length)
+    static T mean_squared_error(const T* y, const T* y_hat, SizeType length)
     {
         T ret{0.0};
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             ret += squared_error(y[i], y_hat[i]);
         }
@@ -420,9 +420,9 @@ public:
      */
     template <typename T>
     static T* mean_squared_error_1(T* dst, const T* y, const T* y_hat, T norm, 
-        size_t length)
+        SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = squared_error_1(y[i], y_hat[i], norm);
         }
@@ -437,7 +437,7 @@ public:
      * \return T The max value.
      */
     template <typename T>
-    static T max(const T* src, size_t length) 
+    static T max(const T* src, SizeType length) 
     {
         return *std::max_element(src, src + length);
     }
@@ -447,12 +447,12 @@ public:
      * \tparam T Type of the input.
      * \param src    Source array.
      * \param length Length of the array.
-     * \return size_t The argmax index.
+     * \return SizeType The argmax index.
      */
     template <typename T>
-    static size_t argmax(const T* src, size_t length) 
+    static SizeType argmax(const T* src, SizeType length) 
     {
-        return static_cast<size_t>(std::distance(src, 
+        return static_cast<SizeType>(std::distance(src, 
             std::max_element(src, src + length)));
     }
 
@@ -461,13 +461,13 @@ public:
      * \tparam T Type of the input.
      * \param src    Source array.
      * \param length Length of the array.
-     * \return std::tuple<T, size_t> Tuple of max and argmax.
+     * \return std::tuple<T, SizeType> Tuple of max and argmax.
      */
     template <typename T>
-    static std::tuple<T, size_t> max_and_argmax(T* src, size_t length) 
+    static std::tuple<T, SizeType> max_and_argmax(T* src, SizeType length) 
     {
         auto max_iter = std::max_element(src, src + length);
-        auto dist = static_cast<size_t>(std::distance(src, max_iter));
+        auto dist = static_cast<SizeType>(std::distance(src, max_iter));
         return {*max_iter, dist};
     }
 
@@ -492,9 +492,9 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* tanh(T* dst, const T* src, size_t length)
+    static T* tanh(T* dst, const T* src, SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = tanh(src[i]);
         }
@@ -523,9 +523,9 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* tanh_1(T* dst, const T* src, size_t length)
+    static T* tanh_1(T* dst, const T* src, SizeType length)
     {
-        for (size_t i = 0; i < length; ++i)
+        for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = tanh_1(src[i]);
         }

@@ -100,24 +100,24 @@ public:
      * \brief Virtual method that return the number of tunable parameters. 
      * This methos should be overridden to reflect the quantity of tunable 
      * parameters.
-     * \return size_t The amount of tunable parameters. 
+     * \return SizeType The amount of tunable parameters. 
      */
-    virtual size_t param_count() const noexcept { return 0; }
+    virtual SizeType param_count() const noexcept { return 0; }
 
     /**
      * \brief Virtual method accessor for parameter by index.
-     * \param index size_t Parameter index.
+     * \param index SizeType Parameter index.
      * \return NumType* Pointer to parameter.
      */
-    virtual NumType* param(size_t index) { (void) index; return nullptr; }
+    virtual NumType* param(SizeType index) { (void) index; return nullptr; }
 
     /**
      * \brief Virtual method accessor for loss-gradient with respect to a 
      * parameter specified by index.
-     * \param index size_t Parameter index.
+     * \param index SizeType Parameter index.
      * \return NumType* Pointer to gradient value of parameter.
      */
-    virtual NumType* gradient(size_t index) { (void) index; return nullptr; }
+    virtual NumType* gradient(SizeType index) { (void) index; return nullptr; }
 
     /**
      * \brief Print.

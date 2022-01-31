@@ -48,8 +48,8 @@ public:
     }
 
 private:
-    const size_t BATCH_SIZE = 2;
-    const size_t EPOCHS     = 50;
+    const std::size_t BATCH_SIZE = 2;
+    const std::size_t EPOCHS     = 50;
 
     void test_model() 
     {
@@ -96,12 +96,12 @@ private:
         m.init();
         m.print();
 
-        for (size_t e = 0; e < EPOCHS; ++e)
+        for (std::size_t e = 0; e < EPOCHS; ++e)
         {
             std::printf("EPOCH %zu\n", e);
-            for (size_t i = 0; i < inputs.size();)
+            for (std::size_t i = 0; i < inputs.size();)
             {
-                for (size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
+                for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
                     m.step(inputs[i].data(), targets[i].data());
                 }
@@ -154,12 +154,12 @@ private:
         m.init();
         m.print();
 
-        for (size_t e = 0; e < EPOCHS; ++e)
+        for (std::size_t e = 0; e < EPOCHS; ++e)
         {
             std::printf("EPOCH %zu\n", e);
-            for (size_t i = 0; i < inputs.size();)
+            for (std::size_t i = 0; i < inputs.size();)
             {
-                for (size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
+                for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
                     m.step(inputs[i].data(), targets[i].data());
                 }
@@ -191,9 +191,9 @@ private:
 
     void test_recurisive_model() {
         // Input definition.
-        size_t time_steps = 2;
+        std::size_t time_steps = 2;
 
-        size_t input_size = 3;
+        std::size_t input_size = 3;
         std::vector<std::vector<NumType>> inputs = {
             {10.0, 1.0, 10.0, 1.0, 10.0, 1.0},
             {1.0,  3.0, 8.0,  3.0, 1.0,  3.0,},
@@ -201,7 +201,7 @@ private:
             {1.0,  1.5, 8.0,  1.5, 8.0,  1.5},
         };
 
-        size_t output_size = 2;
+        std::size_t output_size = 2;
         std::vector<std::vector<NumType>> targets = {
             {1.0, 2.0, 1.0, 2.0},
             {1.0, 2.0, 1.0, 2.0},
@@ -212,23 +212,23 @@ private:
         // Model definition.
         Model m{"recurrent"};
         auto input_layer = m.add_node<RecurrentLayer>("hidden", 
-            static_cast<uint16_t>(output_size), static_cast<uint16_t>(input_size), 2);
+            static_cast<SizeType>(output_size), static_cast<SizeType>(input_size), 2);
         input_layer->set_initial_hidden_state({0.01, 0.01});
         input_layer->set_time_steps(time_steps);
         input_layer->set_initial_hidden_state({0.0, 0.0});
         auto loss_layer = m.add_loss<MSELossLayer>("loss", 
-            static_cast<uint16_t>(time_steps * output_size), BATCH_SIZE, 0.5);
+            static_cast<SizeType>(time_steps * output_size), BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
         m.create_edge(input_layer, loss_layer);
         m.init();
         m.print();
 
-        for (size_t e = 0; e < EPOCHS; ++e)
+        for (std::size_t e = 0; e < EPOCHS; ++e)
         {
             std::printf("EPOCH %zu\n", e);
-            for (size_t i = 0; i < inputs.size();)
+            for (std::size_t i = 0; i < inputs.size();)
             {
-                for (size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
+                for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
                     m.step(inputs[i].data(), targets[i].data());
                 }

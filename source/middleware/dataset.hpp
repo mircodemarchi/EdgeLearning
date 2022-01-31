@@ -30,6 +30,7 @@
 #ifndef EDGE_LEARNING_MIDDLEWARE_DATASET_HPP
 #define EDGE_LEARNING_MIDDLEWARE_DATASET_HPP
 
+#include "dnn/type.hpp"
 
 #include <cstddef>
 #include <vector>
@@ -79,22 +80,22 @@ public:
      * @param labels_idx The index of the feature to use as ground truth.
      */
     Dataset(Vec data, 
-        std::size_t feature_size = 1, 
-        std::size_t sequence_size = 1,
-        std::set<std::size_t> labels_idx = {})
+        SizeType feature_size = 1, 
+        SizeType sequence_size = 1,
+        std::set<SizeType> labels_idx = {})
         : _data{data}
         , _entry_labels_cache{}
         , _entry_trainset_cache{}
         , _feature_size{std::min(feature_size, _data.size())}
         , _sequence_size{std::min(sequence_size, 
-            std::size_t(_data.size() / std::max(_feature_size, size_t(1))))}
+            SizeType(_data.size() / std::max(_feature_size, SizeType(1))))}
         , _dataset_size{
-            std::size_t(_data.size() 
-                / std::max(_feature_size * _sequence_size, size_t(1)))
+            SizeType(_data.size() 
+                / std::max(_feature_size * _sequence_size, SizeType(1)))
             * (_feature_size * _sequence_size)}
-        , _feature_amount{_dataset_size / std::max(_feature_size, size_t(1))}
+        , _feature_amount{_dataset_size / std::max(_feature_size, SizeType(1))}
         , _sequence_amount{_dataset_size 
-            / std::max(_feature_size * _sequence_size, size_t(1))}
+            / std::max(_feature_size * _sequence_size, SizeType(1))}
         , _labels_idx{labels_idx}
         , _trainset_idx{}
     {
@@ -105,7 +106,7 @@ public:
         {
             if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
         }
-        for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
+        for (SizeType idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
@@ -120,8 +121,8 @@ public:
      * @param sequence_size The size of the sequence in number of feature entry. 
      * @param labels_idx The index of the feature to use as ground truth.
      */
-    Dataset(Mat data, std::size_t sequence_size = 1,
-        std::set<std::size_t> labels_idx = {}) 
+    Dataset(Mat data, SizeType sequence_size = 1,
+        std::set<SizeType> labels_idx = {}) 
         : _data{}
         , _entry_labels_cache{}
         , _entry_trainset_cache{}
@@ -151,7 +152,7 @@ public:
             }
         }
         _sequence_amount = _feature_amount 
-            / std::max(_sequence_size, size_t(1));
+            / std::max(_sequence_size, SizeType(1));
         _dataset_size = _sequence_amount * _sequence_size * _feature_size;
         _data.resize(_dataset_size);
 
@@ -160,7 +161,7 @@ public:
         {
             if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
         }
-        for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
+        for (SizeType idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
@@ -175,7 +176,7 @@ public:
      * @param labels_idx The index of the feature to use as ground truth.
      */
     Dataset(Cub data,
-        std::set<std::size_t> labels_idx = {}) 
+        std::set<SizeType> labels_idx = {}) 
         : _data{}
         , _entry_labels_cache{}
         , _entry_trainset_cache{}
@@ -209,7 +210,7 @@ public:
             {
                 for (const auto& m: data)
                 {
-                    for (std::size_t i = 0; i < _sequence_size; ++i)
+                    for (SizeType i = 0; i < _sequence_size; ++i)
                     {
                         const auto& v = m[i];
                         _data.insert(_data.end(), v.begin(), 
@@ -226,7 +227,7 @@ public:
         {
             if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
         }
-        for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
+        for (SizeType idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
@@ -287,7 +288,7 @@ public:
         // // Uncomment to transpose the cube.
         // arma::Cube<T> ret_trans(
         //     _sequence_size, _feature_size, _sequence_amount);
-        // for (std::size_t s = 0; s < _sequence_amount; ++s)
+        // for (SizeType s = 0; s < _sequence_amount; ++s)
         // {
         //     ret_trans.slice(s) = ret.slice(s).t();
         // } 
@@ -310,15 +311,15 @@ public:
 
     /**
      * @brief Getter and setter of feature_size param.
-     * @return const std::size_t& 
+     * @return const SizeType& 
      */
-    const std::size_t& feature_size() const { return _feature_size; };
+    const SizeType& feature_size() const { return _feature_size; };
 
     /**
      * @brief Getter and setter of sequence_size param.
-     * @return std::size_t& 
+     * @return SizeType& 
      */
-    void sequence_size(std::size_t s)
+    void sequence_size(SizeType s)
     {
         _sequence_size = std::min(s, _feature_amount);
         _sequence_amount = _feature_amount / _sequence_size;
@@ -326,13 +327,13 @@ public:
         _feature_amount = _dataset_size / _feature_size;
         _data.resize(_dataset_size);
     }
-    const std::size_t& sequence_size() const { return _sequence_size; };
+    const SizeType& sequence_size() const { return _sequence_size; };
 
     /**
      * @brief Return the number of entries of the dataset.
-     * @return std::size_t the number of entries of the dataset.
+     * @return SizeType the number of entries of the dataset.
      */
-    std::size_t size() const { return _feature_amount; };
+    SizeType size() const { return _feature_amount; };
 
     /**
      * @brief Return the data vector. 
@@ -340,7 +341,7 @@ public:
      */
     const std::vector<T>& data() const { return _data; };
 
-    const std::vector<T>& entry(std::size_t row_idx)
+    const std::vector<T>& entry(SizeType row_idx)
     {
         if (row_idx >= _feature_amount)
         {
@@ -356,7 +357,7 @@ public:
         return _entry_trainset_cache;
     }
 
-    const std::vector<T>& entry_seq(std::size_t seq_idx)
+    const std::vector<T>& entry_seq(SizeType seq_idx)
     {
         if (seq_idx >= _sequence_amount)
         {
@@ -373,13 +374,13 @@ public:
         return _entry_trainset_cache;
     }
 
-    std::vector<std::size_t> trainset_idx() const 
+    std::vector<SizeType> trainset_idx() const 
     { 
-        return std::vector<std::size_t>(
+        return std::vector<SizeType>(
             _trainset_idx.begin(), _trainset_idx.end());
     }
 
-    const std::vector<T>& trainset(std::size_t row_idx)
+    const std::vector<T>& trainset(SizeType row_idx)
     {
         if (row_idx >= _feature_amount)
         {
@@ -394,7 +395,7 @@ public:
             _entry_trainset_cache, row_idx, _trainset_idx);
     }
 
-    const std::vector<T>& trainset_seq(std::size_t seq_idx)
+    const std::vector<T>& trainset_seq(SizeType seq_idx)
     {
         if (seq_idx >= _sequence_amount)
         {
@@ -409,12 +410,12 @@ public:
             _entry_trainset_cache, seq_idx, _trainset_idx);
     }
 
-    std::vector<std::size_t> labels_idx() const 
+    std::vector<SizeType> labels_idx() const 
     { 
-        return std::vector<std::size_t>(_labels_idx.begin(), _labels_idx.end()); 
+        return std::vector<SizeType>(_labels_idx.begin(), _labels_idx.end()); 
     }
 
-    void labels_idx(std::set<std::size_t> set) 
+    void labels_idx(std::set<SizeType> set) 
     { 
         _labels_idx = set;
         for (auto it = _labels_idx.begin(); it != _labels_idx.end(); )
@@ -422,7 +423,7 @@ public:
             if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
         }
         _trainset_idx.clear();
-        for (std::size_t idx_val = 0; idx_val < _feature_size; ++idx_val)
+        for (SizeType idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
@@ -431,7 +432,7 @@ public:
         }
     }
 
-    const std::vector<T>& labels(std::size_t row_idx)
+    const std::vector<T>& labels(SizeType row_idx)
     {
         if (row_idx >= _feature_amount || _labels_idx.empty())
         {
@@ -441,7 +442,7 @@ public:
         return field_from_row_idx(_entry_labels_cache, row_idx, _labels_idx);
     }
 
-    const std::vector<T>& labels_seq(std::size_t seq_idx)
+    const std::vector<T>& labels_seq(SizeType seq_idx)
     {
         if (seq_idx >= _sequence_amount || _labels_idx.empty())
         {
@@ -454,12 +455,12 @@ public:
 private:
     const std::vector<T>& field_from_row_idx(
         std::vector<T>& dst, 
-        std::size_t row_idx, 
-        const std::set<std::size_t>& set_idx)
+        SizeType row_idx, 
+        const std::set<SizeType>& set_idx)
     {
         dst.resize(set_idx.size());
         auto data_entry_idx = row_idx * _feature_size;
-        std::size_t i = 0;
+        SizeType i = 0;
         for (const auto& idx: set_idx)
         {
             dst[i++] = _data[data_entry_idx + idx];
@@ -469,13 +470,13 @@ private:
 
     const std::vector<T>& field_from_seq_idx(
         std::vector<T>& dst, 
-        std::size_t seq_idx, 
-        const std::set<std::size_t>& set_idx)
+        SizeType seq_idx, 
+        const std::set<SizeType>& set_idx)
     {
         dst.resize(_sequence_size * set_idx.size());
         auto data_entry_idx = seq_idx * _sequence_size * _feature_size;
-        std::size_t i = 0;
-        for (std::size_t t = 0; t < _sequence_size; ++t)
+        SizeType i = 0;
+        for (SizeType t = 0; t < _sequence_size; ++t)
         {
             for (const auto& idx: set_idx)
             {
@@ -493,34 +494,34 @@ private:
     /**
      * @brief The size of a single entry of the dataset, called feature. 
      */
-    std::size_t _feature_size;
+    SizeType _feature_size;
 
     /**
      * @brief The size of a sequence of features entry in the dataset. The 
      * sequence size is in feature entries number granularity. 
      */
-    std::size_t _sequence_size;
+    SizeType _sequence_size;
 
     /**
      * @brief The size of the dataset, that is the quantity of data fields.
      * Element-wise granularity. 
      */
-    std::size_t _dataset_size;
+    SizeType _dataset_size;
 
     /**
      * @brief The number of feature entry of dimension `feature_size` in the 
      * dataset. The feature amount is in feature entries number granularity. 
      */
-    std::size_t _feature_amount;
+    SizeType _feature_amount;
 
     /**
      * @brief The number of sequences in the dataset. The sequence amount is in 
      * sequence number granularity. 
      */
-    std::size_t _sequence_amount;
+    SizeType _sequence_amount;
 
-    std::set<std::size_t> _labels_idx;
-    std::set<std::size_t> _trainset_idx;
+    std::set<SizeType> _labels_idx;
+    std::set<SizeType> _trainset_idx;
 };
 
 } // namespace EdgeLearning

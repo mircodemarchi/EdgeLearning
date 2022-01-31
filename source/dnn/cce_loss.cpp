@@ -33,7 +33,7 @@
 namespace EdgeLearning {
 
 CCELossLayer::CCELossLayer(Model& model, std::string name, 
-    uint16_t input_size, size_t batch_size)
+    SizeType input_size, SizeType batch_size)
     : LossLayer(model, name, input_size, batch_size)
     , _active{}
 { 
@@ -47,7 +47,7 @@ void CCELossLayer::forward(NumType* inputs)
     
     auto max = DLMath::max_and_argmax(inputs, _input_size);
     // NumType max_value = std::get<0>(max);
-    size_t max_index = std::get<1>(max);
+    SizeType max_index = std::get<1>(max);
 
     _active = _argactive();
     if (max_index == _active)
@@ -77,14 +77,14 @@ void CCELossLayer::reverse(NumType* gradients)
     }
 }
 
-size_t CCELossLayer::_argactive() const
+SizeType CCELossLayer::_argactive() const
 {
     if (_target == nullptr)
     {
         std::runtime_error("_target is null, call set_target before");
     }
 
-    for (size_t i = 0; i < _input_size; ++i)
+    for (SizeType i = 0; i < _input_size; ++i)
     {
         if (_target[i] != NumType{0.0})
         {

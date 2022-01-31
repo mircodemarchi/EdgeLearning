@@ -28,8 +28,8 @@ using namespace EdgeLearning;
 
 int main()
 {
-    const size_t BATCH_SIZE = 2;
-    const size_t EPOCHS     = 50;
+    const SizeType BATCH_SIZE = 2;
+    const SizeType EPOCHS     = 50;
 
     std::vector<std::vector<NumType>> inputs = {
         {10.0, 1.0, 10.0, 1.0},
@@ -57,12 +57,12 @@ int main()
     m.create_edge(first_layer, output_layer);
     m.create_edge(output_layer, loss_layer);
 
-    for (size_t e = 0; e < EPOCHS; ++e)
+    for (SizeType e = 0; e < EPOCHS; ++e)
     {
         std::printf("EPOCH %zu\n", e);
-        for (size_t i = 0; i < inputs.size();)
+        for (SizeType i = 0; i < inputs.size();)
         {
-            for (size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
+            for (SizeType b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
             {
                 m.step(inputs[i].data(), targets[i].data());
             }

@@ -59,12 +59,12 @@ public:
 
 private:
     const RneType::result_type SEED = 1;
-    const size_t PRINT_TIMES = 4;
+    const std::size_t PRINT_TIMES = 4;
 
     void test_normal_pdf() {
         RneType generator{SEED};
         auto dist = DLMath::normal_pdf<NumType>(0.0, 0.1);
-        for (size_t i = 0; i < PRINT_TIMES; ++i)
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(dist(generator)));
@@ -72,8 +72,8 @@ private:
 
         std::random_device rd;
         generator = RneType{rd()};
-        size_t gt1_count = 0, lt1_count = 0;
-        for (size_t i = 0; i < 10000; ++i)
+        std::size_t gt1_count = 0, lt1_count = 0;
+        for (std::size_t i = 0; i < 10000; ++i)
         {
             if (dist(generator) > 0.0)
             {
@@ -101,7 +101,7 @@ private:
         std::vector<int> truth_vec{6,6,6,6,6};
         DLMath::arr_sum<int>(test_vec1.data(), test_vec1.data(), 
             test_vec2.data(), test_vec1.size());
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
         }
@@ -113,7 +113,7 @@ private:
         std::vector<int> truth_vec{5,8,9,8,5};
         DLMath::arr_mul<int>(test_vec1.data(), test_vec1.data(), 
             test_vec2.data(), test_vec1.size());
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
         }
@@ -130,7 +130,7 @@ private:
         std::vector<int> res_vec; res_vec.resize(test_vec.size());
         DLMath::matarr_mul<int>(res_vec.data(), test_mat.data(), 
                                 test_vec.data(), 2, 2);
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_EQUAL(res_vec[i], truth_vec[i]);
         }
@@ -141,7 +141,7 @@ private:
         std::vector<NumType> truth_vec{0,0,0,1,2};
         DLMath::relu<NumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
@@ -157,7 +157,7 @@ private:
             0.23412165725274, 0.63640864655883};
         DLMath::softmax<NumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
@@ -170,7 +170,7 @@ private:
         std::vector<NumType> truth_vec{0,0,0,1,1};
         DLMath::relu_1<NumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
@@ -184,7 +184,7 @@ private:
             test_vec.data(), test_vec.size()));
         EDGE_LEARNING_TEST_EXECUTE(DLMath::softmax_1<NumType>(test_vec.data(), 
             test_vec.data(), test_vec.size()));
-        for (size_t i = 0; i < test_vec.size(); ++i)
+        for (std::size_t i = 0; i < test_vec.size(); ++i)
         {
             std::cout << std::fixed << std::setprecision(40) 
                 << "test_vec[i]: " << test_vec[i] << std::endl << std::endl;
@@ -212,7 +212,7 @@ private:
         std::vector<NumType> ret_vec; ret_vec.resize(truth_ce1.size());
         DLMath::cross_entropy_1(ret_vec.data(), test_y.data(), 
             test_y_hat.data(), 1.0, test_y_hat.size());
-        for (size_t i = 0; i < truth_ce1.size(); ++i)
+        for (std::size_t i = 0; i < truth_ce1.size(); ++i)
         {
             EDGE_LEARNING_TEST_WITHIN(ret_vec[i], truth_ce1[i], 0.00000000001);
         }
@@ -251,7 +251,7 @@ private:
         std::vector<NumType> ret_vec; ret_vec.resize(truth_mse1.size());
         DLMath::mean_squared_error_1(ret_vec.data(), test_y.data(), 
             test_y_hat.data(), 1.0, test_y_hat.size());
-        for (size_t i = 0; i < truth_mse1.size(); ++i)
+        for (std::size_t i = 0; i < truth_mse1.size(); ++i)
         {
             EDGE_LEARNING_TEST_WITHIN(ret_vec[i], truth_mse1[i], 0.00000000001);
         }
@@ -279,7 +279,7 @@ private:
         std::vector<NumType> truth_vec{-1.0, 0.0, 0.76159416, 0.99999834, 1.0};
         DLMath::tanh<NumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
@@ -293,7 +293,7 @@ private:
             4.19974342e-01, 3.32610934e-06, 0.00000000e+00};
         DLMath::tanh_1<NumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
-        for (size_t i = 0; i < truth_vec.size(); ++i)
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));

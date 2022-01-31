@@ -39,8 +39,8 @@ namespace EdgeLearning {
 
 class MSELossLayer : public LossLayer {
 public:
-    MSELossLayer(Model& model, std::string name, uint16_t input_size, 
-        size_t batch_size, NumType loss_tolerance=0.1);
+    MSELossLayer(Model& model, std::string name, SizeType input_size, 
+        SizeType batch_size, NumType loss_tolerance=0.1);
 
     /**
      * \brief No initiallization is needed for this layer.

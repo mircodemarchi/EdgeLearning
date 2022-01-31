@@ -30,6 +30,8 @@
 #define EDGE_LEARNING_DNN_TYPE_HPP
 
 #include <random>
+#include <cstddef>
+
 
 namespace EdgeLearning {
 
@@ -40,6 +42,8 @@ using NumType = double;
  * Nishimura, 1998.
  */
 using RneType = std::mt19937_64;
+
+using SizeType = std::size_t;
 
 } // namespace EdgeLearning
 

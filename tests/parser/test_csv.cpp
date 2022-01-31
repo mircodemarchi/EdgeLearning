@@ -197,9 +197,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(std::vector<CSVRow>(csv)[1], csv[1]);
     }
 
-    void test_csv_iterator(const size_t num_lines) {
+    void test_csv_iterator(const std::size_t num_lines) {
         auto csv = CSV(data_training_fp.string());
-        size_t i = 0;
+        std::size_t i = 0;
         for (auto &row: csv)
         {
             if (i == num_lines)

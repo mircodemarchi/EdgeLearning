@@ -46,7 +46,7 @@ public:
      * @param batch_size 
      */
     CCELossLayer(Model& model, std::string name = std::string(), 
-        uint16_t input_size = 0, size_t batch_size = 1);
+        SizeType input_size = 0, SizeType batch_size = 1);
 
     void forward(NumType* inputs) override;
 
@@ -60,12 +60,12 @@ public:
 private:
     /**
      * \brief Find the argument of _target array that is active.
-     * \return size_t
+     * \return SizeType
      */
-    size_t _argactive() const;
+    SizeType _argactive() const;
 
     // Last active classification in the target one-hot encoding. 
-    size_t _active; 
+    SizeType _active; 
 };
 
 } // namespace EdgeLearning

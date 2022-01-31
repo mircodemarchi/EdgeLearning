@@ -131,15 +131,15 @@ void Model::save(std::ofstream& out)
 {
     for (auto& layer: _layers)
     {
-        size_t param_count = layer->param_count();
-        for (size_t i = 0; i < param_count; ++i)
+        SizeType param_count = layer->param_count();
+        for (SizeType i = 0; i < param_count; ++i)
         {
             out.write(reinterpret_cast<char const*>(
                 layer->param(i)), sizeof(NumType));
         }
     }
-    size_t param_count = _loss_layer->param_count();
-    for (size_t i = 0; i < param_count; ++i)
+    SizeType param_count = _loss_layer->param_count();
+    for (SizeType i = 0; i < param_count; ++i)
     {
         out.write(reinterpret_cast<char const*>(
             _loss_layer->param(i)), sizeof(NumType));
@@ -150,14 +150,14 @@ void Model::load(std::ifstream& in)
 {
     for (auto& layer: _layers)
     {
-        size_t param_count = layer->param_count();
-        for (size_t i = 0; i < param_count; ++i)
+        SizeType param_count = layer->param_count();
+        for (SizeType i = 0; i < param_count; ++i)
         {
             in.read(reinterpret_cast<char*>(layer->param(i)), sizeof(NumType));
         }
     }
-    size_t param_count = _loss_layer->param_count();
-    for (size_t i = 0; i < param_count; ++i)
+    SizeType param_count = _loss_layer->param_count();
+    for (SizeType i = 0; i < param_count; ++i)
     {
         in.read(reinterpret_cast<char*>(
             _loss_layer->param(i)), sizeof(NumType));

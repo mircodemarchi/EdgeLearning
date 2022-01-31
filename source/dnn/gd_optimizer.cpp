@@ -32,8 +32,8 @@ GDOptimizer::GDOptimizer(NumType eta)
 
 void GDOptimizer::train(Layer& layer) 
 {
-    size_t param_count = layer.param_count();
-    for (size_t i = 0; i < param_count; ++i)
+    SizeType param_count = layer.param_count();
+    for (SizeType i = 0; i < param_count; ++i)
     {
         NumType& param    = *layer.param(i);
         NumType& gradient = *layer.gradient(i);

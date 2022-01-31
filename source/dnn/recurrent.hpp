@@ -57,8 +57,8 @@ class RecurrentLayer : public Layer
 {
 public: 
     RecurrentLayer(Model& model, std::string name, 
-        uint16_t output_size, uint16_t input_size, uint16_t hidden_size,
-        uint16_t time_steps = 0,
+        SizeType output_size, SizeType input_size, SizeType hidden_size,
+        SizeType time_steps = 0,
         OutputActivation output_activation = OutputActivation::Linear, 
         HiddenActivation hidden_activation = HiddenActivation::TanH);
 
@@ -79,16 +79,16 @@ public:
     /**
      * \brief Weight input to hidden, hidden to hidden and hidden to output.
      * Bias to hidden and to output. 
-     * \return size_t
+     * \return SizeType
      */
-    size_t param_count() const noexcept override
+    SizeType param_count() const noexcept override
     {
-        return (static_cast<size_t>(_input_size) + static_cast<size_t>(_hidden_size + 1UL)) * static_cast<size_t>(_hidden_size)
-             + static_cast<size_t>(_hidden_size + 1UL) * static_cast<size_t>(_output_size);
+        return (static_cast<SizeType>(_input_size) + static_cast<SizeType>(_hidden_size + 1UL)) * static_cast<SizeType>(_hidden_size)
+             + static_cast<SizeType>(_hidden_size + 1UL) * static_cast<SizeType>(_output_size);
     }
 
-    NumType* param(size_t index) override;
-    NumType* gradient(size_t index) override;
+    NumType* param(SizeType index) override;
+    NumType* gradient(SizeType index) override;
 
     void print() const override;
 
@@ -102,13 +102,13 @@ public:
             _hidden_state.begin());
     }
 
-    void set_time_steps(uint16_t time_steps)
+    void set_time_steps(SizeType time_steps)
     {
         _time_steps = time_steps;
-        _hidden_state.resize(static_cast<size_t>(_hidden_size) * static_cast<size_t>(std::max(_time_steps, uint16_t(1U))));
-        _activations.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_time_steps));
-        _activation_gradients.resize(static_cast<size_t>(_output_size) * static_cast<size_t>(_time_steps));
-        _input_gradients.resize(static_cast<size_t>(_input_size) * static_cast<size_t>(_time_steps));
+        _hidden_state.resize(static_cast<SizeType>(_hidden_size) * static_cast<SizeType>(std::max(_time_steps, SizeType(1U))));
+        _activations.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_time_steps));
+        _activation_gradients.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_time_steps));
+        _input_gradients.resize(static_cast<SizeType>(_input_size) * static_cast<SizeType>(_time_steps));
     }
 
     void reset_hidden_state()
@@ -122,12 +122,12 @@ public:
 private:
     OutputActivation _output_activation;
     HiddenActivation _hidden_activation;
-    uint16_t _output_size;
-    uint16_t _input_size;
-    uint16_t _hidden_size;
+    SizeType _output_size;
+    SizeType _input_size;
+    SizeType _hidden_size;
 
     std::vector<NumType> _hidden_state;
-    uint16_t _time_steps;
+    SizeType _time_steps;
 
     // == Layer parameters ==
     /**
