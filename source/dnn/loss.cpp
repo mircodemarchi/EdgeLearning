@@ -31,13 +31,13 @@ namespace EdgeLearning {
 
 LossLayer::LossLayer(Model& model, std::string name, 
     SizeType input_size, SizeType batch_size)
-    : Layer(model, name)
+    : Layer(model, std::move(name))
     , _input_size{input_size}
     , _loss{}
     , _target{nullptr}
     , _last_input{nullptr}
     , _gradients{}
-    , _inv_batch_size{NumType{1.0} / batch_size}
+    , _inv_batch_size{NumType{1.0} / std::max(batch_size, SizeType{1})}
     , _cumulative_loss{0.0}
     , _correct{0}
     , _incorrect{0}
