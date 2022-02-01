@@ -64,11 +64,11 @@ void swap(Model& lop, Model& rop)
     swap(lop._loss_layer, rop._loss_layer);
 }
 
-void Model::create_edge(Layer& src, Layer& dst)
+void Model::create_edge(Layer::SharedPtr src, Layer::SharedPtr dst)
 {
     // NOTE: No validation is done to ensure the edge doesn't already exist
-    dst._antecedents.push_back(&src);
-    src._subsequents.push_back(&dst);
+    dst->_antecedents.push_back(src);
+    src->_subsequents.push_back(dst);
 }
 
 RneType::result_type Model::init(RneType::result_type seed)

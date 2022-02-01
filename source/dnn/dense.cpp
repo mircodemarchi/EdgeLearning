@@ -147,7 +147,7 @@ void DenseLayer::forward(NumType* inputs)
     }
 
     // Forward to the next layers.
-    for (auto *layer: this->_subsequents)
+    for (auto layer: this->_subsequents)
     {
         layer->forward(_activations.data());
     }
@@ -248,7 +248,7 @@ void DenseLayer::reverse(NumType* gradients)
         }
     }
 
-    for (auto *l: _antecedents)
+    for (auto l: _antecedents)
     {
         l->reverse(_input_gradients.data());
     }

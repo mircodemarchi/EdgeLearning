@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 
 namespace EdgeLearning {
@@ -47,6 +48,8 @@ class Model;
 class Layer 
 {
 public:
+    using SharedPtr = std::shared_ptr<Layer>;
+
     /**
      * @brief Construct a new Layer object.
      * @param model 
@@ -138,8 +141,8 @@ protected:
 
     Model& _model;                      ///< Model reference.
     std::string _name;                  ///< Layer naem (for debug).
-    std::vector<Layer*> _antecedents;   ///< List of previous layers.
-    std::vector<Layer*> _subsequents;   ///< List of followers layers.
+    std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
+    std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
 };
 
 } // namespace EdgeLearning
