@@ -1,7 +1,8 @@
 set(UNIT_TESTS
     test_dlmath
     test_layer
-    # test_cce_loss
+    test_loss
+    test_cce_loss
     test_model
 )
 

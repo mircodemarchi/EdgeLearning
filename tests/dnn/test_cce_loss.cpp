@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/dnn/test_layer.cpp
+ *            tests/dnn/test_cce_loss.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -34,27 +34,107 @@ class TestCCELoss {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
+        EDGE_LEARNING_TEST_CALL(test_loss_layer());
+        EDGE_LEARNING_TEST_CALL(test_score());
+        EDGE_LEARNING_TEST_CALL(test_cce_loss_layer());
     }
 
 private:
     void test_layer() {
-        EDGE_LEARNING_TEST_EXECUTE(
-            auto l = CCELossLayer(_m, "cce_loss_layer_test", 1, 1));
-        EDGE_LEARNING_TEST_TRY(
-            auto l = CCELossLayer(_m, "cce_loss_layer_test", 1, 1));
-
-        auto l = CCELossLayer(_m, "cce_loss_layer_test", 1, 1);
+        EDGE_LEARNING_TEST_EXECUTE(auto l1 = CCELossLayer(_m, "cce_loss_layer_test"));
+        EDGE_LEARNING_TEST_TRY(auto l2 = CCELossLayer(_m, "cce_loss_layer_test"));
+        auto l = CCELossLayer(_m, "cce_loss_layer_test");
         EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
-        EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
-        EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l.print());
-
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
         EDGE_LEARNING_TEST_EQUAL(l.param(0), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l.param(10), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l.gradient(0), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l.gradient(10), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l.name(), "cce_loss_layer_test");
+
+        EDGE_LEARNING_TEST_EXECUTE(CCELossLayer l1_copy{l});
+        EDGE_LEARNING_TEST_TRY(CCELossLayer l2_copy{l});
+        CCELossLayer l_copy{l};
+        EDGE_LEARNING_TEST_TRY(RneType r; l_copy.init(r));
+        EDGE_LEARNING_TEST_TRY(l_copy.print());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.param_count(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l_copy.param(0), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_copy.param(10), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_copy.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_copy.gradient(10), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_copy.name(), "cce_loss_layer_test");
+
+        EDGE_LEARNING_TEST_EXECUTE(CCELossLayer l_assign(_m); l_assign = l);
+        EDGE_LEARNING_TEST_TRY(CCELossLayer l_assign(_m); l_assign = l);
+        CCELossLayer l_assign(_m); l_assign = l;
+        EDGE_LEARNING_TEST_TRY(RneType r; l_assign.init(r));
+        EDGE_LEARNING_TEST_TRY(l_assign.print());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l_assign.param(0), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_assign.param(10), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_assign.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_assign.gradient(10), nullptr);
+        EDGE_LEARNING_TEST_EQUAL(l_assign.name(), "cce_loss_layer_test");
+
+        EDGE_LEARNING_TEST_EXECUTE(auto l1_noname = CCELossLayer(_m));
+        EDGE_LEARNING_TEST_TRY(auto l2_noname = CCELossLayer(_m));
+        auto l_noname = CCELossLayer(_m);
+        EDGE_LEARNING_TEST_PRINT(l_noname.name());
+        EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
+    }
+
+    void test_loss_layer() {
+        EDGE_LEARNING_TEST_EXECUTE(auto l1 = CCELossLayer(_m, "cce_loss_layer_test",0, 0));
+        EDGE_LEARNING_TEST_TRY(auto l2 = CCELossLayer(_m, "cce_loss_layer_test",0, 0));
+        auto l = CCELossLayer(_m, "cce_loss_layer_test", 6, 2);
+        EDGE_LEARNING_TEST_EXECUTE(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_EXECUTE(l.print());
+        EDGE_LEARNING_TEST_EXECUTE(l.set_target(nullptr))
+    }
+
+    void test_score() {
+        auto l = CCELossLayer(_m, "cce_loss_layer_test", 1);
+        EDGE_LEARNING_TEST_EXECUTE(l.reset_score());
+        EDGE_LEARNING_TEST_EXECUTE(l.print());
+        std::vector<NumType> v{0};
+        std::vector<NumType> t2{1};
+        EDGE_LEARNING_TEST_EXECUTE(l.set_target(t2.data()));
+        for (SizeType i = 0; i < 10; ++i)
+        {
+            l.forward(v.data());
+        }
+        EDGE_LEARNING_TEST_EXECUTE(l.print());
+        EDGE_LEARNING_TEST_PRINT(l.accuracy());
+        EDGE_LEARNING_TEST_PRINT(l.avg_loss());
+        EDGE_LEARNING_TEST_EXECUTE(l.reset_score());
+        EDGE_LEARNING_TEST_ASSERT(l.accuracy() != l.accuracy());
+        EDGE_LEARNING_TEST_ASSERT(l.avg_loss() != l.avg_loss());
+    }
+
+    void test_cce_loss_layer() {
+        auto l = CCELossLayer(_m, "cce_loss_layer_test", 1, 2);
+        std::vector<NumType> v1{0};
+        std::vector<NumType> t1{0};
+        std::vector<NumType> t2{1};
+        EDGE_LEARNING_TEST_FAIL(l.forward(v1.data()));
+        EDGE_LEARNING_TEST_THROWS(l.forward(v1.data()), std::runtime_error);
+
+        EDGE_LEARNING_TEST_TRY(l.set_target(t1.data()));
+        EDGE_LEARNING_TEST_FAIL(l.forward(v1.data()));
+        EDGE_LEARNING_TEST_THROWS(l.forward(v1.data()), std::runtime_error);
+
+        EDGE_LEARNING_TEST_TRY(l.set_target(t2.data()));
+        EDGE_LEARNING_TEST_TRY(l.forward(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l.reverse(v1.data()));
+
+        CCELossLayer l_copy{l};
+        EDGE_LEARNING_TEST_TRY(l_copy.forward(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l_copy.reverse(v1.data()));
+
+        CCELossLayer l_assign(_m); l_assign = l;
+        EDGE_LEARNING_TEST_TRY(l_assign.forward(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l_assign.reverse(v1.data()));
     }
 
     Model _m = Model("model_cce_loss_layer_test");

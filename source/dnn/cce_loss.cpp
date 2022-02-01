@@ -42,6 +42,7 @@ CCELossLayer::CCELossLayer(Model& model, std::string name,
 
 void CCELossLayer::forward(NumType* inputs)
 {
+    if (_target == nullptr) throw std::runtime_error("call forward without setting target");
     _loss = DLMath::cross_entropy(_target, inputs, _input_size);
     _cumulative_loss += _loss;
     

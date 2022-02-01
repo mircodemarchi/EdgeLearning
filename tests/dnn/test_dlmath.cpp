@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/test_dlmath.cpp
+ *            tests/dnn/test_dlmath.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
