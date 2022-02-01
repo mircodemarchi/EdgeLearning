@@ -91,7 +91,7 @@ public:
         _layers.push_back(
             std::make_shared<Layer_t>(*this, std::forward<T>(args)...)
         );
-        return dynamic_pointer_cast<Layer_t>(_layers.back());
+        return std::dynamic_pointer_cast<Layer_t>(_layers.back());
     }
 
     /**
@@ -109,7 +109,7 @@ public:
     {
         _loss_layer = std::make_shared<LossLayer_t>(
             *this, std::forward<T>(args)...);
-        return dynamic_pointer_cast<LossLayer_t>(_loss_layer);
+        return std::dynamic_pointer_cast<LossLayer_t>(_loss_layer);
     }
 
     /**
