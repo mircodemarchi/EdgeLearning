@@ -30,13 +30,14 @@
 
 namespace EdgeLearning {
 
-Layer::Layer(Model& model, std::string name)
+Layer::Layer(Model& model, std::string name, std::string prefix_name)
     : _model(model)
     , _name{std::move(name)}
 { 
     if (_name.empty())
     {
-        _name = "layer_" + std::to_string(DLMath::unique());
+        if (prefix_name.empty()) prefix_name = "layer_";
+        _name = prefix_name + std::to_string(DLMath::unique());
     }
 }
 

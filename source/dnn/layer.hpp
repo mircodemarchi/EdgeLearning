@@ -53,9 +53,11 @@ public:
     /**
      * @brief Construct a new Layer object.
      * @param model 
-     * @param name 
+     * @param name
+     * @param prefix_name
      */
-    Layer(Model& model, std::string name = std::string());
+    Layer(Model& model, std::string name = std::string(),
+          std::string prefix_name = std::string());
 
     /**
      * @brief Copy constructor of a new Layer object.

@@ -29,12 +29,15 @@
 #include <tuple>
 #include <cstdio>
 #include <stdexcept>
+#include <utility>
 
 namespace EdgeLearning {
 
 CCELossLayer::CCELossLayer(Model& model, std::string name, 
     SizeType input_size, SizeType batch_size)
-    : LossLayer(model, name, input_size, batch_size)
+    : LossLayer(model, std::move(name),
+                input_size, batch_size,
+                "cce_loss_layer_")
     , _active{}
 { 
 
@@ -42,7 +45,10 @@ CCELossLayer::CCELossLayer(Model& model, std::string name,
 
 void CCELossLayer::forward(NumType* inputs)
 {
-    if (_target == nullptr) throw std::runtime_error("call forward without setting target");
+    if (_target == nullptr)
+    {
+        throw std::runtime_error("_target is null, set_target not called");
+    }
     _loss = DLMath::cross_entropy(_target, inputs, _input_size);
     _cumulative_loss += _loss;
     
@@ -80,11 +86,6 @@ void CCELossLayer::reverse(NumType* gradients)
 
 SizeType CCELossLayer::_argactive() const
 {
-    if (_target == nullptr)
-    {
-        throw std::runtime_error("_target is null, call set_target before");
-    }
-
     for (SizeType i = 0; i < _input_size; ++i)
     {
         if (_target[i] != NumType{0.0})

@@ -43,10 +43,14 @@ public:
     /**
      * @brief Construct a new LossLayer object.
      * @param model 
-     * @param name 
+     * @param name
+     * @param input_size
+     * @param batch_size
+     * @param prefix_name
      */
     LossLayer(Model& model, std::string name = std::string(), 
-        SizeType input_size = 0, SizeType batch_size = 1);
+        SizeType input_size = 0, SizeType batch_size = 1,
+        std::string prefix_name = std::string());
 
     /**
      * @brief Destroy the LossLayer object.
