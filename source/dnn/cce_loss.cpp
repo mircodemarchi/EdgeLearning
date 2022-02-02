@@ -35,9 +35,8 @@ namespace EdgeLearning {
 
 CCELossLayer::CCELossLayer(Model& model, std::string name, 
     SizeType input_size, SizeType batch_size)
-    : LossLayer(model, std::move(name),
-                input_size, batch_size,
-                "cce_loss_layer_")
+    : LossLayer(model, input_size, batch_size,
+                std::move(name), "cce_loss_layer_")
     , _active{}
 { 
 

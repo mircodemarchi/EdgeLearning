@@ -32,7 +32,7 @@ using namespace EdgeLearning;
 class CustomLossLayer: public LossLayer {
 public:
     CustomLossLayer(SizeType input_size = 0, SizeType batch_size = 1)
-        : LossLayer(_m, "custom_loss_layer_test", input_size, batch_size)
+        : LossLayer(_m, input_size, batch_size, "custom_loss_layer_test")
         , _m{"model_loss_layer_test"}
         , _i{0}
     { }

@@ -48,8 +48,9 @@ public:
      * @param batch_size
      * @param prefix_name
      */
-    LossLayer(Model& model, std::string name = std::string(), 
+    LossLayer(Model& model,
         SizeType input_size = 0, SizeType batch_size = 1,
+        std::string name = std::string(),
         std::string prefix_name = std::string());
 
     /**
