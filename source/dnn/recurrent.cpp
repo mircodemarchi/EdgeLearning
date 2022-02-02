@@ -35,7 +35,7 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     SizeType output_size, SizeType input_size, SizeType hidden_size, 
     SizeType time_steps, 
     OutputActivation output_activation, HiddenActivation hidden_activation)
-    : Layer(model, std::move(name))
+    : Layer(model, std::move(name), "recurrent_layer_")
     , _output_activation{output_activation}
     , _hidden_activation{hidden_activation}
     , _output_size{output_size}
@@ -47,9 +47,9 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     std::cout << _name << ": " << _input_size 
         << " -{" << _hidden_size << "}-> " << _output_size << std::endl;
 
-    auto ih_size = static_cast<SizeType>(_input_size)*static_cast<SizeType>(_hidden_size);
-    auto hh_size = static_cast<SizeType>(_hidden_size)*static_cast<SizeType>(_hidden_size);
-    auto ho_size = static_cast<SizeType>(_hidden_size)*static_cast<SizeType>(_output_size);
+    auto ih_size = _input_size * _hidden_size;
+    auto hh_size = _hidden_size * _hidden_size;
+    auto ho_size = _hidden_size * _output_size;
 
     // The weight input to hidden parameters are an HxI matrix.
     _weights_i_to_h.resize(ih_size);
@@ -64,19 +64,19 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     _biases_to_o.resize(_output_size);
 
     // The outputs of each neuron within the layer is an "activation".
-    _activations.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_time_steps));
+    _activations.resize(_output_size * _time_steps);
 
     // The hidden state is of hidden_size for each time step of the sequences.
     _hidden_state = std::vector<NumType>(
-        static_cast<SizeType>(_hidden_size) * static_cast<SizeType>(std::max(_time_steps, SizeType(1U))), 0.0);
+        _hidden_size * std::max(_time_steps, SizeType(1U)), 0.0);
 
-    _activation_gradients.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_time_steps));
+    _activation_gradients.resize(_output_size * _time_steps);
     _weights_i_to_h_gradients.resize(ih_size);
     _weights_h_to_h_gradients.resize(hh_size);
     _weights_h_to_o_gradients.resize(ho_size);
     _biases_to_h_gradients.resize(_hidden_size);
     _biases_to_o_gradients.resize(_output_size);
-    _input_gradients.resize(static_cast<SizeType>(_input_size) * static_cast<SizeType>(_time_steps));
+    _input_gradients.resize(_input_size * _time_steps);
 }
 
 void RecurrentLayer::init(RneType& rne)

@@ -56,8 +56,8 @@ enum class HiddenActivation
 class RecurrentLayer : public Layer 
 {
 public: 
-    RecurrentLayer(Model& model, std::string name, 
-        SizeType output_size, SizeType input_size, SizeType hidden_size,
+    RecurrentLayer(Model& model, std::string name = std::string(),
+        SizeType output_size = 0, SizeType input_size = 0, SizeType hidden_size = 0,
         SizeType time_steps = 0,
         OutputActivation output_activation = OutputActivation::Linear, 
         HiddenActivation hidden_activation = HiddenActivation::TanH);
@@ -96,7 +96,7 @@ public:
     {
         if (initial_hidden_state.size() > _hidden_size)
         {
-            std::runtime_error("initial hidden state exceeds the hidden size");
+            throw std::runtime_error("initial hidden state exceeds the hidden size");
         }
         std::copy(initial_hidden_state.begin(), initial_hidden_state.end(), 
             _hidden_state.begin());
