@@ -36,10 +36,31 @@
 using namespace std;
 using namespace EdgeLearning;
 
+class CustomLossLayer: public LossLayer {
+public:
+    CustomLossLayer(Model& m, SizeType input_size = 0, SizeType batch_size = 1)
+            : LossLayer(m, input_size, batch_size, "custom_loss_layer_test")
+    {
+        _params.resize(input_size);
+    }
+
+    SizeType param_count() const noexcept override { return _input_size; }
+    NumType* param(SizeType index) override { return &_params[index]; }
+
+    void forward(NumType* inputs) override {
+        std::copy(inputs, inputs + _input_size, _params.begin());
+    }
+    void reverse(NumType* gradients) override { (void) gradients; }
+
+private:
+    std::vector<NumType> _params;
+};
+
 class TestModel {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_model());
+        EDGE_LEARNING_TEST_CALL(test_load_save());
         EDGE_LEARNING_TEST_CALL(test_classifier_model());
         EDGE_LEARNING_TEST_CALL(test_classifier_model_predict());
         EDGE_LEARNING_TEST_CALL(test_regressor_model());
@@ -72,6 +93,31 @@ private:
         EDGE_LEARNING_TEST_TRY(Model m_assign; m_assign = m);
         Model m_assign; m_assign = m;
         EDGE_LEARNING_TEST_EQUAL(m_assign.name(), "model");
+    }
+
+    void test_load_save()
+    {
+        Model m{"test_model_load_save"};
+        auto first_layer = m.add_layer<DenseLayer>(
+                "first", Activation::ReLU, 8, 4);
+        auto output_layer = m.add_layer<DenseLayer>(
+                "second", Activation::Linear, 2, 8);
+        auto loss_layer = m.add_loss<CustomLossLayer>(
+                2, BATCH_SIZE);
+        m.create_edge(first_layer, output_layer);
+        m.create_edge(output_layer, loss_layer);
+
+        EDGE_LEARNING_TEST_TRY(m.init());
+        std::ofstream ofile{
+            std::filesystem::path{"classifier.weight"},
+            std::ios::binary};
+        EDGE_LEARNING_TEST_TRY(m.save(ofile));
+
+        EDGE_LEARNING_TEST_TRY(m.init());
+        std::ifstream ifile{
+            std::filesystem::path{"classifier.weight"},
+            std::ios::binary};
+        EDGE_LEARNING_TEST_TRY(m.load(ifile));
     }
 
     void test_classifier_model() {
