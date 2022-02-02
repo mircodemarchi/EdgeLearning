@@ -261,16 +261,18 @@ private:
         
         // Model definition.
         Model m{"recurrent"};
-        auto input_layer = m.add_layer<RecurrentLayer>("hidden",
-                                                        static_cast<SizeType>(output_size),
-                                                        static_cast<SizeType>(input_size), 2);
-        input_layer->set_initial_hidden_state({0.01, 0.01});
-        input_layer->set_time_steps(time_steps);
-        input_layer->set_initial_hidden_state({0.0, 0.0});
+        auto first_layer = m.add_layer<DenseLayer>(
+            "hidden", Activation::ReLU, input_size * time_steps, input_size * time_steps);
+        auto output_layer = m.add_layer<RecurrentLayer>(
+            "output", output_size, input_size, 2);
+        output_layer->set_initial_hidden_state({0.01, 0.01});
+        output_layer->set_time_steps(time_steps);
+        output_layer->set_initial_hidden_state({0.0, 0.0});
         auto loss_layer = m.add_loss<MSELossLayer>("loss",
             static_cast<SizeType>(time_steps * output_size), BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
-        m.create_edge(input_layer, loss_layer);
+        m.create_edge(first_layer, output_layer);
+        m.create_edge(output_layer, loss_layer);
         m.init();
         m.print();
 
@@ -295,7 +297,7 @@ private:
         std::cout << "Final result - " << std::endl;
         m.print();
 
-        input_layer->reset_hidden_state();
+        output_layer->reset_hidden_state();
     }
 
     Model _create_binary_classifier_model()
