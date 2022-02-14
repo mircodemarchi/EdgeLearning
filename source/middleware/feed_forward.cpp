@@ -30,16 +30,60 @@ namespace EdgeLearning {
 
 FeedForward::FeedForward(
     std::map<std::string, std::tuple<SizeType, Activation>> layers,
-    LossType loss, OptimizerType optimizer,
+    SizeType input_size,
+    LossType loss,
+    SizeType batch_size,
     std::string name)
     : _layers{std::move(layers)}
+    // , _input_size{input_size}
     , _loss{loss}
-    , _optimizer{optimizer}
+    , _batch_size{batch_size}
     , _name{name}
 #if ENABLE_MLPACK
 #else
     , _m{name}
 #endif
-{ }
+{
+#if ENABLE_MLPACK
+
+#else
+        std::vector<Layer::SharedPtr> l;
+        auto prev_layer_size = input_size;
+        for (const auto& e: _layers)
+        {
+            auto curr_layer_size = std::get<0>(e.second);
+            auto curr_layer_activation = std::get<1>(e.second);
+            l.push_back(
+                    _m.add_layer<DenseLayer>(
+                            e.first, curr_layer_activation,
+                            curr_layer_size, prev_layer_size)
+            );
+            prev_layer_size = curr_layer_size;
+        }
+
+        std::shared_ptr<LossLayer> loss_layer;
+        auto output_size = prev_layer_size;
+        switch(_loss)
+        {
+            case LossType::CCE: {
+                loss_layer = _m.add_loss<CCELossLayer>(
+                        "cce_loss", output_size, batch_size);
+                break;
+            }
+            case LossType::MSE:
+            default: {
+                loss_layer = _m.add_loss<MSELossLayer>(
+                        "mse_loss", output_size, batch_size);
+                break;
+            }
+        }
+
+        for (SizeType i = 0; i < l.size() - 1; ++i)
+        {
+            _m.create_edge(l[i], l[i + 1]);
+        }
+        _m.create_edge(l[l.size() - 1], loss_layer);
+#endif
+}
 
 } // namespace EdgeLearning

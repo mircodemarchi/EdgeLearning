@@ -55,54 +55,19 @@ enum class OptimizerType
 class FeedForward {
 public:
     FeedForward(std::map<std::string, std::tuple<SizeType, Activation>> layers,
+                SizeType input_size,
                 LossType loss = LossType::MSE,
-                OptimizerType optimizer = OptimizerType::GradientDescent,
+                SizeType batch_size = 1,
                 std::string name = std::string());
 
     template<typename T = double>
     void fit(Dataset<T>& data, SizeType epochs = 1,
-             NumType learning_rate = 0.03, SizeType batch_size = 1)
+             OptimizerType optimizer = OptimizerType::GradientDescent,
+             NumType learning_rate = 0.03)
     {
-        auto input_size = data.feature_size();
 #if ENABLE_MLPACK
 #else
-        std::vector<Layer::SharedPtr> l;
-        auto prev_layer_size = input_size;
-        for (const auto& e: _layers)
-        {
-            auto curr_layer_size = std::get<0>(e.second);
-            auto curr_layer_activation = std::get<1>(e.second);
-            l.push_back(
-                _m.add_layer<DenseLayer>(
-                    e.first, curr_layer_activation,
-                    curr_layer_size, prev_layer_size)
-            );
-            prev_layer_size = curr_layer_size;
-        }
-
-        std::shared_ptr<LossLayer> loss_layer;
-        auto output_size = prev_layer_size;
-        switch(_loss)
-        {
-            case LossType::CCE: {
-                loss_layer = _m.add_loss<CCELossLayer>(
-                    "cce_loss", output_size, batch_size);
-                break;
-            }
-            case LossType::MSE:
-            default: {
-                loss_layer = _m.add_loss<MSELossLayer>(
-                    "mse_loss", output_size, batch_size);
-                break;
-            }
-        }
-
-        for (SizeType i = 0; i < l.size() - 1; ++i)
-        {
-            _m.create_edge(l[i], l[i + 1]);
-        }
-        _m.create_edge(l[l.size() - 1], loss_layer);
-
+        _optimizer = optimizer;
         std::shared_ptr<Optimizer> o;
         switch(_optimizer)
         {
@@ -117,7 +82,8 @@ public:
         {
             for (SizeType i = 0; i < data.size();)
             {
-                for (SizeType b = 0; b < batch_size && i < data.size(); ++b, ++i)
+                for (SizeType b = 0; b < _batch_size
+                     && i < data.size(); ++b, ++i)
                 {
                     _m.step(data.trainset(i).data(),
                             data.labels(i).data());
@@ -129,14 +95,27 @@ public:
     }
 
     template<typename T = double>
-    std::vector<T> predict(Dataset<T>& data)
+    std::vector<T> predict(const Dataset<T>& data)
     {
+        std::vector<T> ret;
+        ret.resize(data.size() * data.feature_size());
 
+        auto output_size = _m.output_size();
+        for (std::size_t i = 0; i < data.size(); ++i)
+        {
+            auto res = _m.predict(
+                    data.entry(i).data());
+            std::copy(res, res + output_size,
+                      ret.begin() + (i * data.feature_size()));
+        }
+        return ret;
     }
 
 private:
     std::map<std::string, std::tuple<SizeType, Activation>> _layers;
+    // SizeType _input_size;
     LossType _loss;
+    SizeType _batch_size;
     OptimizerType _optimizer;
     std::string _name;
 
