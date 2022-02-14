@@ -52,16 +52,20 @@ public:
 
     /**
      * \brief Construct a new Layer object.
-     * \param model
-     * \param name
-     * \param prefix_name
+     * \param model       The model in which the layer takes part.
+     * \param input_size  The size of inputs of the layer.
+     * \param output_size The size of outputs of the layer.
+     * \param name        The name of the layer.
+     * If empty, a default generated one is chosen.
+     * \param prefix_name The prefix name of the default generated name.
      */
-    Layer(Model& model, std::string name = std::string(),
+    Layer(Model& model, SizeType input_size = 0, SizeType output_size = 0,
+          std::string name = std::string(),
           std::string prefix_name = std::string());
 
     /**
      * \brief Copy constructor of a new Layer object.
-     * \param obj
+     * \param obj Layer object to copy.
      */
     Layer(const Layer& obj);
 
@@ -157,6 +161,9 @@ protected:
     std::string _name;                  ///< Layer naem (for debug).
     std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
+
+    SizeType _input_size;
+    SizeType _output_size;
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss

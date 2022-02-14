@@ -33,7 +33,7 @@ using namespace EdgeLearning;
 class CustomLayer: public Layer {
 public:
     CustomLayer() 
-        : Layer(_m, "custom_layer_test")
+        : Layer(_m, 0, 0, "custom_layer_test")
         , _m{"model_layer_test"}
     { }
     void init(RneType& rne) override { (void) rne; }

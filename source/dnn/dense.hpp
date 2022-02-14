@@ -87,8 +87,6 @@ public:
 
 private:
     Activation _activation;
-    SizeType _output_size;
-    SizeType _input_size;
 
     // == Layer parameters ==
     /// \brief Weights of the layer. Size: _output_size * _input_size.

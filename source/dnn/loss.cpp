@@ -32,9 +32,8 @@ namespace EdgeLearning {
 LossLayer::LossLayer(Model& model,
     SizeType input_size, SizeType batch_size,
     std::string name, std::string prefix_name)
-    : Layer(model, std::move(name),
+    : Layer(model, input_size, 0, std::move(name),
             prefix_name.empty() ? "loss_layer_" : prefix_name)
-    , _input_size{input_size}
     , _loss{}
     , _target{nullptr}
     , _gradients{}
@@ -43,7 +42,7 @@ LossLayer::LossLayer(Model& model,
     , _correct{0}
     , _incorrect{0}
 {
-    _gradients.resize(_input_size);
+    _gradients.resize(input_size);
 }
 
 void LossLayer::set_target(NumType const* target)

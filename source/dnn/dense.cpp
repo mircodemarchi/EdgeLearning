@@ -33,27 +33,25 @@ namespace EdgeLearning {
 
 DenseLayer::DenseLayer(Model& model, std::string name, Activation activation, 
     SizeType output_size, SizeType input_size)
-    : Layer(model, std::move(name))
+    : Layer(model, input_size, output_size, std::move(name))
     , _activation{activation}
-    , _output_size{output_size}
-    , _input_size{input_size}
 {
-    std::cout << _name << ": " << _input_size 
-        << " -> " << _output_size << std::endl;
+    std::cout << _name << ": " << input_size
+        << " -> " << output_size << std::endl;
 
     // The weight parameters of a FF-layer are an NxM matrix.
-    _weights.resize(_output_size * _input_size);
+    _weights.resize(output_size * input_size);
 
     // Each node in this layer is assigned a bias.
-    _biases.resize(_output_size);
+    _biases.resize(output_size);
 
     // The outputs of each neuron within the layer is an "activation".
-    _activations.resize(_output_size);
+    _activations.resize(output_size);
 
-    _activation_gradients.resize(_output_size);
-    _weight_gradients.resize(_output_size * _input_size);
-    _bias_gradients.resize(_output_size);
-    _input_gradients.resize(_input_size);
+    _activation_gradients.resize(output_size);
+    _weight_gradients.resize(output_size * input_size);
+    _bias_gradients.resize(output_size);
+    _input_gradients.resize(input_size);
 }
 
 void DenseLayer::init(RneType& rne)

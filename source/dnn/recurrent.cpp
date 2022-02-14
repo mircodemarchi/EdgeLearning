@@ -35,11 +35,10 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     SizeType output_size, SizeType input_size, SizeType hidden_size, 
     SizeType time_steps, 
     OutputActivation output_activation, HiddenActivation hidden_activation)
-    : Layer(model, std::move(name), "recurrent_layer_")
+    : Layer(model, input_size, output_size,
+            std::move(name), "recurrent_layer_")
     , _output_activation{output_activation}
     , _hidden_activation{hidden_activation}
-    , _output_size{output_size}
-    , _input_size{input_size}
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
 {

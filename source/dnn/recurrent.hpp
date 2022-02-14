@@ -126,8 +126,6 @@ public:
 private:
     OutputActivation _output_activation;
     HiddenActivation _hidden_activation;
-    SizeType _output_size;
-    SizeType _input_size;
     SizeType _hidden_size;
 
     std::vector<NumType> _hidden_state;

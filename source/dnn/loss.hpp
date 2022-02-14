@@ -132,7 +132,6 @@ public:
     virtual void print() const override;
 
 protected:
-    SizeType _input_size;
     NumType _loss;
     const NumType* _target;
 
