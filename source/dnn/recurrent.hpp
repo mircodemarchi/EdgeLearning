@@ -68,13 +68,13 @@ public:
      * \brief The input data should have size _input_size.
      * \param inputs
      */
-    void forward(NumType* inputs) override;
+    void forward(const NumType *inputs) override;
 
     /**
      * \brief The gradient data should have size _output_size.
      * \param gradients
      */
-    void reverse(NumType* gradients) override;
+    void reverse(const NumType *gradients) override;
 
     /**
      * \brief Weight input to hidden, hidden to hidden and hidden to output.
@@ -189,11 +189,6 @@ private:
      * and bias gradients do.
      */
     std::vector<NumType> _input_gradients;
-    /**
-     * \brief The last input passed to the layer. It is needed to compute loss 
-     * gradients with respect to the weights during backpropagation.
-     */
-    NumType* _last_input;
 };
 
 } // namespace EdgeLearning

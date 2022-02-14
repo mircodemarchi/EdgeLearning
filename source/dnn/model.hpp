@@ -144,6 +144,8 @@ public:
      */
     void step(NumType* input, const NumType* target);
 
+    const NumType* predict(NumType* input);
+
     /**
      * \brief Model name provided for debugging purposes.
      * \return std::string const& Model name string.

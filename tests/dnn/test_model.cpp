@@ -47,10 +47,10 @@ public:
     SizeType param_count() const noexcept override { return _input_size; }
     NumType* param(SizeType index) override { return &_params[index]; }
 
-    void forward(NumType* inputs) override {
+    void forward(const NumType *inputs) override {
         std::copy(inputs, inputs + _input_size, _params.begin());
     }
-    void reverse(NumType* gradients) override { (void) gradients; }
+    void reverse(const NumType *gradients) override { (void) gradients; }
 
 private:
     std::vector<NumType> _params;

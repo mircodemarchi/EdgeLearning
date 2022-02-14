@@ -48,14 +48,14 @@ public:
      */
     void init(RneType& rne) override { (void) rne; };
 
-    void forward(NumType* inputs) override;
+    void forward(const NumType *inputs) override;
 
     /**
      * \brief As a loss node, the argument to this method is ignored (the 
      * gradient of the loss with respect to itself is unity).
      * \param gradients
      */
-    void reverse(NumType* gradients = nullptr) override;
+    void reverse(const NumType *gradients = nullptr) override;
     
 private:
     /// \brief Tollerange to ensure that the prediction produced is correct.

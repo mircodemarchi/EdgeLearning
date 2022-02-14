@@ -42,7 +42,7 @@ CCELossLayer::CCELossLayer(Model& model, std::string name,
 
 }
 
-void CCELossLayer::forward(NumType* inputs)
+void CCELossLayer::forward(const NumType *inputs)
 {
     if (_target == nullptr)
     {
@@ -69,7 +69,7 @@ void CCELossLayer::forward(NumType* inputs)
     _last_input = inputs;
 }
 
-void CCELossLayer::reverse(NumType* gradients)
+void CCELossLayer::reverse(const NumType *gradients)
 {
     // Parameter ignored because it is a loss layer.
     (void) gradients;

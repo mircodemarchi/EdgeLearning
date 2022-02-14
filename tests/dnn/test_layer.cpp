@@ -37,8 +37,8 @@ public:
         , _m{"model_layer_test"}
     { }
     void init(RneType& rne) override { (void) rne; }
-    void forward(NumType* inputs) override { (void) inputs; }
-    void reverse(NumType* gradients) override { (void) gradients; }
+    void forward(const NumType *inputs) override { (void) inputs; }
+    void reverse(const NumType *gradients) override { (void) gradients; }
     vector<NumType> last_input() override { return {}; }
     vector<NumType> last_output() override { return {}; }
     void print() const override {}
@@ -54,8 +54,8 @@ public:
         , _m{"model_layer_test"}
     { }
     void init(RneType& rne) override { (void) rne; }
-    void forward(NumType* inputs) override { (void) inputs; }
-    void reverse(NumType* gradients) override { (void) gradients; }
+    void forward(const NumType *inputs) override { (void) inputs; }
+    void reverse(const NumType *gradients) override { (void) gradients; }
     vector<NumType> last_input() override { return {}; }
     vector<NumType> last_output() override { return {}; }
     void print() const override {}

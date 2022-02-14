@@ -90,7 +90,7 @@ public:
      * subsequent nodes.
      * \param inputs NumType ptr
      */
-    virtual void forward(NumType* inputs) = 0;
+    virtual void forward(const NumType *inputs) = 0;
 
     /**
      * \brief Virtual method used to perform reverse propagations. During 
@@ -99,7 +99,7 @@ public:
      * Compute dJ/dz = dJ/dg(z) * dg(z)/dz.
      * \param gradients NumType ptr dJ/dg(z)
      */
-    virtual void reverse(NumType* gradients) = 0;
+    virtual void reverse(const NumType *gradients) = 0;
 
     /**
      * \brief Return the last input of the layer.
@@ -157,6 +157,12 @@ protected:
     std::string _name;                  ///< Layer naem (for debug).
     std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
+
+    /**
+     * \brief The last input passed to the layer. It is needed to compute loss
+     * gradients with respect to the weights during backpropagation.
+     */
+    const NumType* _last_input;
 };
 
 } // namespace EdgeLearning

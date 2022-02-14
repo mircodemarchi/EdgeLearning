@@ -37,7 +37,7 @@ MSELossLayer::MSELossLayer(Model& model, std::string name,
 
 }
 
-void MSELossLayer::forward(NumType* inputs)
+void MSELossLayer::forward(const NumType *inputs)
 {
     _loss = DLMath::mean_squared_error(_target, inputs, _input_size);
     _cumulative_loss += _loss;
@@ -55,7 +55,7 @@ void MSELossLayer::forward(NumType* inputs)
     _last_input = inputs;
 }
 
-void MSELossLayer::reverse(NumType* gradients)
+void MSELossLayer::reverse(const NumType *gradients)
 {
     // Parameter ignored because it is a loss layer.
     (void) gradients;

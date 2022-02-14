@@ -33,6 +33,7 @@ namespace EdgeLearning {
 Layer::Layer(Model& model, std::string name, std::string prefix_name)
     : _model(model)
     , _name{std::move(name)}
+    , _last_input{nullptr}
 { 
     if (_name.empty())
     {

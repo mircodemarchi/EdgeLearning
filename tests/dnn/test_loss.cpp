@@ -36,7 +36,7 @@ public:
         , _m{"model_loss_layer_test"}
         , _i{0}
     { }
-    void forward(NumType* inputs) override {
+    void forward(const NumType *inputs) override {
         (void) inputs;
         if (_i % 2 == 0)
         {
@@ -50,7 +50,7 @@ public:
         ++_i;
     }
 
-    void reverse(NumType* gradients) override { (void) gradients; }
+    void reverse(const NumType *gradients) override { (void) gradients; }
 
 private:
     Model _m;
@@ -63,8 +63,8 @@ public:
         : LossLayer(_m)
         , _m{"model_layer_test"}
     { }
-    void forward(NumType* inputs) override { (void) inputs; }
-    void reverse(NumType* gradients) override { (void) gradients; }
+    void forward(const NumType *inputs) override { (void) inputs; }
+    void reverse(const NumType *gradients) override { (void) gradients; }
 
 private:
     Model _m;

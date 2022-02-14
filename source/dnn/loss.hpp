@@ -68,13 +68,13 @@ public:
      * \brief Method inheritance.
      * \param inputs
      */
-    virtual void forward(NumType* inputs) override = 0;
+    virtual void forward(const NumType *inputs) override = 0;
 
     /**
      * \brief Method inheritance with default parameter overriding. 
      * \param gradients
      */
-    virtual void reverse(NumType* gradients = nullptr) override = 0;
+    virtual void reverse(const NumType *gradients = nullptr) override = 0;
 
     /**
      * \brief Loss layers do not have params.
@@ -135,7 +135,6 @@ protected:
     SizeType _input_size;
     NumType _loss;
     const NumType* _target;
-    NumType* _last_input;
 
     /**
      * The loss delivered back gradient with respect to any input.

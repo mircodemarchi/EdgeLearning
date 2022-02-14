@@ -110,7 +110,7 @@ void DenseLayer::init(RneType& rne)
     }
 }
 
-void DenseLayer::forward(NumType* inputs) 
+void DenseLayer::forward(const NumType *inputs)
 {
     // Remember the last input data for backpropagation.
     _last_input = inputs;
@@ -153,7 +153,7 @@ void DenseLayer::forward(NumType* inputs)
     }
 }
 
-void DenseLayer::reverse(NumType* gradients)
+void DenseLayer::reverse(const NumType *gradients)
 {
     // Calculate dg(z)/dz and put in _activation_gradients.
     switch (_activation)

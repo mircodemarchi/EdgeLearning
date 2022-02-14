@@ -42,7 +42,6 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     , _input_size{input_size}
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
-    , _last_input{}
 {
     std::cout << _name << ": " << _input_size 
         << " -{" << _hidden_size << "}-> " << _output_size << std::endl;
@@ -154,16 +153,16 @@ void RecurrentLayer::init(RneType& rne)
     }
 }
 
-void RecurrentLayer::forward(NumType* inputs) 
+void RecurrentLayer::forward(const NumType *inputs)
 {
     // Remember the last input data for backpropagation.
     _last_input = inputs;
 
-    NumType* curr_sequence;     //< Ptr to the current sequence to forward.
+    const NumType* curr_sequence; //< Ptr to the current sequence to forward.
     SizeType curr_hs_idx;         //< Current hidden state index.
     SizeType next_hs_idx;         //< Next hidden state index.
 
-    NumType *tmp_mul = new NumType[_hidden_size];
+    auto *tmp_mul = new NumType[_hidden_size];
 
     // Loop the time sequences.
     for (SizeType t = 0; t < _time_steps; ++t)
@@ -278,11 +277,11 @@ void RecurrentLayer::forward(NumType* inputs)
     }
 }
 
-void RecurrentLayer::reverse(NumType* gradients)
+void RecurrentLayer::reverse(const NumType *gradients)
 {
-    NumType* curr_sequence_gradients; //< Ptr to the current sequence gradients.
-    SizeType curr_hs_idx;             //< Current hidden state index.
-    SizeType prev_hs_idx;             //< Previous hidden state index.
+    const NumType* curr_sequence_gradients; //< Ptr to the current gradients.
+    SizeType curr_hs_idx; //< Current hidden state index.
+    SizeType prev_hs_idx; //< Previous hidden state index.
 
     std::vector<NumType> next_hidden_state(
         static_cast<std::size_t>(_hidden_size), NumType{0.0});
