@@ -44,8 +44,8 @@
 namespace EdgeLearning {
 
 /**
- * @brief Dataset class for training and Armadillo conversions. 
- * @tparam T 
+ * \brief Dataset class for training and Armadillo conversions.
+ * \tparam T
  */
 template<typename T = double>
 class Dataset {
@@ -55,7 +55,7 @@ public:
     using Cub = std::vector<Mat>;
 
     /**
-     * @brief Empty construct a new Dataset object.
+     * \brief Empty construct a new Dataset object.
      */
     Dataset()
         : _data{}
@@ -73,11 +73,11 @@ public:
     }
 
     /**
-     * @brief Construct a new Dataset object.
-     * @param data          The vector dataset. 
-     * @param feature_size  The size of the features in number of elements. 
-     * @param sequence_size The size of the sequence in number of feature entry. 
-     * @param labels_idx The index of the feature to use as ground truth.
+     * \brief Construct a new Dataset object.
+     * \param data          The vector dataset.
+     * \param feature_size  The size of the features in number of elements.
+     * \param sequence_size The size of the sequence in number of feature entry.
+     * \param labels_idx The index of the feature to use as ground truth.
      */
     Dataset(Vec data, 
         SizeType feature_size = 1, 
@@ -116,10 +116,10 @@ public:
     }
 
     /**
-     * @brief Construct a new Dataset object.
-     * @param data          The matrix dataset. 
-     * @param sequence_size The size of the sequence in number of feature entry. 
-     * @param labels_idx The index of the feature to use as ground truth.
+     * \brief Construct a new Dataset object.
+     * \param data          The matrix dataset.
+     * \param sequence_size The size of the sequence in number of feature entry.
+     * \param labels_idx The index of the feature to use as ground truth.
      */
     Dataset(Mat data, SizeType sequence_size = 1,
         std::set<SizeType> labels_idx = {}) 
@@ -171,9 +171,9 @@ public:
     } 
 
     /**
-     * @brief Construct a new Dataset object.
-     * @param data The cube dataset. 
-     * @param labels_idx The index of the feature to use as ground truth.
+     * \brief Construct a new Dataset object.
+     * \param data The cube dataset.
+     * \param labels_idx The index of the feature to use as ground truth.
      */
     Dataset(Cub data,
         std::set<SizeType> labels_idx = {}) 
@@ -237,14 +237,14 @@ public:
     } 
 
     /**
-     * @brief Destroy the Dataset object.
+     * \brief Destroy the Dataset object.
      */
     ~Dataset() {};
 
 #if ENABLE_MLPACK
     /**
-     * @brief Convert the dataset in Armadillo Vector. 
-     * @return arma::Col<T> 
+     * \brief Convert the dataset in Armadillo Vector.
+     * \return arma::Col<T>
      */
     operator arma::Col<T>()
     {   
@@ -253,8 +253,8 @@ public:
     }
 
     /**
-     * @brief Convert the dataset in Armadillo Vector. 
-     * @return arma::Row<T> 
+     * \brief Convert the dataset in Armadillo Vector.
+     * \return arma::Row<T>
      */
     operator arma::Row<T>()
     {   
@@ -263,8 +263,8 @@ public:
     }
 
     /**
-     * @brief Convert the dataset in Armadillo Matrix. 
-     * @return arma::Mat<T> 
+     * \brief Convert the dataset in Armadillo Matrix.
+     * \return arma::Mat<T>
      */
     operator arma::Mat<T>()
     {   
@@ -276,8 +276,8 @@ public:
     }
 
     /**
-     * @brief Convert the dataset in Armadillo Cube. 
-     * @return arma::Cube<T> 
+     * \brief Convert the dataset in Armadillo Cube.
+     * \return arma::Cube<T>
      */
     operator arma::Cube<T>()
     {   
@@ -298,9 +298,9 @@ public:
     }
 
     /**
-     * @brief Convert the dataset in Armadillo format. 
-     * @tparam ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Col<T>
-     * @return ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Col<T>
+     * \brief Convert the dataset in Armadillo format.
+     * \tparam ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Col<T>
+     * \return ARMA_T arma::Cube<T>, arma::Mat<T> or arma::Col<T>
      */
     template<typename ARMA_T>
     ARMA_T to_arma()
@@ -310,14 +310,14 @@ public:
 #endif // ENABLE_MLPACK
 
     /**
-     * @brief Getter and setter of feature_size param.
-     * @return const SizeType& 
+     * \brief Getter and setter of feature_size param.
+     * \return const SizeType&
      */
     const SizeType& feature_size() const { return _feature_size; };
 
     /**
-     * @brief Getter and setter of sequence_size param.
-     * @return SizeType& 
+     * \brief Getter and setter of sequence_size param.
+     * \return SizeType&
      */
     void sequence_size(SizeType s)
     {
@@ -330,14 +330,14 @@ public:
     const SizeType& sequence_size() const { return _sequence_size; };
 
     /**
-     * @brief Return the number of entries of the dataset.
-     * @return SizeType the number of entries of the dataset.
+     * \brief Return the number of entries of the dataset.
+     * \return SizeType the number of entries of the dataset.
      */
     SizeType size() const { return _feature_amount; };
 
     /**
-     * @brief Return the data vector. 
-     * @return const std::vector<T>& The data vector reference.
+     * \brief Return the data vector.
+     * \return const std::vector<T>& The data vector reference.
      */
     const std::vector<T>& data() const { return _data; };
 
@@ -492,30 +492,30 @@ private:
     std::vector<T> _entry_trainset_cache;
 
     /**
-     * @brief The size of a single entry of the dataset, called feature. 
+     * \brief The size of a single entry of the dataset, called feature.
      */
     SizeType _feature_size;
 
     /**
-     * @brief The size of a sequence of features entry in the dataset. The 
+     * \brief The size of a sequence of features entry in the dataset. The
      * sequence size is in feature entries number granularity. 
      */
     SizeType _sequence_size;
 
     /**
-     * @brief The size of the dataset, that is the quantity of data fields.
+     * \brief The size of the dataset, that is the quantity of data fields.
      * Element-wise granularity. 
      */
     SizeType _dataset_size;
 
     /**
-     * @brief The number of feature entry of dimension `feature_size` in the 
+     * \brief The number of feature entry of dimension `feature_size` in the
      * dataset. The feature amount is in feature entries number granularity. 
      */
     SizeType _feature_amount;
 
     /**
-     * @brief The number of sequences in the dataset. The sequence amount is in 
+     * \brief The number of sequences in the dataset. The sequence amount is in
      * sequence number granularity. 
      */
     SizeType _sequence_amount;

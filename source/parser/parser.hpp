@@ -34,18 +34,18 @@
 namespace EdgeLearning {
 
 /**
- * @brief Generic class for parser the shares the TypeChecker entity.
+ * \brief Generic class for parser the shares the TypeChecker entity.
  */
 class Parser 
 {
 public:
     /**
-     * @brief Construct a new Parser object.
+     * \brief Construct a new Parser object.
      */
     Parser() : _tc() {}
 
     /**
-     * @brief Destroy the Parser object.
+     * \brief Destroy the Parser object.
      */
     virtual ~Parser() {};
 

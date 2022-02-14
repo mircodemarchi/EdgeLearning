@@ -43,7 +43,7 @@
 namespace EdgeLearning {
 
 /**
- * @brief Single field of a CSV file. 
+ * \brief Single field of a CSV file.
  * Composed by its field string, the corresponding type and the column number 
  * in the CSV file.
  */
@@ -53,10 +53,10 @@ class CSVField : public Parser
 
 public:
     /**
-     * @brief Construct a new CSVField object
-     * @param field     The CSV field string.
-     * @param type      The CSV field type.
-     * @param col_index The corresponding column index in CSV file.
+     * \brief Construct a new CSVField object
+     * \param field     The CSV field string.
+     * \param type      The CSV field type.
+     * \param col_index The corresponding column index in CSV file.
      * The type field is changed if it contains the Type::AUTO.
      */ 
     CSVField(std::string field, Type& type, std::size_t col_index)
@@ -72,8 +72,8 @@ public:
     }
 
     /**
-     * @brief Construct a new CSVField object from another
-     * @param other     Another CSVField object.
+     * \brief Construct a new CSVField object from another
+     * \param other     Another CSVField object.
     */
     CSVField(CSVField const& other)
             : Parser()
@@ -83,9 +83,9 @@ public:
     { }
 
     /**
-     * @brief Assignment operator.
-     * @param obj The object to assign.
-     * @return CSVField& The updated object.
+     * \brief Assignment operator.
+     * \param obj The object to assign.
+     * \return CSVField& The updated object.
      */
     CSVField& operator=(const CSVField& obj)
     {
@@ -96,14 +96,14 @@ public:
     }
 
     /**
-     * @brief Destroy the CSVField object.
+     * \brief Destroy the CSVField object.
      */
     ~CSVField() = default;
 
     /**
-     * @brief Convert the field in the templated type and put in the ptr.
-     * @tparam T  Field type requested.
-     * @param ptr Pointer in which put the result.
+     * \brief Convert the field in the templated type and put in the ptr.
+     * \tparam T  Field type requested.
+     * \param ptr Pointer in which put the result.
      */
     template<typename T>
     void as(T *ptr) const
@@ -112,9 +112,9 @@ public:
     }
 
     /**
-     * @brief Return the converted field as specified by the template type. 
-     * @tparam T Field type requested.
-     * @return T The converted field. 
+     * \brief Return the converted field as specified by the template type.
+     * \tparam T Field type requested.
+     * \return T The converted field.
      */
     template<typename T>
     T as() const
@@ -125,14 +125,14 @@ public:
     }
 
     /**
-     * @brief Field type getter.
-     * @return const Type& 
+     * \brief Field type getter.
+     * \return const Type&
      */
     const Type& type() const { return _type; }
 
     /**
-     * @brief CSV column index gettere.
-     * @return std::size_t 
+     * \brief CSV column index gettere.
+     * \return std::size_t
      */
     std::size_t idx() const { return _col_index; }
 
@@ -143,7 +143,7 @@ private:
 };
 
 /**
- * @brief The CSV row of a CSV file.
+ * \brief The CSV row of a CSV file.
  * Composed by the CSV line string, the row index of the main CSV file, 
  * the number of columns, the type list of each column and the separator of each 
  * CSV field.
@@ -156,12 +156,12 @@ class CSVRow : public Parser
 
 public:
     /**
-     * @brief Construct a new CSVRow object.
-     * @param line        The CSV line string.
-     * @param row_idx     The CSV row index in the main CSV file.
-     * @param cols_amount The number of columns.
-     * @param types       The list of types of each field.
-     * @param separator   The separator of each field.
+     * \brief Construct a new CSVRow object.
+     * \param line        The CSV line string.
+     * \param row_idx     The CSV row index in the main CSV file.
+     * \param cols_amount The number of columns.
+     * \param types       The list of types of each field.
+     * \param separator   The separator of each field.
      * The vector of types is changed if it's not compliant to the 
      * column amount or if it contains the Type::AUTO.
      */
@@ -190,11 +190,11 @@ public:
     }
 
     /**
-     * @brief Construct a new CSVRow object.
-     * @param line      The CSV line string.
-     * @param row_idx   The CSV row index in the main CSV file.
-     * @param types     The list of types of each field.
-     * @param separator The separator of each field.
+     * \brief Construct a new CSVRow object.
+     * \param line      The CSV line string.
+     * \param row_idx   The CSV row index in the main CSV file.
+     * \param types     The list of types of each field.
+     * \param separator The separator of each field.
      * Automatically calculates the number of columns.
      */
     CSVRow(std::string line, std::size_t row_idx, std::vector<Type>& types, 
@@ -208,9 +208,9 @@ public:
     }
     
     /**
-     * @brief Construct a new CSVRow object.
-     * @param types     The list of types of each field.
-     * @param separator The separator of each field.
+     * \brief Construct a new CSVRow object.
+     * \param types     The list of types of each field.
+     * \param separator The separator of each field.
      * Construct an empty CSV Row.
      */
     CSVRow(std::vector<Type>& types, char separator = ',')
@@ -220,8 +220,8 @@ public:
     }
 
     /**
-     * @brief Construct a new CSVRow object by copy.
-     * @param obj 
+     * \brief Construct a new CSVRow object by copy.
+     * \param obj
      */
     CSVRow(const CSVRow& obj)
         : _line{obj._line}
@@ -234,16 +234,16 @@ public:
     }
 
     /**
-     * @brief Destroy the CSVRow object.
+     * \brief Destroy the CSVRow object.
      */
     ~CSVRow() {};
 
     /**
-     * @brief Check if two CSVRow are equal. 
+     * \brief Check if two CSVRow are equal.
      * Two CSVRow are equal if the line strings are equal.
-     * @param rhs The CSVRow to compare with this.
-     * @return true  Equals.
-     * @return false Different.
+     * \param rhs The CSVRow to compare with this.
+     * \return true  Equals.
+     * \return false Different.
      */
     bool operator==(const CSVRow& rhs) const
     {
@@ -251,11 +251,11 @@ public:
     }
 
     /**
-     * @brief Check if two CSVRow are differne. 
+     * \brief Check if two CSVRow are differne.
      * Two CSVRow are different if the line strings are different.
-     * @param rhs The CSVRow to compare with this.
-     * @return true  Different.
-     * @return false Equals.
+     * \param rhs The CSVRow to compare with this.
+     * \return true  Different.
+     * \return false Equals.
      */
     bool operator!=(const CSVRow& rhs) const
     {
@@ -263,9 +263,9 @@ public:
     }
 
     /**
-     * @brief Get a CSVField from the CSVRow.
-     * @param idx The index of the CSVField.
-     * @return CSVField The field of the CSVRow in the corresponding index.
+     * \brief Get a CSVField from the CSVRow.
+     * \param idx The index of the CSVField.
+     * \return CSVField The field of the CSVRow in the corresponding index.
      * Could throw a std::runtime_error if index is out of range. 
      */
     CSVField operator[](std::size_t idx) const
@@ -293,9 +293,9 @@ public:
     }
 
     /**
-     * @brief Assignment operator.
-     * @param obj The object to assign.
-     * @return CSVRow& The updated object.
+     * \brief Assignment operator.
+     * \param obj The object to assign.
+     * \return CSVRow& The updated object.
      */
     CSVRow& operator=(const CSVRow& obj)
     {
@@ -308,10 +308,10 @@ public:
     }
 
     /**
-     * @brief Operator overloading to print a CSVRow.
-     * @param stream The input stream.
-     * @param obj    The object to print.
-     * @return std::ostream& The output stream.
+     * \brief Operator overloading to print a CSVRow.
+     * \param stream The input stream.
+     * \param obj    The object to print.
+     * \return std::ostream& The output stream.
      */
     friend std::ostream& operator<<(std::ostream& stream, const CSVRow& obj)
     { 
@@ -320,8 +320,8 @@ public:
     }
 
     /**
-     * @brief Divide the CSVRow in a vector of string fields.
-     * @return std::vector<std::string> 
+     * \brief Divide the CSVRow in a vector of string fields.
+     * \return std::vector<std::string>
      */
     operator std::vector<std::string>() const
     {
@@ -338,8 +338,8 @@ public:
     }
 
     /**
-     * @brief Convert the CSVRow in a vector of CSVField objects.
-     * @return std::vector<CSVField> 
+     * \brief Convert the CSVRow in a vector of CSVField objects.
+     * \return std::vector<CSVField>
      */
     operator std::vector<CSVField>() const
     {
@@ -355,8 +355,8 @@ public:
     }
 
     /**
-     * @brief Return the row in string.
-     * @return std::string The CSV line.
+     * \brief Return the row in string.
+     * \return std::string The CSV line.
      */
     operator std::string() const
     {
@@ -364,10 +364,10 @@ public:
     }
 
     /**
-     * @brief Convert each field of the CSVRow in the templated type and return
+     * \brief Convert each field of the CSVRow in the templated type and return
      * in a vector.
-     * @tparam T The specified type of each row field. 
-     * @return std::vector<T> The converted vector of fields.
+     * \tparam T The specified type of each row field.
+     * \return std::vector<T> The converted vector of fields.
      */
     template<typename T>
     operator std::vector<T>() const
@@ -387,10 +387,10 @@ public:
     }
 
     /**
-     * @brief Convert each field in the templated type 
+     * \brief Convert each field in the templated type
      * (see operator std::vector<T>()).
-     * @tparam T The specified type of each row field. 
-     * @return std::vector<T> The converted vector of fields.
+     * \tparam T The specified type of each row field.
+     * \return std::vector<T> The converted vector of fields.
      */
     template<typename T>
     std::vector<T> to_vec() const
@@ -399,34 +399,34 @@ public:
     }
 
     /**
-     * @brief Column amount getter.
-     * @return std::size_t 
+     * \brief Column amount getter.
+     * \return std::size_t
      */
     std::size_t size() const { return _cols_amount; }
     
     /**
-     * @brief Check if the CSVRow is empty. It is empty if the column amount is 
+     * \brief Check if the CSVRow is empty. It is empty if the column amount is
      * zero.
-     * @return true  Column amount greater than 0.
-     * @return false Column amount equals than 0.
+     * \return true  Column amount greater than 0.
+     * \return false Column amount equals than 0.
      */
     bool empty() const { return _cols_amount == 0; }
     
     /**
-     * @brief Column types getter. 
-     * @return const std::vector<Type>& The vector of column types.
+     * \brief Column types getter.
+     * \return const std::vector<Type>& The vector of column types.
      */
     const std::vector<Type>& types() const { return _types; } 
     
     /**
-     * @brief Getter of CSVRow index.
-     * @return std::size_t Index of the line in CSV file.
+     * \brief Getter of CSVRow index.
+     * \return std::size_t Index of the line in CSV file.
      */
     std::size_t idx() const { return _idx; }
     
     /**
-     * @brief Getter of CSVRow line.
-     * @return std::string
+     * \brief Getter of CSVRow line.
+     * \return std::string
      */
     std::string line() const { return _line; }
 
@@ -439,7 +439,7 @@ private:
 };
 
 /**
- * @brief Iterator pattern for CSV class.
+ * \brief Iterator pattern for CSV class.
  */
 class CSVIterator 
 {
@@ -448,12 +448,12 @@ class CSVIterator
 public:
     
     /**
-     * @brief Construct a new CSVIterator object.
-     * @param fn          Filename of CSV file.
-     * @param idx         Index of CSV row.
-     * @param cols_amount Number of columns.
-     * @param types       The list of types of each field.
-     * @param separator   The separator of each field.
+     * \brief Construct a new CSVIterator object.
+     * \param fn          Filename of CSV file.
+     * \param idx         Index of CSV row.
+     * \param cols_amount Number of columns.
+     * \param types       The list of types of each field.
+     * \param separator   The separator of each field.
      * Initialize the internal CSVRow with the types list, the separator, the 
      * column amount and the requested row index. 
      * Open a file stream to input path fn. 
@@ -469,8 +469,8 @@ public:
     }
 
     /**
-     * @brief Construct a new CSVIterator object by copy.
-     * @param obj Object to copy.
+     * \brief Construct a new CSVIterator object by copy.
+     * \param obj Object to copy.
      */
     CSVIterator(const CSVIterator& obj)
         : _fn{obj._fn}
@@ -483,7 +483,7 @@ public:
     }
 
     /**
-     * @brief Destroy the CSVIterator object
+     * \brief Destroy the CSVIterator object
      * Clone file stream.
      */
     ~CSVIterator()
@@ -492,8 +492,8 @@ public:
     }
 
     /**
-     * @brief Access the requested CSVRow reference in CSV file and index. 
-     * @return CSVRow& The CSVRow reference.
+     * \brief Access the requested CSVRow reference in CSV file and index.
+     * \return CSVRow& The CSVRow reference.
      */
     CSVRow& operator*()
     {
@@ -502,8 +502,8 @@ public:
     }
 
     /**
-     * @brief Access the requested CSVRow pointer in CSV file and index. 
-     * @return CSVRow* The CSVRow pointer.
+     * \brief Access the requested CSVRow pointer in CSV file and index.
+     * \return CSVRow* The CSVRow pointer.
      */
     CSVRow* operator->()
     {
@@ -512,11 +512,11 @@ public:
     }
 
     /**
-     * @brief Check if iterators are equal. Two iterators are equals if they 
+     * \brief Check if iterators are equal. Two iterators are equals if they
      * consider the same request row index. 
-     * @param rhs The object to compare with this.
-     * @return true  Equals.
-     * @return false Different.
+     * \param rhs The object to compare with this.
+     * \return true  Equals.
+     * \return false Different.
      */
     bool operator==(const CSVIterator& rhs) const
     {
@@ -524,11 +524,11 @@ public:
     }
 
     /**
-     * @brief Check if iterators are different. Two iterators are different if 
+     * \brief Check if iterators are different. Two iterators are different if
      * they consider different request row index. 
-     * @param rhs The object to compare with this.
-     * @return true  Different.
-     * @return false Equals.
+     * \param rhs The object to compare with this.
+     * \return true  Different.
+     * \return false Equals.
      */
     bool operator!=(const CSVIterator& rhs) const
     {
@@ -536,8 +536,8 @@ public:
     }
 
     /**
-     * @brief Increment the iterator by 1 row.
-     * @return CSVIterator& The reference to the updated iterator.
+     * \brief Increment the iterator by 1 row.
+     * \return CSVIterator& The reference to the updated iterator.
      */
     CSVIterator& operator++()
     {
@@ -546,8 +546,8 @@ public:
     }
 
     /**
-     * @brief Increment the iterator by 1 row.
-     * @return CSVIterator& The copy to the updated iterator.
+     * \brief Increment the iterator by 1 row.
+     * \return CSVIterator& The copy to the updated iterator.
      */
     CSVIterator operator++(int)
     {
@@ -557,8 +557,8 @@ public:
     }
 
     /**
-     * @brief Decrement the iterator by 1 row.
-     * @return CSVIterator& The reference to the updated iterator.
+     * \brief Decrement the iterator by 1 row.
+     * \return CSVIterator& The reference to the updated iterator.
      */
     CSVIterator& operator--()
     {
@@ -567,8 +567,8 @@ public:
     }
 
     /**
-     * @brief Decrement the iterator by 1 row.
-     * @return CSVIterator& The copy to the updated iterator.
+     * \brief Decrement the iterator by 1 row.
+     * \return CSVIterator& The copy to the updated iterator.
      */
     CSVIterator operator--(int)
     {
@@ -579,7 +579,7 @@ public:
 
 private:
     /**
-     * @brief Read the right row line according to the requested row.
+     * \brief Read the right row line according to the requested row.
      */
     void update_row()
     {
@@ -604,22 +604,22 @@ private:
     }
 
     /**
-     * @brief Path of the CSV file.
+     * \brief Path of the CSV file.
      */
     std::string _fn; 
 
     /**
-     * @brief CSVRow object updated and returned on iterator request. 
+     * \brief CSVRow object updated and returned on iterator request.
      */
     CSVRow _row;
     
     /**
-     * @brief 
+     * \brief
      */
     std::size_t _req_row_idx;
     
     /**
-     * @brief Input stream used to read the CSV file.
+     * \brief Input stream used to read the CSV file.
      */
     std::ifstream _stream;
 };
@@ -629,10 +629,10 @@ class CSV : public Parser
 {
 public:
     /**
-     * @brief Construct a new CSV object.
-     * @param fn        The path of the CSV file.
-     * @param types     The list of types of each field.
-     * @param separator The separator of each field.
+     * \brief Construct a new CSV object.
+     * \param fn        The path of the CSV file.
+     * \param types     The list of types of each field.
+     * \param separator The separator of each field.
      * If the list of types is not compliant to the colums amount of the CSV 
      * file or it contains the Type::AUTO, then the types list is automatically
      * computed using the second line of the CSV file.
@@ -693,38 +693,38 @@ public:
     }
 
     /**
-     * @brief Destroy the CSV object.
+     * \brief Destroy the CSV object.
      */
     ~CSV() {};
 
     /**
-     * @brief Getter of the column size of the CSV file.
-     * @return std::size_t The columns amount.
+     * \brief Getter of the column size of the CSV file.
+     * \return std::size_t The columns amount.
      */
     std::size_t cols_size() const { return _cols_amount; }
 
     /**
-     * @brief Getter of the row size of the CSV file.
-     * @return std::size_t The rows amount.
+     * \brief Getter of the row size of the CSV file.
+     * \return std::size_t The rows amount.
      */
     std::size_t rows_size() const { return _rows_amount; }
 
     /**
-     * @brief Getter of the header row: the first line of the CSV file.
-     * @return const CSVRow& 
+     * \brief Getter of the header row: the first line of the CSV file.
+     * \return const CSVRow&
      */
     const CSVRow& header() const { return _row_header; }
 
     /**
-     * @brief Getter of the types list of each field. 
-     * @return const std::vector<Type>& Vector of types.
+     * \brief Getter of the types list of each field.
+     * \return const std::vector<Type>& Vector of types.
      */
     const std::vector<Type>& types() const { return _types; }
     
     /**
-     * @brief Get a CSVRow at the index row specified.
-     * @param idx The index row.
-     * @return CSVRow The requested row. 
+     * \brief Get a CSVRow at the index row specified.
+     * \param idx The index row.
+     * \return CSVRow The requested row.
      */
     CSVRow operator[](std::size_t idx)
     {
@@ -748,9 +748,9 @@ public:
     }
 
     /**
-     * @brief Get the first CSVIterator that is the second line of the CSV
+     * \brief Get the first CSVIterator that is the second line of the CSV
      * file (it skips the header row).
-     * @return CSVIterator 
+     * \return CSVIterator
      */
     CSVIterator begin()
     { 
@@ -758,8 +758,8 @@ public:
     }
     
     /**
-     * @brief Get the last CSVIterator.
-     * @return CSVIterator 
+     * \brief Get the last CSVIterator.
+     * \return CSVIterator
      */
     CSVIterator end()
     { 
@@ -768,8 +768,8 @@ public:
     }
 
     /**
-     * @brief Convert the CSV file in a vector of string for each row.
-     * @return std::vector<std::string> Vector of CSV lines.
+     * \brief Convert the CSV file in a vector of string for each row.
+     * \return std::vector<std::string> Vector of CSV lines.
      */
     operator std::vector<std::string>()
     {
@@ -789,8 +789,8 @@ public:
     }
 
     /**
-     * @brief Convert the CSV file in a vector of CSVRow for each row.
-     * @return std::vector<CSVRow>
+     * \brief Convert the CSV file in a vector of CSVRow for each row.
+     * \return std::vector<CSVRow>
      */
     operator std::vector<CSVRow>()
     {
@@ -809,10 +809,10 @@ public:
     }
 
     /**
-     * @brief Convert the CSV file in a vector of vector with element converted 
+     * \brief Convert the CSV file in a vector of vector with element converted
      * in the type specified by the template.
-     * @tparam T The requested type of each CSV field.
-     * @return std::vector<std::vector<T>> A vector of vector for each field.
+     * \tparam T The requested type of each CSV field.
+     * \return std::vector<std::vector<T>> A vector of vector for each field.
      */
     template<typename T>
     operator std::vector<std::vector<T>>()
@@ -833,10 +833,10 @@ public:
     }
 
     /**
-     * @brief Convert the CSV file in a vector with each element converted 
+     * \brief Convert the CSV file in a vector with each element converted
      * in the type specified by the template.
-     * @tparam T The requested type of each CSV field.
-     * @return std::vector<std::vector<T>> A vector of vector for each field.
+     * \tparam T The requested type of each CSV field.
+     * \return std::vector<std::vector<T>> A vector of vector for each field.
      */
     template<typename T>
     operator std::vector<T>()
@@ -857,10 +857,10 @@ public:
     }
 
     /**
-     * @brief Convert the CSV file in a vector for each field. 
+     * \brief Convert the CSV file in a vector for each field.
      * Wrapper of operator std::vector<std::vector<T>>().
-     * @tparam T The requested type of each CSV field.
-     * @return std::vector<T> A vector for each field.
+     * \tparam T The requested type of each CSV field.
+     * \return std::vector<T> A vector for each field.
      */
     template<typename T>
     std::vector<T> to_vec()
@@ -869,10 +869,10 @@ public:
     }
 
     /**
-     * @brief Convert the CSV file in a vector of vector for each line. 
+     * \brief Convert the CSV file in a vector of vector for each line.
      * Wrapper of operator std::vector<std::vector<T>>().
-     * @tparam T The requested type of each CSV field.
-     * @return std::vector<std::vector<T>> A vector of vector for each line.
+     * \tparam T The requested type of each CSV field.
+     * \return std::vector<std::vector<T>> A vector of vector for each line.
      */
     template<typename T>
     std::vector<std::vector<T>> to_mat()

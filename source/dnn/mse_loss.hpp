@@ -58,7 +58,7 @@ public:
     void reverse(NumType* gradients = nullptr) override;
     
 private:
-    /// @brief Tollerange to ensure that the prediction produced is correct. 
+    /// \brief Tollerange to ensure that the prediction produced is correct.
     NumType _loss_tolerance;
 };
 

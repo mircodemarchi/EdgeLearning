@@ -41,12 +41,12 @@ class LossLayer : public Layer
 {
 public:
     /**
-     * @brief Construct a new LossLayer object.
-     * @param model 
-     * @param name
-     * @param input_size
-     * @param batch_size
-     * @param prefix_name
+     * \brief Construct a new LossLayer object.
+     * \param model
+     * \param name
+     * \param input_size
+     * \param batch_size
+     * \param prefix_name
      */
     LossLayer(Model& model,
         SizeType input_size = 0, SizeType batch_size = 1,
@@ -54,7 +54,7 @@ public:
         std::string prefix_name = std::string());
 
     /**
-     * @brief Destroy the LossLayer object.
+     * \brief Destroy the LossLayer object.
      */
     virtual ~LossLayer() {};
 
@@ -65,8 +65,8 @@ public:
     void init(RneType& rne) override { (void) rne; };
 
     /**
-     * @brief Method inheritance. 
-     * @param inputs 
+     * \brief Method inheritance.
+     * \param inputs
      */
     virtual void forward(NumType* inputs) override = 0;
 
@@ -77,22 +77,22 @@ public:
     virtual void reverse(NumType* gradients = nullptr) override = 0;
 
     /**
-     * @brief Loss layers do not have params.
-     * @return SizeType 0
+     * \brief Loss layers do not have params.
+     * \return SizeType 0
      */
     SizeType param_count() const noexcept override { return 0; }
 
     /**
-     * @brief Loss layers do not have params.
-     * @param index Not used.
-     * @return NumType* nullptr
+     * \brief Loss layers do not have params.
+     * \param index Not used.
+     * \return NumType* nullptr
      */
     NumType* param(SizeType index) override { (void) index; return nullptr; }
 
     /**
-     * @brief Loss layers do not have gradients.
-     * @param index Not used.
-     * @return NumType* nullptr
+     * \brief Loss layers do not have gradients.
+     * \param index Not used.
+     * \return NumType* nullptr
      */
     NumType* gradient(SizeType index) override { (void) index; return nullptr; }
 
@@ -105,26 +105,26 @@ public:
     void set_target(const NumType* target);
 
     /**
-     * @brief Calculate and return the accuracy until the last forward 
+     * \brief Calculate and return the accuracy until the last forward
      * iteration.
-     * @return NumType 
+     * \return NumType
      */
     NumType accuracy() const;
 
     /**
-     * @brief Calculate and return the average loss until the last forward 
+     * \brief Calculate and return the average loss until the last forward
      * iteration.
-     * @return NumType 
+     * \return NumType
      */
     NumType avg_loss() const;
 
     /**
-     * @brief Reset loss statistics. 
+     * \brief Reset loss statistics.
      */
     void reset_score();
 
     /**
-     * @brief Print loss info.
+     * \brief Print loss info.
      */
     virtual void print() const override;
 

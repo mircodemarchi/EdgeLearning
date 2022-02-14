@@ -37,7 +37,7 @@
 namespace EdgeLearning {
 
 /**
- * @brief Enumeration class with the list of parserizable types.
+ * \brief Enumeration class with the list of parserizable types.
  */
 enum class Type : int
 {
@@ -51,33 +51,33 @@ enum class Type : int
 };
 
 /**
- * @brief Regex to detect float values in string.
+ * \brief Regex to detect float values in string.
  */
 const std::regex _float_regex   { "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$" };
 
 /**
- * @brief Regex to detect int values in string.
+ * \brief Regex to detect int values in string.
  */
 const std::regex _integer_regex { "^[-+]?(0|[1-9][0-9]*)$" };
 
 /**
- * @brief Regex to detect bool values in string.
+ * \brief Regex to detect bool values in string.
  */
 const std::regex _boolean_regex { "^(true|false)$" };
 
 /**
- * @brief Regex to detect strings
+ * \brief Regex to detect strings
  */
 const std::regex _string_regex  { "^\".*\"$" };
 
 /**
- * @brief Convert a string in the templated type T and put the result in the 
+ * \brief Convert a string in the templated type T and put the result in the
  * pointer.
- * @tparam T  The type to convert to.
- * @param s   The string to convert. 
- * @param ptr The pointer to the memory in which put the result.
- * @return true  If convertion succeedes.
- * @return false If convertion fails.
+ * \tparam T  The type to convert to.
+ * \param s   The string to convert.
+ * \param ptr The pointer to the memory in which put the result.
+ * \return true  If convertion succeedes.
+ * \return false If convertion fails.
  */
 template<typename T>
 bool convert(const std::string &s, T *ptr)
@@ -88,12 +88,12 @@ bool convert(const std::string &s, T *ptr)
 }
 
 /**
- * @brief Template specialization for string of convert<T>
- * @tparam std::string
- * @param s   The string to convert. 
- * @param ptr The pointer to the memory in which put the result.
- * @return true  If convertion succeedes.
- * @return false If convertion fails.
+ * \brief Template specialization for string of convert<T>
+ * \tparam std::string
+ * \param s   The string to convert.
+ * \param ptr The pointer to the memory in which put the result.
+ * \return true  If convertion succeedes.
+ * \return false If convertion fails.
  */
 template<>
 bool convert<std::string>(const std::string &s, std::string *ptr)
@@ -103,12 +103,12 @@ bool convert<std::string>(const std::string &s, std::string *ptr)
 }
 
 /**
- * @brief Template specialization for boolean of convert<T>
- * @tparam bool
- * @param s   The string to convert. 
- * @param ptr The pointer to the memory in which put the result.
- * @return true  If convertion succeedes.
- * @return false If convertion fails.
+ * \brief Template specialization for boolean of convert<T>
+ * \tparam bool
+ * \param s   The string to convert.
+ * \param ptr The pointer to the memory in which put the result.
+ * \return true  If convertion succeedes.
+ * \return false If convertion fails.
  */
 template<>
 bool convert<bool>(const std::string &s, bool *ptr)
@@ -125,64 +125,64 @@ bool convert<bool>(const std::string &s, bool *ptr)
 }
 
 /**
- * @brief TypeChecker class that manages the types of parsed strings in input. 
+ * \brief TypeChecker class that manages the types of parsed strings in input.
  */
 class TypeChecker
 {
 public:
     /**
-     * @brief Construct a new TypeChecker object.
+     * \brief Construct a new TypeChecker object.
      */
     TypeChecker() {};
 
     /**
-     * @brief Destroy the TypeChecker object.
+     * \brief Destroy the TypeChecker object.
      */
     virtual ~TypeChecker() {};
     
     /**
-     * @brief Check if the input string is of type float. 
-     * @param in     The input string.
-     * @return true  It is of type float.
-     * @return false It is not of type float.
+     * \brief Check if the input string is of type float.
+     * \param in     The input string.
+     * \return true  It is of type float.
+     * \return false It is not of type float.
      */
     static bool is_float(const std::string& in)  
         { return parse(in) == Type::FLOAT;  };
 
     /**
-     * @brief Check if the input string is of type bool. 
-     * @param in     The input string.
-     * @return true  It is of type bool.
-     * @return false It is not of type bool.
+     * \brief Check if the input string is of type bool.
+     * \param in     The input string.
+     * \return true  It is of type bool.
+     * \return false It is not of type bool.
      */
     static bool is_bool(const std::string& in)   
         { return parse(in) == Type::BOOL;   };
 
     /**
-     * @brief Check if the input string is of type int. 
-     * @param in     The input string.
-     * @return true  It is of type int.
-     * @return false It is not of type int.
+     * \brief Check if the input string is of type int.
+     * \param in     The input string.
+     * \return true  It is of type int.
+     * \return false It is not of type int.
      */
     static bool is_int(const std::string& in)    
         { return parse(in) == Type::INT;    };
     
     /**
-     * @brief Check if the input string is of type string. 
-     * @param in     The input string.
-     * @return true  It is of type string.
-     * @return false It is not of type string.
+     * \brief Check if the input string is of type string.
+     * \param in     The input string.
+     * \return true  It is of type string.
+     * \return false It is not of type string.
      */
     static bool is_string(const std::string& in) 
         { return parse(in) == Type::STRING; };
     
     /**
-     * @brief Operator overloading for string convertion (see convert). 
-     * @tparam T 
-     * @param s   The string to convert. 
-     * @param ptr The pointer to the memory in which put the result.
-     * @return true  If convertion succeedes.
-     * @return false If convertion fails.
+     * \brief Operator overloading for string convertion (see convert).
+     * \tparam T
+     * \param s   The string to convert.
+     * \param ptr The pointer to the memory in which put the result.
+     * \return true  If convertion succeedes.
+     * \return false If convertion fails.
      */
     template<typename T> 
     bool operator()(const std::string &s, T *ptr) const 
@@ -191,9 +191,9 @@ public:
     }
 
     /**
-     * @brief Operator overloading that parse a string (see parse). 
-     * @param field The string field.
-     * @return Type The type of the parsed field.
+     * \brief Operator overloading that parse a string (see parse).
+     * \param field The string field.
+     * \return Type The type of the parsed field.
      */
     Type operator()(const std::string &field) const 
     {
@@ -201,9 +201,9 @@ public:
     }
 
     /**
-     * @brief Operator () overloading that parse a vector of string. 
-     * @param field The vector of string field.
-     * @return Type The vector types of the parsed fields.
+     * \brief Operator () overloading that parse a vector of string.
+     * \param field The vector of string field.
+     * \return Type The vector types of the parsed fields.
      */
     std::vector<Type> operator()(
         const std::vector<std::string> &fields) const 
@@ -212,12 +212,12 @@ public:
     }
 
     /**
-     * @brief Convert a string in the specified template type (see convert). 
-     * @tparam T  The specified type. 
-     * @param s   The string to convert. 
-     * @param ptr The pointer to the memory in which put the result.
-     * @return true  If convertion succeedes.
-     * @return false If convertion fails.
+     * \brief Convert a string in the specified template type (see convert).
+     * \tparam T  The specified type.
+     * \param s   The string to convert.
+     * \param ptr The pointer to the memory in which put the result.
+     * \return true  If convertion succeedes.
+     * \return false If convertion fails.
      */
     template<typename T>
     static bool parse(const std::string &s, T *ptr)
@@ -226,9 +226,9 @@ public:
     }
     
     /**
-     * @brief Parse the type of the given string field.
-     * @param field The string to parse.
-     * @return Type The type of the converted string.
+     * \brief Parse the type of the given string field.
+     * \param field The string to parse.
+     * \return Type The type of the converted string.
      */
     static Type parse(const std::string &field)
     {
@@ -260,9 +260,9 @@ public:
     }
 
     /**
-     * @brief Parse a vector of string fields.
-     * @param fields The string fields to parse.
-     * @return std::vector<Type> The resulting types of string fields.
+     * \brief Parse a vector of string fields.
+     * \param fields The string fields to parse.
+     * \return std::vector<Type> The resulting types of string fields.
      */
     static std::vector<Type> parse(
         const std::vector<std::string> &fields)
@@ -278,10 +278,10 @@ public:
 };
 
 /**
- * @brief Operator overloading to cout the type.
- * @param os  Input stream.
- * @param obj Type to print.
- * @return std::ostream& Output stream.
+ * \brief Operator overloading to cout the type.
+ * \param os  Input stream.
+ * \param obj Type to print.
+ * \return std::ostream& Output stream.
  */
 std::ostream& operator<<(std::ostream& os, const Type& obj)
 {
@@ -301,10 +301,10 @@ std::ostream& operator<<(std::ostream& os, const Type& obj)
 }
 
 /**
- * @brief Operator overloading to cout a vector of types.
- * @param os  Input stream.
- * @param obj Types to print.
- * @return std::ostream& Output stream.
+ * \brief Operator overloading to cout a vector of types.
+ * \param os  Input stream.
+ * \param obj Types to print.
+ * \return std::ostream& Output stream.
  */
 std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
 {
@@ -318,11 +318,11 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
 }
 
 /**
- * @brief Check if two vectors of types are equals.
- * @param lhs Vector of types first operand.
- * @param rhs Vector of types second operand.
- * @return true  Equals.
- * @return false Not equals.
+ * \brief Check if two vectors of types are equals.
+ * \param lhs Vector of types first operand.
+ * \param rhs Vector of types second operand.
+ * \return true  Equals.
+ * \return false Not equals.
  */
 bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
 {
@@ -338,11 +338,11 @@ bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
 }
 
 /**
- * @brief Check if two vectors of types are different.
- * @param lhs Vector of types first operand.
- * @param rhs Vector of types second operand.
- * @return true  Different.
- * @return false Equals.
+ * \brief Check if two vectors of types are different.
+ * \param lhs Vector of types first operand.
+ * \param rhs Vector of types second operand.
+ * \return true  Different.
+ * \return false Equals.
  */
 bool operator!=(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
 {

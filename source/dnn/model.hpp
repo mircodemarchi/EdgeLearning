@@ -50,28 +50,28 @@ class Model
 {
 public:
     /**
-     * @brief Construct a new Model object.
-     * @param name 
+     * \brief Construct a new Model object.
+     * \param name
      */
     Model(std::string name = std::string());
 
     /**
-     * @brief Copy constructor of a new Model object.
-     * @param obj 
+     * \brief Copy constructor of a new Model object.
+     * \param obj
      */
     Model(const Model& obj);
 
     /**
-     * @brief Assignment operator of a Model object.
-     * @param obj 
-     * @return Model& 
+     * \brief Assignment operator of a Model object.
+     * \param obj
+     * \return Model&
      */
     Model& operator=(Model obj);
 
     /**
-     * @brief Swap method of Model object.
-     * @param lop 
-     * @param rop 
+     * \brief Swap method of Model object.
+     * \param lop
+     * \param rop
      */
     friend void swap(Model& lop, Model& rop);
 
@@ -136,11 +136,11 @@ public:
     void train(Optimizer& optimizer);
 
     /**
-     * @brief Train step: forward and backward.
+     * \brief Train step: forward and backward.
      * This function does not update the layers parameter, this operation will
      * be done by the train function.  
-     * @param input  Inputs data.
-     * @param target Labels data.
+     * \param input  Inputs data.
+     * \param target Labels data.
      */
     void step(NumType* input, const NumType* target);
 
@@ -159,14 +159,14 @@ public:
     void print() const;
 
     /**
-     * @brief Return the accuracy provided by the loss layer.
-     * @return NumType 
+     * \brief Return the accuracy provided by the loss layer.
+     * \return NumType
      */
     [[nodiscard]] NumType accuracy() const;
 
     /**
-     * @brief Return the loss provided by the loss layer.
-     * @return NumType 
+     * \brief Return the loss provided by the loss layer.
+     * \return NumType
      */
     [[nodiscard]] NumType avg_loss() const;
 

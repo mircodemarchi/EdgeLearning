@@ -26,38 +26,126 @@
  *  \brief Task execution time estimator model.
  */
 
-#ifndef EDGE_LEARNING_ESTIMATORS_TIME_ESTIMATOR_HPP
-#define EDGE_LEARNING_ESTIMATORS_TIME_ESTIMATOR_HPP
+#ifndef EDGE_LEARNING_MIDDLEWARE_FEED_FORWARD_HPP
+#define EDGE_LEARNING_MIDDLEWARE_FEED_FORWARD_HPP
 
-#if ENABLE_MLPACK
+#include "dnn/dense.hpp"
+#include "dnn/mse_loss.hpp"
+#include "dnn/cce_loss.hpp"
+#include "dnn/gd_optimizer.hpp"
+#include "middleware/dataset.hpp"
 
-#include <filesystem>
+#include <map>
+#include <tuple>
 
-#include <mlpack/core.hpp>
-#include <mlpack/methods/ann/layer/layer.hpp>
-#include <mlpack/methods/ann/ffn.hpp>
 
 namespace EdgeLearning {
 
-using namespace mlpack;
-using namespace mlpack::ann;
+enum class LossType
+{
+    CCE,
+    MSE
+};
 
-const std::string DATA_TRAINING_FN = "execution-time.csv";
+enum class OptimizerType
+{
+    GradientDescent
+};
 
-class TimeEstimatorModel {
-  public:
-    TimeEstimatorModel();
-    ~TimeEstimatorModel();
+class FeedForward {
+public:
+    FeedForward(std::map<std::string, std::tuple<SizeType, Activation>> layers,
+                LossType loss = LossType::MSE,
+                OptimizerType optimizer = OptimizerType::GradientDescent,
+                std::string name = std::string());
 
-    void load_data();
-  private:
-    FFN<> model;
-    arma::mat data;
-    std::filesystem::path data_training_fp;
+    template<typename T = double>
+    void fit(Dataset<T>& data, SizeType epochs = 1,
+             NumType learning_rate = 0.03, SizeType batch_size = 1)
+    {
+        auto input_size = data.feature_size();
+#if ENABLE_MLPACK
+#else
+        std::vector<Layer::SharedPtr> l;
+        auto prev_layer_size = input_size;
+        for (const auto& e: _layers)
+        {
+            auto curr_layer_size = std::get<0>(e.second);
+            auto curr_layer_activation = std::get<1>(e.second);
+            l.push_back(
+                _m.add_layer<DenseLayer>(
+                    e.first, curr_layer_activation,
+                    curr_layer_size, prev_layer_size)
+            );
+            prev_layer_size = curr_layer_size;
+        }
+
+        std::shared_ptr<LossLayer> loss_layer;
+        auto output_size = prev_layer_size;
+        switch(_loss)
+        {
+            case LossType::CCE: {
+                loss_layer = _m.add_loss<CCELossLayer>(
+                    "cce_loss", output_size, batch_size);
+                break;
+            }
+            case LossType::MSE:
+            default: {
+                loss_layer = _m.add_loss<MSELossLayer>(
+                    "mse_loss", output_size, batch_size);
+                break;
+            }
+        }
+
+        for (SizeType i = 0; i < l.size() - 1; ++i)
+        {
+            _m.create_edge(l[i], l[i + 1]);
+        }
+        _m.create_edge(l[l.size() - 1], loss_layer);
+
+        std::shared_ptr<Optimizer> o;
+        switch(_optimizer)
+        {
+            case OptimizerType::GradientDescent:
+            default: {
+                o = std::make_shared<GDOptimizer>(learning_rate);
+                break;
+            }
+        }
+
+        for (SizeType e = 0; e < epochs; ++e)
+        {
+            for (SizeType i = 0; i < data.size();)
+            {
+                for (SizeType b = 0; b < batch_size && i < data.size(); ++b, ++i)
+                {
+                    _m.step(data.trainset(i).data(),
+                            data.labels(i).data());
+                }
+                _m.train(*o);
+            }
+        }
+#endif
+    }
+
+    template<typename T = double>
+    std::vector<T> predict(Dataset<T>& data)
+    {
+
+    }
+
+private:
+    std::map<std::string, std::tuple<SizeType, Activation>> _layers;
+    LossType _loss;
+    OptimizerType _optimizer;
+    std::string _name;
+
+#if ENABLE_MLPACK
+#else
+    Model _m;
+#endif
 };
 
 } // namespace EdgeLearning
 
-#endif // ENABLE_MLPACK
-
-#endif // EDGE_LEARNING_ESTIMATORS_TIME_ESTIMATOR_HPP
+#endif // EDGE_LEARNING_MIDDLEWARE_FEED_FORWARD_HPP

@@ -24,21 +24,22 @@
 
 #include "middleware/feed_forward.hpp"
 
-#if ENABLE_MLPACK
+#include <utility>
 
 namespace EdgeLearning {
 
-TimeEstimatorModel::TimeEstimatorModel() : model(), data() {
-    data_training_fp = std::filesystem::path(__FILE__).parent_path() / ".." / ".." / "data" / DATA_TRAINING_FN;
-}
-
-TimeEstimatorModel::~TimeEstimatorModel() = default;
-
-void TimeEstimatorModel::load_data() {
-    data::Load(this->data_training_fp.string(), this->data, true);
-}
-
+FeedForward::FeedForward(
+    std::map<std::string, std::tuple<SizeType, Activation>> layers,
+    LossType loss, OptimizerType optimizer,
+    std::string name)
+    : _layers{std::move(layers)}
+    , _loss{loss}
+    , _optimizer{optimizer}
+    , _name{name}
+#if ENABLE_MLPACK
+#else
+    , _m{name}
+#endif
+{ }
 
 } // namespace EdgeLearning
-
-#endif // ENABLE_MLPACK

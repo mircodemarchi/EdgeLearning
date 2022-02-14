@@ -118,7 +118,7 @@ public:
     /**
      * \brief Multiplication between a matrix and an array.
      * Used for y = Wx
-     * @tparam T      Type of each source and destination elements.
+     * \tparam T      Type of each source and destination elements.
      * \param arr_dst Array destination to write the result.
      * \param mat_src Matrix source, left operand.
      * \param arr_src Array source, right operand.

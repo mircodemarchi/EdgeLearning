@@ -51,29 +51,29 @@ public:
     using SharedPtr = std::shared_ptr<Layer>;
 
     /**
-     * @brief Construct a new Layer object.
-     * @param model 
-     * @param name
-     * @param prefix_name
+     * \brief Construct a new Layer object.
+     * \param model
+     * \param name
+     * \param prefix_name
      */
     Layer(Model& model, std::string name = std::string(),
           std::string prefix_name = std::string());
 
     /**
-     * @brief Copy constructor of a new Layer object.
-     * @param obj 
+     * \brief Copy constructor of a new Layer object.
+     * \param obj
      */
     Layer(const Layer& obj);
 
     /**
-     * @brief Destroy the Layer object.
+     * \brief Destroy the Layer object.
      */
     virtual ~Layer() {};
 
     /**
-     * @brief Assignment operator of a Layer object.
-     * @param obj 
-     * @return Layer& 
+     * \brief Assignment operator of a Layer object.
+     * \param obj
+     * \return Layer&
      */
     Layer& operator=(const Layer& obj);
 
@@ -100,6 +100,14 @@ public:
      * \param gradients NumType ptr dJ/dg(z)
      */
     virtual void reverse(NumType* gradients) = 0;
+
+    /**
+     * \brief
+     * \return
+     */
+    virtual std::vector<NumType> last_input() = 0;
+
+    virtual std::vector<NumType> last_output() = 0;
 
     /**
      * \brief Virtual method that return the number of tunable parameters. 
