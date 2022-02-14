@@ -39,8 +39,6 @@ public:
     void init(RneType& rne) override { (void) rne; }
     void forward(const NumType *inputs) override { (void) inputs; }
     void reverse(const NumType *gradients) override { (void) gradients; }
-    vector<NumType> last_input() override { return {}; }
-    vector<NumType> last_output() override { return {}; }
     void print() const override {}
 
 private:
@@ -56,8 +54,6 @@ public:
     void init(RneType& rne) override { (void) rne; }
     void forward(const NumType *inputs) override { (void) inputs; }
     void reverse(const NumType *gradients) override { (void) gradients; }
-    vector<NumType> last_input() override { return {}; }
-    vector<NumType> last_output() override { return {}; }
     void print() const override {}
 
 private:

@@ -452,14 +452,14 @@ void RecurrentLayer::reverse(const NumType *gradients)
     }
 }
 
-std::vector<NumType> RecurrentLayer::last_input()
+const NumType* RecurrentLayer::last_input()
 {
-    return {_last_input, _last_input + _input_size};
+    return _last_input;
 }
 
-std::vector<NumType> RecurrentLayer::last_output()
+const NumType* RecurrentLayer::last_output()
 {
-    return _activations;
+    return _activations.data();
 }
 
 NumType* RecurrentLayer::param(SizeType index)

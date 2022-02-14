@@ -51,14 +51,14 @@ void LossLayer::set_target(NumType const* target)
     _target = target;
 }
 
-std::vector<NumType> LossLayer::last_input()
+const NumType* LossLayer::last_input()
 {
-    return {_last_input, _last_input + _input_size};
+    return _last_input;
 }
 
-std::vector<NumType> LossLayer::last_output()
+const NumType* LossLayer::last_output()
 {
-    return {};
+    return nullptr;
 }
 
 NumType LossLayer::accuracy() const

@@ -96,8 +96,8 @@ public:
      */
     NumType* gradient(SizeType index) override { (void) index; return nullptr; }
 
-    std::vector<NumType> last_input() override;
-    std::vector<NumType> last_output() override;
+    const NumType* last_input() override;
+    const NumType* last_output() override;
 
     /**
      * \brief Setter of the target object.

@@ -76,15 +76,18 @@ public:
      */
     void reverse(const NumType *gradients) override;
 
+    const NumType* last_input() override;
+    const NumType* last_output() override;
+
     /**
      * \brief Weight input to hidden, hidden to hidden and hidden to output.
      * Bias to hidden and to output. 
      * \return SizeType
      */
-    SizeType param_count() const noexcept override
+    [[nodiscard]] SizeType param_count() const noexcept override
     {
-        return (static_cast<SizeType>(_input_size) + static_cast<SizeType>(_hidden_size + 1UL)) * static_cast<SizeType>(_hidden_size)
-             + static_cast<SizeType>(_hidden_size + 1UL) * static_cast<SizeType>(_output_size);
+        return (_input_size + _hidden_size + 1UL) * _hidden_size
+             + _hidden_size + 1UL * _output_size;
     }
 
     NumType* param(SizeType index) override;
@@ -105,10 +108,11 @@ public:
     void set_time_steps(SizeType time_steps)
     {
         _time_steps = time_steps;
-        _hidden_state.resize(static_cast<SizeType>(_hidden_size) * static_cast<SizeType>(std::max(_time_steps, SizeType(1U))));
-        _activations.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_time_steps));
-        _activation_gradients.resize(static_cast<SizeType>(_output_size) * static_cast<SizeType>(_time_steps));
-        _input_gradients.resize(static_cast<SizeType>(_input_size) * static_cast<SizeType>(_time_steps));
+        _hidden_state.resize(
+                _hidden_size * std::max(_time_steps, SizeType(1U)));
+        _activations.resize(_output_size * _time_steps);
+        _activation_gradients.resize(_output_size * _time_steps);
+        _input_gradients.resize(_input_size * _time_steps);
     }
 
     void reset_hidden_state()
@@ -118,10 +122,6 @@ public:
             s = 0.0;
         }
     }
-
-    std::vector<NumType> last_input() override;
-
-    std::vector<NumType> last_output() override;
 
 private:
     OutputActivation _output_activation;

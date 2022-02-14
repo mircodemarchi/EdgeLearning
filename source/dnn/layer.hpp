@@ -103,15 +103,15 @@ public:
 
     /**
      * \brief Return the last input of the layer.
-     * \return The last input of the layer of input layers size.
+     * \return const NumType* The last input of the layer of input size.
      */
-    virtual std::vector<NumType> last_input() = 0;
+    virtual const NumType* last_input() { return _last_input; };
 
     /**
      * \brief Return the last output of the layer.
-     * \return The last output of the layer of output layers size.
+     * \return const NumType* The last output of the layer of output size.
      */
-    virtual std::vector<NumType> last_output() = 0;
+    virtual const NumType* last_output() { return nullptr; };
 
     /**
      * \brief Virtual method that return the number of tunable parameters. 
