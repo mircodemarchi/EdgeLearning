@@ -80,7 +80,7 @@ public:
      * \brief Loss layers do not have params.
      * \return SizeType 0
      */
-    SizeType param_count() const noexcept override { return 0; }
+    [[nodiscard]] SizeType param_count() const noexcept override { return 0; }
 
     /**
      * \brief Loss layers do not have params.
@@ -95,6 +95,9 @@ public:
      * \return NumType* nullptr
      */
     NumType* gradient(SizeType index) override { (void) index; return nullptr; }
+
+    std::vector<NumType> last_input() override;
+    std::vector<NumType> last_output() override;
 
     /**
      * \brief Setter of the target object.

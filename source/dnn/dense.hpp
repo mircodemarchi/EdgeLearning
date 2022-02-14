@@ -68,6 +68,9 @@ public:
      */
     void reverse(NumType* gradients) override;
 
+    std::vector<NumType> last_input() override;
+    std::vector<NumType> last_output() override;
+
     /**
      * \brief Weight matrix entries + bias entries.
      * \return SizeType

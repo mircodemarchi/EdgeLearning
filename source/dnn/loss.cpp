@@ -52,6 +52,16 @@ void LossLayer::set_target(NumType const* target)
     _target = target;
 }
 
+std::vector<NumType> LossLayer::last_input()
+{
+    return {_last_input, _last_input + _input_size};
+}
+
+std::vector<NumType> LossLayer::last_output()
+{
+    return {};
+}
+
 NumType LossLayer::accuracy() const
 {
     return static_cast<NumType>(_correct) 

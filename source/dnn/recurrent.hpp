@@ -119,6 +119,10 @@ public:
         }
     }
 
+    std::vector<NumType> last_input() override;
+
+    std::vector<NumType> last_output() override;
+
 private:
     OutputActivation _output_activation;
     HiddenActivation _hidden_activation;

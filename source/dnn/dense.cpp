@@ -254,6 +254,16 @@ void DenseLayer::reverse(NumType* gradients)
     }
 }
 
+std::vector<NumType> DenseLayer::last_input()
+{
+    return {_last_input, _last_input + _input_size};
+}
+
+std::vector<NumType> DenseLayer::last_output()
+{
+    return _input_gradients;
+}
+
 NumType* DenseLayer::param(SizeType index)
 {
     if (index < _weights.size())

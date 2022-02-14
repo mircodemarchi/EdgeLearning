@@ -102,11 +102,15 @@ public:
     virtual void reverse(NumType* gradients) = 0;
 
     /**
-     * \brief
-     * \return
+     * \brief Return the last input of the layer.
+     * \return The last input of the layer of input layers size.
      */
     virtual std::vector<NumType> last_input() = 0;
 
+    /**
+     * \brief Return the last output of the layer.
+     * \return The last output of the layer of output layers size.
+     */
     virtual std::vector<NumType> last_output() = 0;
 
     /**
@@ -115,7 +119,7 @@ public:
      * parameters.
      * \return SizeType The amount of tunable parameters. 
      */
-    virtual SizeType param_count() const noexcept { return 0; }
+    [[nodiscard]] virtual SizeType param_count() const noexcept { return 0; }
 
     /**
      * \brief Virtual method accessor for parameter by index.
