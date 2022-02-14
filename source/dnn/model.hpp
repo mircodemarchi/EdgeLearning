@@ -146,6 +146,10 @@ public:
 
     const NumType* predict(NumType* input);
 
+    [[nodiscard]] SizeType input_size();
+
+    [[nodiscard]] SizeType output_size();
+
     /**
      * \brief Model name provided for debugging purposes.
      * \return std::string const& Model name string.

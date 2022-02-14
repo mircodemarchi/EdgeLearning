@@ -104,8 +104,24 @@ void Model::train(Optimizer& optimizer)
 void Model::step(NumType* input, const NumType* target)
 {
     _loss_layer->set_target(target);
-    _layers[0]->forward(input); //< TODO: how many input layers there are?
+    _layers.front()->forward(input); //< TODO: how many input layers there are?
     _loss_layer->reverse();
+}
+
+const NumType* Model::predict(NumType* input)
+{
+    _layers.front()->forward(input);
+    return _layers.back()->last_output();
+}
+
+SizeType Model::input_size()
+{
+    return _layers.front()->input_size();
+}
+
+SizeType Model::output_size()
+{
+    return _layers.back()->output_size();
 }
 
 void Model::print() const
