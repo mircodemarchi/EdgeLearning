@@ -154,6 +154,18 @@ public:
         return _name; 
     }
 
+    /**
+     * \brief Getter of input_size class field.
+     * \return The size of the layer input.
+     */
+    [[nodiscard]] SizeType input_size() const;
+
+    /**
+     * \brief Getter of input_size class field.
+     * \return The size of the layer output.
+     */
+    [[nodiscard]] SizeType output_size() const;
+
 protected:
     friend class Model;
 

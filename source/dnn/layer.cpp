@@ -64,4 +64,12 @@ Layer& Layer::operator=(const Layer& obj)
     return *this;
 }
 
+SizeType Layer::input_size() const {
+    return _input_size;
+}
+
+SizeType Layer::output_size() const {
+    return _output_size;
+}
+
 } // namespace EdgeLearning
