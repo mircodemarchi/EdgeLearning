@@ -40,6 +40,7 @@ namespace EdgeLearning {
 class Optimizer
 {
 public:
+    virtual ~Optimizer() = default;
     virtual void train(Layer& layer) = 0;
 };
 

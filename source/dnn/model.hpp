@@ -142,9 +142,9 @@ public:
      * \param input  Inputs data.
      * \param target Labels data.
      */
-    void step(NumType* input, const NumType* target);
+    void step(const NumType* input, const NumType* target);
 
-    const NumType* predict(NumType* input);
+    const NumType* predict(const NumType* input);
 
     [[nodiscard]] SizeType input_size();
 

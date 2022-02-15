@@ -52,13 +52,16 @@ enum class OptimizerType
     GradientDescent
 };
 
-class FeedForward {
+class FFNN {
 public:
-    FeedForward(std::map<std::string, std::tuple<SizeType, Activation>> layers,
-                SizeType input_size,
-                LossType loss = LossType::MSE,
-                SizeType batch_size = 1,
-                std::string name = std::string());
+    using LayerDesc = std::tuple<std::string, SizeType, Activation>;
+    using LayerDescVec = std::vector<LayerDesc>;
+
+    FFNN(LayerDescVec layers,
+         SizeType input_size,
+         LossType loss = LossType::MSE,
+         SizeType batch_size = 1,
+         std::string name = std::string());
 
     template<typename T = double>
     void fit(Dataset<T>& data, SizeType epochs = 1,
@@ -95,9 +98,12 @@ public:
     }
 
     template<typename T = double>
-    std::vector<T> predict(const Dataset<T>& data)
+    Dataset<T> predict(Dataset<T>& data)
     {
 #if ENABLE_MLPACK
+        return  Dataset<T>(
+            std::vector<T>(data.size() * data.feature_size()),
+            data.feature_size());
 #else
         std::vector<T> ret;
         ret.resize(data.size() * data.feature_size());
@@ -108,14 +114,14 @@ public:
             auto res = _m.predict(
                     data.entry(i).data());
             std::copy(res, res + output_size,
-                      ret.begin() + (i * data.feature_size()));
+                      ret.begin() + long(i * data.feature_size()));
         }
-        return ret;
+        return Dataset<T>(ret, data.feature_size());
 #endif
     }
 
 private:
-    std::map<std::string, std::tuple<SizeType, Activation>> _layers;
+    LayerDescVec _layers;
     // SizeType _input_size;
     LossType _loss;
     SizeType _batch_size;

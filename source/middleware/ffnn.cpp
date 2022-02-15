@@ -28,8 +28,8 @@
 
 namespace EdgeLearning {
 
-FeedForward::FeedForward(
-    std::map<std::string, std::tuple<SizeType, Activation>> layers,
+FFNN::FFNN(
+    LayerDescVec layers,
     SizeType input_size,
     LossType loss,
     SizeType batch_size,
@@ -51,11 +51,12 @@ FeedForward::FeedForward(
         auto prev_layer_size = input_size;
         for (const auto& e: _layers)
         {
-            auto curr_layer_size = std::get<0>(e.second);
-            auto curr_layer_activation = std::get<1>(e.second);
+            auto curr_layer_name = std::get<0>(e);
+            auto curr_layer_size = std::get<1>(e);
+            auto curr_layer_activation = std::get<2>(e);
             l.push_back(
                     _m.add_layer<DenseLayer>(
-                            e.first, curr_layer_activation,
+                            curr_layer_name, curr_layer_activation,
                             curr_layer_size, prev_layer_size)
             );
             prev_layer_size = curr_layer_size;
