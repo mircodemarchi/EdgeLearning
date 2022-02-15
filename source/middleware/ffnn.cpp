@@ -55,9 +55,9 @@ FFNN::FFNN(
             auto curr_layer_size = std::get<1>(e);
             auto curr_layer_activation = std::get<2>(e);
             l.push_back(
-                    _m.add_layer<DenseLayer>(
-                            curr_layer_name, curr_layer_activation,
-                            curr_layer_size, prev_layer_size)
+                _m.add_layer<DenseLayer>(
+                    curr_layer_name, curr_layer_activation,
+                    curr_layer_size, prev_layer_size)
             );
             prev_layer_size = curr_layer_size;
         }
@@ -68,13 +68,13 @@ FFNN::FFNN(
         {
             case LossType::CCE: {
                 loss_layer = _m.add_loss<CCELossLayer>(
-                        "cce_loss", output_size, batch_size);
+                    "cce_loss", output_size, batch_size);
                 break;
             }
             case LossType::MSE:
             default: {
                 loss_layer = _m.add_loss<MSELossLayer>(
-                        "mse_loss", output_size, batch_size);
+                    "mse_loss", output_size, batch_size);
                 break;
             }
         }

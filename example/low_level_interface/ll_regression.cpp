@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/test_dlmath.cpp
+ *            example/low_level_interface/regression.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -28,8 +28,11 @@ using namespace EdgeLearning;
 
 int main()
 {
-    const SizeType BATCH_SIZE = 2;
-    const SizeType EPOCHS     = 50;
+    const SizeType BATCH_SIZE    = 2;
+    const SizeType EPOCHS        = 50;
+    const SizeType INPUT_SIZE    = 4;
+    const SizeType OUTPUT_SIZE   = 2;
+    const NumType  LEARNING_RATE = 0.03;
 
     std::vector<std::vector<NumType>> inputs = {
         {10.0, 1.0, 10.0, 1.0},
@@ -40,22 +43,22 @@ int main()
 
     std::vector<std::vector<NumType>> targets = {
         {1.0, 0.0},
-        {0.0, 1.0},
+        {1.0, 0.4},
         {1.0, 0.0},
-        {0.0, 1.0},
+        {1.0, 0.4},
     };
     
     // Model definition.
-    GDOptimizer o{NumType{0.01}};
+    GDOptimizer o{NumType{LEARNING_RATE}};
     Model m{"regressor"};
     auto first_layer = m.add_layer<DenseLayer>(
-            "hidden", Activation::ReLU, 8, 4);
+        "hidden", Activation::ReLU, 8, INPUT_SIZE);
     auto output_layer = m.add_layer<DenseLayer>(
-            "output", Activation::Linear, 2, 8);
+        "output", Activation::Linear, OUTPUT_SIZE, 8);
     auto loss_layer = m.add_loss<MSELossLayer>(
-        "loss", 2, BATCH_SIZE, 0.5);
+        "loss", OUTPUT_SIZE, BATCH_SIZE, 0.5);
     m.create_edge(first_layer, output_layer);
-    m.create_edge(output_layer, loss_layer);
+    m.create_back_arc(output_layer, loss_layer);
 
     for (SizeType e = 0; e < EPOCHS; ++e)
     {
@@ -74,5 +77,19 @@ int main()
             m.train(o);
         }
     }
-    std::cout << "End" << std::endl; 
+    std::cout << "Training End" << std::endl;
+
+    std::vector<NumType> new_data = {9.0,  1.0, 9.0,  1.0};
+    auto result = m.predict(new_data.data());
+    std::cout << "Predict: {";
+    for (SizeType i = 0; i < m.input_size() - 1; ++i)
+    {
+        std::cout << new_data[i] << ", ";
+    }
+    std::cout << new_data[m.input_size() - 1] << "} -> {"<< std::endl;
+    for (SizeType i = 0; i < m.output_size() - 1; ++i)
+    {
+        std::cout << result[i] << ", ";
+    }
+    std::cout << result[m.output_size() - 1] << "}"<< std::endl;
 }

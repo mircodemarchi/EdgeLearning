@@ -1,7 +1,2 @@
-set(EXAMPLES 
-    regression
-)
-foreach(EX ${EXAMPLES})
-    add_executable(${EX} ${EX}.cpp)
-    target_link_libraries(${EX} edgelearning)
-endforeach()
+add_subdirectory(low_level_interface)
+add_subdirectory(high_level_interface)
