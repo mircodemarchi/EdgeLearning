@@ -34,6 +34,8 @@ Layer::Layer(Model& model, SizeType input_size, SizeType output_size,
              std::string name, std::string prefix_name)
     : _model(model)
     , _name{std::move(name)}
+    , _antecedents{}
+    , _subsequents{}
     , _input_size{input_size}
     , _output_size{output_size}
     , _last_input{nullptr}
@@ -50,6 +52,9 @@ Layer::Layer(const Layer& obj)
     , _name{obj._name}
     , _antecedents{obj._antecedents}
     , _subsequents{obj._subsequents}
+    , _input_size{obj._input_size}
+    , _output_size{obj._output_size}
+    , _last_input{obj._last_input}
 {
 
 }
@@ -61,6 +66,9 @@ Layer& Layer::operator=(const Layer& obj)
     _name = obj._name;
     _antecedents = obj._antecedents;
     _subsequents = obj._subsequents;
+    _input_size = obj._input_size;
+    _output_size = obj._output_size;
+    _last_input = obj._last_input;
     return *this;
 }
 

@@ -169,13 +169,12 @@ public:
 protected:
     friend class Model;
 
-    Model& _model;                      ///< Model reference.
-    std::string _name;                  ///< Layer naem (for debug).
+    Model& _model;                         ///< Model reference.
+    std::string _name;                     ///< Layer naem (for debug).
     std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
-
-    SizeType _input_size;
-    SizeType _output_size;
+    SizeType _input_size;                  ///< Layer input size.
+    SizeType _output_size;                 ///< Layer output size.
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss
