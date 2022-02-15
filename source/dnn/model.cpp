@@ -117,10 +117,14 @@ void Model::train(Optimizer& optimizer)
 void Model::step(const NumType* input, const NumType* target)
 {
     _loss_layer->set_target(target);
-    _layers.front()->forward(input); //< TODO: how many input layers there are?
-    _loss_layer->forward(_layers.back()->last_output());
+    // TODO: how many input layers there are?
+    // TODO: manage multiple input layers.
+    _layers.front()->forward(input);
+    for(const auto& l: _loss_layer->_antecedents)
+    {
+        _loss_layer->forward(l->last_output());
+    }
     _loss_layer->reverse();
-    _layers.back()->reverse(_loss_layer);
 }
 
 const NumType* Model::predict(const NumType* input)

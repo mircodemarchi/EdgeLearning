@@ -145,7 +145,7 @@ void DenseLayer::forward(const NumType *inputs)
     }
 
     // Forward to the next layers.
-    for (auto layer: this->_subsequents)
+    for (const auto& layer: this->_subsequents)
     {
         layer->forward(_activations.data());
     }

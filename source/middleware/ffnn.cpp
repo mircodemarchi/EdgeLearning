@@ -83,7 +83,7 @@ FFNN::FFNN(
         {
             _m.create_edge(l[i], l[i + 1]);
         }
-        _m.create_edge(l[l.size() - 1], loss_layer);
+        _m.create_back_arc(l[l.size() - 1], loss_layer);
 #endif
 }
 
