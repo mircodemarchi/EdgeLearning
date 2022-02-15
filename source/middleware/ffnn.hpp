@@ -97,6 +97,8 @@ public:
     template<typename T = double>
     std::vector<T> predict(const Dataset<T>& data)
     {
+#if ENABLE_MLPACK
+#else
         std::vector<T> ret;
         ret.resize(data.size() * data.feature_size());
 
@@ -109,6 +111,7 @@ public:
                       ret.begin() + (i * data.feature_size()));
         }
         return ret;
+#endif
     }
 
 private:

@@ -3,6 +3,7 @@ set(UNIT_TESTS
     test_layer
     test_loss
     test_cce_loss
+    test_dense
     test_recurrent
     test_model
 )
