@@ -47,8 +47,10 @@ enum class Activation
 class DenseLayer : public Layer 
 {
 public: 
-    DenseLayer(Model& model, std::string name, Activation activation, 
-        SizeType output_size, SizeType input_size);
+    DenseLayer(Model& model,
+               std::string name = std::string(),
+               Activation activation = Activation::ReLU,
+               SizeType output_size = 0, SizeType input_size = 0);
 
     void init(RneType& rne) override;
 
