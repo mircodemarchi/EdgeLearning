@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "middleware/feed_forward.hpp"
+#include "middleware/ffnn.hpp"
 
 #include <utility>
 

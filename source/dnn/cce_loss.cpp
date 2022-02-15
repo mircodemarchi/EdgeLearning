@@ -94,7 +94,6 @@ SizeType CCELossLayer::_argactive() const
     }
 
     throw std::runtime_error("_target is an array of 0.0 values");
-    return 0;
 }
 
 } // namespace EdgeLearning

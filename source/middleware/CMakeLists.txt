@@ -1,8 +1,8 @@
 set(LIBRARY_NAME edgelearning-middleware)
 
 add_library(${LIBRARY_NAME} OBJECT
-    feed_forward.cpp
-    recurrent.cpp
+        ffnn.cpp
+        rnn.cpp
 )
 
 if(COVERAGE)

@@ -112,14 +112,14 @@ public:
      * iteration.
      * \return NumType
      */
-    NumType accuracy() const;
+    [[nodiscard]] NumType accuracy() const;
 
     /**
      * \brief Calculate and return the average loss until the last forward
      * iteration.
      * \return NumType
      */
-    NumType avg_loss() const;
+    [[nodiscard]] NumType avg_loss() const;
 
     /**
      * \brief Reset loss statistics.

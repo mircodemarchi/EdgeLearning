@@ -39,8 +39,8 @@
 #include "dnn/dense.hpp"
 #include "dnn/recurrent.hpp"
 #include "dnn/gd_optimizer.hpp"
-#include "middleware/feed_forward.hpp"
-#include "middleware/recurrent.hpp"
+#include "middleware/ffnn.hpp"
+#include "middleware/rnn.hpp"
 #include "parser/parser.hpp"
 #include "parser/csv.hpp"
 
