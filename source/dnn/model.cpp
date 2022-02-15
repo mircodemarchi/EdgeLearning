@@ -64,11 +64,24 @@ void swap(Model& lop, Model& rop)
     swap(lop._loss_layer, rop._loss_layer);
 }
 
-void Model::create_edge(Layer::SharedPtr src, Layer::SharedPtr dst)
+void Model::create_back_arc(
+    const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
+{
+    dst->_antecedents.push_back(src);
+}
+
+void Model::create_front_arc(
+    const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
+{
+    src->_subsequents.push_back(dst);
+}
+
+void Model::create_edge(
+    const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
 {
     // NOTE: No validation is done to ensure the edge doesn't already exist
-    dst->_antecedents.push_back(src);
-    src->_subsequents.push_back(dst);
+    create_back_arc(src, dst);
+    create_front_arc(src, dst);
 }
 
 RneType::result_type Model::init(RneType::result_type seed)
@@ -105,7 +118,9 @@ void Model::step(const NumType* input, const NumType* target)
 {
     _loss_layer->set_target(target);
     _layers.front()->forward(input); //< TODO: how many input layers there are?
+    _loss_layer->forward(_layers.back()->last_output());
     _loss_layer->reverse();
+    _layers.back()->reverse(_loss_layer);
 }
 
 const NumType* Model::predict(const NumType* input)

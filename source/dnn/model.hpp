@@ -113,11 +113,34 @@ public:
     }
 
     /**
-     * \brief Create a dependency between two constituent layers.
+     * \brief Create a reverse dependency between two constituent layers.
+     * The dependency between layers imposes a propagation of the destination
+     * layer gradient backward to the source layer.
+     * The propagation will be done in reverse only.
      * \param src Source layer.
      * \param dst Destination layer.
      */
-    void create_edge(Layer::SharedPtr src, Layer::SharedPtr dst);
+    void create_back_arc(
+        const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
+
+    /**
+     * \brief Create a forward dependency between two constituent layers.
+     * The dependency between layers imposes a propagation of the source
+     * layer output forward to the destination layer.
+     * The propagation will be done in forward only.
+     * \param src Source layer.
+     * \param dst Destination layer.
+     */
+    void create_front_arc(
+        const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
+
+    /**
+     * \brief Create a dependency between two constituent layers.
+     * Pragation in forward and backward between source and destination layers.
+     * \param src Source layer.
+     * \param dst Destination layer.
+     */
+    void create_edge(const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
 
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 

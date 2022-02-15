@@ -272,7 +272,7 @@ private:
             static_cast<SizeType>(time_steps * output_size), BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
         m.create_edge(first_layer, output_layer);
-        m.create_edge(output_layer, loss_layer);
+        m.create_back_arc(output_layer, loss_layer);
         m.init();
         m.print();
 
@@ -310,7 +310,7 @@ private:
         auto loss_layer = m.add_loss<CCELossLayer>(
             "loss", 2, BATCH_SIZE);
         m.create_edge(first_layer, output_layer);
-        m.create_edge(output_layer, loss_layer);
+        m.create_back_arc(output_layer, loss_layer);
         return m;
     }
 
@@ -324,7 +324,7 @@ private:
         auto loss_layer = m.add_loss<MSELossLayer>(
             "loss", 2, BATCH_SIZE, 0.5);
         m.create_edge(first_layer, output_layer);
-        m.create_edge(output_layer, loss_layer);
+        m.create_back_arc(output_layer, loss_layer);
         return m;
     }
 };
