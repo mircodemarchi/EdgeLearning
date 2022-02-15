@@ -259,7 +259,7 @@ const NumType* DenseLayer::last_input()
 
 const NumType* DenseLayer::last_output()
 {
-    return _input_gradients.data();
+    return _activations.data();
 }
 
 NumType* DenseLayer::param(SizeType index)
