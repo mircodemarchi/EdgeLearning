@@ -1,5 +1,5 @@
 /***************************************************************************
- *            gd_optimizer.hpp
+ *            dnn/gd_optimizer.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file gd_optimizer.hpp
+/*! \file  dnn/gd_optimizer.hpp
  *  \brief Gradient Descent Optimizer class.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            mse_loss.hpp
+ *            dnn/mse_loss.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file mse_loss.hpp
+/*! \file  dnn/mse_loss.hpp
  *  \brief Mean Squared Error Loss layer.
  */
 

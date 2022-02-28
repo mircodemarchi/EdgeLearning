@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/test_type_checker.cpp
+ *            parser/test_type_checker.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

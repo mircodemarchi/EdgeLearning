@@ -1,5 +1,5 @@
 /***************************************************************************
- *            gd_optimizer.cpp
+ *            dnn/gd_optimizer.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/middleware/test_dataset.cpp
+ *            middleware/test_dataset.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -23,7 +23,7 @@
  */
 
 #include "test.hpp"
-#include "middleware/dataset.hpp"
+#include "data/dataset.hpp"
 
 #include <vector>
 

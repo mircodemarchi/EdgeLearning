@@ -1,5 +1,5 @@
 /***************************************************************************
- *            cce_loss.hpp
+ *            dnn/cce_loss.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file cce_loss.hpp
+/*! \file  dnn/cce_loss.hpp
  *  \brief Categorical Cross-Entropy Loss layer.
  */
 

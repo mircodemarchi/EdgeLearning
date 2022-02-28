@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parser/parser.cpp
+ *            time_estimator.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,29 +22,12 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "test.hpp"
-#include "parser/parser.hpp"
+#include "middleware/ffnn.hpp"
 
+#include <utility>
 
-using namespace std;
-using namespace EdgeLearning;
-
-class TestParser {
-public:
-    void test() {
-        EDGE_LEARNING_TEST_CALL(test_parser());
-    }
-
-private:
-    void test_parser() {
-        EDGE_LEARNING_TEST_CALL(Parser());
-    }
-};
-
-int main() {
-    TestParser().test();
-    return EDGE_LEARNING_TEST_FAILURES;
-}
+namespace EdgeLearning {
 
 
 
+} // namespace EdgeLearning

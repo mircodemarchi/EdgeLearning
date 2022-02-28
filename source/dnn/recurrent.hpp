@@ -1,5 +1,5 @@
 /***************************************************************************
- *            recurrent.hpp
+ *            dnn/recurrent.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file recurrent.hpp
+/*! \file  dnn/recurrent.hpp
  *  \brief Recurrent layer.
  */
 

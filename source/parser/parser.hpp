@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parser.hpp
+ *            parser/parser.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file parser.hpp
+/*! \file  parser/parser.hpp
  *  \brief Generic parser implementation.
  */
 

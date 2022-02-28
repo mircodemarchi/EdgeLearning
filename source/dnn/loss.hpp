@@ -1,5 +1,5 @@
 /***************************************************************************
- *            loss.hpp
+ *            dnn/loss.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file loss.hpp
+/*! \file  dnn/loss.hpp
  *  \brief High level loss layer of a deep neural network.
  */
 

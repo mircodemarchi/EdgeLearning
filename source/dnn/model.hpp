@@ -1,5 +1,5 @@
 /***************************************************************************
- *            model.hpp
+ *            dnn/model.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file model.hpp
+/*! \file  dnn/model.hpp
  *  \brief Deep Neural Network Model.
  */
 

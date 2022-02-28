@@ -1,5 +1,5 @@
 /***************************************************************************
- *            layer.hpp
+ *            dnn/layer.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file layer.hpp
+/*! \file  dnn/layer.hpp
  *  \brief High level layer of a deep neural network.
  */
 

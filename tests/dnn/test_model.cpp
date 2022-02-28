@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/dnn/test_model.cpp
+ *            dnn/test_model.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

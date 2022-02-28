@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dlmath.hpp
+ *            dnn/dlmath.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dlmath.hpp
+/*! \file  dnn/dlmath.hpp
  *  \brief Simply replace me.
  */
 
@@ -37,8 +37,8 @@
 
 #include <iostream>
 
-#ifndef EDGE_LEARNING_DL_DLMATH_HPP
-#define EDGE_LEARNING_DL_DLMATH_HPP
+#ifndef EDGE_LEARNING_DNN_DLMATH_HPP
+#define EDGE_LEARNING_DNN_DLMATH_HPP
 
 namespace EdgeLearning {
 
@@ -535,4 +535,4 @@ public:
 
 } // namespace EdgeLearning
 
-#endif // EDGE_LEARNING_DL_DLMATH_HPP
+#endif // EDGE_LEARNING_DNN_DLMATH_HPP

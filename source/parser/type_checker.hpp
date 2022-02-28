@@ -1,5 +1,5 @@
 /***************************************************************************
- *            TypeChecker.hpp
+ *            parser/type_checker.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file TypeChecker.hpp
+/*! \file  parser/type_checker.hpp
  *  \brief Type checking and conversion type of strings.
  */
 

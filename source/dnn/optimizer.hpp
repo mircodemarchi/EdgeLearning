@@ -1,5 +1,5 @@
 /***************************************************************************
- *            optimizer.hpp
+ *            dnn/optimizer.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file optimizer.hpp
+/*! \file  dnn/optimizer.hpp
  *  \brief Optimizer interface.
  */
 

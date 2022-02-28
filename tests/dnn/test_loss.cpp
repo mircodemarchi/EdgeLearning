@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/dnn/test_loss.cpp
+ *            dnn/test_loss.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

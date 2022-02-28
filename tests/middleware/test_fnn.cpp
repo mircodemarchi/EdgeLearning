@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/middleware/test_ffnn.cpp
+ *            middleware/test_fnn.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -23,7 +23,7 @@
  */
 
 #include "test.hpp"
-#include "middleware/ffnn.hpp"
+#include "middleware/fnn.hpp"
 
 using namespace std;
 using namespace EdgeLearning;
@@ -49,15 +49,15 @@ private:
         };
         Dataset<NumType> dataset{data, 1, {4, 5}};
 
-        FFNN::LayerDescVec layers_descriptor(
+        FFNN<>::LayerDescVec layers_descriptor(
             {{"hidden_layer", 8UL, Activation::ReLU  },
              {"output_layer", 2UL, Activation::Linear   }}
             );
         EDGE_LEARNING_TEST_TRY(
-            auto m = FFNN(layers_descriptor, 4,
+            auto m = FFNN<>(layers_descriptor, 4,
                  LossType::MSE, BATCH_SIZE,
                  "regressor_model"));
-        auto m = FFNN(layers_descriptor,
+        auto m = FFNN<>(layers_descriptor,
                       4, LossType::MSE, BATCH_SIZE,
                       "regressor_model");
         EDGE_LEARNING_TEST_TRY(

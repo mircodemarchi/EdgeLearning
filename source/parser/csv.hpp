@@ -1,5 +1,5 @@
 /***************************************************************************
- *            csv.hpp
+ *            parser/csv.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file csv.hpp
+/*! \file  parser/csv.hpp
  *  \brief CSV Parser implementation.
  */
 

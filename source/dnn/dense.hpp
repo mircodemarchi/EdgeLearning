@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dense.hpp
+ *            dnn/dense.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dense.hpp
+/*! \file  dnn/dense.hpp
  *  \brief Dense layer.
  */
 

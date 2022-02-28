@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/dnn/test_cce_loss.cpp
+ *            dnn/test_cce_loss.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

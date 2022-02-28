@@ -1,5 +1,5 @@
 /***************************************************************************
- *            type.hpp
+ *            dnn/type.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file type.hpp
+/*! \file  dnn/type.hpp
  *  \brief Simply replace me.
  */
 

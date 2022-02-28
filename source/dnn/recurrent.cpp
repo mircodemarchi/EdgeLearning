@@ -1,5 +1,5 @@
 /***************************************************************************
- *            recurrent.cpp
+ *            dnn/recurrent.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

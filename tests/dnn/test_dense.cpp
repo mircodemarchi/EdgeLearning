@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/dnn/test_dense.cpp
+ *            dnn/test_dense.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *

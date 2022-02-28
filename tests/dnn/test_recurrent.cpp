@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tests/dnn/test_recurrent.cpp
+ *            dnn/test_recurrent.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
