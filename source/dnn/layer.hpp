@@ -159,6 +159,7 @@ public:
      * \return The size of the layer input.
      */
     [[nodiscard]] SizeType input_size() const;
+    virtual void input_size(SizeType input_size);
 
     /**
      * \brief Getter of input_size class field.

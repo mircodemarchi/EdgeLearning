@@ -77,6 +77,10 @@ SizeType Layer::input_size() const
     return _input_size;
 }
 
+void Layer::input_size(SizeType input_size) {
+    _input_size = input_size;
+}
+
 SizeType Layer::output_size() const
 {
     return _output_size;

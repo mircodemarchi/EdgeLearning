@@ -131,6 +131,8 @@ public:
      */
     virtual void print() const override;
 
+    void input_size(SizeType input_size) override;
+
 protected:
     NumType _loss;
     const NumType* _target;

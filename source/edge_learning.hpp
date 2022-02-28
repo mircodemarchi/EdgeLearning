@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file edge_learning.hpp
+/*! \file  edge_learning.hpp
  *  \brief Top-level header file includes all user headers.
  */
 
@@ -39,8 +39,9 @@
 #include "dnn/dense.hpp"
 #include "dnn/recurrent.hpp"
 #include "dnn/gd_optimizer.hpp"
-#include "middleware/ffnn.hpp"
+#include "middleware/fnn.hpp"
 #include "middleware/rnn.hpp"
+#include "data/dataset.hpp"
 #include "parser/parser.hpp"
 #include "parser/csv.hpp"
 

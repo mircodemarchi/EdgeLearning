@@ -87,6 +87,8 @@ public:
 
     void print() const override;
 
+    void input_size(SizeType input_size) override;
+
 private:
     Activation _activation;
 

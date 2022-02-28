@@ -123,6 +123,8 @@ public:
         }
     }
 
+    void input_size(SizeType input_size) override;
+
 private:
     OutputActivation _output_activation;
     HiddenActivation _hidden_activation;
