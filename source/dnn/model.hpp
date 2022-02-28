@@ -174,6 +174,12 @@ public:
     [[nodiscard]] SizeType output_size();
 
     /**
+     * \brief  Layers getter.
+     * \return A list of shared_ptr Layer.
+     */
+    const std::vector<Layer::SharedPtr>& layers() const;
+
+    /**
      * \brief Model name provided for debugging purposes.
      * \return std::string const& Model name string.
      */
@@ -222,12 +228,11 @@ public:
      * \param in In file stream
      */
     void load(std::ifstream& in);
-
 private:
     friend class Layer;
 
     std::string _name;                           ///< Model name;
-    std::vector<std::shared_ptr<Layer>> _layers; ///< List of layers pointers;
+    std::vector<Layer::SharedPtr> _layers; ///< List of layers pointers;
     std::shared_ptr<LossLayer> _loss_layer;      ///< Loss of the model; 
 };
 

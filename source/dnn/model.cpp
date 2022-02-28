@@ -143,6 +143,11 @@ SizeType Model::output_size()
     return _layers.back()->output_size();
 }
 
+const std::vector<Layer::SharedPtr>& Model::layers() const
+{
+    return _layers;
+}
+
 void Model::print() const
 {
     for (auto& layer: _layers)
