@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dataset.hpp
+ *            data/dataset.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,7 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dataset.hpp
+/*! \file data/dataset.hpp
  *  \brief The Dataset class implementation for training set, validation set 
  * and test set. 
  */
