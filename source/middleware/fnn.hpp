@@ -1,5 +1,5 @@
 /***************************************************************************
- *            time_estimator.hpp
+ *            middleware/fnn.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,150 +22,126 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file time_estimator.hpp
- *  \brief Task execution time estimator model.
+/*! \file  middleware/fnn.hpp
+ *  \brief Feedforward Neural Network.
  */
 
 #ifndef EDGE_LEARNING_MIDDLEWARE_FNN_HPP
 #define EDGE_LEARNING_MIDDLEWARE_FNN_HPP
 
 #include "middleware/type.hpp"
+#if ENABLE_MLPACK
+#include "mlpack_fnn.hpp"
+#endif
 
 #include <map>
 #include <tuple>
+#include <utility>
+#include <vector>
 
 
 namespace EdgeLearning {
 
-template<LossType LT = LossType::MSE, typename T = NumType>
-class FFNN {
+template<
+    LossType LT = LossType::MSE,
+    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
+    InitType IT = InitType::AUTO,
+    typename T = NumType>
+class EdgeFNN : public NN<T> {
 public:
-    using LayerDesc = std::tuple<std::string, SizeType, Activation>;
-    using LayerDescVec = std::vector<LayerDesc>;
-
-    FFNN(LayerDescVec layers, std::string name)
-        : _layers{std::move(layers)}
-        , _name{name}
+    EdgeFNN(std::string name)
+        : NN<T>(name)
+        , _m(NN<T>::_name)
+        , _output_size{0}
     {
-#if ENABLE_MLPACK
 
-#else
-
-#endif
     }
 
-    template<OptimizerType OT = OptimizerType::GradientDescent>
-    ModelType<LT> fit(Dataset<T>& data,
-                      SizeType epochs = 1,
-                      SizeType batch_size = 1,
-                      NumType learning_rate = 0.03)
+    void add(LayerDesc ld) override
     {
-        auto prev_layer_size = data.trainset_idx().size();
-#if ENABLE_MLPACK
-        ModelType<LT> m;
-        for (const auto& e: _layers)
+        auto layer_name = std::get<0>(ld);
+        auto layer_size = std::get<1>(ld);
+        auto layer_activation = std::get<2>(ld);
+
+        auto prev_layer = _m.layers().back();
+        if (_output_size != 0)
         {
-            auto curr_layer_name = std::get<0>(e);
-            auto curr_layer_size = std::get<1>(e);
-            auto curr_layer_activation = std::get<2>(e);
-            m.template Add<mlpack::ann::Linear<>>(
-                prev_layer_size, curr_layer_size);
-            switch (curr_layer_activation) {
-                case Activation::ReLU:
-                {
-                    m.template Add<mlpack::ann::ReLULayer<>>();
-                    break;
-                }
-                case Activation::Softmax:
-                {
-                    m.template Add<mlpack::ann::Softmax<>>();
-                    break;
-                }
-                case Activation::Linear:
-                default:
-                {
-                    m.template Add<mlpack::ann::IdentityLayer<>>();
-                    break;
-                }
+            auto layer = _m.template add_layer<DenseLayer>(
+                layer_name, layer_activation,
+                layer_size, _output_size);
+            if (prev_layer)
+            {
+                _m.create_edge(prev_layer, layer);
             }
-            prev_layer_size = curr_layer_size;
         }
+        _output_size = layer_size;
+    }
 
-        ens::GradientDescent o(0.03, data.size());
-        auto dataset = data.template to_arma<arma::Mat<T>>();
-        arma::mat trainLabels = dataset.row(dataset.n_rows - 1);
-        dataset.shed_row(dataset.n_rows - 1);
-        m.template Train(dataset, trainLabels, o);
-#else
-        ModelType m(_name);
-        std::vector<Layer::SharedPtr> l;
-        for (const auto& e: _layers)
+    void fit(Dataset<T> &data,
+             SizeType epochs = 1,
+             SizeType batch_size = 1,
+             NumType learning_rate = 0.03) override
+    {
+        // Add Loss layer.
+        auto prev_layer = _m.layers().back();
+        if (!prev_layer)
         {
-            auto curr_layer_name = std::get<0>(e);
-            auto curr_layer_size = std::get<1>(e);
-            auto curr_layer_activation = std::get<2>(e);
-            l.push_back(
-                m.add_layer<DenseLayer>(
-                    curr_layer_name, curr_layer_activation,
-                    curr_layer_size, prev_layer_size)
-            );
-            prev_layer_size = curr_layer_size;
+            throw std::runtime_error(
+                "The FNN has no layer: call add before fit");
         }
+        auto loss_layer_name = MapLoss<Framework::EDGE_LEARNING, LT>::name;
+        auto loss_layer = _m.add_loss<
+            MapLoss<Framework::EDGE_LEARNING, LT>::type>(
+                loss_layer_name, prev_layer->output_size(), batch_size);
+        _m.create_back_arc(prev_layer, loss_layer);
 
-        auto output_size = prev_layer_size;
-        auto loss_layer_name = MapLoss<LT>::name;
-        auto loss_layer = m.add_loss<MapLoss<LT>::type>(
-            loss_layer_name, output_size, batch_size);
-
-        for (SizeType i = 0; i < l.size() - 1; ++i)
-        {
-            m.create_edge(l[i], l[i + 1]);
-        }
-        m.create_back_arc(l[l.size() - 1], loss_layer);
-
-        auto o = MapOptimizer<OT>::type(learning_rate);
+        // Train.
+        auto o = MapOptimizer<Framework::EDGE_LEARNING, OT>::type(
+            learning_rate);
         for (SizeType e = 0; e < epochs; ++e)
         {
             for (SizeType i = 0; i < data.size();)
             {
                 for (SizeType b = 0; b < batch_size
-                     && i < data.size(); ++b, ++i)
+                                     && i < data.size(); ++b, ++i)
                 {
-                    m.step(data.trainset(i).data(),
+                    _m.step(data.trainset(i).data(),
                            data.labels(i).data());
                 }
-                m.train(o);
+                _m.train(o);
             }
         }
-        return m;
-#endif
     }
 
-    Dataset<T> predict(Dataset<T>& data, ModelType<LT>& m)
+    Dataset<T> predict(Dataset<T> &data) override
     {
-#if ENABLE_MLPACK
-        return  Dataset<T>(
-            std::vector<T>(data.size() * data.feature_size()),
-            data.feature_size());
-#else
         std::vector<T> ret;
         ret.resize(data.size() * data.feature_size());
 
-        auto output_size = m.output_size();
+        auto output_size = _m.output_size();
         for (std::size_t i = 0; i < data.size(); ++i)
         {
-            auto res = m.predict(
-                    data.entry(i).data());
+            auto res = _m.predict(data.entry(i).data());
             std::copy(res, res + output_size,
                       ret.begin() + long(i * data.feature_size()));
         }
         return Dataset<T>(ret, data.feature_size());
-#endif
     }
 
 private:
-    LayerDescVec _layers;
-    std::string _name;
+    Model _m;
+    SizeType _output_size;
+};
+
+template <LossType LT, OptimizerType OT, InitType IT, typename T>
+struct MapModel<Framework::EDGE_LEARNING, LT, OT, IT, T> {
+    using loss_type = typename MapLoss<Framework::EDGE_LEARNING, LT>::type;
+    using optimizer_type = typename MapOptimizer<
+        Framework::EDGE_LEARNING, OT>::type;
+    static const InitType init_type = MapInit<
+        Framework::EDGE_LEARNING, IT>::type;
+    using type = Model;
+    using fnn = EdgeFNN<LT, OT, IT, T>;
 };
 
 } // namespace EdgeLearning

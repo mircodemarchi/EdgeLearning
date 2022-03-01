@@ -1,5 +1,5 @@
 /***************************************************************************
- *            time_estimator.cpp
+ *            middleware/fnn.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,9 +22,7 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "middleware/ffnn.hpp"
-
-#include <utility>
+#include "middleware/fnn.hpp"
 
 namespace EdgeLearning {
 
