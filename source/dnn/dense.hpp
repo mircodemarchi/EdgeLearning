@@ -87,6 +87,10 @@ public:
 
     void print() const override;
 
+    [[nodiscard]] SizeType input_size() const override
+    {
+        return Layer::input_size();
+    }
     void input_size(SizeType input_size) override;
 
 private:
