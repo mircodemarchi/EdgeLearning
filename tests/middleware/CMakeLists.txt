@@ -1,6 +1,6 @@
 set(UNIT_TESTS
     test_dataset
-    #test_fnn
+    test_fnn
 )
 
 foreach(TEST ${UNIT_TESTS})

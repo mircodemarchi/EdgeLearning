@@ -49,22 +49,13 @@ private:
         };
         Dataset<NumType> dataset{data, 1, {4, 5}};
 
-        FFNN<>::LayerDescVec layers_descriptor(
-            {{"hidden_layer", 8UL, Activation::ReLU  },
+        LayerDescriptorVector layers_descriptor(
+            {{"input_layer",  4UL, Activation::Linear   },
+             {"hidden_layer", 8UL, Activation::ReLU     },
              {"output_layer", 2UL, Activation::Linear   }}
             );
-        EDGE_LEARNING_TEST_TRY(
-            auto m = FFNN<>(layers_descriptor, 4,
-                 LossType::MSE, BATCH_SIZE,
-                 "regressor_model"));
-        auto m = FFNN<>(layers_descriptor,
-                      4, LossType::MSE, BATCH_SIZE,
-                      "regressor_model");
-        EDGE_LEARNING_TEST_TRY(
-            m.fit<NumType>(dataset,
-                           EPOCHS,
-                           OptimizerType::GradientDescent,
-                           0.03));
+        auto m = FNN<>(layers_descriptor, "regressor_model");
+        EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
     }
 
     void test_predict() {
@@ -76,21 +67,15 @@ private:
         };
         Dataset<NumType> dataset(data, 1, {4, 5});
 
-        FFNN::LayerDescVec layers_descriptor(
-            {{"hidden_layer", 8UL, Activation::ReLU  },
+        LayerDescriptorVector layers_descriptor(
+            {{"input_layer",  4UL, Activation::Linear   },
+             {"hidden_layer", 8UL, Activation::ReLU     },
              {"output_layer", 2UL, Activation::Linear   }}
         );
-        EDGE_LEARNING_TEST_TRY(
-            auto m = FFNN(layers_descriptor, 4,
-                 LossType::MSE, BATCH_SIZE,
-                 "regressor_model"));
-        auto m = FFNN(layers_descriptor,
-                      4, LossType::MSE, BATCH_SIZE,
-                      "regressor_model");
+        auto m = FNN<>(layers_descriptor, "regressor_model");
 
         Dataset<NumType> predicted_labels;
-        EDGE_LEARNING_TEST_TRY(
-            predicted_labels = m.predict<NumType>(dataset));
+        EDGE_LEARNING_TEST_TRY(predicted_labels = m.predict(dataset));
         EDGE_LEARNING_TEST_EQUALS(predicted_labels.size(), dataset.size());
         EDGE_LEARNING_TEST_EQUALS(predicted_labels.feature_size(),
                                   dataset.feature_size());
@@ -98,7 +83,6 @@ private:
         {
             EDGE_LEARNING_TEST_PRINT(e);
         }
-
     }
 };
 
