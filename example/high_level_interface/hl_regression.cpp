@@ -42,7 +42,7 @@ int main()
     };
     Dataset<NumType> dataset(data, 1, {4, 5});
 
-    LayerDescVec layers_descriptor(
+    LayerDescriptorVector layers_descriptor(
         {
             {"input_layer",   INPUT_SIZE,  Activation::Linear },
             {"hidden_layer1", 8UL,         Activation::ReLU   },

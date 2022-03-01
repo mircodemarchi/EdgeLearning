@@ -57,7 +57,7 @@ public:
 
     }
 
-    void add(LayerDesc ld) override
+    void add(LayerDescriptor ld) override
     {
         auto layer_name = std::get<0>(ld);
         auto layer_size = std::get<1>(ld);
@@ -90,14 +90,15 @@ public:
                 "The FNN has no layer: call add before fit");
         }
         auto loss_layer_name = MapLoss<Framework::EDGE_LEARNING, LT>::name;
-        auto loss_layer = _m.add_loss<
-            MapLoss<Framework::EDGE_LEARNING, LT>::type>(
+        auto loss_layer = _m.template add_loss<
+            typename MapLoss<Framework::EDGE_LEARNING, LT>::type>(
                 loss_layer_name, prev_layer->output_size(), batch_size);
         _m.create_back_arc(prev_layer, loss_layer);
 
         // Train.
-        auto o = MapOptimizer<Framework::EDGE_LEARNING, OT>::type(
-            learning_rate);
+        using optimizer_type = typename MapOptimizer<
+            Framework::EDGE_LEARNING, OT>::type;
+        auto o = optimizer_type(learning_rate);
         for (SizeType e = 0; e < epochs; ++e)
         {
             for (SizeType i = 0; i < data.size();)
@@ -155,7 +156,7 @@ class FNN {
 public:
     using ModelFNN = typename MapModel<F, LT, OT, IT, T>::fnn;
 
-    FNN(LayerDescVec layers, std::string name)
+    FNN(LayerDescriptorVector layers, std::string name)
         : _fnn_model{name}
         , _layers{std::move(layers)}
     {
@@ -176,11 +177,11 @@ public:
         {
             _fnn_model.add(e);
         }
-        _fnn_model.train(data, epochs, batch_size, learning_rate);
+        _fnn_model.fit(data, epochs, batch_size, learning_rate);
     }
 
 private:
-    LayerDescVec _layers;
+    LayerDescriptorVector _layers;
     ModelFNN _fnn_model;
 };
 

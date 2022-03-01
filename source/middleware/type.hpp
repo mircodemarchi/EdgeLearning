@@ -62,13 +62,13 @@ struct MapActivation<Framework::EDGE_LEARNING, ActivationType::Linear> {
 template <>
 struct MapLoss<Framework::EDGE_LEARNING, LossType::CCE> {
     using type = CCELossLayer;
-    static constexpr std::string_view name = "cce_loss";
+    inline static const std::string name = "cce_loss";
 };
 
 template <>
 struct MapLoss<Framework::EDGE_LEARNING, LossType::MSE> {
     using type = MSELossLayer;
-    static constexpr std::string_view name = "mse_loss";
+    inline static const std::string name = "mse_loss";
 };
 
 template <>

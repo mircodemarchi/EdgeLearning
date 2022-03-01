@@ -49,8 +49,8 @@ enum class Framework
 #endif
 };
 
-using LayerDesc = std::tuple<std::string, SizeType, Activation>;
-using LayerDescVec = std::vector<LayerDesc>;
+using LayerDescriptor = std::tuple<std::string, SizeType, Activation>;
+using LayerDescriptorVector = std::vector<LayerDescriptor>;
 
 using ActivationType = Activation;
 
@@ -93,7 +93,7 @@ public:
     {
     }
     virtual ~NN() = default;
-    virtual void add(LayerDesc ld) = 0;
+    virtual void add(LayerDescriptor ld) = 0;
     virtual Dataset<T> predict(Dataset<T>& data) = 0;
     virtual void fit(Dataset<T>& data,
                      SizeType epochs = 1,
