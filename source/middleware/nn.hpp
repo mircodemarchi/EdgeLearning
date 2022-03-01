@@ -104,45 +104,6 @@ protected:
     std::string _name;
 };
 
-template<
-    Framework F = Framework::EDGE_LEARNING,
-    LossType LT = LossType::MSE,
-    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
-    InitType IT = InitType::AUTO,
-    typename T = NumType>
-class FNN {
-public:
-    using ModelFNN = typename MapModel<F, LT, OT, IT, T>::fnn;
-
-    FNN(LayerDescVec layers, std::string name)
-        : _fnn_model{name}
-        , _layers{layers}
-    {
-
-    }
-
-    Dataset<T> predict(Dataset<T> &data)
-    {
-        return _fnn_model.predict(data);
-    }
-
-    void fit(Dataset<T> &data,
-             SizeType epochs = 1,
-             SizeType batch_size = 1,
-             NumType learning_rate = 0.03)
-    {
-        for (const auto& e: _layers)
-        {
-            _fnn_model.add(e);
-        }
-        _fnn_model.train(data, epochs, batch_size, learning_rate);
-    }
-
-private:
-    LayerDescVec _layers;
-    ModelFNN _fnn_model;
-};
-
 } // namespace EdgeLearning
 
 

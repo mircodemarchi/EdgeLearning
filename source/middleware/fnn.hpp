@@ -144,6 +144,62 @@ struct MapModel<Framework::EDGE_LEARNING, LT, OT, IT, T> {
     using fnn = EdgeFNN<LT, OT, IT, T>;
 };
 
+
+template<
+    Framework F = Framework::EDGE_LEARNING,
+    LossType LT = LossType::MSE,
+    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
+    InitType IT = InitType::AUTO,
+    typename T = NumType>
+class FNN {
+public:
+    using ModelFNN = typename MapModel<F, LT, OT, IT, T>::fnn;
+
+    FNN(LayerDescVec layers, std::string name)
+        : _fnn_model{name}
+        , _layers{std::move(layers)}
+    {
+
+    }
+
+    Dataset<T> predict(Dataset<T> &data)
+    {
+        return _fnn_model.predict(data);
+    }
+
+    void fit(Dataset<T> &data,
+             SizeType epochs = 1,
+             SizeType batch_size = 1,
+             NumType learning_rate = 0.03)
+    {
+        for (const auto& e: _layers)
+        {
+            _fnn_model.add(e);
+        }
+        _fnn_model.train(data, epochs, batch_size, learning_rate);
+    }
+
+private:
+    LayerDescVec _layers;
+    ModelFNN _fnn_model;
+};
+
+#if ENABLE_MLPACK
+template<
+    LossType LT = LossType::MSE,
+    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
+    InitType IT = InitType::AUTO,
+    typename T = NumType>
+using CompileFNN = FNN<Framework::MLPACK, LT, OT, IT, T>;
+#else
+template<
+    LossType LT = LossType::MSE,
+    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
+    InitType IT = InitType::AUTO,
+    typename T = NumType>
+using CompileFNN = FNN<Framework::EDGE_LEARNING, LT, OT, IT, T>;
+#endif
+
 } // namespace EdgeLearning
 
 #endif // EDGE_LEARNING_MIDDLEWARE_FNN_HPP
