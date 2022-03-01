@@ -1,8 +1,17 @@
 set(LIBRARY_NAME edgelearning-middleware)
 
+set(SOURCES
+    fnn.cpp
+    rnn.cpp
+)
+
+if (ENABLE_MLPACK)
+    list(APPEND SOURCES
+    )
+endif()
+
 add_library(${LIBRARY_NAME} OBJECT
-        ffnn.cpp
-        rnn.cpp
+    ${SOURCES}
 )
 
 if(COVERAGE)

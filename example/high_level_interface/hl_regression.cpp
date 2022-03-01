@@ -42,18 +42,21 @@ int main()
     };
     Dataset<NumType> dataset(data, 1, {4, 5});
 
-    FFNN::LayerDescVec layers_descriptor(
-        {{"hidden_layer1", 8UL,         Activation::ReLU  },
-         {"hidden_layer2", 32UL,         Activation::ReLU  },
-         {"hidden_layer3", 16UL,         Activation::ReLU  },
-         {"output_layer", OUTPUT_SIZE, Activation::Linear}}
+    LayerDescVec layers_descriptor(
+        {
+            {"input_layer",   INPUT_SIZE,  Activation::Linear },
+            {"hidden_layer1", 8UL,         Activation::ReLU   },
+            {"hidden_layer2", 32UL,        Activation::ReLU   },
+            {"hidden_layer3", 16UL,        Activation::ReLU   },
+            {"output_layer",  OUTPUT_SIZE, Activation::Linear }
+        }
     );
     SizeType input_size = 4;
-    auto m = FFNN(layers_descriptor, input_size,
-                  LossType::MSE, BATCH_SIZE,
-                  "regressor_model");
-    m.fit<NumType>(dataset, EPOCHS,
-                   OptimizerType::GradientDescent, LEARNING_RATE);
+    FNN<Framework::EDGE_LEARNING,
+        LossType::MSE,
+        OptimizerType::GRADIENT_DESCENT,
+        InitType::AUTO> m(layers_descriptor, "regressor_model");
+    m.fit(dataset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
     std::cout << "Training End" << std::endl;
 
     Dataset<NumType> new_data({9.0,  1.0, 9.0,  1.0}, INPUT_SIZE);
