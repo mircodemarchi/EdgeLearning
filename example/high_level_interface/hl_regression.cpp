@@ -51,7 +51,7 @@ int main()
             {"output_layer",  OUTPUT_SIZE, Activation::Linear }
         }
     );
-    SizeType input_size = 4;
+
     FNN<Framework::EDGE_LEARNING,
         LossType::MSE,
         OptimizerType::GRADIENT_DESCENT,
