@@ -63,9 +63,13 @@ public:
         auto layer_size = std::get<1>(ld);
         auto layer_activation = std::get<2>(ld);
 
-        auto prev_layer = _m.layers().back();
         if (_output_size != 0)
         {
+            Layer::SharedPtr prev_layer;
+            if (!_m.layers().empty())
+            {
+                prev_layer = _m.layers().back();
+            }
             auto layer = _m.template add_layer<DenseLayer>(
                 layer_name, layer_activation,
                 layer_size, _output_size);
@@ -83,12 +87,12 @@ public:
              NumType learning_rate = 0.03) override
     {
         // Add Loss layer.
-        auto prev_layer = _m.layers().back();
-        if (!prev_layer)
+        if (_m.layers().empty())
         {
             throw std::runtime_error(
                 "The FNN has no layer: call add before fit");
         }
+        auto prev_layer = _m.layers().back();
         auto loss_layer_name = MapLoss<Framework::EDGE_LEARNING, LT>::name;
         auto loss_layer = _m.template add_loss<
             typename MapLoss<Framework::EDGE_LEARNING, LT>::type>(
@@ -157,10 +161,13 @@ public:
     using ModelFNN = typename MapModel<F, LT, OT, IT, T>::fnn;
 
     FNN(LayerDescriptorVector layers, std::string name)
-        : _fnn_model{name}
-        , _layers{std::move(layers)}
+        : _layers{std::move(layers)}
+        , _fnn_model{name}
     {
-
+        for (const auto& e: _layers)
+        {
+            _fnn_model.add(e);
+        }
     }
 
     Dataset<T> predict(Dataset<T> &data)
@@ -173,10 +180,6 @@ public:
              SizeType batch_size = 1,
              NumType learning_rate = 0.03)
     {
-        for (const auto& e: _layers)
-        {
-            _fnn_model.add(e);
-        }
         _fnn_model.fit(data, epochs, batch_size, learning_rate);
     }
 
