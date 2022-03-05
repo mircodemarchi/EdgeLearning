@@ -29,7 +29,7 @@
 #ifndef EDGE_LEARNING_EDGE_LEARNING_HPP
 #define EDGE_LEARNING_EDGE_LEARNING_HPP
 
-#include "dnn/type.hpp"
+#include "type.hpp"
 #include "dnn/dlmath.hpp"
 #include "dnn/model.hpp"
 #include "dnn/layer.hpp"
@@ -39,6 +39,8 @@
 #include "dnn/dense.hpp"
 #include "dnn/recurrent.hpp"
 #include "dnn/gd_optimizer.hpp"
+#include "middleware/definitions.hpp"
+#include "middleware/nn.hpp"
 #include "middleware/fnn.hpp"
 #include "middleware/rnn.hpp"
 #include "data/dataset.hpp"

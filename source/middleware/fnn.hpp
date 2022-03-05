@@ -29,7 +29,7 @@
 #ifndef EDGE_LEARNING_MIDDLEWARE_FNN_HPP
 #define EDGE_LEARNING_MIDDLEWARE_FNN_HPP
 
-#include "middleware/type.hpp"
+#include "definitions.hpp"
 #if ENABLE_MLPACK
 #include "mlpack_fnn.hpp"
 #endif

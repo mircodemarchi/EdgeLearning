@@ -23,7 +23,7 @@
  */
 
 #include "test.hpp"
-#include "dnn/type.hpp"
+#include "type.hpp"
 #include "dnn/dlmath.hpp"
 #include "dnn/layer.hpp"
 #include "dnn/model.hpp"

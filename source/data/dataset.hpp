@@ -30,7 +30,7 @@
 #ifndef EDGE_LEARNING_MIDDLEWARE_DATASET_HPP
 #define EDGE_LEARNING_MIDDLEWARE_DATASET_HPP
 
-#include "dnn/type.hpp"
+#include "type.hpp"
 
 #include <cstddef>
 #include <vector>
