@@ -32,7 +32,7 @@
 namespace EdgeLearning {
 
 RecurrentLayer::RecurrentLayer(Model& model, std::string name, 
-    SizeType output_size, SizeType input_size, SizeType hidden_size, 
+    SizeType input_size, SizeType output_size, SizeType hidden_size,
     SizeType time_steps, 
     OutputActivation output_activation, HiddenActivation hidden_activation)
     : Layer(model, input_size, output_size,

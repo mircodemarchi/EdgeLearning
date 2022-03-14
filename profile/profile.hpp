@@ -1,5 +1,5 @@
 /***************************************************************************
- *            profile_body.cpp
+ *            profile.hpp
  *
  *  Copyright  2021  Luca Geretti
  *
@@ -63,7 +63,7 @@ public:
     NsCount profile(std::function<void(SizeType)> function, SizeType num_tries)
     {
         _sw.restart();
-        for (SizeType i=0; i<num_tries; ++i) function(i);
+        for (SizeType i = 0; i < num_tries; ++i) function(i);
         _sw.click();
         return static_cast<NsCount>(
             (static_cast<double>(_sw.duration().count())) * 1000 //< to ns
@@ -81,7 +81,8 @@ public:
         return cnt;
     }
 
-    NsCount profile(std::string msg, std::function<void(SizeType)> function) {
+    NsCount profile(std::string msg, std::function<void(SizeType)> function)
+    {
         return profile(std::move(msg), std::move(function), _num_tries);
     }
 

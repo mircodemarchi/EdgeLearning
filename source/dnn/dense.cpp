@@ -32,7 +32,7 @@
 namespace EdgeLearning {
 
 DenseLayer::DenseLayer(Model& model, std::string name, Activation activation, 
-    SizeType output_size, SizeType input_size)
+    SizeType input_size, SizeType output_size)
     : Layer(model, input_size, output_size, std::move(name))
     , _activation{activation}
 {

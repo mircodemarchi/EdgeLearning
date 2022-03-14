@@ -106,7 +106,7 @@ private:
                                   std::runtime_error);
         EDGE_LEARNING_TEST_TRY(l_fail.set_initial_hidden_state({}));
         auto l = RecurrentLayer(_m, "recurrent_layer_test",
-                                20, 10, 5);
+                                10, 20, 5);
         EDGE_LEARNING_TEST_TRY(l.set_initial_hidden_state({0.0}));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);

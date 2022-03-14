@@ -99,9 +99,9 @@ private:
     {
         Model m{"test_model_load_save"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "first", Activation::ReLU, 8, 4);
+                "first", Activation::ReLU, 4, 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "second", Activation::Linear, 2, 8);
+                "second", Activation::Linear, 8, 2);
         auto loss_layer = m.add_loss<CustomLossLayer>(
                 2, BATCH_SIZE);
         m.create_edge(first_layer, output_layer);
@@ -264,12 +264,12 @@ private:
         auto first_layer = m.add_layer<DenseLayer>(
             "hidden", Activation::ReLU, input_size * time_steps, input_size * time_steps);
         auto output_layer = m.add_layer<RecurrentLayer>(
-            "output", output_size, input_size, 2);
+            "output", input_size, output_size, 2);
         output_layer->set_initial_hidden_state({0.01, 0.01});
         output_layer->set_time_steps(time_steps);
         output_layer->set_initial_hidden_state({0.0, 0.0});
         auto loss_layer = m.add_loss<MSELossLayer>("loss",
-            static_cast<SizeType>(time_steps * output_size), BATCH_SIZE, 0.5);
+            time_steps * output_size, BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
         m.create_edge(first_layer, output_layer);
         m.create_back_arc(output_layer, loss_layer);
@@ -304,9 +304,9 @@ private:
     {
         Model m{"binary_classifier"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "hidden", Activation::ReLU, 8, 4);
+                "hidden", Activation::ReLU, 4, 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "output", Activation::Softmax, 2, 8);
+                "output", Activation::Softmax, 8, 2);
         auto loss_layer = m.add_loss<CCELossLayer>(
             "loss", 2, BATCH_SIZE);
         m.create_edge(first_layer, output_layer);
@@ -318,9 +318,9 @@ private:
     {
         Model m{"regressor"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "hidden", Activation::ReLU, 8, 4);
+                "hidden", Activation::ReLU, 4, 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "output", Activation::Linear, 2, 8);
+                "output", Activation::Linear, 8, 2);
         auto loss_layer = m.add_loss<MSELossLayer>(
             "loss", 2, BATCH_SIZE, 0.5);
         m.create_edge(first_layer, output_layer);

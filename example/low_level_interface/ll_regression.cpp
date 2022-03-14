@@ -52,9 +52,9 @@ int main()
     GDOptimizer o{NumType{LEARNING_RATE}};
     Model m{"regressor"};
     auto first_layer = m.add_layer<DenseLayer>(
-        "hidden", Activation::ReLU, 8, INPUT_SIZE);
+        "hidden", Activation::ReLU, INPUT_SIZE, 8);
     auto output_layer = m.add_layer<DenseLayer>(
-        "output", Activation::Linear, OUTPUT_SIZE, 8);
+        "output", Activation::Linear, 8, OUTPUT_SIZE);
     auto loss_layer = m.add_loss<MSELossLayer>(
         "loss", OUTPUT_SIZE, BATCH_SIZE, 0.5);
     m.create_edge(first_layer, output_layer);

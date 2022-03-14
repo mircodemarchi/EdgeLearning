@@ -57,7 +57,7 @@ class RecurrentLayer : public Layer
 {
 public: 
     RecurrentLayer(Model& model, std::string name = std::string(),
-        SizeType output_size = 0, SizeType input_size = 0, SizeType hidden_size = 0,
+        SizeType input_size = 0, SizeType output_size = 0, SizeType hidden_size = 0,
         SizeType time_steps = 0,
         OutputActivation output_activation = OutputActivation::Linear, 
         HiddenActivation hidden_activation = HiddenActivation::TanH);

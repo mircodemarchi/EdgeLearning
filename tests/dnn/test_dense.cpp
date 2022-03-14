@@ -101,7 +101,7 @@ private:
 
         auto l_shape = DenseLayer(_m, "dense_layer_test",
                                   Activation::ReLU,
-                                  20, 10);
+                                  10, 20);
         EDGE_LEARNING_TEST_EQUAL(l_shape.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape.output_size(), 20);
         EDGE_LEARNING_TEST_EQUAL(l_shape.last_input(), nullptr);
