@@ -1,5 +1,5 @@
 /***************************************************************************
- *            middleware/type.hpp
+ *            middleware/definitions.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,12 +22,12 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file  middleware/type.hpp
+/*! \file  middleware/definitions.hpp
  *  \brief Simply replace me.
  */
 
-#ifndef EDGE_LEARNING_MIDDLEWARE_TYPE_HPP
-#define EDGE_LEARNING_MIDDLEWARE_TYPE_HPP
+#ifndef EDGE_LEARNING_MIDDLEWARE_DEFINITIONS_HPP
+#define EDGE_LEARNING_MIDDLEWARE_DEFINITIONS_HPP
 
 #include "nn.hpp"
 
@@ -94,4 +94,4 @@ struct MapInit<Framework::EDGE_LEARNING, InitType::AUTO> {
 } // namespace EdgeLearning
 
 
-#endif // EDGE_LEARNING_MIDDLEWARE_TYPE_HPP
+#endif // EDGE_LEARNING_MIDDLEWARE_DEFINITIONS_HPP

@@ -72,7 +72,7 @@ public:
             }
             auto layer = _m.template add_layer<DenseLayer>(
                 layer_name, layer_activation,
-                layer_size, _output_size);
+                _output_size, layer_size);
             if (prev_layer)
             {
                 _m.create_edge(prev_layer, layer);

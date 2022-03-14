@@ -1,5 +1,5 @@
 /***************************************************************************
- *            middleware/mlpack_type.hpp
+ *            middleware/mlpack_definitions.hpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,12 +22,12 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file  middleware/mlpack_type.hpp
+/*! \file  middleware/mlpack_definitions.hpp
  *  \brief Simply replace me.
  */
 
-#ifndef EDGE_LEARNING_MIDDLEWARE_TYPE_HPP
-#define EDGE_LEARNING_MIDDLEWARE_TYPE_HPP
+#ifndef EDGE_LEARNING_MIDDLEWARE_MLPACK_DEFINITIONS_HPP
+#define EDGE_LEARNING_MIDDLEWARE_MLPACK_DEFINITIONS_HPP
 
 #include "nn.hpp"
 
@@ -86,11 +86,11 @@ struct MapInit<Framework::MLPACK, InitType::XAVIER_INIT> {
 };
 
 template <>
-struct MapInit<Framework::EDGE_LEARNING, InitType::AUTO> {
+struct MapInit<Framework::MLPACK, InitType::AUTO> {
     using type = mlpack::ann::LecunNormalInitialization;
 };
 
 } // namespace EdgeLearning
 
 
-#endif // EDGE_LEARNING_MIDDLEWARE_TYPE_HPP
+#endif // EDGE_LEARNING_MIDDLEWARE_MLPACK_DEFINITIONS_HPP

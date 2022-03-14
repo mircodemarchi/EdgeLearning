@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <cmath>
 #if ENABLE_MLPACK
+#include <mlpack/core.hpp>
 #include <armadillo>
 #endif // ENABLE_MLPACK
 

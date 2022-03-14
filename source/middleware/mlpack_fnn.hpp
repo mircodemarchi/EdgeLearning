@@ -26,11 +26,11 @@
  *  \brief MLPACK implementation of Feedforward Neural Network.
  */
 
-#ifndef EDGE_LEARNING_MIDDLEWARE_FNN_HPP
-#define EDGE_LEARNING_MIDDLEWARE_FNN_HPP
+#ifndef EDGE_LEARNING_MIDDLEWARE_MLPACK_FNN_HPP
+#define EDGE_LEARNING_MIDDLEWARE_MLPACK_FNN_HPP
 
 #include "nn.hpp"
-#include "mlpack_type.hpp"
+#include "mlpack_definitions.hpp"
 
 #include <map>
 #include <tuple>
@@ -77,7 +77,7 @@ public:
             data.feature_size());
     }
 
-    void add(LayerDesc ld) override
+    void add(LayerDescriptor ld) override
     {
         auto layer_name = std::get<0>(ld);
         auto layer_size = std::get<1>(ld);
@@ -126,4 +126,4 @@ struct MapModel<Framework::MLPACK, LT, OT, IT, T> {
 
 } // namespace EdgeLearning
 
-#endif // EDGE_LEARNING_MIDDLEWARE_FNN_HPP
+#endif // EDGE_LEARNING_MIDDLEWARE_MLPACK_FNN_HPP
