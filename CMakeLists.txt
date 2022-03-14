@@ -88,6 +88,7 @@ endif()
 
 add_subdirectory(source)
 add_subdirectory(tests)
+add_subdirectory(profile)
 
 add_library(edgelearning ${LIBRARY_KIND}
     $<TARGET_OBJECTS:edgelearning-dnn>
