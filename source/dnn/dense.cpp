@@ -36,8 +36,8 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     : Layer(model, input_size, output_size, std::move(name))
     , _activation{activation}
 {
-    std::cout << _name << ": " << input_size
-        << " -> " << output_size << std::endl;
+    // std::cout << _name << ": " << input_size
+    //    << " -> " << output_size << std::endl;
 
     // The weight parameters of a FF-layer are an NxM matrix.
     _weights.resize(output_size * input_size);

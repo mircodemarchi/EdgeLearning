@@ -42,8 +42,8 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
 {
-    std::cout << _name << ": " << _input_size 
-        << " -{" << _hidden_size << "}-> " << _output_size << std::endl;
+    // std::cout << _name << ": " << _input_size
+    //    << " -{" << _hidden_size << "}-> " << _output_size << std::endl;
 
     auto ih_size = _input_size * _hidden_size;
     auto hh_size = _hidden_size * _hidden_size;
