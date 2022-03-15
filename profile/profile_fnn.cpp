@@ -28,6 +28,8 @@
 #include "data/dataset.hpp"
 #include "middleware/fnn.hpp"
 
+#include <filesystem>
+
 
 using namespace EdgeLearning;
 namespace fs = std::filesystem;
@@ -45,8 +47,7 @@ struct ProfileRegressorFNN : Profiler
 
 private:
     const std::string DATA_TRAINING_FN = "execution-time.csv";
-    const std::filesystem::path data_training_fp =
-        std::filesystem::path(__FILE__).parent_path()
+    const fs::path data_training_fp = fs::path(__FILE__).parent_path()
         / ".." / "data" / DATA_TRAINING_FN;
 
     void profile_on_epochs_amount() {

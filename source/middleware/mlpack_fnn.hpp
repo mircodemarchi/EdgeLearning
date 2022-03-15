@@ -70,7 +70,7 @@ public:
         }
     }
 
-    Dataset<T> predict(Dataset<T>& data)
+    Dataset<T> predict(Dataset<T>& data) override
     {
         return Dataset<T>(
             std::vector<T>(data.size() * data.feature_size()),
@@ -86,7 +86,7 @@ public:
         _layers_name.push_back(layer_name);
         if (_output_size != 0)
         {
-            _m.template Add(mlpack::ann::Linear<>(_output_size, layer_size));
+            _m.template Add<mlpack::ann::Linear<>>(_output_size, layer_size);
             switch (layer_activation) {
                 case Activation::ReLU:
                 {
@@ -110,7 +110,9 @@ public:
     }
 
 private:
-    MlpackFNN<LT, OT, IT, T> _m;
+    mlpack::ann::FFN<
+        typename MapLoss<Framework::MLPACK, LT>::type,
+        typename MapInit<Framework::MLPACK, IT>::type> _m;
     SizeType _output_size;
     std::vector<std::string> _layers_name;
 };
