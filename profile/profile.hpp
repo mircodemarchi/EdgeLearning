@@ -63,7 +63,10 @@ public:
     NsCount profile(std::function<void(SizeType)> function, SizeType num_tries)
     {
         _sw.restart();
-        for (SizeType i = 0; i < num_tries; ++i) function(i);
+        for (SizeType i = 0; i < num_tries; ++i)
+        {
+            function(i);
+        }
         _sw.click();
         return static_cast<NsCount>(
             (static_cast<double>(_sw.duration().count())) * 1000 //< to ns
