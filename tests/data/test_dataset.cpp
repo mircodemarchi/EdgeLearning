@@ -135,6 +135,37 @@ private:
         EDGE_LEARNING_TEST_EQUAL(d_empty1.feature_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(d_empty1.sequence_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(d_empty1.data().size(), 0);
+
+        Dataset<double> d_subdata(data, 2, 1);
+        EDGE_LEARNING_TEST_FAIL(d_subdata.subdata(4, 2));
+        EDGE_LEARNING_TEST_THROWS(d_subdata.subdata(4, 2),
+                                  std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).feature_size(), d_subdata.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).sequence_size(), d_subdata.sequence_size());
+        EDGE_LEARNING_TEST_ASSERT(d_subdata.subdata(1, 2).labels_idx().empty());
+        EDGE_LEARNING_TEST_ASSERT(d_subdata.subdata(2, 2).data().empty());
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0, 1).data().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0, 2).data().size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(0, d_subdata.size()).data().size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(0, 100).data().size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0, 1).size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0, 2).size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(0, d_subdata.size()).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0, 100).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(0, 2).data()[0], d_subdata.data()[0]);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).data()[0], d_subdata.data()[2]);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).data()[1], d_subdata.data()[3]);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(0, 100).data()[d_subdata.data().size() - 1],
+            d_subdata.data()[d_subdata.data().size() - 1]);
     }
 
     void test_dataset_mat() {
@@ -194,6 +225,18 @@ private:
         EDGE_LEARNING_TEST_EQUAL(d_empty2.feature_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(d_empty2.sequence_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(d_empty2.data().size(), 0);
+
+        Dataset<double> d_subdata(data, 1);
+        EDGE_LEARNING_TEST_FAIL(d_subdata.subdata(4, 2));
+        EDGE_LEARNING_TEST_THROWS(d_subdata.subdata(4, 2),
+                                  std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).feature_size(), d_subdata.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).sequence_size(), d_subdata.sequence_size());
+        EDGE_LEARNING_TEST_ASSERT(d_subdata.subdata(1, 2).labels_idx().empty());
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).data()[0], d_subdata.data()[2]);
     }
 
     void test_dataset_cub() {
@@ -276,6 +319,21 @@ private:
         EDGE_LEARNING_TEST_EQUAL(d_empty3.feature_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(d_empty3.sequence_size(), 1);
         EDGE_LEARNING_TEST_EQUAL(d_empty3.data().size(), 0);
+
+        Dataset<double> d_subdata(data);
+        EDGE_LEARNING_TEST_FAIL(d_subdata.subdata(4, 2));
+        EDGE_LEARNING_TEST_THROWS(d_subdata.subdata(4, 2),
+                                  std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).feature_size(), d_subdata.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).sequence_size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(0, d_subdata.size()).sequence_size(),
+            d_subdata.sequence_size());
+        EDGE_LEARNING_TEST_ASSERT(d_subdata.subdata(1, 2).labels_idx().empty());
+        EDGE_LEARNING_TEST_EQUAL(
+            d_subdata.subdata(1, 2).data()[0], d_subdata.data()[2]);
     }
 
     void test_dataset_entry() {

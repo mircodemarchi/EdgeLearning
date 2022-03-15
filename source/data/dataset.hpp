@@ -453,6 +453,26 @@ public:
         return field_from_seq_idx(_entry_labels_cache, seq_idx, _labels_idx);
     }
 
+    Dataset<T> subdata(SizeType from, SizeType to)
+    {
+        if (to > _feature_amount)
+        {
+            to = _feature_amount;
+        }
+
+        if (from > to)
+        {
+            throw std::runtime_error("The argument 'from' exceeds 'to'");
+        }
+
+        auto subvector = std::vector(
+            _data.begin() + long(from * _feature_size),
+            _data.begin() + long(to * _feature_size)
+            );
+        return Dataset<T>(subvector,
+                          _feature_size, _sequence_size, _labels_idx);
+    }
+
 private:
     const std::vector<T>& field_from_row_idx(
         std::vector<T>& dst, 
