@@ -95,7 +95,11 @@ public:
                 }
                 case Activation::Softmax:
                 {
+#if __unix__
+                    _m.template Add<mlpack::ann::LogSoftMax<>>();
+#else
                     _m.template Add<mlpack::ann::Softmax<>>();
+#endif
                     break;
                 }
                 case Activation::Linear:

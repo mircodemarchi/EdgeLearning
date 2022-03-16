@@ -55,7 +55,7 @@ private:
         const SizeType EPOCHS        = 20;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(data_training_fp);
+        auto csv = CSV(data_training_fp.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -97,7 +97,7 @@ private:
         const NumType  LEARNING_RATE         = 0.03;
         const SizeType MIN_TRAINING_SET_SIZE = 10;
 
-        auto csv = CSV(data_training_fp);
+        auto csv = CSV(data_training_fp.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -141,7 +141,7 @@ private:
         const SizeType LAYERS_AMOUNT = 100;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(data_training_fp);
+        auto csv = CSV(data_training_fp.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -179,7 +179,7 @@ private:
         const NumType  LEARNING_RATE = 0.03;
         const SizeType LAYERS_MAX_SIZE = 100;
 
-        auto csv = CSV(data_training_fp);
+        auto csv = CSV(data_training_fp.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -194,13 +194,13 @@ private:
                             {"input_layer",   input_size,  Activation::Linear },
                             {
                                 "hidden_layer0",
-                                10 + static_cast<NumType>(i / 2),
+                                10 + static_cast<SizeType>(i / 2),
                                 Activation::ReLU
                             },
                             {"hidden_layer1", 10 + i,  Activation::ReLU   },
                             {
                                 "hidden_layer2",
-                                10 + static_cast<NumType>(i / 2),
+                                10 + static_cast<SizeType>(i / 2),
                                 Activation::ReLU
                             },
                             {"output_layer",  output_size, Activation::Linear },
