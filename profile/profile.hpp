@@ -37,6 +37,7 @@
 #include <sstream>
 #include <utility>
 #include <algorithm>
+#include <numeric>
 
 using namespace EdgeLearning;
 
