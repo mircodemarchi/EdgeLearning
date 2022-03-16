@@ -52,7 +52,7 @@ private:
 
     void profile_on_epochs_amount() {
         const SizeType BATCH_SIZE    = 1;
-        const SizeType EPOCHS        = 20;
+        const SizeType EPOCHS        = 10;
         const NumType  LEARNING_RATE = 0.03;
 
         auto csv = CSV(data_training_fp.string());
@@ -93,9 +93,10 @@ private:
 
     void profile_on_training_set() {
         const SizeType BATCH_SIZE            = 1;
-        const SizeType EPOCHS                = 20;
+        const SizeType EPOCHS                = 5;
         const NumType  LEARNING_RATE         = 0.03;
         const SizeType MIN_TRAINING_SET_SIZE = 10;
+        const SizeType MAX_TRAINING_SET_SIZE = 100;
 
         auto csv = CSV(data_training_fp.string());
         auto labels_idx = std::set<SizeType>{4};
@@ -132,13 +133,13 @@ private:
                         0, MIN_TRAINING_SET_SIZE + i);
                     m.fit(trainsubset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
                 },
-                training_set_size);
+                std::min(training_set_size, MAX_TRAINING_SET_SIZE));
     }
 
     void profile_on_layers_amount() {
         const SizeType BATCH_SIZE    = 1;
-        const SizeType EPOCHS        = 10;
-        const SizeType LAYERS_AMOUNT = 100;
+        const SizeType EPOCHS        = 5;
+        const SizeType LAYERS_AMOUNT = 20;
         const NumType  LEARNING_RATE = 0.03;
 
         auto csv = CSV(data_training_fp.string());
@@ -177,7 +178,8 @@ private:
     void profile_on_layers_shape() {
         const SizeType BATCH_SIZE    = 1;
         const NumType  LEARNING_RATE = 0.03;
-        const SizeType LAYERS_MAX_SIZE = 100;
+        const SizeType EPOCHS        = 5;
+        const SizeType LAYERS_MAX_SIZE = 20;
 
         auto csv = CSV(data_training_fp.string());
         auto labels_idx = std::set<SizeType>{4};
@@ -211,7 +213,7 @@ private:
                         OptimizerType::GRADIENT_DESCENT,
                         InitType::AUTO>
                         m(layers_descriptor, "regressor_model");
-                    m.fit(data, 10, BATCH_SIZE, LEARNING_RATE);
+                    m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
                 },
                 LAYERS_MAX_SIZE);
     }
