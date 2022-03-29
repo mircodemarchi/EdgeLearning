@@ -337,6 +337,12 @@ public:
     SizeType size() const { return _feature_amount; };
 
     /**
+     * \brief Return if the dataset is empty.
+     * \return True if the dataset is empty, else False.
+     */
+    [[nodiscard]] bool empty() const { return _data.empty(); };
+
+    /**
      * \brief Return the data vector.
      * \return const std::vector<T>& The data vector reference.
      */
@@ -392,8 +398,23 @@ public:
         {
             return entry(row_idx);
         }
-        return field_from_row_idx(
+        return _field_from_row_idx(
             _entry_trainset_cache, row_idx, _trainset_idx);
+    }
+
+    Dataset<T> trainset()
+    {
+        auto ret = Vec(std::size_t(_trainset_idx.size() * _feature_amount));
+        for (std::size_t row_i = 0; row_i < _feature_amount; ++row_i)
+        {
+            std::size_t trainset_col_i = 0;
+            for (const auto& col_i: _trainset_idx)
+            {
+                ret[(row_i * _trainset_idx.size()) + trainset_col_i++]
+                    = _data[(row_i * _feature_size) + col_i];
+            }
+        }
+        return Dataset<T>(ret, _trainset_idx.size(), _sequence_size);
     }
 
     const std::vector<T>& trainset_seq(SizeType seq_idx)
@@ -407,13 +428,13 @@ public:
         {
             return entry_seq(seq_idx);
         }
-        return field_from_seq_idx(
+        return _field_from_seq_idx(
             _entry_trainset_cache, seq_idx, _trainset_idx);
     }
 
     std::vector<SizeType> labels_idx() const 
     { 
-        return std::vector<SizeType>(_labels_idx.begin(), _labels_idx.end()); 
+        return {_labels_idx.begin(), _labels_idx.end()};
     }
 
     void labels_idx(std::set<SizeType> set) 
@@ -440,7 +461,22 @@ public:
             _entry_labels_cache.clear();
             return _entry_labels_cache;
         } 
-        return field_from_row_idx(_entry_labels_cache, row_idx, _labels_idx);
+        return _field_from_row_idx(_entry_labels_cache, row_idx, _labels_idx);
+    }
+
+    Dataset<T> labels()
+    {
+        auto ret = Vec(std::size_t(_labels_idx.size() * _feature_amount));
+        for (std::size_t row_i = 0; row_i < _feature_amount; ++row_i)
+        {
+            std::size_t labels_col_i = 0;
+            for (const auto& col_i: _labels_idx)
+            {
+                ret[(row_i * _labels_idx.size()) + labels_col_i++]
+                    = _data[(row_i * _feature_size) + col_i];
+            }
+        }
+        return Dataset<T>(ret, _labels_idx.size(), _sequence_size);
     }
 
     const std::vector<T>& labels_seq(SizeType seq_idx)
@@ -450,7 +486,7 @@ public:
             _entry_labels_cache.clear();
             return _entry_labels_cache;
         } 
-        return field_from_seq_idx(_entry_labels_cache, seq_idx, _labels_idx);
+        return _field_from_seq_idx(_entry_labels_cache, seq_idx, _labels_idx);
     }
 
     Dataset<T> subdata(SizeType from, SizeType to)
@@ -465,7 +501,7 @@ public:
             throw std::runtime_error("The argument 'from' exceeds 'to'");
         }
 
-        auto subvector = std::vector(
+        auto subvector = Vec(
             _data.begin() + long(from * _feature_size),
             _data.begin() + long(to * _feature_size)
             );
@@ -474,7 +510,7 @@ public:
     }
 
 private:
-    const std::vector<T>& field_from_row_idx(
+    const std::vector<T>& _field_from_row_idx(
         std::vector<T>& dst, 
         SizeType row_idx, 
         const std::set<SizeType>& set_idx)
@@ -489,7 +525,7 @@ private:
         return dst;
     }
 
-    const std::vector<T>& field_from_seq_idx(
+    const std::vector<T>& _field_from_seq_idx(
         std::vector<T>& dst, 
         SizeType seq_idx, 
         const std::set<SizeType>& set_idx)
