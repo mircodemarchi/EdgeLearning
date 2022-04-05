@@ -271,8 +271,6 @@ public:
     {   
         arma::Mat<T> ret(_data);
         ret.reshape(_feature_size, _feature_amount);
-        // // Uncomment to transpose the matrix.
-        // return ret.t();
         return ret;
     }
 

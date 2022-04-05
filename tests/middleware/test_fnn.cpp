@@ -29,7 +29,7 @@ using namespace std;
 using namespace EdgeLearning;
 
 
-class TestFFNN {
+class TestFNN {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_train());
@@ -46,6 +46,8 @@ private:
             {1.0,  3.0, 8.0,  3.0, 0.0, 1.0},
             {8.0,  1.0, 8.0,  1.0, 1.0, 0.0},
             {1.0,  1.5, 8.0,  1.5, 0.0, 1.0},
+            {8.0,  1.0, 8.0,  1.0, 1.0, 0.0},
+            {1.0,  1.5, 8.0,  1.5, 0.0, 1.0},
         };
         Dataset<NumType> dataset{data, 1, {4, 5}};
 
@@ -54,11 +56,12 @@ private:
              {"hidden_layer", 8UL, Activation::ReLU     },
              {"output_layer", 2UL, Activation::Linear   }}
             );
-        auto m = FNN<>(layers_descriptor, "regressor_model");
+        auto m = CompileFNN<>(layers_descriptor, "regressor_model");
         EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
     }
 
     void test_predict() {
+        const std::size_t OUTPUT_SIZE = 2;
         Dataset<NumType>::Mat data = {
             {10.0, 1.0, 10.0, 1.0},
             {1.0,  3.0, 8.0,  3.0},
@@ -68,17 +71,16 @@ private:
         Dataset<NumType> dataset(data, 1, {4, 5});
 
         LayerDescriptorVector layers_descriptor(
-            {{"input_layer",  4UL, Activation::Linear   },
-             {"hidden_layer", 8UL, Activation::ReLU     },
-             {"output_layer", 2UL, Activation::Linear   }}
+            {{"input_layer",  4UL,         Activation::Linear   },
+             {"hidden_layer", 8UL,         Activation::ReLU     },
+             {"output_layer", OUTPUT_SIZE, Activation::Linear   }}
         );
-        auto m = FNN<>(layers_descriptor, "regressor_model");
+        auto m = CompileFNN<>(layers_descriptor, "regressor_model");
 
         Dataset<NumType> predicted_labels;
         EDGE_LEARNING_TEST_TRY(predicted_labels = m.predict(dataset));
         EDGE_LEARNING_TEST_EQUALS(predicted_labels.size(), dataset.size());
-        EDGE_LEARNING_TEST_EQUALS(predicted_labels.feature_size(),
-                                  dataset.feature_size());
+        EDGE_LEARNING_TEST_EQUALS(predicted_labels.feature_size(), OUTPUT_SIZE);
         for (const auto& e: predicted_labels.data())
         {
             EDGE_LEARNING_TEST_PRINT(e);
@@ -87,6 +89,6 @@ private:
 };
 
 int main() {
-    TestFFNN().test();
+    TestFNN().test();
     return EDGE_LEARNING_TEST_FAILURES;
 }

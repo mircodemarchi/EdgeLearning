@@ -61,20 +61,23 @@ public:
              NumType learning_rate = 0.03) override
     {
         ens::GradientDescent o(learning_rate, data.size());
-        auto dataset = data.template to_arma<arma::Mat<T>>();
-        arma::mat trainLabels = dataset.row(dataset.n_rows - 1);
-        dataset.shed_row(dataset.n_rows - 1);
+        auto trainset = data.trainset().template to_arma<arma::Mat<T>>();
+        auto labels = data.labels().template to_arma<arma::Mat<T>>();
+
         for (SizeType i = 0; i < epochs; ++i)
         {
-            _m.template Train(dataset, trainLabels, o);
+            _m.Train(trainset, labels, o);
         }
     }
 
     Dataset<T> predict(Dataset<T>& data) override
     {
-        return Dataset<T>(
-            std::vector<T>(data.size() * data.feature_size()),
-            data.feature_size());
+        arma::Mat<T> prediction;
+        _m.Predict(data.template to_arma<arma::Mat<T>>(), prediction);
+        arma::Mat<T> predition_t = prediction.t();
+        predition_t.reshape(1, predition_t.n_rows * predition_t.n_cols);
+        auto predition_vec = arma::conv_to<std::vector<T>>::from(predition_t);
+        return Dataset<T>(predition_vec, prediction.n_rows);
     }
 
     void add(LayerDescriptor ld) override

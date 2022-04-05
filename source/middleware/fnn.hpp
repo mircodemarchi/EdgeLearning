@@ -111,7 +111,7 @@ public:
                                      && i < data.size(); ++b, ++i)
                 {
                     _m.step(data.trainset(i).data(),
-                           data.labels(i).data());
+                            data.labels(i).data());
                 }
                 _m.train(o);
             }
