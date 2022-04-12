@@ -38,6 +38,9 @@
 #include <utility>
 #include <algorithm>
 #include <numeric>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 using namespace EdgeLearning;
 
@@ -80,7 +83,23 @@ using NsCount = long long unsigned int;
 
 class Profiler {
 public:
-    Profiler(SizeType num_tries) : _num_tries(num_tries) { }
+    Profiler(SizeType num_tries, std::string name = std::string())
+        : _num_tries(num_tries)
+        , _name(name.empty() ? "profiler" : name)
+    {
+        fs::path path(_name);
+        if (fs::exists(path))
+        {
+            if (!fs::is_directory(path))
+            {
+                throw std::runtime_error("path is not a directory");
+            }
+        }
+        else
+        {
+            fs::create_directories(path);
+        }
+    }
 
     [[nodiscard]] SizeType num_tries() const { return _num_tries; }
 
@@ -99,17 +118,20 @@ public:
     void profile(
         std::string msg,
         std::function<void(SizeType)> function,
-        SizeType num_tries)
+        SizeType num_tries, std::string profile_name)
     {
         std::cout << msg << std::endl;
         profile(std::move(function), num_tries);
         std::cout << "completed " << _pretty_print() << std::endl;
+        std::string fn(profile_name + ".csv");
+        _sw.dump(fs::path(_name) / fn, "time");
         _sw.reset();
     }
 
-    void profile(std::string msg, std::function<void(SizeType)> function)
+    void profile(std::string msg, std::function<void(SizeType)> function,
+                 std::string profile_name)
     {
-        profile(std::move(msg), std::move(function), _num_tries);
+        profile(std::move(msg), std::move(function), _num_tries, profile_name);
     }
 
 private:
@@ -144,6 +166,7 @@ private:
     Stopwatch<Microseconds> _sw;
     Randomizer _rnd;
     const SizeType _num_tries;
+    std::string _name;
 };
 
 #endif // EDGE_LEARNING_PROFILE_HPP

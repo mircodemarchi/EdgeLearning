@@ -36,7 +36,7 @@ namespace fs = std::filesystem;
 
 struct ProfileRegressionFNN : Profiler
 {
-    ProfileRegressionFNN() : Profiler(100) { }
+    ProfileRegressionFNN() : Profiler(100, "profile_fnn_regression") { }
 
     void run() {
         EDGE_LEARNING_PROFILE_TITLE("FNN training and prediction process when "
@@ -58,7 +58,7 @@ private:
      */
     void profile_on_epochs_amount() {
         const SizeType BATCH_SIZE    = 1;
-        const SizeType EPOCHS        = 50;
+        const SizeType EPOCHS        = 20;
         const NumType  LEARNING_RATE = 0.03;
 
         auto csv = CSV(DATA_TRAINING_FP.string());
@@ -96,7 +96,7 @@ private:
                             m(layers_descriptor, "regressor_model");
                         m.fit(data, e, BATCH_SIZE, LEARNING_RATE);
                     },
-                    100);
+                    100, "training_on_epochs_amount");
         }
 
         CompileFNN<LossType::MSE,
@@ -110,7 +110,7 @@ private:
                     (void) i;
                     m.predict(data);
                 },
-                100);
+                100, "prediction");
     }
 
     /**
@@ -167,7 +167,7 @@ private:
                             m(layers_descriptor, "regressor_model");
                         auto subset = data.subdata(0, curr_size);
                         m.fit(subset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                    }, 100);
+                    }, 100, "training_on_dataset_size");
         }
 
         CompileFNN<LossType::MSE,
@@ -187,7 +187,7 @@ private:
                         auto subset = data.subdata(0, curr_size);
                         auto prediction = m.predict(subset);
                         (void) prediction;
-                    }, 100);
+                    }, 100, "prediction_on_dataset_size");
         }
     }
 
@@ -198,7 +198,7 @@ private:
     void profile_on_layers_amount() {
         const SizeType BATCH_SIZE    = 1;
         const SizeType EPOCHS        = 5;
-        const SizeType LAYERS_AMOUNT = 20;
+        const SizeType LAYERS_AMOUNT = 15;
         const NumType  LEARNING_RATE = 0.03;
 
         auto csv = CSV(DATA_TRAINING_FP.string());
@@ -235,7 +235,7 @@ private:
                             m(layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
                     },
-                    100);
+                    100, "training_on_hidden_layers_amount");
             CompileFNN<LossType::MSE,
                 OptimizerType::GRADIENT_DESCENT,
                 InitType::AUTO>
@@ -248,7 +248,7 @@ private:
                         auto prediction = m.predict(data);
                         (void) prediction;
                     },
-                    100);
+                    100, "prediction_on_hidden_layers_amount");
         }
     }
 
@@ -298,7 +298,7 @@ private:
                         InitType::AUTO>
                         m(layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                }, 100);
+                }, 100, "training_on_hidden_layers_shape");
             CompileFNN<LossType::MSE,
                 OptimizerType::GRADIENT_DESCENT,
                 InitType::AUTO>
@@ -310,7 +310,7 @@ private:
                         (void) i;
                         auto prediction = m.predict(data);
                         (void) prediction;
-                    }, 100);
+                    }, 100, "prediction_on_hidden_layers_shape");
         }
     }
 };
