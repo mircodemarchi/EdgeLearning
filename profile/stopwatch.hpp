@@ -34,8 +34,12 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <filesystem>
+#include <fstream>
 
 namespace EdgeLearning {
+
+namespace fs = std::filesystem;
 
 using Seconds = std::chrono::seconds;
 using Milliseconds = std::chrono::milliseconds;
@@ -125,6 +129,27 @@ public:
             diff.begin(), diff.end(), diff.begin(), R(0.0));
         R std = std::sqrt(sqsum / diff.size());
         return std;
+    }
+
+    void dump(fs::path path, std::string header = "data")
+    {
+        std::ofstream f;
+        if (!fs::exists(path)) {
+            f.open(path);
+            f << header << std::endl;
+            f.close();
+        }
+
+        f.open(path, std::ofstream::out | std::ofstream::app);
+        if(!f.is_open() || !f.good())
+        {
+            throw std::runtime_error("dump file open error");
+        }
+        for (std::size_t i = 0; i < _durations.size(); ++i)
+        {
+            f << _durations[i] << std::endl;
+        }
+        f.close();
     }
 
 private:
