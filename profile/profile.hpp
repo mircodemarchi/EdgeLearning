@@ -41,6 +41,29 @@
 
 using namespace EdgeLearning;
 
+#define EDGE_LEARNING_PROFILE_TITLE(comment)                                   \
+    {                                                                          \
+        std::cout << "****************************************\n"              \
+                  << comment << "\n"                                           \
+                  << "****************************************\n" << std::endl;\
+    }
+
+#define EDGE_LEARNING_PROFILE_CALL(function)                                   \
+    {                                                                          \
+        std::cout << "*** PROFILING " << #function << " ***" << std::endl;     \
+        try {                                                                  \
+            function;                                                          \
+        } catch(const std::exception& except) {                                \
+            std::cout << "ERROR: exception '" << except.what() << "' in "      \
+                      << #function << ": "                                     \
+                      << except.what() << std::endl;                           \
+            std::cerr << "ERROR: " << __FILE__ << ":"                          \
+                      << __LINE__ << ": calling "                              \
+                      << #function << ": " << except.what() << std::endl;      \
+            std::cout << std::endl;                                            \
+        }                                                                      \
+    }                                                                          \
+
 struct Randomizer {
     static NumType get(double min, double max) {
         return (max - min) * rand() / RAND_MAX + min;
@@ -63,39 +86,30 @@ public:
 
     [[nodiscard]] Randomizer const& rnd() const { return _rnd; }
 
-    std::vector<NsCount> profile(std::function<void(SizeType)> function, SizeType num_tries)
+    void profile(
+        std::function<void(SizeType)> function, SizeType num_tries)
     {
-        std::vector<NsCount> duration_times{};
-        duration_times.resize(num_tries);
-        std::cout << "profile tries: ";
         for (SizeType i = 0; i < num_tries; ++i) {
-            std::cout << i << "..";
             _sw.restart();
             function(i);
             _sw.click();
-            auto duration = static_cast<NsCount>(
-                _sw.duration().count() * 1000 //< to ns
-            );
-            duration_times[i] = duration;
         }
-        std::cout << std::endl;
-        return duration_times;
     }
 
-    std::vector<NsCount> profile(
+    void profile(
         std::string msg,
         std::function<void(SizeType)> function,
         SizeType num_tries)
     {
         std::cout << msg << std::endl;
-        auto cnt = profile(std::move(function), num_tries);
-        std::cout << "completed " << _pretty_print(cnt) << std::endl;
-        return cnt;
+        profile(std::move(function), num_tries);
+        std::cout << "completed " << _pretty_print() << std::endl;
+        _sw.reset();
     }
 
-    std::vector<NsCount> profile(std::string msg, std::function<void(SizeType)> function)
+    void profile(std::string msg, std::function<void(SizeType)> function)
     {
-        return profile(std::move(msg), std::move(function), _num_tries);
+        profile(std::move(msg), std::move(function), _num_tries);
     }
 
 private:
@@ -116,20 +130,14 @@ private:
         return ss.str();
     }
 
-    [[nodiscard]] std::string
-    _pretty_print(std::vector<NsCount> const& cnt) const
+    [[nodiscard]] std::string _pretty_print()
     {
-        std::string ret = "[ ";
-        for (std::size_t i = 0; i < cnt.size() - 1; ++i)
-        {
-            ret += _pretty_print(cnt[i]) + ", ";
-        }
-        ret += _pretty_print(cnt[cnt.size() - 1]) + "]";
-
-        auto mean = std::accumulate(cnt.begin(), cnt.end(), 0.0) / cnt.size();
-        ret = "{ mean: " + _pretty_print(static_cast<NsCount>(mean))
-            + ", arr: " + ret + " }";
-        return ret;
+        auto mean = static_cast<NsCount>(_sw.mean() * 1000);
+        auto median = static_cast<NsCount>(_sw.median() * 1000);
+        auto std = static_cast<NsCount>(_sw.std() * 1000);
+        return "mean: " + _pretty_print(mean)
+            + " median: " +  _pretty_print(median)
+            + " std: " +  _pretty_print(std);
     }
 
 private:

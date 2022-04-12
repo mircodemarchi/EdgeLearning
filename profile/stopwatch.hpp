@@ -30,6 +30,10 @@
 #define EDGE_LEARNING_STOPWATCH_HPP
 
 #include <chrono>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <numeric>
 
 namespace EdgeLearning {
 
@@ -41,13 +45,27 @@ template<class D> class Stopwatch {
 public:
     using ResolutionType = std::chrono::high_resolution_clock;
     using TimePointType = std::chrono::time_point<ResolutionType>;
+    using DurationVecType = std::vector<double>;
 
-    Stopwatch() { restart(); }
+    Stopwatch()
+        : _initial()
+        , _clicked()
+        , _durations()
+    {
+        restart();
+    }
+
+    void reset()
+    {
+        _durations.clear();
+        restart();
+    }
 
     //! \brief Get the duration in the given type
     D duration() const
     {
-        return std::chrono::duration_cast<D>(_clicked - _initial);
+        if (_durations.empty()) return -1;
+        return _durations.back();
     }
 
     //! \brief Get the duration in seconds, in double precision
@@ -69,12 +87,50 @@ public:
     Stopwatch& click()
     {
         _clicked = ResolutionType::now();
+        auto d = std::chrono::duration_cast<D>(_clicked - _initial);
+        _durations.push_back(d.count());
         return *this;
+    }
+
+    template <typename R = double>
+    R median() const
+    {
+        std::size_t mid = (_durations.size() - 1) / 2;
+        DurationVecType durations_copy(_durations);
+        std::nth_element(durations_copy.begin(),
+                         durations_copy.begin() + static_cast<long>(mid),
+                         durations_copy.end());
+        return durations_copy[mid];
+    }
+
+    template <typename R = double>
+    R mean() const
+    {
+        return std::accumulate(_durations.begin(), _durations.end(), R(0.0))
+            / _durations.size();
+    }
+
+    template <typename R = double>
+    R std() const
+    {
+        R m = mean<R>();
+        std::vector<R> diff(_durations.size());
+        std::transform(
+            _durations.begin() , _durations.end(),
+            diff.begin(),
+            [m](R x) {
+                return x - m;
+            });
+        R sqsum = std::inner_product(
+            diff.begin(), diff.end(), diff.begin(), R(0.0));
+        R std = std::sqrt(sqsum / diff.size());
+        return std;
     }
 
 private:
     TimePointType _initial;
     TimePointType _clicked;
+    DurationVecType _durations;
 };
 
 } // namespace EdgeLearning

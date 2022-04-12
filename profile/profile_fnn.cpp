@@ -34,28 +34,32 @@
 using namespace EdgeLearning;
 namespace fs = std::filesystem;
 
-struct ProfileRegressorFNN : Profiler
+struct ProfileRegressionFNN : Profiler
 {
-    ProfileRegressorFNN() : Profiler(100000) { }
+    ProfileRegressionFNN() : Profiler(100) { }
 
     void run() {
-        profile_on_epochs_amount();
-        profile_on_training_set();
-        profile_on_layers_amount();
-        profile_on_layers_shape();
+        EDGE_LEARNING_PROFILE_TITLE("FNN training process when "
+                                    "solving a Regression problem");
+        EDGE_LEARNING_PROFILE_CALL(profile_training_on_epochs_amount());
+        EDGE_LEARNING_PROFILE_CALL(profile_training_on_training_set());
+        EDGE_LEARNING_PROFILE_CALL(profile_training_on_layers_amount());
+        EDGE_LEARNING_PROFILE_CALL(profile_training_on_layers_shape());
+        EDGE_LEARNING_PROFILE_TITLE("FNN prediction process when "
+                                    "solving a Regression problem");
     }
 
 private:
     const std::string DATA_TRAINING_FN = "execution-time.csv";
-    const fs::path data_training_fp = fs::path(__FILE__).parent_path()
-        / ".." / "data" / DATA_TRAINING_FN;
+    const fs::path DATA_TRAINING_FP = fs::path(__FILE__).parent_path()
+                                      / ".." / "data" / DATA_TRAINING_FN;
 
-    void profile_on_epochs_amount() {
+    void profile_training_on_epochs_amount() {
         const SizeType BATCH_SIZE    = 1;
-        const SizeType EPOCHS        = 10;
+        const SizeType EPOCHS        = 50;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(data_training_fp.string());
+        auto csv = CSV(DATA_TRAINING_FP.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -79,26 +83,29 @@ private:
             }
         );
 
-        profile("Increment the amount of epochs for regression",
-                [&](SizeType i){
-                    auto epochs = i + 1;
-                    CompileFNN<LossType::MSE,
-                        OptimizerType::GRADIENT_DESCENT,
-                        InitType::AUTO>
-                        m(layers_descriptor, "regressor_model");
-                    m.fit(data, epochs, BATCH_SIZE, LEARNING_RATE);
-                },
-                EPOCHS);
+        for (SizeType e = 1; e <= EPOCHS; ++e)
+        {
+            profile("epochs amount: " + std::to_string(e),
+                    [&](SizeType i){
+                        (void) i;
+                        CompileFNN<LossType::MSE,
+                            OptimizerType::GRADIENT_DESCENT,
+                            InitType::AUTO>
+                            m(layers_descriptor, "regressor_model");
+                        m.fit(data, e, BATCH_SIZE, LEARNING_RATE);
+                    },
+                    100);
+        }
     }
 
-    void profile_on_training_set() {
+    void profile_training_on_training_set() {
         const SizeType BATCH_SIZE            = 1;
         const SizeType EPOCHS                = 5;
         const NumType  LEARNING_RATE         = 0.03;
         const SizeType MIN_TRAINING_SET_SIZE = 10;
         const SizeType MAX_TRAINING_SET_SIZE = 100;
 
-        auto csv = CSV(data_training_fp.string());
+        auto csv = CSV(DATA_TRAINING_FP.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -123,26 +130,34 @@ private:
             }
         );
 
-        profile("Increment the training-set size for regression",
-                [&](SizeType i){
-                    CompileFNN<LossType::MSE,
-                        OptimizerType::GRADIENT_DESCENT,
-                        InitType::AUTO>
-                        m(layers_descriptor, "regressor_model");
-                    auto trainsubset = data.subdata(
-                        0, MIN_TRAINING_SET_SIZE + i);
-                    m.fit(trainsubset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                },
-                std::min(training_set_size, MAX_TRAINING_SET_SIZE));
+        auto max_size_training_set = std::min(
+            training_set_size, MAX_TRAINING_SET_SIZE);
+        for (std::int64_t div_factor = 10; div_factor >= 0; div_factor-=2)
+        {
+            auto curr_size = MIN_TRAINING_SET_SIZE
+                + max_size_training_set / static_cast<std::size_t>(
+                    div_factor + 1);
+            profile("training set size (#entries): "
+                        + std::to_string(curr_size),
+                    [&](SizeType i) {
+                        (void) i;
+                        CompileFNN<LossType::MSE,
+                            OptimizerType::GRADIENT_DESCENT,
+                            InitType::AUTO>
+                            m(layers_descriptor, "regressor_model");
+                        auto trainsubset = data.subdata(0, curr_size);
+                        m.fit(trainsubset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+                    }, 100);
+        }
     }
 
-    void profile_on_layers_amount() {
+    void profile_training_on_layers_amount() {
         const SizeType BATCH_SIZE    = 1;
         const SizeType EPOCHS        = 5;
         const SizeType LAYERS_AMOUNT = 20;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(data_training_fp.string());
+        auto csv = CSV(DATA_TRAINING_FP.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -157,31 +172,35 @@ private:
             }
         );
 
-        profile("Increment the amount of FNN layers for regression",
-                [&](SizeType i){
-                    layers_descriptor.insert(
-                        layers_descriptor.end() - 1,
-                        {
-                            "hidden_layer" + std::to_string(i),
-                            input_size * 2,
-                            Activation::ReLU
-                        });
-                    CompileFNN<LossType::MSE,
-                        OptimizerType::GRADIENT_DESCENT,
-                        InitType::AUTO>
-                        m(layers_descriptor, "regressor_model");
-                    m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                },
-                LAYERS_AMOUNT);
+        for (std::size_t amount = 0; amount < LAYERS_AMOUNT; ++amount)
+        {
+            layers_descriptor.insert(
+                layers_descriptor.end() - 1,
+                {
+                    "hidden_layer" + std::to_string(amount),
+                    input_size * 2,
+                    Activation::ReLU
+                });
+            profile("hidden layers amount: " + std::to_string(amount),
+                    [&](SizeType i){
+                        (void) i;
+                        CompileFNN<LossType::MSE,
+                            OptimizerType::GRADIENT_DESCENT,
+                            InitType::AUTO>
+                            m(layers_descriptor, "regressor_model");
+                        m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+                    },
+                    100);
+        }
     }
 
-    void profile_on_layers_shape() {
+    void profile_training_on_layers_shape() {
         const SizeType BATCH_SIZE    = 1;
         const NumType  LEARNING_RATE = 0.03;
         const SizeType EPOCHS        = 5;
         const SizeType LAYERS_MAX_SIZE = 20;
 
-        auto csv = CSV(data_training_fp.string());
+        auto csv = CSV(DATA_TRAINING_FP.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
@@ -189,37 +208,38 @@ private:
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
-        profile("Increment the shape of layers for regression",
+        for (std::size_t shape = 10; shape < LAYERS_MAX_SIZE; ++shape)
+        {
+            LayerDescriptorVector layers_descriptor(
+                {
+                    {"input_layer", input_size, Activation::Linear},
+                    {
+                        "hidden_layer0",
+                        static_cast<SizeType>(shape / 2),
+                        Activation::ReLU
+                    },
+                    {"hidden_layer1", shape, Activation::ReLU},
+                    {
+                        "hidden_layer2",
+                        static_cast<SizeType>(shape / 2),
+                        Activation::ReLU
+                    },
+                    {"output_layer", output_size, Activation::Linear},
+                }
+            );
+            profile("width of hidden layers: " + std::to_string(shape),
                 [&](SizeType i){
-                    LayerDescriptorVector layers_descriptor(
-                        {
-                            {"input_layer",   input_size,  Activation::Linear },
-                            {
-                                "hidden_layer0",
-                                10 + static_cast<SizeType>(i / 2),
-                                Activation::ReLU
-                            },
-                            {"hidden_layer1", 10 + i,  Activation::ReLU   },
-                            {
-                                "hidden_layer2",
-                                10 + static_cast<SizeType>(i / 2),
-                                Activation::ReLU
-                            },
-                            {"output_layer",  output_size, Activation::Linear },
-                        }
-                    );
-
+                    (void) i;
                     CompileFNN<LossType::MSE,
                         OptimizerType::GRADIENT_DESCENT,
                         InitType::AUTO>
                         m(layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                },
-                LAYERS_MAX_SIZE);
+                }, 100);
+        }
     }
-
 };
 
 int main() {
-    ProfileRegressorFNN().run();
+    ProfileRegressionFNN().run();
 }
