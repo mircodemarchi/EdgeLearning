@@ -120,17 +120,17 @@ public:
 
     Dataset<T> predict(Dataset<T> &data) override
     {
-        std::vector<T> ret;
-        ret.resize(data.size() * data.feature_size());
-
         auto output_size = _m.output_size();
+        std::vector<T> ret;
+        ret.resize(data.size() * output_size);
+
         for (std::size_t i = 0; i < data.size(); ++i)
         {
             auto res = _m.predict(data.entry(i).data());
             std::copy(res, res + output_size,
-                      ret.begin() + long(i * data.feature_size()));
+                      ret.begin() + long(i * output_size));
         }
-        return Dataset<T>(ret, data.feature_size());
+        return Dataset<T>(ret, output_size);
     }
 
 private:
