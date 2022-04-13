@@ -616,20 +616,21 @@ private:
 
     template <typename T>
     static T _max_pool_op(const T* src, SizeType width, SizeType height,
-                       const T* k, SizeType f,
-                       SizeType col, SizeType row)
+                          const T* k, SizeType f,
+                          int64_t col, int64_t row)
     {
-        T max = src[row * width + col];
+        (void) height;
+        (void) k;
+        T max = src[row * static_cast<int64_t>(width) + col];
         for (SizeType k_i = 1; k_i < f * f; ++k_i)
         {
             auto row_k = k_i / f;
             auto col_k = k_i % f;
-            auto row_src = row + row_k;
-            auto col_src = col + col_k;
-            if (src[row_src * width + col_src] > max)
-            {
-                max = src[row_src * width + col_src];
-            }
+            auto row_src = row + static_cast<int64_t>(row_k);
+            auto col_src = col + static_cast<int64_t>(col_k);
+            auto curr_val = src[row_src * static_cast<int64_t>(width)
+                                + col_src];
+            if (curr_val > max) max = curr_val;
         }
         return max;
     }
@@ -637,8 +638,10 @@ private:
     template <typename T>
     static T _avg_pool_op(const T* src, SizeType width, SizeType height,
                           const T* k, SizeType f,
-                          SizeType col, SizeType row)
+                          int64_t col, int64_t row)
     {
+        (void) height;
+        (void) k;
         T sum = 0;
         for (SizeType k_i = 0; k_i < f * f; ++k_i)
         {
