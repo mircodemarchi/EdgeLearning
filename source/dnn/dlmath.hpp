@@ -538,6 +538,38 @@ public:
                      const T* k, SizeType f,
                      SizeType s = 1, SizeType p = 0)
     {
+        return _kernel_slide<T>(
+            _conv2d_op<T>, dst, src, width, height, k, f, s, p);
+    }
+
+    template <typename T>
+    static T* max_pool(T* dst,
+                       const T* src, SizeType width, SizeType height,
+                       SizeType f, SizeType s = 1)
+    {
+        return _kernel_slide<T>(
+            _max_pool_op<T>, dst, src, width, height, nullptr, f, s);
+    }
+
+    template <typename T>
+    static T* avg_pool(T* dst,
+                       const T* src, SizeType width, SizeType height,
+                       SizeType f, SizeType s = 1)
+    {
+        return _kernel_slide<T>(
+            _avg_pool_op<T>, dst, src, width, height, nullptr, f, s);
+    }
+
+private:
+
+    template <typename T>
+    static T* _kernel_slide(
+        std::function<T(const T*, SizeType, SizeType,
+                        const T*, SizeType,
+                        int64_t, int64_t)> k_to_src_operation,
+        T* dst, const T* src, SizeType width, SizeType height,
+        const T* k, SizeType f, SizeType s = 1, SizeType p = 0)
+    {
         SizeType row = 0, col = 0;
         s = std::max(s, SizeType(1));
         auto width_dst = ((width - f + 2 * p) / s) + 1;
@@ -546,23 +578,10 @@ public:
         {
             for (SizeType col_dst = 0; col_dst < width_dst; ++col_dst)
             {
-                SizeType sum = 0;
-                for (SizeType i = 0; i < f * f; ++i)
-                {
-                    auto row_k = i / f;
-                    auto col_k = i % f;
-                    auto row_src = static_cast<int64_t>(row + row_k)
-                        - static_cast<int64_t>(p);
-                    auto col_src = static_cast<int64_t>(col + col_k)
-                        - static_cast<int64_t>(p);
-                    if (col_src < 0 || row_src < 0 ||
-                        col_src >= static_cast<int64_t>(width) ||
-                        row_src >= static_cast<int64_t>(height))
-                        continue; //< zero-padding.
-                    sum += src[row_src * static_cast<int64_t>(width) + col_src]
-                        * k[i];
-                }
-                dst[row_dst * width_dst + col_dst] = sum;
+                dst[row_dst * width_dst + col_dst] = k_to_src_operation(
+                    src, width, height, k, f,
+                    static_cast<int64_t>(col) - static_cast<int64_t>(p),
+                    static_cast<int64_t>(row) - static_cast<int64_t>(p));
                 col += s;
             }
             row += s;
@@ -570,6 +589,68 @@ public:
         }
         return dst;
     }
+
+    template <typename T>
+    static T _conv2d_op(const T* src, SizeType width, SizeType height,
+                     const T* k, SizeType f,
+                     int64_t col, int64_t row)
+    {
+        T sum = 0;
+        for (SizeType k_i = 0; k_i < f * f; ++k_i)
+        {
+            auto row_k = k_i / f;
+            auto col_k = k_i % f;
+            auto row_src = row + static_cast<int64_t>(row_k);
+            auto col_src = col + static_cast<int64_t>(col_k);
+            if (col_src < 0 || row_src < 0 ||
+                col_src >= static_cast<int64_t>(width) ||
+                row_src >= static_cast<int64_t>(height))
+            {
+                continue; //< zero-padding.
+            }
+            sum += src[row_src * static_cast<int64_t>(width) + col_src]
+                   * k[k_i];
+        }
+        return sum;
+    }
+
+    template <typename T>
+    static T _max_pool_op(const T* src, SizeType width, SizeType height,
+                       const T* k, SizeType f,
+                       SizeType col, SizeType row)
+    {
+        T max = src[row * width + col];
+        for (SizeType k_i = 1; k_i < f * f; ++k_i)
+        {
+            auto row_k = k_i / f;
+            auto col_k = k_i % f;
+            auto row_src = row + row_k;
+            auto col_src = col + col_k;
+            if (src[row_src * width + col_src] > max)
+            {
+                max = src[row_src * width + col_src];
+            }
+        }
+        return max;
+    }
+
+    template <typename T>
+    static T _avg_pool_op(const T* src, SizeType width, SizeType height,
+                          const T* k, SizeType f,
+                          SizeType col, SizeType row)
+    {
+        T sum = 0;
+        for (SizeType k_i = 0; k_i < f * f; ++k_i)
+        {
+            auto row_k = k_i / f;
+            auto col_k = k_i % f;
+            auto row_src = row + static_cast<int64_t>(row_k);
+            auto col_src = col + static_cast<int64_t>(col_k);
+            sum += src[row_src * static_cast<int64_t>(width) + col_src];
+        }
+        return sum / (f * f);
+    }
+
 };
 
 } // namespace EdgeLearning
