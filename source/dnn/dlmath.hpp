@@ -531,6 +531,45 @@ public:
         }
         return dst;
     }
+
+    template <typename T>
+    static T* conv2d(T* dst,
+                     const T* src, SizeType width, SizeType height,
+                     const T* k, SizeType f,
+                     SizeType s = 1, SizeType p = 0)
+    {
+        SizeType row = 0, col = 0;
+        s = std::max(s, SizeType(1));
+        auto width_dst = ((width - f + 2 * p) / s) + 1;
+        auto height_dst = ((height - f + 2 * p) / s) + 1;
+        for (SizeType row_dst = 0; row_dst < height_dst; ++row_dst)
+        {
+            for (SizeType col_dst = 0; col_dst < width_dst; ++col_dst)
+            {
+                SizeType sum = 0;
+                for (SizeType i = 0; i < f * f; ++i)
+                {
+                    auto row_k = i / f;
+                    auto col_k = i % f;
+                    auto row_src = static_cast<int64_t>(row + row_k)
+                        - static_cast<int64_t>(p);
+                    auto col_src = static_cast<int64_t>(col + col_k)
+                        - static_cast<int64_t>(p);
+                    if (col_src < 0 || row_src < 0 ||
+                        col_src >= static_cast<int64_t>(width) ||
+                        row_src >= static_cast<int64_t>(height))
+                        continue; //< zero-padding.
+                    sum += src[row_src * static_cast<int64_t>(width) + col_src]
+                        * k[i];
+                }
+                dst[row_dst * width_dst + col_dst] = sum;
+                col += s;
+            }
+            row += s;
+            col = 0;
+        }
+        return dst;
+    }
 };
 
 } // namespace EdgeLearning

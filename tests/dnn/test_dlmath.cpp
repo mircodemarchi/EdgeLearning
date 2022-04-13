@@ -55,6 +55,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_max_argmax());
         EDGE_LEARNING_TEST_CALL(test_tanh());
         EDGE_LEARNING_TEST_CALL(test_tanh_1());
+        EDGE_LEARNING_TEST_CALL(test_conv2d());
     }
 
 private:
@@ -298,6 +299,91 @@ private:
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
                 + std::to_string(test_vec[i]));
             EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
+        }
+    }
+
+    void test_conv2d() {
+        SizeType input_width = 3;
+        SizeType input_height = 3;
+        SizeType f = 2;
+        SizeType output_width = 2;
+        SizeType output_height = 2;
+        std::vector<NumType> test_img{
+            0, 1, 2,
+            3, 4, 5,
+            6, 7, 8
+        };
+        std::vector<NumType> test_k{
+            0, 0,
+            0, 1
+        };
+        std::vector<NumType> truth_vec{
+            4, 5,
+            7, 8
+        };
+        std::vector<NumType> result(truth_vec.size());
+        DLMath::conv2d<NumType>(result.data(),
+                                test_img.data(), input_width, input_height,
+                                test_k.data(), f);
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        output_width = 4;
+        output_height = 4;
+        truth_vec = std::vector<NumType>{
+            0, 1, 2, 0,
+            3, 4, 5, 0,
+            6, 7, 8, 0,
+            0, 0, 0, 0
+        };
+        result.resize(truth_vec.size());
+        DLMath::conv2d<NumType>(result.data(),
+                                test_img.data(), input_width, input_height,
+                                test_k.data(), f, 1, 1);
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        output_width = 2;
+        output_height = 2;
+        truth_vec = std::vector<NumType>{
+            0, 2,
+            6, 8
+        };
+        result.resize(truth_vec.size());
+        DLMath::conv2d<NumType>(result.data(),
+                                test_img.data(), input_width, input_height,
+                                test_k.data(), f, 2, 1);
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
         }
     }
 };
