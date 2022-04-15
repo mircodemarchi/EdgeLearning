@@ -56,6 +56,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_tanh());
         EDGE_LEARNING_TEST_CALL(test_tanh_1());
         EDGE_LEARNING_TEST_CALL(test_conv2d());
+        EDGE_LEARNING_TEST_CALL(test_conv3d());
         EDGE_LEARNING_TEST_CALL(test_max_pool());
         EDGE_LEARNING_TEST_CALL(test_avg_pool());
     }
@@ -325,8 +326,8 @@ private:
         };
         std::vector<NumType> result(truth_vec.size());
         DLMath::conv2d<NumType>(result.data(),
-                                test_img.data(), input_width, input_height,
-                                test_k.data(), f, f);
+                                test_img.data(), {input_height, input_width},
+                                test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -350,8 +351,8 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::conv2d<NumType>(result.data(),
-                                test_img.data(), input_width, input_height,
-                                test_k.data(), f, f, 1, 1);
+                                test_img.data(), {input_height, input_width},
+                                test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -373,8 +374,8 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::conv2d<NumType>(result.data(),
-                                test_img.data(), input_width, input_height,
-                                test_k.data(), f, f, 2, 1);
+                                test_img.data(), {input_height, input_width},
+                                test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -410,8 +411,8 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::conv2d<NumType>(result.data(),
-                                test_img.data(), input_width, input_height,
-                                test_k.data(), f, f);
+                                test_img.data(), {input_height, input_width},
+                                test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -435,8 +436,8 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::conv2d<NumType>(result.data(),
-                                test_img.data(), input_width, input_height,
-                                test_k.data(), f, f, 1, 1);
+                                test_img.data(), {input_height, input_width},
+                                test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -458,8 +459,186 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::conv2d<NumType>(result.data(),
-                                test_img.data(), input_width, input_height,
-                                test_k.data(), f, f, 2, 1);
+                                test_img.data(), {input_height, input_width},
+                                test_k.data(), {f, f}, {2, 2}, {1, 1});
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+    }
+
+    void test_conv3d() {
+        SizeType input_width = 3;
+        SizeType input_height = 3;
+        SizeType input_channels = 2;
+        SizeType f = 2;
+        SizeType output_width = 2;
+        SizeType output_height = 2;
+        std::vector<NumType> test_img{
+            0,0, 1,1, 2,2,
+            3,3, 4,4, 5,5,
+            6,6, 7,7, 8.5,8.5
+        };
+        std::vector<NumType> test_k{
+            0,0, 0,0,
+            0,0, 1,1
+        };
+        std::vector<NumType> truth_vec{
+            4+4, 5+5,
+            7+7, 8.5+8.5
+        };
+        std::vector<NumType> result(truth_vec.size());
+        DLMath::conv3d<NumType>(result.data(),
+                                test_img.data(),
+                                {input_height, input_width, input_channels},
+                                test_k.data(), {f, f});
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        output_width = 4;
+        output_height = 4;
+        truth_vec = std::vector<NumType>{
+            0+0, 1+1, 2+2,     0+0,
+            3+3, 4+4, 5+5,     0+0,
+            6+6, 7+7, 8.5+8.5, 0+0,
+            0+0, 0+0, 0+0,     0+0
+        };
+        result.resize(truth_vec.size());
+        DLMath::conv3d<NumType>(result.data(),
+                                test_img.data(),
+                                {input_height, input_width, input_channels},
+                                test_k.data(), {f, f}, {1, 1}, {1, 1});
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        output_width = 2;
+        output_height = 2;
+        truth_vec = std::vector<NumType>{
+            0+0, 2+2,
+            6+6, 8.5+8.5
+        };
+        result.resize(truth_vec.size());
+        DLMath::conv3d<NumType>(result.data(),
+                                test_img.data(),
+                                {input_height, input_width, input_channels},
+                                test_k.data(), {f, f}, {2, 2}, {1, 1});
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        input_width = 5;
+        input_height = 4;
+        input_channels = 3;
+        f = 3;
+        output_width = 3;
+        output_height = 2;
+        test_img = std::vector<NumType>{
+            0,1,2,   4,5,0,   1,2,4,    5,0,1,   2,4,5,
+            3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
+            6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
+            9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
+        };
+        test_k = std::vector<NumType>{
+            0,0,0, 0,0,0, 0,0,0,
+            0,0,0, 1,1,1, 0,0,0,
+            0,0,0, 0,0,0, 1,1,1
+        };
+        truth_vec = std::vector<NumType>{
+            40, 38, 41,
+            58, 56, 59
+        };
+        result.resize(truth_vec.size());
+        DLMath::conv3d<NumType>(result.data(),
+                                test_img.data(),
+                                {input_height, input_width, input_channels},
+                                test_k.data(), {f, f});
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        output_width = 5;
+        output_height = 4;
+        truth_vec = std::vector<NumType>{
+            19, 24, 21, 24, 11,
+            37, 40, 38, 41, 18,
+            55, 58, 56, 59, 27,
+            30, 34, 33, 32, 36
+        };
+        result.resize(truth_vec.size());
+        DLMath::conv3d<NumType>(result.data(),
+                                test_img.data(),
+                                {input_height, input_width, input_channels},
+                                test_k.data(), {f, f}, {1, 1}, {1, 1});
+        for (std::size_t r = 0; r < output_height; ++r)
+        {
+            for (std::size_t c = 0; c < output_width; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(
+                    "[" + std::to_string(r) + "," + std::to_string(c) + "] "
+                    + std::to_string(result[r * output_width + c]));
+                EDGE_LEARNING_TEST_WITHIN(
+                    result[r * output_width + c],
+                    truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        output_width = 3;
+        output_height = 2;
+        truth_vec = std::vector<NumType>{
+            19, 21, 11,
+            55, 56, 27
+        };
+        result.resize(truth_vec.size());
+        DLMath::conv3d<NumType>(result.data(),
+                                test_img.data(),
+                                {input_height, input_width, input_channels},
+                                test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -491,7 +670,8 @@ private:
         };
         std::vector<NumType> result(truth_vec.size());
         DLMath::max_pool<NumType>(
-            result.data(), test_img.data(), input_width, input_height, f, f);
+            result.data(), test_img.data(),
+            {input_height, input_width}, {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
             for (std::size_t c = 0; c < output_width; ++c) {
                 EDGE_LEARNING_TEST_PRINT(
@@ -520,7 +700,7 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::max_pool<NumType>(
-            result.data(), test_img.data(), input_width, input_height, f, f);
+            result.data(), test_img.data(), {input_height, input_width}, {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
             for (std::size_t c = 0; c < output_width; ++c) {
                 EDGE_LEARNING_TEST_PRINT(
@@ -539,7 +719,8 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::max_pool<NumType>(
-            result.data(), test_img.data(), input_width, input_height, f, f, 2);
+            result.data(), test_img.data(), {input_height, input_width},
+            {f, f}, {2, 2});
         for (std::size_t r = 0; r < output_height; ++r) {
             for (std::size_t c = 0; c < output_width; ++c) {
                 EDGE_LEARNING_TEST_PRINT(
@@ -548,6 +729,69 @@ private:
                 EDGE_LEARNING_TEST_WITHIN(
                     result[r * output_width + c],
                     truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        SizeType channels = 3;
+        output_width = 3;
+        output_height = 2;
+        auto step = output_width * channels;
+        test_img = std::vector<NumType>{
+            10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
+            3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
+            6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
+            9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
+        };
+        truth_vec = std::vector<NumType>{
+            10,10,10, 10,10,10, 10,10,10,
+            12,13,12, 13,13,12, 13,12,13
+        };
+        result.resize(truth_vec.size());
+        DLMath::max_pool<NumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, channels}, {f, f});
+        for (std::size_t r = 0; r < output_height; ++r) {
+            for (std::size_t c = 0; c < output_width; ++c) {
+                for (std::size_t ch = 0; ch < channels; ++ch) {
+                    EDGE_LEARNING_TEST_PRINT(
+                        "[" + std::to_string(r) + "," + std::to_string(c)
+                        + "," + std::to_string(ch) + "] "
+                        + std::to_string(result[r * step + c * channels + ch]));
+                    EDGE_LEARNING_TEST_WITHIN(
+                        result[r * step + c * channels + ch],
+                        truth_vec[r * step + c * channels + ch],
+                        0.0000000000001);
+                }
+            }
+        }
+
+        output_width = 2;
+        output_height = 1;
+        test_img = std::vector<NumType>{
+            10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
+            3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
+            6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
+            9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
+        };
+        truth_vec = std::vector<NumType>{
+            10,10,10, 10,10,10,
+        };
+        result.resize(truth_vec.size());
+        DLMath::max_pool<NumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, channels}, {f, f}, {2, 2});
+        for (std::size_t r = 0; r < output_height; ++r) {
+            for (std::size_t c = 0; c < output_width; ++c) {
+                for (std::size_t ch = 0; ch < channels; ++ch) {
+                    EDGE_LEARNING_TEST_PRINT(
+                        "[" + std::to_string(r) + "," + std::to_string(c)
+                        + "," + std::to_string(ch) + "] "
+                        + std::to_string(result[r * step + c * channels + ch]));
+                    EDGE_LEARNING_TEST_WITHIN(
+                        result[r * step + c * channels + ch],
+                        truth_vec[r * step + c * channels + ch],
+                        0.0000000000001);
+                }
             }
         }
     }
@@ -569,7 +813,8 @@ private:
         };
         std::vector<NumType> result(truth_vec.size());
         DLMath::avg_pool<NumType>(
-            result.data(), test_img.data(), input_width, input_height, f, f);
+            result.data(), test_img.data(), {input_height, input_width},
+            {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
             for (std::size_t c = 0; c < output_width; ++c) {
                 EDGE_LEARNING_TEST_PRINT(
@@ -598,7 +843,8 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::avg_pool<NumType>(
-            result.data(), test_img.data(), input_width, input_height, f, f);
+            result.data(), test_img.data(), {input_height, input_width},
+            {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
             for (std::size_t c = 0; c < output_width; ++c) {
                 EDGE_LEARNING_TEST_PRINT(
@@ -617,7 +863,8 @@ private:
         };
         result.resize(truth_vec.size());
         DLMath::avg_pool<NumType>(
-            result.data(), test_img.data(), input_width, input_height, f, f, 2);
+            result.data(), test_img.data(), {input_height, input_width}, 
+            {f, f}, {2, 2});
         for (std::size_t r = 0; r < output_height; ++r) {
             for (std::size_t c = 0; c < output_width; ++c) {
                 EDGE_LEARNING_TEST_PRINT(
@@ -626,6 +873,69 @@ private:
                 EDGE_LEARNING_TEST_WITHIN(
                     result[r * output_width + c],
                     truth_vec[r * output_width + c], 0.0000000000001);
+            }
+        }
+
+        SizeType channels = 3;
+        output_width = 3;
+        output_height = 2;
+        auto step = output_width * channels;
+        test_img = std::vector<NumType>{
+            10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
+            3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
+            6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
+            9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
+        };
+        truth_vec = std::vector<NumType>{
+            50.0/9,49.0/9,53.0/9, 53.0/9,56.0/9,50.0/9, 49.0/9,53.0/9,53.0/9,
+            66.0/9,75.0/9,69.0/9, 78.0/9,72.0/9,66.0/9, 75.0/9,69.0/9,78.0/9
+        };
+        result.resize(truth_vec.size());
+        DLMath::avg_pool<NumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, channels}, {f, f});
+        for (std::size_t r = 0; r < output_height; ++r) {
+            for (std::size_t c = 0; c < output_width; ++c) {
+                for (std::size_t ch = 0; ch < channels; ++ch) {
+                    EDGE_LEARNING_TEST_PRINT(
+                        "[" + std::to_string(r) + "," + std::to_string(c)
+                        + "," + std::to_string(ch) + "] "
+                        + std::to_string(result[r * step + c * channels + ch]));
+                    EDGE_LEARNING_TEST_WITHIN(
+                        result[r * step + c * channels + ch],
+                        truth_vec[r * step + c * channels + ch],
+                        0.0000000000001);
+                }
+            }
+        }
+
+        output_width = 2;
+        output_height = 1;
+        test_img = std::vector<NumType>{
+            10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
+            3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
+            6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
+            9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
+        };
+        truth_vec = std::vector<NumType>{
+            50.0/9,49.0/9,53.0/9, 49.0/9,53.0/9,53.0/9
+        };
+        result.resize(truth_vec.size());
+        DLMath::avg_pool<NumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, channels}, {f, f}, {2, 2});
+        for (std::size_t r = 0; r < output_height; ++r) {
+            for (std::size_t c = 0; c < output_width; ++c) {
+                for (std::size_t ch = 0; ch < channels; ++ch) {
+                    EDGE_LEARNING_TEST_PRINT(
+                        "[" + std::to_string(r) + "," + std::to_string(c)
+                        + "," + std::to_string(ch) + "] "
+                        + std::to_string(result[r * step + c * channels + ch]));
+                    EDGE_LEARNING_TEST_WITHIN(
+                        result[r * step + c * channels + ch],
+                        truth_vec[r * step + c * channels + ch],
+                        0.0000000000001);
+                }
             }
         }
     }

@@ -48,6 +48,55 @@ public:
     static constexpr RneType::result_type max_rand = 
         std::numeric_limits<RneType::result_type>::max();
 
+    struct Coord2d {
+        SizeType row;
+        SizeType col;
+    };
+
+    struct Coord3d {
+        Coord3d(Coord2d c2d)
+            : row{c2d.row}
+            , col{c2d.col}
+            , channel{1}
+        {}
+
+        SizeType row;
+        SizeType col;
+        SizeType channel;
+    };
+
+    struct Shape2d {
+        Shape2d(SizeType h, SizeType w)
+            : height{h}
+            , width{w}
+        {}
+
+        SizeType size() { return height * width; }
+
+        SizeType height;
+        SizeType width;
+    };
+
+    struct Shape3d {
+        Shape3d(Shape2d s2d)
+            : height{s2d.height}
+            , width{s2d.width}
+            , channels{1}
+        {}
+
+        Shape3d(SizeType h, SizeType w, SizeType c=1)
+            : height{h}
+            , width{w}
+            , channels{c}
+        {}
+
+        SizeType size() { return height * width * channels; }
+
+        SizeType height;
+        SizeType width;
+        SizeType channels;
+    };
+
     /**
      * \brief Gaussian Probability Density Function.
      * \tparam T      Input and output type.
@@ -533,129 +582,179 @@ public:
     }
 
     /**
-     * \brief Convolution 2D of a source matrix and a squared kernel.
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    The destination matrix in which put the resulting matrix.
-     * The destination matrix will be of shape:
-     *  width_dst  = ((width_src  - f + (2 * p)) / s) + 1
-     *  height_dst = ((height_src - f + (2 * p)) / s) + 1
-     * \param src    The source matrix on which calculate the convolution.
-     * \param width  The width of the source matrix.
-     * \param height The height of the source matrix.
-     * \param k      The kernel matrix to use for convolution.
-     * \param f      The kernel side.
-     * \param s      The slice amount: the number of cells that the kernel
-     *               will move.
-     * \param p      The padding of the source matrix to include.
+     * \brief Convolution 3D of a source matrix and a squared kernel.
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       The destination matrix in which put the resulting
+     *                  matrix.
+     * \param src       The source matrix on which calculate the convolution.
+     * \param src_shape The shape of the source matrix: height, width.
+     * \param k         The kernel matrix to use for convolution.
+     * \param k_shape   The shape of the kernel: height, width.
+     * \param s         The slice amount: the number of cells that the kernel
+     *                  will move. It is defined in 2d: the width is the amount
+     *                  slice when moving from left to right, the height
+     *                  from up to down.
+     * \param p         The padding of the source matrix to include defined in
+     *                  2d: the width is the amount padding introduced in right
+     *                  and left side, the height in up and down side.
      * \return The pointer to the destination matrix.
+     *
+     * The destination matrix will be of shape:
+     *  width_dst  = ((width_src  - width_k  + (2 * p)) / s) + 1
+     *  height_dst = ((height_src - height_k + (2 * p)) / s) + 1
      */
     template <typename T>
-    static T* conv2d(T* dst,
-                     const T* src, SizeType width, SizeType height,
-                     const T* k, SizeType k_width, SizeType k_height,
-                     SizeType s = 1, SizeType p = 0)
+    static T* conv2d(T* dst, const T* src, Shape2d src_shape,
+                     const T* k, Shape2d k_shape,
+                     Shape2d s = {1, 1}, Shape2d p = {0, 0})
+    {
+        return conv3d<T>(dst, src, Shape3d(src_shape), k, k_shape, s, p);
+    }
+
+    /**
+     * \brief Convolution 3D of a source matrix and a squared kernel.
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       The destination matrix in which put the resulting
+     *                  matrix.
+     * \param src       The source matrix on which calculate the convolution.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k         The kernel matrix to use for convolution.
+     * \param k_shape   The shape of the kernel: height, width.
+     * The third dimension is the same of the src matrix.
+     * \param s         The slice amount: the number of cells that the kernel
+     *                  will move. It is defined in 2d: the width is the amount
+     *                  slice when moving from left to right, the height
+     *                  from up to down.
+     * \param p         The padding of the source matrix to include defined in
+     *                  2d: the width is the amount padding introduced in right
+     *                  and left side, the height in up and down side.
+     * \return The pointer to the destination matrix.
+     *
+     * The destination matrix will be of shape:
+     *  width_dst  = ((width_src  - width_k  + (2 * p)) / s) + 1
+     *  height_dst = ((height_src - height_k + (2 * p)) / s) + 1
+     */
+    template <typename T>
+    static T* conv3d(T* dst, const T* src, Shape3d src_shape,
+                     const T* k, Shape2d k_shape,
+                     Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
         return _kernel_slide<T>(
-            _conv2d_op<T>, dst, src, width, height,
-            k, k_width, k_height, s, p);
+            _conv3d_op<T>, dst, src, src_shape, k, k_shape, s, p);
     }
 
     /**
      * \brief Max pooling of a source matrix.
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    The destination matrix in which put the resulting matrix.
-     * The destination matrix will be of shape:
-     *  width_dst  = ((width_src  - f + (2 * p)) / s) + 1
-     *  height_dst = ((height_src - f + (2 * p)) / s) + 1
-     * \param src    The source matrix on which calculate the max pooling.
-     * \param width  The width of the source matrix.
-     * \param height The height of the source matrix.
-     * \param f      The kernel side.
-     * \param s      The slice amount: the number of cells that the kernel
-     *               will move.
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       The destination matrix in which put the resulting
+     *                  matrix.
+     * \param src       The source matrix on which calculate the max pooling.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k_shape   The shape of the kernel: height, width.
+     * The third dimension is the same of the src matrix.
+     * \param s         The slice amount: the number of cells that the kernel
+     *                  will move. It is defined in 2d: the width is the amount
+     *                  slice when moving from left to right, the height
+     *                  from up to down.
      * \return The pointer to the destination matrix.
+     *
+     * The destination matrix will be of shape:
+     *  width_dst  = ((width_src  - width_k)  / s) + 1
+     *  height_dst = ((height_src - height_k) / s) + 1
      */
     template <typename T>
-    static T* max_pool(T* dst,
-                       const T* src, SizeType width, SizeType height,
-                       SizeType k_width, SizeType k_height, SizeType s = 1)
+    static T* max_pool(T* dst, const T* src, Shape3d src_shape,
+                       Shape2d k_shape, Shape2d s = {1, 1})
     {
         return _kernel_slide<T>(
-            _max_pool_op<T>, dst, src, width, height,
-            nullptr, k_width, k_height, s);
+            _max_pool_op<T>, dst, src, src_shape, nullptr, k_shape, s);
     }
 
     /**
      * \brief Average pooling of a source matrix.
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    The destination matrix in which put the resulting matrix.
-     * The destination matrix will be of shape:
-     *  width_dst  = ((width_src  - f + (2 * p)) / s) + 1
-     *  height_dst = ((height_src - f + (2 * p)) / s) + 1
-     * \param src    The source matrix on which calculate the average pooling.
-     * \param width  The width of the source matrix.
-     * \param height The height of the source matrix.
-     * \param f      The kernel side.
-     * \param s      The slice amount: the number of cells that the kernel
-     *               will move.
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       The destination matrix in which put the resulting
+     *                  matrix.
+     * \param src       The source matrix on which calculate the average
+     *                  pooling.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k_shape   The shape of the kernel: height, width.
+     * The third dimension is the same of the src matrix.
+     * \param s         The slice amount: the number of cells that the kernel
+     *                  will move. It is defined in 2d: the width is the amount
+     *                  slice when moving from left to right, the height
+     *                  from up to down.
      * \return The pointer to the destination matrix.
+     *
+     * The destination matrix will be of shape:
+     *  width_dst  = ((width_src  - width_k)  / s) + 1
+     *  height_dst = ((height_src - height_k) / s) + 1
      */
     template <typename T>
-    static T* avg_pool(T* dst,
-                       const T* src, SizeType width, SizeType height,
-                       SizeType k_width, SizeType k_height, SizeType s = 1)
+    static T* avg_pool(T* dst, const T* src, Shape3d src_shape,
+                       Shape2d k_shape, Shape2d s = {1, 1})
     {
         return _kernel_slide<T>(
-            _avg_pool_op<T>, dst, src, width, height,
-            nullptr, k_width, k_height, s);
+            _avg_pool_op<T>, dst, src, src_shape, nullptr, k_shape, s);
     }
 
 private:
 
     /**
      * \brief Kernel slicing on the source matrix.
-     * \tparam T     Type of each source and destination elements.
+     * \tparam T        Type of each source and destination elements.
      * \param k_to_src_operation The operation to perform at each overlapping
      * step between the source matrix and the kernel.
-     * \param dst    The destination matrix in which put the resulting matrix.
+     * \param dst       The destination matrix in which put the resulting
+     *                  matrix.
+     * \param src       The source matrix on which calculate the operation
+     *                  defined in k_to_src_operation.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k         The kernel matrix to use for convolution. Can be nullptr
+     *                  if the kernel is not used in k_to_src_operation (see
+     *                  average pooling and max pooling).
+     * \param k_shape   The shape of the kernel: height, width.
+     *                  The third dimension is the same of the src matrix.
+     * \param s         The slice amount: the number of cells that the kernel
+     *                  will move. It is defined in 2d: the width is the amount
+     *                  slice when moving from left to right, the height
+     *                  from up to down.
+     * \param p         The padding of the source matrix to include defined in
+     *                  2d: the width is the amount padding introduced in right
+     *                  and left side, the height in up and down side.
+     * \return The pointer to the destination matrix.
+     *
      * The destination matrix will be of shape:
      *  width_dst  = ((width_src  - f + (2 * p)) / s) + 1
      *  height_dst = ((height_src - f + (2 * p)) / s) + 1
-     * \param src    The source matrix on which calculate the operation defined
-     *               in k_to_src_operation.
-     * \param width  The width of the source matrix.
-     * \param height The height of the source matrix.
-     * \param k      The kernel matrix to use for convolution. Can be nullptr
-     *               if the kernel is not used in k_to_src_operation (see
-     *               average pooling and max pooling).
-     * \param f      The kernel side.
-     * \param s      The slice amount: the number of cells that the kernel
-     *               will move.
-     * \param p      The padding of the source matrix to include.
-     * \return The pointer to the destination matrix.
      */
     template <typename T>
     static T* _kernel_slide(
-        std::function<T(const T*, SizeType, SizeType,
-                        const T*, SizeType, SizeType,
-                        int64_t, int64_t)> k_to_src_operation,
-        T* dst, const T* src, SizeType width, SizeType height,
-        const T* k, SizeType k_width, SizeType k_height,
-        SizeType s = 1, SizeType p = 0)
+        std::function<void(T*, Shape2d, Coord2d,
+                           const T*, Shape3d,
+                           const T*, Shape2d,
+                           int64_t, int64_t)> k_to_src_operation,
+        T* dst, const T* src, Shape3d src_shape,
+        const T* k, Shape2d k_shape, Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
-        s = std::max(s, SizeType(1));
-        auto width_dst = ((width - k_width + 2 * p) / s) + 1;
-        auto height_dst = ((height - k_height + 2 * p) / s) + 1;
+        s.width = std::max(s.width, SizeType(1));
+        s.height = std::max(s.height, SizeType(1));
+        auto width_dst = ((src_shape.width - k_shape.width + 2 * p.width)
+            / s.width) + 1;
+        auto height_dst = ((src_shape.height - k_shape.height + 2 * p.height)
+            / s.height) + 1;
         for (SizeType row_dst = 0; row_dst < height_dst; ++row_dst)
         {
             for (SizeType col_dst = 0; col_dst < width_dst; ++col_dst)
             {
-                auto col = static_cast<int64_t>(col_dst * s)
-                    - static_cast<int64_t>(p);
-                auto row = static_cast<int64_t>(row_dst * s)
-                    - static_cast<int64_t>(p);
-                dst[row_dst * width_dst + col_dst] = k_to_src_operation(
-                    src, width, height, k, k_width, k_height, col, row);
+                auto col = (static_cast<int64_t>(col_dst * s.width)
+                    - static_cast<int64_t>(p.width))
+                    * static_cast<int64_t>(src_shape.channels);
+                auto row = static_cast<int64_t>(row_dst * s.height)
+                    - static_cast<int64_t>(p.height);
+                k_to_src_operation(
+                    dst, {height_dst, width_dst}, {row_dst, col_dst},
+                    src, src_shape, k, k_shape, row, col);
             }
         }
         return dst;
@@ -663,112 +762,136 @@ private:
 
     /**
      * \brief Sum of multiplication between the kernel and the source matrix
-     * for Convolution 2D.
-     * \tparam T     Type of each source and destination elements.
-     * \param src    The source matrix on which calculate the convolution.
-     * \param width  The width of the source matrix.
-     * \param height The height of the source matrix.
-     * \param k      The kernel matrix to use for convolution.
-     * \param f      The kernel side.
-     * \param col    The column in which the kernel is moved over the source
-     *               matrix.
-     * \param row    The row in which the kernel is moved over the source
-     *               matrix.
+     * for Convolution 3D.
+     * \tparam T        Type of each source and destination elements.
+     * \param src       The source matrix on which calculate the convolution.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k         The kernel matrix to use for convolution.
+     * \param k_shape   The shape of the kernel: height, width.
+     *                  The third dimension is the same of the src matrix.
+     * \param col       The column in which the kernel is moved over the source
+     *                  matrix.
+     * \param row       The row in which the kernel is moved over the source
+     *                  matrix.
      * \return The value of the convolution 2D between the kernel and the
      * source matrix in the current position.
      */
     template <typename T>
-    static T _conv2d_op(const T* src, SizeType width, SizeType height,
-                     const T* k, SizeType k_width, SizeType k_height,
-                     int64_t col, int64_t row)
+    static void _conv3d_op(T* dst, Shape2d dst_shape, Coord2d dst_coord,
+                           const T* src, Shape3d src_shape,
+                           const T* k, Shape2d k_shape,
+                           int64_t row, int64_t col)
     {
         T sum = 0;
-        for (SizeType k_i = 0; k_i < k_width * k_height; ++k_i)
+        auto k_size = k_shape.height * k_shape.width * src_shape.channels;
+        auto k_step = k_shape.width * src_shape.channels;
+        auto src_step = src_shape.width * src_shape.channels;
+        for (SizeType k_i = 0; k_i < k_size; ++k_i)
         {
-            auto row_k = k_i / k_width;
-            auto col_k = k_i % k_width;
+            auto row_k = k_i / k_step;
+            auto col_k = k_i % k_step;
             auto row_src = row + static_cast<int64_t>(row_k);
             auto col_src = col + static_cast<int64_t>(col_k);
             if (col_src < 0 || row_src < 0 ||
-                col_src >= static_cast<int64_t>(width) ||
-                row_src >= static_cast<int64_t>(height))
+                col_src >= static_cast<int64_t>(src_step) ||
+                row_src >= static_cast<int64_t>(src_shape.height))
             {
                 continue; //< zero-padding.
             }
-            sum += src[row_src * static_cast<int64_t>(width) + col_src]
-                   * k[k_i];
+            sum += src[row_src * static_cast<int64_t>(src_step)
+                       + col_src] * k[k_i];
         }
-        return sum;
+        dst[dst_coord.row * dst_shape.width + dst_coord.col] = sum;
     }
 
     /**
      * \brief Maximum value of the kernel portion in the source matrix.
-     * \tparam T     Type of each source and destination elements.
-     * \param src    The source matrix on which calculate the max pooling.
-     * \param width  The width of the source matrix.
-     * \param height The height of the source matrix (not used).
-     * \param k      Parameter not used (nullptr).
-     * \param f      The kernel side.
-     * \param col    The column in which the kernel is moved over the source
-     *               matrix.
-     * \param row    The row in which the kernel is moved over the source
-     *               matrix.
+     * \tparam T        Type of each source and destination elements.
+     * \param src       The source matrix on which calculate the max pooling.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k         Parameter not used (nullptr).
+     * \param k_shape   The shape of the kernel: height, width.
+     *                  The third dimension is the same of the src matrix.
+     * \param col       The column in which the kernel is moved over the source
+     *                  matrix.
+     * \param row       The row in which the kernel is moved over the source
+     *                  matrix.
      * \return The value of the max pooling of the kernel portion defined by
      * the current position in the source matrix.
      */
     template <typename T>
-    static T _max_pool_op(const T* src, SizeType width, SizeType height,
-                          const T* k, SizeType k_width, SizeType k_height,
-                          int64_t col, int64_t row)
+    static void _max_pool_op(T* dst, Shape2d dst_shape, Coord2d dst_coord,
+                          const T* src, Shape3d src_shape,
+                          const T* k, Shape2d k_shape, int64_t row, int64_t col)
     {
-        (void) height;
         (void) k;
-        T max = src[row * static_cast<int64_t>(width) + col];
-        for (SizeType k_i = 1; k_i < k_width * k_height; ++k_i)
+        auto src_step = src_shape.width * src_shape.channels;
+        auto dst_step = dst_shape.width * src_shape.channels;
+        for (SizeType c = 0; c < src_shape.channels; ++c)
         {
-            auto row_k = k_i / k_width;
-            auto col_k = k_i % k_width;
-            auto row_src = row + static_cast<int64_t>(row_k);
-            auto col_src = col + static_cast<int64_t>(col_k);
-            auto curr_val = src[row_src * static_cast<int64_t>(width)
-                                + col_src];
-            if (curr_val > max) max = curr_val;
+            T max = src[
+                row * static_cast<int64_t>(src_step)
+                + col + static_cast<int64_t>(c)];
+            for (SizeType k_i = 1; k_i < k_shape.height * k_shape.width; ++k_i)
+            {
+                auto row_k = k_i / k_shape.width;
+                auto col_k = k_i % k_shape.width;
+                auto row_src = (row + static_cast<int64_t>(row_k))
+                    * static_cast<int64_t>(src_step);
+                auto col_src = col
+                    + static_cast<int64_t>(col_k * src_shape.channels)
+                    + static_cast<int64_t>(c);
+                auto curr_val = src[row_src + col_src];
+                if (curr_val > max) max = curr_val;
+            }
+            dst[dst_coord.row * dst_step
+                + dst_coord.col * src_shape.channels + c] = max;
         }
-        return max;
+
     }
 
     /**
      * \brief Average value of the kernel portion in the source matrix.
-     * \tparam T     Type of each source and destination elements.
-     * \param src    The source matrix on which calculate the average pooling.
-     * \param width  The width of the source matrix.
-     * \param height The height of the source matrix (not used).
-     * \param k      Parameter not used (nullptr).
-     * \param f      The kernel side.
-     * \param col    The column in which the kernel is moved over the source
-     *               matrix.
-     * \param row    The row in which the kernel is moved over the source
-     *               matrix.
+     * \tparam T        Type of each source and destination elements.
+     * \param src       The source matrix on which calculate the average
+     *                  pooling.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k         Parameter not used (nullptr).
+     * \param k_shape   The shape of the kernel: height, width.
+     *                  The third dimension is the same of the src matrix.
+     * \param col       The column in which the kernel is moved over the source
+     *                  matrix.
+     * \param row       The row in which the kernel is moved over the source
+     *                  matrix.
      * \return The value of the max pooling of the kernel portion defined by
      * the current position in the source matrix.
      */
     template <typename T>
-    static T _avg_pool_op(const T* src, SizeType width, SizeType height,
-                          const T* k, SizeType k_width, SizeType k_height,
-                          int64_t col, int64_t row)
+    static void _avg_pool_op(T* dst, Shape2d dst_shape, Coord2d dst_coord,
+                          const T* src, Shape3d src_shape,
+                          const T* k, Shape2d k_shape, int64_t row, int64_t col)
     {
-        (void) height;
         (void) k;
-        T sum = 0;
-        for (SizeType k_i = 0; k_i < k_width * k_height; ++k_i)
+        auto src_step = src_shape.width * src_shape.channels;
+        auto dst_step = dst_shape.width * src_shape.channels;
+        for (SizeType c = 0; c < src_shape.channels; ++c)
         {
-            auto row_k = k_i / k_width;
-            auto col_k = k_i % k_width;
-            auto row_src = row + static_cast<int64_t>(row_k);
-            auto col_src = col + static_cast<int64_t>(col_k);
-            sum += src[row_src * static_cast<int64_t>(width) + col_src];
+            T sum = 0;
+            for (SizeType k_i = 0; k_i < k_shape.height * k_shape.width; ++k_i)
+            {
+                auto row_k = k_i / k_shape.width;
+                auto col_k = k_i % k_shape.width;
+                auto row_src = (row + static_cast<int64_t>(row_k))
+                    * static_cast<int64_t>(src_step);
+                auto col_src = col
+                    + static_cast<int64_t>(col_k * src_shape.channels)
+                    + static_cast<int64_t>(c);
+                sum += src[row_src + col_src];
+            }
+            dst[dst_coord.row * dst_step
+                + dst_coord.col * src_shape.channels + c]
+                = sum / (k_shape.height * k_shape.width);
         }
-        return sum / (k_width * k_height);
     }
 
 };
