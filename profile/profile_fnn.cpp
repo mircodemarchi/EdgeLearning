@@ -81,17 +81,17 @@ private:
 
         LayerDescriptorVector layers_descriptor(
             {
-                {"input_layer",   input_size,  Activation::Linear },
-                {"hidden_layer0", 10,          Activation::ReLU },
-                {"hidden_layer1", 20,          Activation::ReLU },
-                {"hidden_layer2", 25,          Activation::ReLU },
-                {"hidden_layer3", 28,          Activation::ReLU },
-                {"hidden_layer4", 30,          Activation::ReLU },
-                {"hidden_layer5", 28,          Activation::ReLU },
-                {"hidden_layer6", 25,          Activation::ReLU },
-                {"hidden_layer7", 20,          Activation::ReLU },
-                {"hidden_layer8", 10,          Activation::ReLU },
-                {"output_layer",  output_size, Activation::Linear },
+                {"input_layer",   input_size,  ActivationType::Linear },
+                {"hidden_layer0", 10,          ActivationType::ReLU },
+                {"hidden_layer1", 20,          ActivationType::ReLU },
+                {"hidden_layer2", 25,          ActivationType::ReLU },
+                {"hidden_layer3", 28,          ActivationType::ReLU },
+                {"hidden_layer4", 30,          ActivationType::ReLU },
+                {"hidden_layer5", 28,          ActivationType::ReLU },
+                {"hidden_layer6", 25,          ActivationType::ReLU },
+                {"hidden_layer7", 20,          ActivationType::ReLU },
+                {"hidden_layer8", 10,          ActivationType::ReLU },
+                {"output_layer",  output_size, ActivationType::Linear },
             }
         );
 
@@ -146,17 +146,17 @@ private:
 
         LayerDescriptorVector layers_descriptor(
             {
-                {"input_layer",   input_size,  Activation::Linear },
-                {"hidden_layer0", 10,          Activation::ReLU },
-                {"hidden_layer1", 20,          Activation::ReLU },
-                {"hidden_layer2", 25,          Activation::ReLU },
-                {"hidden_layer3", 28,          Activation::ReLU },
-                {"hidden_layer4", 30,          Activation::ReLU },
-                {"hidden_layer5", 28,          Activation::ReLU },
-                {"hidden_layer6", 25,          Activation::ReLU },
-                {"hidden_layer7", 20,          Activation::ReLU },
-                {"hidden_layer8", 10,          Activation::ReLU },
-                {"output_layer",  output_size, Activation::Linear },
+                {"input_layer",   input_size,  ActivationType::Linear },
+                {"hidden_layer0", 10,          ActivationType::ReLU },
+                {"hidden_layer1", 20,          ActivationType::ReLU },
+                {"hidden_layer2", 25,          ActivationType::ReLU },
+                {"hidden_layer3", 28,          ActivationType::ReLU },
+                {"hidden_layer4", 30,          ActivationType::ReLU },
+                {"hidden_layer5", 28,          ActivationType::ReLU },
+                {"hidden_layer6", 25,          ActivationType::ReLU },
+                {"hidden_layer7", 20,          ActivationType::ReLU },
+                {"hidden_layer8", 10,          ActivationType::ReLU },
+                {"output_layer",  output_size, ActivationType::Linear },
             }
         );
 
@@ -225,8 +225,8 @@ private:
 
         LayerDescriptorVector layers_descriptor(
             {
-                {"input_layer",   input_size,  Activation::Linear },
-                {"output_layer",  output_size, Activation::Linear },
+                {"input_layer",   input_size,  ActivationType::Linear },
+                {"output_layer",  output_size, ActivationType::Linear },
             }
         );
 
@@ -237,7 +237,7 @@ private:
                 {
                     "hidden_layer" + std::to_string(amount),
                     input_size * 2,
-                    Activation::ReLU
+                    ActivationType::ReLU
                 });
             profile("training with hidden layers amount: "
                         + std::to_string(amount),
@@ -291,19 +291,19 @@ private:
         {
             LayerDescriptorVector layers_descriptor(
                 {
-                    {"input_layer", input_size, Activation::Linear},
+                    {"input_layer", input_size, ActivationType::Linear},
                     {
                         "hidden_layer0",
                         static_cast<SizeType>(shape / 2),
-                        Activation::ReLU
+                        ActivationType::ReLU
                     },
-                    {"hidden_layer1", shape, Activation::ReLU},
+                    {"hidden_layer1", shape, ActivationType::ReLU},
                     {
                         "hidden_layer2",
                         static_cast<SizeType>(shape / 2),
-                        Activation::ReLU
+                        ActivationType::ReLU
                     },
-                    {"output_layer", output_size, Activation::Linear},
+                    {"output_layer", output_size, ActivationType::Linear},
                 }
             );
             profile("training with hidden layers shape: "

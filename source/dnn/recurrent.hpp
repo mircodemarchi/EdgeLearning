@@ -38,24 +38,24 @@
 
 namespace EdgeLearning {
 
-// TODO: test softmax output activation.
-enum class OutputActivation
-{
-    Linear,
-    // Softmax, 
-};
-
-// TODO: test relu and linear hidden activation.
-enum class HiddenActivation
-{
-    TanH,
-    // ReLU,
-    // Linear,
-};
-
 class RecurrentLayer : public Layer 
 {
-public: 
+public:
+    // TODO: test softmax output activation.
+    enum class OutputActivation
+    {
+        Linear,
+        // Softmax,
+    };
+
+    // TODO: test relu and linear hidden activation.
+    enum class HiddenActivation
+    {
+        TanH,
+        // ReLU,
+        // Linear,
+    };
+
     RecurrentLayer(Model& model, std::string name = std::string(),
         SizeType input_size = 0, SizeType output_size = 0, SizeType hidden_size = 0,
         SizeType time_steps = 0,

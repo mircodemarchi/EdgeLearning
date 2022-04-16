@@ -49,10 +49,7 @@ enum class Framework
 #endif
 };
 
-using LayerDescriptor = std::tuple<std::string, SizeType, Activation>;
-using LayerDescriptorVector = std::vector<LayerDescriptor>;
-
-using ActivationType = Activation;
+using ActivationType = DenseLayer::Activation;
 
 enum class LossType
 {
@@ -71,6 +68,9 @@ enum class InitType
     XAVIER_INIT,
     AUTO,
 };
+
+using LayerDescriptor = std::tuple<std::string, SizeType, ActivationType>;
+using LayerDescriptorVector = std::vector<LayerDescriptor>;
 
 // template <Framework F> struct MatType;
 

@@ -44,11 +44,11 @@ int main()
 
     LayerDescriptorVector layers_descriptor(
         {
-            {"input_layer",   INPUT_SIZE,  Activation::Linear },
-            {"hidden_layer1", 8UL,         Activation::ReLU   },
-            {"hidden_layer2", 32UL,        Activation::ReLU   },
-            {"hidden_layer3", 16UL,        Activation::ReLU   },
-            {"output_layer",  OUTPUT_SIZE, Activation::Linear }
+            {"input_layer",   INPUT_SIZE,  ActivationType::Linear },
+            {"hidden_layer1", 8UL,         ActivationType::ReLU   },
+            {"hidden_layer2", 32UL,        ActivationType::ReLU   },
+            {"hidden_layer3", 16UL,        ActivationType::ReLU   },
+            {"output_layer",  OUTPUT_SIZE, ActivationType::Linear }
         }
     );
 

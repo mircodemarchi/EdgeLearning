@@ -37,16 +37,16 @@
 
 namespace EdgeLearning {
 
-enum class Activation
-{
-    ReLU,
-    Softmax,
-    Linear
-};
-
 class DenseLayer : public Layer 
 {
-public: 
+public:
+    enum class Activation
+    {
+        ReLU,
+        Softmax,
+        Linear
+    };
+
     DenseLayer(Model& model,
                std::string name = std::string(),
                Activation activation = Activation::ReLU,

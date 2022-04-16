@@ -52,9 +52,9 @@ private:
         Dataset<NumType> dataset{data, 1, {4, 5}};
 
         LayerDescriptorVector layers_descriptor(
-            {{"input_layer",  4UL, Activation::Linear   },
-             {"hidden_layer", 8UL, Activation::ReLU     },
-             {"output_layer", 2UL, Activation::Linear   }}
+            {{"input_layer",  4UL, ActivationType::Linear   },
+             {"hidden_layer", 8UL, ActivationType::ReLU     },
+             {"output_layer", 2UL, ActivationType::Linear   }}
             );
         auto m = CompileFNN<>(layers_descriptor, "regressor_model");
         EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
@@ -71,9 +71,9 @@ private:
         Dataset<NumType> dataset(data, 1, {4, 5});
 
         LayerDescriptorVector layers_descriptor(
-            {{"input_layer",  4UL,         Activation::Linear   },
-             {"hidden_layer", 8UL,         Activation::ReLU     },
-             {"output_layer", OUTPUT_SIZE, Activation::Linear   }}
+            {{"input_layer",  4UL,         ActivationType::Linear   },
+             {"hidden_layer", 8UL,         ActivationType::ReLU     },
+             {"output_layer", OUTPUT_SIZE, ActivationType::Linear   }}
         );
         auto m = CompileFNN<>(layers_descriptor, "regressor_model");
 

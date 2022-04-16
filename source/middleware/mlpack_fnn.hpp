@@ -84,19 +84,19 @@ public:
     {
         auto layer_name = std::get<0>(ld);
         auto layer_size = std::get<1>(ld);
-        auto layer_activation = std::get<2>(ld);
+        auto layer_ActivationType = std::get<2>(ld);
 
         _layers_name.push_back(layer_name);
         if (_output_size != 0)
         {
             _m.template Add<mlpack::ann::Linear<>>(_output_size, layer_size);
-            switch (layer_activation) {
-                case Activation::ReLU:
+            switch (layer_ActivationType) {
+                case ActivationType::ReLU:
                 {
                     _m.template Add<mlpack::ann::ReLULayer<>>();
                     break;
                 }
-                case Activation::Softmax:
+                case ActivationType::Softmax:
                 {
 #if __unix__
                     _m.template Add<mlpack::ann::LogSoftMax<>>();
@@ -105,7 +105,7 @@ public:
 #endif
                     break;
                 }
-                case Activation::Linear:
+                case ActivationType::Linear:
                 default:
                 {
                     _m.template Add<mlpack::ann::IdentityLayer<>>();
