@@ -429,8 +429,8 @@ private:
         output_width = 5;
         output_height = 4;
         truth_vec = std::vector<NumType>{
-            4,  6,  8,  11,  5,
-            10, 12, 14, 16,  7,
+            4,  6,  8,  11, 5,
+            10, 12, 14, 16, 7,
             16, 18, 20, 22, 10,
             9,  10, 11, 12, 13
         };
@@ -454,7 +454,7 @@ private:
         output_width = 3;
         output_height = 2;
         truth_vec = std::vector<NumType>{
-            4,  8,   5,
+            4,  8,  5,
             16, 20, 10,
         };
         result.resize(truth_vec.size());

@@ -57,7 +57,7 @@ public:
         Coord3d(Coord2d c2d)
             : row{c2d.row}
             , col{c2d.col}
-            , channel{1}
+            , channel{0}
         {}
 
         SizeType row;
@@ -71,7 +71,12 @@ public:
             , width{w}
         {}
 
-        SizeType size() { return height * width; }
+        Shape2d(SizeType s)
+            : height{s}
+            , width{s}
+        {}
+
+        [[nodiscard]] SizeType size() const { return height * width; }
 
         SizeType height;
         SizeType width;
@@ -84,7 +89,7 @@ public:
             , channels{1}
         {}
 
-        Shape3d(SizeType h, SizeType w, SizeType c=1)
+        Shape3d(SizeType h, SizeType w=1, SizeType c=1)
             : height{h}
             , width{w}
             , channels{c}
@@ -590,9 +595,9 @@ public:
      * \param src_shape The shape of the source matrix: height, width.
      * \param k         The kernel matrix to use for convolution.
      * \param k_shape   The shape of the kernel: height, width.
-     * \param s         The slice amount: the number of cells that the kernel
+     * \param s         The stride amount: the number of cells that the kernel
      *                  will move. It is defined in 2d: the width is the amount
-     *                  slice when moving from left to right, the height
+     *                  stride when moving from left to right, the height
      *                  from up to down.
      * \param p         The padding of the source matrix to include defined in
      *                  2d: the width is the amount padding introduced in right
@@ -621,9 +626,9 @@ public:
      * \param k         The kernel matrix to use for convolution.
      * \param k_shape   The shape of the kernel: height, width.
      * The third dimension is the same of the src matrix.
-     * \param s         The slice amount: the number of cells that the kernel
+     * \param s         The stride amount: the number of cells that the kernel
      *                  will move. It is defined in 2d: the width is the amount
-     *                  slice when moving from left to right, the height
+     *                  stride when moving from left to right, the height
      *                  from up to down.
      * \param p         The padding of the source matrix to include defined in
      *                  2d: the width is the amount padding introduced in right
@@ -652,9 +657,9 @@ public:
      * \param src_shape The shape of the source matrix: height, width, channels.
      * \param k_shape   The shape of the kernel: height, width.
      * The third dimension is the same of the src matrix.
-     * \param s         The slice amount: the number of cells that the kernel
+     * \param s         The stride amount: the number of cells that the kernel
      *                  will move. It is defined in 2d: the width is the amount
-     *                  slice when moving from left to right, the height
+     *                  stride when moving from left to right, the height
      *                  from up to down.
      * \return The pointer to the destination matrix.
      *
@@ -680,9 +685,9 @@ public:
      * \param src_shape The shape of the source matrix: height, width, channels.
      * \param k_shape   The shape of the kernel: height, width.
      * The third dimension is the same of the src matrix.
-     * \param s         The slice amount: the number of cells that the kernel
+     * \param s         The stride amount: the number of cells that the kernel
      *                  will move. It is defined in 2d: the width is the amount
-     *                  slice when moving from left to right, the height
+     *                  stride when moving from left to right, the height
      *                  from up to down.
      * \return The pointer to the destination matrix.
      *
@@ -715,9 +720,9 @@ private:
      *                  average pooling and max pooling).
      * \param k_shape   The shape of the kernel: height, width.
      *                  The third dimension is the same of the src matrix.
-     * \param s         The slice amount: the number of cells that the kernel
+     * \param s         The stride amount: the number of cells that the kernel
      *                  will move. It is defined in 2d: the width is the amount
-     *                  slice when moving from left to right, the height
+     *                  stride when moving from left to right, the height
      *                  from up to down.
      * \param p         The padding of the source matrix to include defined in
      *                  2d: the width is the amount padding introduced in right

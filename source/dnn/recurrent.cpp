@@ -270,9 +270,9 @@ void RecurrentLayer::forward(const NumType *inputs)
     delete[] tmp_mul;
 
     // Forward to the next layers.
-    for (auto layer: this->_subsequents)
+    for (const auto& l: this->_subsequents)
     {
-        layer->forward(_activations.data());
+        l->forward(_activations.data());
     }
 }
 
@@ -284,7 +284,7 @@ void RecurrentLayer::reverse(const NumType *gradients)
 
     std::vector<NumType> next_hidden_state(
         static_cast<std::size_t>(_hidden_size), NumType{0.0});
-    NumType *tmp_mul = new NumType[_hidden_size];
+    auto *tmp_mul = new NumType[_hidden_size];
 
     // Loop the gradient sequences in reverse.
     for (SizeType t = _time_steps; t > 0; --t)
@@ -445,7 +445,7 @@ void RecurrentLayer::reverse(const NumType *gradients)
 
     delete[] tmp_mul;
 
-    for (auto l: _antecedents)
+    for (const auto& l: _antecedents)
     {
         l->reverse(_input_gradients.data());
     }
