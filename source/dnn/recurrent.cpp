@@ -34,10 +34,9 @@ namespace EdgeLearning {
 RecurrentLayer::RecurrentLayer(Model& model, std::string name, 
     SizeType input_size, SizeType output_size, SizeType hidden_size,
     SizeType time_steps, 
-    OutputActivation output_activation, HiddenActivation hidden_activation)
-    : Layer(model, input_size, output_size,
+    Activation output_activation, Activation hidden_activation)
+    : Layer(model, input_size, output_size, output_activation,
             std::move(name), "recurrent_layer_")
-    , _output_activation{output_activation}
     , _hidden_activation{hidden_activation}
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
@@ -80,9 +79,9 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
 void RecurrentLayer::init(RneType& rne)
 {
     NumType sigma_i, sigma_h;
-    switch (_output_activation)
+    switch (_activation)
     {
-        // case OutputActivation::ReLU:
+        // case Activation::ReLU:
         // {   
         //     /*
         //      * Kaiming He, et. al. weight initialization for ReLU networks 
@@ -93,8 +92,8 @@ void RecurrentLayer::init(RneType& rne)
         //     sigma_h = std::sqrt(2.0 / static_cast<NumType>(_hidden_size));
         //     break;
         // }
-        // case OutputActivation::Softmax:
-        case OutputActivation::Linear:
+        // case Activation::Softmax:
+        case Activation::Linear:
         default:
         {
             /* 
@@ -200,7 +199,7 @@ void RecurrentLayer::forward(const NumType *inputs)
         switch (_hidden_activation)
         {
             // TODO: to test.
-            // case HiddenActivation::ReLU:
+            // case Activation::ReLU:
             // {
             //     /*
             //      * Compute the relu of the new hidden state.
@@ -212,12 +211,12 @@ void RecurrentLayer::forward(const NumType *inputs)
             //         _hidden_size);
             //     break;
             // }
-            // case HiddenActivation::Linear:
+            // case Activation::Linear:
             // {
             //     // Linear activation disables non-linear function.
             //     break;
             // }
-            case HiddenActivation::TanH:
+            case Activation::TanH:
             default:
             {
                 /*
@@ -247,10 +246,10 @@ void RecurrentLayer::forward(const NumType *inputs)
             _biases_to_o.data(), _output_size);
 
         // Calculate output activations.
-        switch (_output_activation)
+        switch (_activation)
         {
             // TODO: to test.
-            // case OutputActivation::Softmax:
+            // case Activation::Softmax:
             // {
             //     DLMath::softmax<NumType>(
             //         _activations.data() + i * _output_size, 
@@ -258,7 +257,7 @@ void RecurrentLayer::forward(const NumType *inputs)
             //         SizeType(_output_size));
             //     break;
             // }
-            case OutputActivation::Linear:
+            case Activation::Linear:
             default:
             {
                 // Linear activation disables non-linear function.
@@ -269,11 +268,7 @@ void RecurrentLayer::forward(const NumType *inputs)
 
     delete[] tmp_mul;
 
-    // Forward to the next layers.
-    for (const auto& l: this->_subsequents)
-    {
-        l->forward(_activations.data());
-    }
+    Layer::next(_activations.data());
 }
 
 void RecurrentLayer::reverse(const NumType *gradients)
@@ -300,10 +295,10 @@ void RecurrentLayer::reverse(const NumType *gradients)
          */
         NumType* curr_activation_gradients = _activation_gradients.data() 
             + (t_idx * _output_size);
-        switch (_output_activation)
+        switch (_activation)
         {
             // TODO: to test.
-            // case OutputActivation::Softmax:
+            // case Activation::Softmax:
             // {
             //     DLMath::softmax_1_opt<NumType>(
             //         curr_activation_gradients,
@@ -311,7 +306,7 @@ void RecurrentLayer::reverse(const NumType *gradients)
             //         _output_size);
             //     break;
             // }
-            case OutputActivation::Linear:
+            case Activation::Linear:
             default:
             {
                 std::fill(curr_activation_gradients, 
@@ -361,20 +356,20 @@ void RecurrentLayer::reverse(const NumType *gradients)
         switch (_hidden_activation)
         {
             // TODO: to test.
-            // case HiddenActivation::ReLU:
+            // case Activation::ReLU:
             // {
             //     DLMath::relu_1<NumType>(next_hidden_state.data(), 
             //         _hidden_state.data() + curr_hs_idx * _hidden_size, 
             //         _hidden_size);
             //     break;
             // }
-            // case HiddenActivation::Linear:
+            // case Activation::Linear:
             // {
             //     std::fill(next_hidden_state.begin(), next_hidden_state.end(),
             //         NumType{1.0});
             //     break;
             // }
-            case HiddenActivation::TanH:
+            case Activation::TanH:
             default:
             {
                 DLMath::tanh_1<NumType>(
@@ -445,10 +440,7 @@ void RecurrentLayer::reverse(const NumType *gradients)
 
     delete[] tmp_mul;
 
-    for (const auto& l: _antecedents)
-    {
-        l->reverse(_input_gradients.data());
-    }
+    Layer::previous(_input_gradients.data());
 }
 
 const NumType* RecurrentLayer::last_input()

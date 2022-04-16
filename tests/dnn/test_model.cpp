@@ -99,9 +99,9 @@ private:
     {
         Model m{"test_model_load_save"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "first", DenseLayer::Activation::ReLU, 4, 8);
+                "first", Layer::Activation::ReLU, 4, 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "second", DenseLayer::Activation::Linear, 8, 2);
+                "second", Layer::Activation::Linear, 8, 2);
         auto loss_layer = m.add_loss<CustomLossLayer>(
                 2, BATCH_SIZE);
         m.create_edge(first_layer, output_layer);
@@ -262,7 +262,7 @@ private:
         // Model definition.
         Model m{"recurrent"};
         auto first_layer = m.add_layer<DenseLayer>(
-            "hidden", DenseLayer::Activation::ReLU, input_size * time_steps, input_size * time_steps);
+            "hidden", Layer::Activation::ReLU, input_size * time_steps, input_size * time_steps);
         auto output_layer = m.add_layer<RecurrentLayer>(
             "output", input_size, output_size, 2);
         output_layer->set_initial_hidden_state({0.01, 0.01});
@@ -304,9 +304,9 @@ private:
     {
         Model m{"binary_classifier"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "hidden", DenseLayer::Activation::ReLU, 4, 8);
+                "hidden", Layer::Activation::ReLU, 4, 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "output", DenseLayer::Activation::Softmax, 8, 2);
+                "output", Layer::Activation::Softmax, 8, 2);
         auto loss_layer = m.add_loss<CCELossLayer>(
             "loss", 2, BATCH_SIZE);
         m.create_edge(first_layer, output_layer);
@@ -318,9 +318,9 @@ private:
     {
         Model m{"regressor"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "hidden", DenseLayer::Activation::ReLU, 4, 8);
+                "hidden", Layer::Activation::ReLU, 4, 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "output", DenseLayer::Activation::Linear, 8, 2);
+                "output", Layer::Activation::Linear, 8, 2);
         auto loss_layer = m.add_loss<MSELossLayer>(
             "loss", 2, BATCH_SIZE, 0.5);
         m.create_edge(first_layer, output_layer);

@@ -29,7 +29,7 @@
 #ifndef EDGE_LEARNING_DNN_DENSE_HPP
 #define EDGE_LEARNING_DNN_DENSE_HPP
 
-#include "layer.hpp"
+#include "feedforward.hpp"
 
 #include <string>
 #include <vector>
@@ -37,16 +37,9 @@
 
 namespace EdgeLearning {
 
-class DenseLayer : public Layer 
+class DenseLayer : public FeedforwardLayer
 {
 public:
-    enum class Activation
-    {
-        ReLU,
-        Softmax,
-        Linear
-    };
-
     DenseLayer(Model& model,
                std::string name = std::string(),
                Activation activation = Activation::ReLU,
@@ -94,30 +87,18 @@ public:
     void input_size(DLMath::Shape3d input_size) override;
 
 private:
-    Activation _activation;
 
     // == Layer parameters ==
     /// \brief Weights of the layer. Size: _output_size * _input_size.
     std::vector<NumType> _weights;
     /// \brief Biases of the layer. Size: _output_size. 
     std::vector<NumType> _biases;
-    /// \brief Activations of the layer. Size: _output_size. 
-    std::vector<NumType> _activations;
 
     // == Loss Gradients ==
     /// \brief Weight gradients of the layer. Size: _output_size * _input_size.
     std::vector<NumType> _weight_gradients;
     /// \brief Biase gradients of the layer. Size: _output_size. 
     std::vector<NumType> _bias_gradients;
-    /// \brief Activation gradients of the layer. Size: _output_size. 
-    std::vector<NumType> _activation_gradients;
-    /**
-     * \brief Input gradients of the layer. Size: _input_size. 
-     * This buffer is used to store temporary gradients used in a **singe** 
-     * backpropagation pass. Note that this does not accumulate like the weight 
-     * and bias gradients do.
-     */
-    std::vector<NumType> _input_gradients;
 };
 
 } // namespace EdgeLearning

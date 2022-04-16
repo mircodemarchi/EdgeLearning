@@ -100,7 +100,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
 
         auto l_shape = DenseLayer(_m, "dense_layer_test",
-                                  DenseLayer::Activation::ReLU,
+                                  Layer::Activation::ReLU,
                                   10, 20);
         EDGE_LEARNING_TEST_EQUAL(l_shape.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape.output_size(), 20);
@@ -122,7 +122,7 @@ private:
     {
         std::vector<NumType> v1{1};
         auto l = DenseLayer(_m, "dense_layer_test",
-                            DenseLayer::Activation::ReLU, 1, 1);
+                            Layer::Activation::ReLU, 1, 1);
         EDGE_LEARNING_TEST_TRY(l.forward(v1.data()));
         EDGE_LEARNING_TEST_TRY(l.reverse(v1.data()));
         EDGE_LEARNING_TEST_NOT_EQUAL(l.last_input(), nullptr);

@@ -49,7 +49,7 @@ enum class Framework
 #endif
 };
 
-using ActivationType = DenseLayer::Activation;
+using ActivationType = Layer::Activation;
 
 enum class LossType
 {

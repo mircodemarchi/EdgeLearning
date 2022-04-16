@@ -33,8 +33,8 @@ namespace EdgeLearning {
 
 DenseLayer::DenseLayer(Model& model, std::string name, Activation activation, 
     SizeType input_size, SizeType output_size)
-    : Layer(model, input_size, output_size, std::move(name))
-    , _activation{activation}
+    : FeedforwardLayer(model, input_size, output_size, activation,
+                       std::move(name), "dense_layer_")
 {
     // std::cout << _name << ": " << input_size
     //    << " -> " << output_size << std::endl;
@@ -45,13 +45,8 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     // Each node in this layer is assigned a bias.
     _biases.resize(output_size);
 
-    // The outputs of each neuron within the layer is an "activation".
-    _activations.resize(output_size);
-
-    _activation_gradients.resize(output_size);
     _weight_gradients.resize(output_size * input_size);
     _bias_gradients.resize(output_size);
-    _input_gradients.resize(input_size);
 }
 
 void DenseLayer::init(RneType& rne)
@@ -122,80 +117,14 @@ void DenseLayer::forward(const NumType *inputs)
     DLMath::arr_sum<NumType>(_activations.data(), _activations.data(), 
         _biases.data(), _output_size);
 
-    switch (_activation)
-    {
-        case Activation::ReLU:
-        {
-            DLMath::relu<NumType>(_activations.data(), _activations.data(), 
-                SizeType(_output_size));
-            break;
-        }
-        case Activation::Softmax:
-        {
-            DLMath::softmax<NumType>(_activations.data(), _activations.data(), 
-                SizeType(_output_size));
-            break;
-        }
-        case Activation::Linear:
-        default:
-        {
-            // Linear activation disables non-linear function.
-            break;
-        }
-    }
+    FeedforwardLayer::forward(_activations.data());
 
-    // Forward to the next layers.
-    for (const auto& l: this->_subsequents)
-    {
-        l->forward(_activations.data());
-    }
+    FeedforwardLayer::next();
 }
 
 void DenseLayer::reverse(const NumType *gradients)
 {
-    // Calculate dg(z)/dz and put in _activation_gradients.
-    switch (_activation)
-    {
-        case Activation::ReLU:
-        {
-            /*
-             * The input for ReLU derivation is the _activations vector, that 
-             * is filled with the ReLU of vector z, and not directly the vector
-             * z. Considering that the input of ReLU derivation is used only 
-             * to check if it is > 0, and that if z > 0 then ReLU(z) > 0 and 
-             * viceversa, using ReLU of vector z or using directly the vector z
-             * there is no differences.  
-             */
-            DLMath::relu_1<NumType>(
-                _activation_gradients.data(), 
-                _activations.data(), 
-                _output_size);
-            break;
-        }
-        case Activation::Softmax:
-        {
-            /*
-             * The softmax derivation explits the calculus of softmax performed 
-             * previously and saved in _activations vector.
-             */
-            DLMath::softmax_1_opt<NumType>(
-                _activation_gradients.data(),
-                _activations.data(), 
-                _output_size);
-            break;
-        }
-        case Activation::Linear:
-        default:
-        {
-            std::fill(_activation_gradients.begin(), 
-                _activation_gradients.end(), NumType{1.0});
-            break;
-        }
-    }
-
-    // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
-    DLMath::arr_mul(_activation_gradients.data(), _activation_gradients.data(),
-        gradients, _output_size);
+    FeedforwardLayer::reverse(gradients);
 
     /*
      * Bias gradient.
@@ -246,10 +175,7 @@ void DenseLayer::reverse(const NumType *gradients)
         }
     }
 
-    for (const auto& l: _antecedents)
-    {
-        l->reverse(_input_gradients.data());
-    }
+    FeedforwardLayer::previous();
 }
 
 const NumType* DenseLayer::last_input()
@@ -305,10 +231,9 @@ void DenseLayer::print() const
 
 void DenseLayer::input_size(DLMath::Shape3d input_size)
 {
-    Layer::input_size(input_size);
+    FeedforwardLayer::input_size(input_size);
     _weights.resize(_output_size * input_size.height);
     _weight_gradients.resize(_output_size * input_size.height);
-    _input_gradients.resize(input_size.height);
 }
 
 } // namespace EdgeLearning

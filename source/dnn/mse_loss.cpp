@@ -60,13 +60,10 @@ void MSELossLayer::reverse(const NumType *gradients)
     // Parameter ignored because it is a loss layer.
     (void) gradients;
 
-    DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input, 
+    DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input,
         _inv_batch_size, _input_size);
 
-    for (auto l: _antecedents)
-    {
-        l->reverse(_gradients.data());
-    }
+    Layer::previous(_gradients.data());
 }
 
 } // namespace EdgeLearning

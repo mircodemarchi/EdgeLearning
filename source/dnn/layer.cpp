@@ -31,13 +31,14 @@
 namespace EdgeLearning {
 
 Layer::Layer(Model& model, SizeType input_size, SizeType output_size,
-             std::string name, std::string prefix_name)
+             Activation activation, std::string name, std::string prefix_name)
     : _model(model)
     , _name{std::move(name)}
     , _antecedents{}
     , _subsequents{}
     , _input_size{input_size}
     , _output_size{output_size}
+    , _activation{activation}
     , _last_input{nullptr}
 { 
     if (_name.empty())
@@ -70,6 +71,23 @@ Layer& Layer::operator=(const Layer& obj)
     _output_size = obj._output_size;
     _last_input = obj._last_input;
     return *this;
+}
+
+void Layer::next(const NumType *activations)
+{
+    // Forward to the next layers.
+    for (const auto& l: this->_subsequents)
+    {
+        l->forward(activations);
+    }
+}
+
+void Layer::previous(const NumType *gradients)
+{
+    for (const auto& l: _antecedents)
+    {
+        l->reverse(gradients);
+    }
 }
 
 SizeType Layer::input_size() const

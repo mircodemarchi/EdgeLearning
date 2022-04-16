@@ -49,6 +49,16 @@ class Model;
 class Layer 
 {
 public:
+    enum class Activation
+    {
+        ReLU,
+        Softmax,
+        TanH,
+        // Sigmoid, // TODO: Implement sigmoid activation function.
+        Linear,
+        None
+    };
+
     using SharedPtr = std::shared_ptr<Layer>;
 
     /**
@@ -56,11 +66,13 @@ public:
      * \param model       The model in which the layer takes part.
      * \param input_size  The size of inputs of the layer.
      * \param output_size The size of outputs of the layer.
+     * \param activation  The output activation function.
      * \param name        The name of the layer.
      * If empty, a default generated one is chosen.
      * \param prefix_name The prefix name of the default generated name.
      */
     Layer(Model& model, SizeType input_size = 0, SizeType output_size = 0,
+          Activation activation = Activation::None,
           std::string name = std::string(),
           std::string prefix_name = std::string());
 
@@ -105,6 +117,19 @@ public:
      * \param gradients NumType ptr dJ/dg(z)
      */
     virtual void reverse(const NumType *gradients) = 0;
+
+    /**
+     * \brief Pass activations vector, that contains the output of the layer
+     * after the non-linear function calculation, to the next layers.
+     * \param activations Activations parameters of size _output_size.
+     */
+    virtual void next(const NumType *activations);
+
+    /**
+     * \brief Pass the input_gradients vector to the previous layers.
+     * \param gradients Activations parameters of size _input_size.
+     */
+    virtual void previous(const NumType *gradients);
 
     /**
      * \brief Return the last input of the layer.
@@ -177,6 +202,8 @@ protected:
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
     SizeType _input_size;                  ///< Layer input size.
     SizeType _output_size;                 ///< Layer output size.
+
+    Activation _activation;
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss

@@ -42,25 +42,13 @@ class RecurrentLayer : public Layer
 {
 public:
     // TODO: test softmax output activation.
-    enum class OutputActivation
-    {
-        Linear,
-        // Softmax,
-    };
-
     // TODO: test relu and linear hidden activation.
-    enum class HiddenActivation
-    {
-        TanH,
-        // ReLU,
-        // Linear,
-    };
 
     RecurrentLayer(Model& model, std::string name = std::string(),
         SizeType input_size = 0, SizeType output_size = 0, SizeType hidden_size = 0,
         SizeType time_steps = 0,
-        OutputActivation output_activation = OutputActivation::Linear, 
-        HiddenActivation hidden_activation = HiddenActivation::TanH);
+        Activation output_activation = Activation::Linear, 
+        Activation hidden_activation = Activation::TanH);
 
     void init(RneType& rne) override;
 
@@ -130,8 +118,7 @@ public:
     void input_size(DLMath::Shape3d input_size) override;
 
 private:
-    OutputActivation _output_activation;
-    HiddenActivation _hidden_activation;
+    Activation _hidden_activation;
     SizeType _hidden_size;
 
     std::vector<NumType> _hidden_state;
@@ -159,7 +146,7 @@ private:
     /// \brief Biases to output of the layer. Size: _output_size. 
     std::vector<NumType> _biases_to_o;
 
-    /// \brief Activations of the layer. Size: _output_size. 
+    /// \brief Activations of the layer. Size: _output_size.
     std::vector<NumType> _activations;
 
     /**
@@ -183,13 +170,13 @@ private:
     /// \brief Biases gradients to output of the layer. Size: _output_size. 
     std::vector<NumType> _biases_to_o_gradients;
 
-    /// \brief Activation gradients of the layer. Size: _output_size. 
+    /// \brief Activation gradients of the layer. Size: _output_size.
     std::vector<NumType> _activation_gradients;
 
     /**
-     * \brief Input gradients of the layer. Size: _input_size. 
-     * This buffer is used to store temporary gradients used in a **singe** 
-     * backpropagation pass. Note that this does not accumulate like the weight 
+     * \brief Input gradients of the layer. Size: _input_size.
+     * This buffer is used to store temporary gradients used in a **single**
+     * backpropagation pass. Note that this does not accumulate like the weight
      * and bias gradients do.
      */
     std::vector<NumType> _input_gradients;

@@ -43,9 +43,9 @@ public:
     /**
      * \brief Construct a new LossLayer object.
      * \param model
-     * \param name
      * \param input_size
      * \param batch_size
+     * \param name
      * \param prefix_name
      */
     LossLayer(Model& model,
