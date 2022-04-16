@@ -77,8 +77,8 @@ SizeType Layer::input_size() const
     return _input_size;
 }
 
-void Layer::input_size(SizeType input_size) {
-    _input_size = input_size;
+void Layer::input_size(DLMath::Shape3d input_size) {
+    _input_size = input_size.height;
 }
 
 SizeType Layer::output_size() const

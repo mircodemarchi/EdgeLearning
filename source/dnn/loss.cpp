@@ -85,9 +85,9 @@ void LossLayer::print() const
         << "\t" << (accuracy() * 100.0) << "%% correct" << std::endl;
 }
 
-void LossLayer::input_size(SizeType input_size) {
+void LossLayer::input_size(DLMath::Shape3d input_size) {
     Layer::input_size(input_size);
-    _gradients.resize(input_size);
+    _gradients.resize(input_size.height);
 }
 
 } // namespace EdgeLearning

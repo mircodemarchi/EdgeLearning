@@ -30,6 +30,7 @@
 #define EDGE_LEARNING_DNN_LAYER_HPP
 
 #include "type.hpp"
+#include "dlmath.hpp"
 
 #include <cstdint>
 #include <string>
@@ -159,7 +160,7 @@ public:
      * \return The size of the layer input.
      */
     [[nodiscard]] virtual SizeType input_size() const;
-    virtual void input_size(SizeType input_size);
+    virtual void input_size(DLMath::Shape3d input_size);
 
     /**
      * \brief Getter of input_size class field.

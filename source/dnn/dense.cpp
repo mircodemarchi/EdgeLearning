@@ -303,12 +303,12 @@ void DenseLayer::print() const
     std::cout << std::endl;
 }
 
-void DenseLayer::input_size(SizeType input_size)
+void DenseLayer::input_size(DLMath::Shape3d input_size)
 {
     Layer::input_size(input_size);
-    _weights.resize(_output_size * input_size);
-    _weight_gradients.resize(_output_size * input_size);
-    _input_gradients.resize(input_size);
+    _weights.resize(_output_size * input_size.height);
+    _weight_gradients.resize(_output_size * input_size.height);
+    _input_gradients.resize(input_size.height);
 }
 
 } // namespace EdgeLearning

@@ -127,7 +127,7 @@ public:
     {
         return Layer::input_size();
     }
-    void input_size(SizeType input_size) override;
+    void input_size(DLMath::Shape3d input_size) override;
 
 private:
     OutputActivation _output_activation;

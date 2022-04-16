@@ -565,12 +565,12 @@ void RecurrentLayer::print() const
     std::cout << std::endl;
 }
 
-void RecurrentLayer::input_size(SizeType input_size) {
+void RecurrentLayer::input_size(DLMath::Shape3d input_size) {
     Layer::input_size(input_size);
-    auto ih_size = input_size * _hidden_size;
+    auto ih_size = input_size.height * _hidden_size;
     _weights_i_to_h.resize(ih_size);
     _weights_i_to_h_gradients.resize(ih_size);
-    _input_gradients.resize(input_size * _time_steps);
+    _input_gradients.resize(input_size.height * _time_steps);
 }
 
 } // namespace EdgeLearning
