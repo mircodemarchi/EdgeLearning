@@ -443,11 +443,6 @@ void RecurrentLayer::reverse(const NumType *gradients)
     Layer::previous(_input_gradients.data());
 }
 
-const NumType* RecurrentLayer::last_input()
-{
-    return _last_input;
-}
-
 const NumType* RecurrentLayer::last_output()
 {
     return _activations.data();

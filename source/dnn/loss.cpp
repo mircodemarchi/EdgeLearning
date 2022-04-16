@@ -50,16 +50,6 @@ void LossLayer::set_target(NumType const* target)
     _target = target;
 }
 
-const NumType* LossLayer::last_input()
-{
-    return _last_input;
-}
-
-const NumType* LossLayer::last_output()
-{
-    return nullptr;
-}
-
 NumType LossLayer::accuracy() const
 {
     return static_cast<NumType>(_correct) 

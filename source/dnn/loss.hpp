@@ -96,9 +96,6 @@ public:
      */
     NumType* gradient(SizeType index) override { (void) index; return nullptr; }
 
-    const NumType* last_input() override;
-    const NumType* last_output() override;
-
     /**
      * \brief Setter of the target object.
      * During training, this must be set to the expected target distribution for 

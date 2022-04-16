@@ -70,6 +70,8 @@ public:
      */
     virtual void reverse(const NumType *gradients) override;
 
+    const NumType* last_output() override { return _activations.data(); }
+
     void next(const NumType *activations = nullptr) override;
     void previous(const NumType *gradients = nullptr) override;
 

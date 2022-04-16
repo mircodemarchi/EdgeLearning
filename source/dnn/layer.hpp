@@ -135,7 +135,7 @@ public:
      * \brief Return the last input of the layer.
      * \return const NumType* The last input of the layer of input size.
      */
-    virtual const NumType* last_input() { return _last_input; };
+    const NumType* last_input() { return _last_input; };
 
     /**
      * \brief Return the last output of the layer.

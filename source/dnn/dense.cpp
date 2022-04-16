@@ -178,16 +178,6 @@ void DenseLayer::reverse(const NumType *gradients)
     FeedforwardLayer::previous();
 }
 
-const NumType* DenseLayer::last_input()
-{
-    return _last_input;
-}
-
-const NumType* DenseLayer::last_output()
-{
-    return _activations.data();
-}
-
 NumType* DenseLayer::param(SizeType index)
 {
     if (index < _weights.size())

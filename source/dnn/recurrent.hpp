@@ -64,7 +64,6 @@ public:
      */
     void reverse(const NumType *gradients) override;
 
-    const NumType* last_input() override;
     const NumType* last_output() override;
 
     /**
