@@ -587,7 +587,7 @@ public:
     }
 
     /**
-     * \brief Convolution 3D of a source matrix and a squared kernel.
+     * \brief Convolution 2D of a source 2D matrix and a squared kernel.
      * \tparam T        Type of each source and destination elements.
      * \param dst       The destination matrix in which put the resulting
      *                  matrix.
@@ -617,7 +617,7 @@ public:
     }
 
     /**
-     * \brief Convolution 3D of a source matrix and a squared kernel.
+     * \brief Convolution 2D of a 3D source matrix and a cubic kernel.
      * \tparam T        Type of each source and destination elements.
      * \param dst       The destination matrix in which put the resulting
      *                  matrix.
@@ -644,8 +644,42 @@ public:
                      const T* k, Shape2d k_shape,
                      Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
+        return conv4d<T>(dst, src, Shape3d(src_shape), k, k_shape, 1, s, p);
+    }
+
+    /**
+     * \brief Multi Convolution 2D of a 3D source matrix iterated on n_filters
+     * of cubic kernel.
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       The destination matrix in which put the resulting
+     *                  matrix.
+     * \param src       The source matrix on which calculate the convolution.
+     * \param src_shape The shape of the source matrix: height, width, channels.
+     * \param k         The kernel matrix to use for convolution.
+     * \param k_shape   The shape of the kernel: height, width.
+     * The third dimension is the same of the src matrix.
+     * \param n_filters The number of filters contained in k to apply to the
+     *                  matrix.
+     * \param s         The stride amount: the number of cells that the kernel
+     *                  will move. It is defined in 2d: the width is the amount
+     *                  stride when moving from left to right, the height
+     *                  from up to down.
+     * \param p         The padding of the source matrix to include defined in
+     *                  2d: the width is the amount padding introduced in right
+     *                  and left side, the height in up and down side.
+     * \return The pointer to the destination matrix.
+     *
+     * The destination matrix will be of shape:
+     *  width_dst  = ((width_src  - width_k  + (2 * p)) / s) + 1
+     *  height_dst = ((height_src - height_k + (2 * p)) / s) + 1
+     */
+    template <typename T>
+    static T* conv4d(T* dst, const T* src, Shape3d src_shape,
+                     const T* k, Shape2d k_shape, SizeType n_filters = 1,
+                     Shape2d s = {1, 1}, Shape2d p = {0, 0})
+    {
         return _kernel_slide<T>(
-            _conv3d_op<T>, dst, src, src_shape, k, k_shape, s, p);
+            _conv4d_op<T>, dst, src, src_shape, k, k_shape, n_filters, s, p);
     }
 
     /**
@@ -672,7 +706,7 @@ public:
                        Shape2d k_shape, Shape2d s = {1, 1})
     {
         return _kernel_slide<T>(
-            _max_pool_op<T>, dst, src, src_shape, nullptr, k_shape, s);
+            _max_pool_op<T>, dst, src, src_shape, nullptr, k_shape, 1, s);
     }
 
     /**
@@ -700,7 +734,7 @@ public:
                        Shape2d k_shape, Shape2d s = {1, 1})
     {
         return _kernel_slide<T>(
-            _avg_pool_op<T>, dst, src, src_shape, nullptr, k_shape, s);
+            _avg_pool_op<T>, dst, src, src_shape, nullptr, k_shape, 1, s);
     }
 
 private:
@@ -720,6 +754,8 @@ private:
      *                  average pooling and max pooling).
      * \param k_shape   The shape of the kernel: height, width.
      *                  The third dimension is the same of the src matrix.
+     * \param n_filters The number of filters contained in k to apply to the
+     *                  matrix.
      * \param s         The stride amount: the number of cells that the kernel
      *                  will move. It is defined in 2d: the width is the amount
      *                  stride when moving from left to right, the height
@@ -737,10 +773,11 @@ private:
     static T* _kernel_slide(
         std::function<void(T*, Shape2d, Coord2d,
                            const T*, Shape3d,
-                           const T*, Shape2d,
+                           const T*, Shape2d, SizeType,
                            int64_t, int64_t)> k_to_src_operation,
         T* dst, const T* src, Shape3d src_shape,
-        const T* k, Shape2d k_shape, Shape2d s = {1, 1}, Shape2d p = {0, 0})
+        const T* k, Shape2d k_shape, SizeType n_filters = 1,
+        Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
         s.width = std::max(s.width, SizeType(1));
         s.height = std::max(s.height, SizeType(1));
@@ -759,7 +796,7 @@ private:
                     - static_cast<int64_t>(p.height);
                 k_to_src_operation(
                     dst, {height_dst, width_dst}, {row_dst, col_dst},
-                    src, src_shape, k, k_shape, row, col);
+                    src, src_shape, k, k_shape, n_filters, row, col);
             }
         }
         return dst;
@@ -774,6 +811,8 @@ private:
      * \param k         The kernel matrix to use for convolution.
      * \param k_shape   The shape of the kernel: height, width.
      *                  The third dimension is the same of the src matrix.
+     * \param n_filters The number of filters contained in k to apply to the
+     *                  matrix.
      * \param col       The column in which the kernel is moved over the source
      *                  matrix.
      * \param row       The row in which the kernel is moved over the source
@@ -782,31 +821,37 @@ private:
      * source matrix in the current position.
      */
     template <typename T>
-    static void _conv3d_op(T* dst, Shape2d dst_shape, Coord2d dst_coord,
+    static void _conv4d_op(T* dst, Shape2d dst_shape, Coord2d dst_coord,
                            const T* src, Shape3d src_shape,
-                           const T* k, Shape2d k_shape,
+                           const T* k, Shape2d k_shape, SizeType n_filters,
                            int64_t row, int64_t col)
     {
-        T sum = 0;
-        auto k_size = k_shape.height * k_shape.width * src_shape.channels;
+        auto k_size = k_shape.height * k_shape.width
+            * src_shape.channels;
         auto k_step = k_shape.width * src_shape.channels;
         auto src_step = src_shape.width * src_shape.channels;
-        for (SizeType k_i = 0; k_i < k_size; ++k_i)
+        for (SizeType f = 0; f < n_filters; ++f)
         {
-            auto row_k = k_i / k_step;
-            auto col_k = k_i % k_step;
-            auto row_src = row + static_cast<int64_t>(row_k);
-            auto col_src = col + static_cast<int64_t>(col_k);
-            if (col_src < 0 || row_src < 0 ||
-                col_src >= static_cast<int64_t>(src_step) ||
-                row_src >= static_cast<int64_t>(src_shape.height))
+            T sum = 0;
+            for (SizeType k_i = 0; k_i < k_size; ++k_i)
             {
-                continue; //< zero-padding.
+                auto row_k = k_i / k_step;
+                auto col_k = k_i % k_step;
+                auto row_src = row + static_cast<int64_t>(row_k);
+                auto col_src = col + static_cast<int64_t>(col_k);
+                if (col_src < 0 || row_src < 0 ||
+                    col_src >= static_cast<int64_t>(src_step) ||
+                    row_src >= static_cast<int64_t>(src_shape.height))
+                {
+                    continue; //< zero-padding.
+                }
+                sum += src[row_src * static_cast<int64_t>(src_step)
+                           + col_src] * k[k_i * n_filters + f];
             }
-            sum += src[row_src * static_cast<int64_t>(src_step)
-                       + col_src] * k[k_i];
+            dst[dst_coord.row * dst_shape.width * n_filters
+                + dst_coord.col * n_filters
+                + f] = sum;
         }
-        dst[dst_coord.row * dst_shape.width + dst_coord.col] = sum;
     }
 
     /**
@@ -817,6 +862,8 @@ private:
      * \param k         Parameter not used (nullptr).
      * \param k_shape   The shape of the kernel: height, width.
      *                  The third dimension is the same of the src matrix.
+     * \param n_filters The number of filters contained in k to apply to the
+     *                  matrix.
      * \param col       The column in which the kernel is moved over the source
      *                  matrix.
      * \param row       The row in which the kernel is moved over the source
@@ -827,9 +874,11 @@ private:
     template <typename T>
     static void _max_pool_op(T* dst, Shape2d dst_shape, Coord2d dst_coord,
                           const T* src, Shape3d src_shape,
-                          const T* k, Shape2d k_shape, int64_t row, int64_t col)
+                          const T* k, Shape2d k_shape, SizeType n_filters,
+                          int64_t row, int64_t col)
     {
         (void) k;
+        (void) n_filters;
         auto src_step = src_shape.width * src_shape.channels;
         auto dst_step = dst_shape.width * src_shape.channels;
         for (SizeType c = 0; c < src_shape.channels; ++c)
@@ -864,6 +913,8 @@ private:
      * \param k         Parameter not used (nullptr).
      * \param k_shape   The shape of the kernel: height, width.
      *                  The third dimension is the same of the src matrix.
+     * \param n_filters The number of filters contained in k to apply to the
+     *                  matrix.
      * \param col       The column in which the kernel is moved over the source
      *                  matrix.
      * \param row       The row in which the kernel is moved over the source
@@ -874,9 +925,11 @@ private:
     template <typename T>
     static void _avg_pool_op(T* dst, Shape2d dst_shape, Coord2d dst_coord,
                           const T* src, Shape3d src_shape,
-                          const T* k, Shape2d k_shape, int64_t row, int64_t col)
+                          const T* k, Shape2d k_shape, SizeType n_filters,
+                          int64_t row, int64_t col)
     {
         (void) k;
+        (void) n_filters;
         auto src_step = src_shape.width * src_shape.channels;
         auto dst_step = dst_shape.width * src_shape.channels;
         for (SizeType c = 0; c < src_shape.channels; ++c)
