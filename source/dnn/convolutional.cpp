@@ -78,13 +78,14 @@ ConvolutionalLayer::ConvolutionalLayer(
     , _stride(stride)
     , _padding(padding)
 {
-    // The weight parameters of a  are an NxM matrix.
-    _weights.resize(_kernel_shape.size() * n_filters);
+    // The weight parameters are composed by n_filters of kernel size.
+    _weights.resize(_kernel_shape.size() * input_shape.channels * n_filters);
 
-    // Each node in this layer is assigned a bias.
+    // The bias is incremented to the result of each filter.
     _biases.resize(n_filters);
 
-    _weight_gradients.resize(_kernel_shape.size() * n_filters);
+    _weight_gradients.resize(_kernel_shape.size() * input_shape.channels
+                             * n_filters);
     _bias_gradients.resize(n_filters);
 }
 
@@ -147,7 +148,13 @@ void ConvolutionalLayer::forward(const NumType *inputs)
     // Remember the last input data for backpropagation.
     _last_input = inputs;
 
-    // TODO:
+    /*
+     * Perform convolution with n_filters of kernel size contained in
+     * _weights vector on the input 3D matrix.
+     */
+    DLMath::conv4d<NumType>(_activations.data(), inputs, _input_shape,
+                            _weights.data(), _kernel_shape, _n_filters,
+                            _stride, _padding);
 
     FeedforwardLayer::forward(_activations.data());
 
