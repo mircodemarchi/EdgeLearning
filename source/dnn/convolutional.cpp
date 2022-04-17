@@ -172,23 +172,77 @@ void ConvolutionalLayer::reverse(const NumType *gradients)
 
 NumType* ConvolutionalLayer::param(SizeType index)
 {
-
+    if (index < _weights.size())
+    {
+        return &_weights[index];
+    }
+    return &_biases[index - _weights.size()];
 }
 
 NumType* ConvolutionalLayer::gradient(SizeType index)
 {
-
+    if (index < _weight_gradients.size())
+    {
+        return &_weight_gradients[index];
+    }
+    return &_bias_gradients[index - _weight_gradients.size()];
 }
 
 void ConvolutionalLayer::print() const
 {
     std::cout << _name << std::endl;
+    std::cout << "Weights ("
+        << _kernel_shape.height << " x "
+        << _kernel_shape.width  << " x "
+        << _input_shape.channels  << " x "
+        << _n_filters << ")" << std::endl;
 
+    for (SizeType r = 0; r < _kernel_shape.height; ++r)
+    {
+        SizeType r_offset = r * _kernel_shape.width * _input_shape.channels
+                            * _n_filters;
+        for (SizeType c = 0; c < _kernel_shape.width; ++c)
+        {
+            SizeType c_offset = c * _input_shape.channels * _n_filters;
+            for (SizeType ch = 0; ch < _input_shape.channels; ++ch)
+            {
+                SizeType ch_offset = ch * _n_filters;
+                std::cout << "\t[" << r << "," << c << "," << ch << ",0:"
+                          << _n_filters << "]" << std::endl;
+                for (SizeType f = 0; f < _n_filters - 1; ++f)
+                {
+                    std::cout << _weights[r_offset + c_offset + ch_offset + f]
+                        << ", ";
+                }
+                std::cout << _weights[r_offset + c_offset + ch_offset
+                                      + _n_filters - 1] << std::endl;
+            }
+        }
+    }
+    std::cout << "Biases (1 x 1 x " << _n_filters << ")" << std::endl;
+    for (SizeType i = 0; i < _n_filters; ++i)
+    {
+        std::cout << "\t" << _biases[i] << std::endl;
+    }
+    std::cout << std::endl;
 }
 
-void ConvolutionalLayer::input_size(DLMath::Shape3d input_size)
+void ConvolutionalLayer::input_size(DLMath::Shape3d input_shape)
 {
+    FeedforwardLayer::input_size(input_shape);
+    _weights.resize(_kernel_shape.size() * input_shape.channels * _n_filters);
+    _weight_gradients.resize(_kernel_shape.size() * input_shape.channels
+                             * _n_filters);
 
+    // Update input and output shape accordingly (see this constructor).
+    _input_shape = input_shape;
+    _output_shape = convolutional_output_shape(input_shape, _kernel_shape,
+                                               _stride, _padding, _n_filters);
+
+    // Update output size accordingly (see Layer and FeedforwardLayer constr.).
+    _output_size = _output_shape.size();
+    _activations.resize(_output_size);
+    _activation_gradients.resize(_output_size);
 }
 
 } // namespace EdgeLearning

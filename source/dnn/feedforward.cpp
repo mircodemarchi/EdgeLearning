@@ -147,8 +147,8 @@ void FeedforwardLayer::previous(const NumType *gradients)
 }
 
 void FeedforwardLayer::input_size(DLMath::Shape3d input_size) {
-    _input_size = input_size.height;
-    _input_gradients.resize(input_size.height);
+    Layer::input_size(input_size);
+    _input_gradients.resize(input_size.size());
 }
 
 
