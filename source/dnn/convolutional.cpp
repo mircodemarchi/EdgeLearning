@@ -44,10 +44,10 @@ static inline DLMath::Shape3d convolutional_output_shape(
 )
 {
     return {
-        convolutional_output_side(input_shape.width, kernel_shape.width,
-                                  stride.width, padding.width),
         convolutional_output_side(input_shape.height, kernel_shape.height,
                                   stride.height, padding.height),
+        convolutional_output_side(input_shape.width, kernel_shape.width,
+                                  stride.width, padding.width),
         n_filters};
 }
 
