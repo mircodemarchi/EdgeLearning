@@ -41,10 +41,6 @@ void MaxPoolingLayer::forward(const NumType *inputs)
     // Remember the last input data for backpropagation.
     _last_input = inputs;
 
-    /*
-     * Perform convolution with n_filters of kernel size contained in
-     * _weights vector on the input 3D matrix.
-     */
     DLMath::max_pool<NumType>(_activations.data(), inputs, _input_shape,
                               _kernel_shape, _stride);
 
@@ -56,6 +52,55 @@ void MaxPoolingLayer::forward(const NumType *inputs)
 void MaxPoolingLayer::reverse(const NumType *gradients)
 {
     FeedforwardLayer::reverse(gradients);
+
+    std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
+    auto gradients_op = [this](
+        NumType* dst, DLMath::Shape2d dst_shape, DLMath::Coord2d dst_coord,
+        const NumType* src, DLMath::Shape3d src_shape,
+        const NumType* k, DLMath::Shape2d k_shape, SizeType n_filters,
+        int64_t row, int64_t col)
+    {
+        // TODO: evaluate to optimize using the activations vector and the calculated max
+        (void) dst;
+        (void) k;
+        (void) n_filters;
+        auto src_step = src_shape.width * src_shape.channels;
+        auto dst_step = dst_shape.width * src_shape.channels;
+        for (SizeType c = 0; c < src_shape.channels; ++c)
+        {
+            auto output_gradient = _activation_gradients[
+                dst_coord.row * dst_step
+                + dst_coord.col * src_shape.channels
+                + c];
+
+            NumType max = src[row * static_cast<int64_t>(src_step)
+                              + col + static_cast<int64_t>(c)];
+            int64_t max_row = 0, max_col = 0;
+            for (SizeType k_i = 1; k_i < k_shape.height * k_shape.width; ++k_i)
+            {
+                auto row_k = k_i / k_shape.width;
+                auto col_k = k_i % k_shape.width;
+                auto row_src = (row + static_cast<int64_t>(row_k))
+                    * static_cast<int64_t>(src_step);
+                auto col_src = col
+                    + static_cast<int64_t>(col_k * src_shape.channels)
+                    + static_cast<int64_t>(c);
+                auto curr_val = src[row_src + col_src];
+                if (curr_val > max)
+                {
+                    max = curr_val;
+                    max_row = row_src;
+                    max_col = col_src;
+                }
+            }
+            _input_gradients[static_cast<std::size_t>(max_row + max_col)]
+                += output_gradient;
+        }
+    };
+    DLMath::kernel_slide<NumType>(
+        gradients_op, nullptr, _last_input, _input_shape,
+        nullptr, _kernel_shape,
+        1, _stride, {0, 0});
 
     FeedforwardLayer::previous();
 }
