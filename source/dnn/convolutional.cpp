@@ -165,7 +165,77 @@ void ConvolutionalLayer::reverse(const NumType *gradients)
 {
     FeedforwardLayer::reverse(gradients);
 
-    // TODO:
+    /*
+     * Bias gradient. Calculate dJ/db = dJ/dz.
+     *
+     * Shape of gradients: out_height * out_width * n_filters.
+     * Shape of bias: n_filters.
+     */
+    for (SizeType f = 0; f < _n_filters; ++f)
+    {
+        NumType sum = 0;
+        for (SizeType r = 0; r < _output_shape.height; ++r)
+        {
+            auto step = _output_shape.width * _n_filters;
+            for (SizeType c = 0; c < _output_shape.width; ++c)
+            {
+                sum += _activation_gradients[r * step + c * _n_filters + f];
+            }
+        }
+        _bias_gradients[f] = sum;
+    }
+
+    /*
+     * Weight gradient. Calculate dJ/dw_i_j = dJ/dz * x_j.
+     * Input gradient. Calculate dJ/dx = dJ/dz * W.
+     *
+     * Shape of gradients: out_height * out_width * n_filters.
+     * Shape of input: in_height * in_width * channels.
+     * Shape of input gradients: in_height * in_width * channels.
+     * Shape of kernel: k_height * k_width * channels.
+     * Shape of weight: k_height * k_width * channels * n_filters.
+     * Shape of weight gradients: k_height * k_width * channels * n_filters.
+     */
+    std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
+    auto gradients_op = [this](
+        NumType* dst, DLMath::Shape2d dst_shape, DLMath::Coord2d dst_coord,
+        const NumType* src, DLMath::Shape3d src_shape,
+        const NumType* k, DLMath::Shape2d k_shape, SizeType n_filters,
+        int64_t row, int64_t col)
+    {
+        auto k_size = k_shape.size() * src_shape.channels;
+        auto k_step = k_shape.width * src_shape.channels;
+        auto src_step = src_shape.width * src_shape.channels;
+        for (SizeType f = 0; f < n_filters; ++f)
+        {
+            auto output_gradient = _activation_gradients[
+                dst_coord.row * dst_shape.width * n_filters
+                + dst_coord.col * n_filters + f];
+            for (SizeType k_i = 0; k_i < k_size; ++k_i)
+            {
+                auto row_k = k_i / k_step;
+                auto col_k = k_i % k_step;
+                auto row_src = row + static_cast<int64_t>(row_k);
+                auto col_src = col + static_cast<int64_t>(col_k);
+                if (col_src < 0 || row_src < 0 ||
+                    col_src >= static_cast<int64_t>(src_step) ||
+                    row_src >= static_cast<int64_t>(src_shape.height))
+                {
+                    continue; //< zero-padding.
+                }
+                _input_gradients[
+                    row_src * static_cast<int64_t>(src_step)
+                    + col_src] += k[k_i * n_filters + f] * output_gradient;
+                _weight_gradients[k_i * n_filters + f]
+                    += src[row_src * static_cast<int64_t>(src_step) + col_src]
+                        * output_gradient;
+            }
+        }
+    };
+    DLMath::kernel_slide<NumType>(
+        gradients_op, nullptr, _last_input, _input_shape,
+        _weights.data(), _kernel_shape,
+        _n_filters, _stride, _padding);
 
     FeedforwardLayer::previous();
 }

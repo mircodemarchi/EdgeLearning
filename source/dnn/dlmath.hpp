@@ -825,8 +825,7 @@ private:
                            const T* k, Shape2d k_shape, SizeType n_filters,
                            int64_t row, int64_t col)
     {
-        auto k_size = k_shape.height * k_shape.width
-            * src_shape.channels;
+        auto k_size = k_shape.size() * src_shape.channels;
         auto k_step = k_shape.width * src_shape.channels;
         auto src_step = src_shape.width * src_shape.channels;
         for (SizeType f = 0; f < n_filters; ++f)
