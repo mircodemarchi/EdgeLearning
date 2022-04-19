@@ -13,6 +13,7 @@ add_library(${LIBRARY_NAME} OBJECT
     convolutional.cpp
     pooling.cpp
     max_pooling.cpp
+    avg_pooling.cpp
 )
 
 if(COVERAGE)

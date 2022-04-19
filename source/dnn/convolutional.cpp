@@ -203,6 +203,7 @@ void ConvolutionalLayer::reverse(const NumType *gradients)
         const NumType* k, DLMath::Shape2d k_shape, SizeType n_filters,
         int64_t row, int64_t col)
     {
+        (void) dst;
         auto k_size = k_shape.size() * src_shape.channels;
         auto k_step = k_shape.width * src_shape.channels;
         auto src_step = src_shape.width * src_shape.channels;
@@ -223,9 +224,9 @@ void ConvolutionalLayer::reverse(const NumType *gradients)
                 {
                     continue; //< zero-padding.
                 }
-                _input_gradients[
+                _input_gradients[static_cast<std::size_t>(
                     row_src * static_cast<int64_t>(src_step)
-                    + col_src] += k[k_i * n_filters + f] * output_gradient;
+                    + col_src)] += k[k_i * n_filters + f] * output_gradient;
                 _weight_gradients[k_i * n_filters + f]
                     += src[row_src * static_cast<int64_t>(src_step) + col_src]
                         * output_gradient;
