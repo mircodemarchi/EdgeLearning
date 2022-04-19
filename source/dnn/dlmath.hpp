@@ -678,7 +678,7 @@ public:
                      const T* k, Shape2d k_shape, SizeType n_filters = 1,
                      Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
-        return _kernel_slide<T>(
+        return kernel_slide<T>(
             _conv4d_op<T>, dst, src, src_shape, k, k_shape, n_filters, s, p);
     }
 
@@ -705,7 +705,7 @@ public:
     static T* max_pool(T* dst, const T* src, Shape3d src_shape,
                        Shape2d k_shape, Shape2d s = {1, 1})
     {
-        return _kernel_slide<T>(
+        return kernel_slide<T>(
             _max_pool_op<T>, dst, src, src_shape, nullptr, k_shape, 1, s);
     }
 
@@ -733,11 +733,9 @@ public:
     static T* avg_pool(T* dst, const T* src, Shape3d src_shape,
                        Shape2d k_shape, Shape2d s = {1, 1})
     {
-        return _kernel_slide<T>(
+        return kernel_slide<T>(
             _avg_pool_op<T>, dst, src, src_shape, nullptr, k_shape, 1, s);
     }
-
-private:
 
     /**
      * \brief Kernel slicing on the source matrix.
@@ -770,7 +768,7 @@ private:
      *  height_dst = ((height_src - f + (2 * p)) / s) + 1
      */
     template <typename T>
-    static T* _kernel_slide(
+    static T* kernel_slide(
         std::function<void(T*, Shape2d, Coord2d,
                            const T*, Shape3d,
                            const T*, Shape2d, SizeType,
@@ -802,6 +800,7 @@ private:
         return dst;
     }
 
+private:
     /**
      * \brief Sum of multiplication between the kernel and the source matrix
      * for Convolution 3D.
