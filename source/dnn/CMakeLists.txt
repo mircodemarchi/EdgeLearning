@@ -11,6 +11,7 @@ add_library(${LIBRARY_NAME} OBJECT
     gd_optimizer.cpp
     recurrent.cpp
     convolutional.cpp
+    pooling.cpp
 )
 
 if(COVERAGE)

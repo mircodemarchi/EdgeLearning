@@ -32,7 +32,7 @@ namespace EdgeLearning {
 
 static inline SizeType convolutional_output_side(
     SizeType input_side, SizeType kernel_side,
-    SizeType padding, SizeType stride
+    SizeType stride, SizeType padding
     )
 {
     return ((input_side - kernel_side + (2 * padding)) / stride) + 1ULL;
@@ -45,9 +45,9 @@ static inline DLMath::Shape3d convolutional_output_shape(
 {
     return {
         convolutional_output_side(input_shape.width, kernel_shape.width,
-                                  padding.width, stride.width),
+                                  stride.width, padding.width),
         convolutional_output_side(input_shape.height, kernel_shape.height,
-                                  padding.height, stride.height),
+                                  stride.height, padding.height),
         n_filters};
 }
 
