@@ -12,6 +12,7 @@ add_library(${LIBRARY_NAME} OBJECT
     recurrent.cpp
     convolutional.cpp
     pooling.cpp
+    max_pooling.cpp
 )
 
 if(COVERAGE)

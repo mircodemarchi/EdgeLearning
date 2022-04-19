@@ -57,26 +57,6 @@ public:
     void init(RneType& rne) override { (void) rne; };
 
     /**
-     * \brief The input data should have size _input_size, that is the shape of
-     * the input matrix height x width x channels.
-     * \param inputs The input matrix of input size = height * width * channels.
-     */
-    virtual void forward(const NumType *inputs) override = 0;
-
-    /**
-     * \brief The gradient data should have size _output_size.
-     * Compute dJ/dz = dJ/dg(z) * dg(z)/dz
-     * where dJ/dg(z) is the input gradients, dg(z)/dz is the activation_grad 
-     * computed in the function and dJ/dz will be the result saved in 
-     * _activation_gradients.
-     * \param gradients The gradients of the subsequent layer. The size of
-     * the gradients is _output_size that is: h_out x w_out x n_filters, where
-     *  h_out  = ((h_in - h_kernel) / h_stride) + 1
-     *  w_out  = ((w_in - w_kernel) / w_stride) + 1
-     */
-    void reverse(const NumType *gradients) override = 0;
-
-    /**
      * \brief The pooling Layer doesn't have any learnable parameters.
      * \return SizeType 0.
      */
@@ -112,7 +92,7 @@ public:
      */
     void input_size(DLMath::Shape3d input_shape) override;
 
-private:
+protected:
     /// \brief Input shape. Size: height * width * channels (_input_size).
     DLMath::Shape3d _input_shape;
     /**
