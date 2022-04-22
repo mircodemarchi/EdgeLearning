@@ -7,6 +7,7 @@ set(UNIT_TESTS
     test_recurrent
     test_convolutional
     test_max_pooling
+    test_avg_pooling
     test_model
 )
 
