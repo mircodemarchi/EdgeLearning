@@ -166,12 +166,14 @@ private:
     }
 
     void test_cce_loss_layer() {
+        SizeType input_size = 1;
+        SizeType batch_size = 1;
         auto l = CCELossLayer(_m, "cce_loss_layer_test",
-                              1, 2);
+                              input_size, batch_size);
         std::vector<NumType> v1{0};
         std::vector<NumType> target_not_active{0};
         std::vector<NumType> target_active{1};
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
         EDGE_LEARNING_TEST_FAIL(l.forward(v1.data()));
         EDGE_LEARNING_TEST_THROWS(l.forward(v1.data()),
@@ -213,6 +215,18 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_input(), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), v2.data());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output(), nullptr);
+
+        input_size = 2;
+        auto l_binary = CCELossLayer(_m, "cce_loss_layer_test", input_size);
+        std::vector<NumType> v3{0.6, 0.4};
+        std::vector<NumType> target_right{1, 0};
+        std::vector<NumType> target_wrong{0, 1};
+        EDGE_LEARNING_TEST_TRY(l_binary.set_target(target_right.data()));
+        EDGE_LEARNING_TEST_TRY(l_binary.forward(v3.data()));
+        EDGE_LEARNING_TEST_TRY(l_binary.reverse(v3.data()));
+        EDGE_LEARNING_TEST_TRY(l_binary.set_target(target_wrong.data()));
+        EDGE_LEARNING_TEST_TRY(l_binary.forward(v3.data()));
+        EDGE_LEARNING_TEST_TRY(l_binary.reverse(v3.data()));
     }
 
     Model _m = Model("model_cce_loss_layer_test");
