@@ -85,6 +85,10 @@ public:
 
     void print() const override;
 
+    [[nodiscard]] SizeType input_size() const override
+    {
+        return Layer::input_size();
+    }
     /**
      * \brief Input shape setter. In this layer, all the 3 fields contained in
      * DLMath::Shape3d are used to calculate the layer input size.

@@ -35,7 +35,8 @@ static inline SizeType convolutional_output_side(
     SizeType stride, SizeType padding
     )
 {
-    return ((input_side - kernel_side + (2 * padding)) / stride) + 1ULL;
+    return input_side == 0 ?
+        0 : ((input_side - kernel_side + (2 * padding)) / stride) + 1ULL;
 }
 
 static inline DLMath::Shape3d convolutional_output_shape(

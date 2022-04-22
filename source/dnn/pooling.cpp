@@ -32,7 +32,7 @@ static inline SizeType pooling_output_side(
     SizeType input_side, SizeType kernel_side, SizeType stride
     )
 {
-    return ((input_side - kernel_side) / stride) + 1ULL;
+    return input_side == 0 ? 0 : ((input_side - kernel_side) / stride) + 1ULL;
 }
 
 static inline DLMath::Shape3d pooling_output_shape(

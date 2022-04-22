@@ -46,7 +46,7 @@ public:
            std::string name = std::string(),
            Activation activation = Activation::ReLU,
            DLMath::Shape3d input_shape = {0, 0, 1},
-           DLMath::Shape2d kernel_shape = {0}, SizeType n_filters = 0,
+           DLMath::Shape2d kernel_shape = {0}, SizeType n_filters = 1,
            DLMath::Shape2d stride = {1}, DLMath::Shape2d padding = {0});
 
     void init(RneType& rne) override;

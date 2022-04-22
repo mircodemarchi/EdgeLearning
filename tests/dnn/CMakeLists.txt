@@ -6,6 +6,7 @@ set(UNIT_TESTS
     test_dense
     test_recurrent
     test_convolutional
+    test_max_pooling
     test_model
 )
 
