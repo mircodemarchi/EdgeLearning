@@ -30,7 +30,7 @@ using namespace std;
 using namespace EdgeLearning;
 
 
-class TestRecurrent {
+class TestRecurrentLayer {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
@@ -128,6 +128,6 @@ private:
 };
 
 int main() {
-    TestRecurrent().test();
+    TestRecurrentLayer().test();
     return EDGE_LEARNING_TEST_FAILURES;
 }

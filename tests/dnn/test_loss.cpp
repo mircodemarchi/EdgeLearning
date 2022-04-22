@@ -70,7 +70,7 @@ private:
     Model _m;
 };
 
-class TestLoss {
+class TestLossLayer {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
@@ -202,6 +202,6 @@ private:
 };
 
 int main() {
-    TestLoss().test();
+    TestLossLayer().test();
     return EDGE_LEARNING_TEST_FAILURES;
 }

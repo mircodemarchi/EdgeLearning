@@ -30,7 +30,7 @@ using namespace std;
 using namespace EdgeLearning;
 
 
-class TestCCELoss {
+class TestCCELossLayer {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
@@ -219,6 +219,6 @@ private:
 };
 
 int main() {
-    TestCCELoss().test();
+    TestCCELossLayer().test();
     return EDGE_LEARNING_TEST_FAILURES;
 }

@@ -5,6 +5,7 @@ set(UNIT_TESTS
     test_cce_loss
     test_dense
     test_recurrent
+    test_convolutional
     test_model
 )
 
