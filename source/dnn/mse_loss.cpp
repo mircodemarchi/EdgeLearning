@@ -39,6 +39,10 @@ MSELossLayer::MSELossLayer(Model& model, std::string name,
 
 void MSELossLayer::forward(const NumType *inputs)
 {
+    if (_target == nullptr)
+    {
+        throw std::runtime_error("_target is null, set_target not called");
+    }
     _loss = DLMath::mean_squared_error(_target, inputs, _input_size);
     _cumulative_loss += _loss;
 
