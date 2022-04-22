@@ -45,8 +45,8 @@ public:
     // TODO: test relu and linear hidden activation.
 
     RecurrentLayer(Model& model, std::string name = std::string(),
-        SizeType input_size = 0, SizeType output_size = 0, SizeType hidden_size = 0,
-        SizeType time_steps = 0,
+        SizeType input_size = 0, SizeType output_size = 0,
+        SizeType hidden_size = 0, SizeType time_steps = 0,
         Activation output_activation = Activation::Linear, 
         Activation hidden_activation = Activation::TanH);
 

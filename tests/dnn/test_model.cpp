@@ -39,7 +39,8 @@ using namespace EdgeLearning;
 class CustomLossLayer: public LossLayer {
 public:
     CustomLossLayer(Model& m, SizeType input_size = 0, SizeType batch_size = 1)
-            : LossLayer(m, input_size, batch_size, "custom_loss_layer_test")
+        : LossLayer(m, input_size, batch_size, "custom_loss_layer_test")
+        , _i{0}
     {
         _params.resize(input_size);
     }
@@ -49,17 +50,22 @@ public:
 
     void forward(const NumType *inputs) override {
         std::copy(inputs, inputs + _input_size, _params.begin());
+        _last_input = inputs;
+        if (_i++ % 2 == 0) ++_correct; else ++_incorrect;
+        _cumulative_loss += 2.0;
     }
     void reverse(const NumType *gradients) override { (void) gradients; }
 
 private:
     std::vector<NumType> _params;
+    SizeType _i;
 };
 
 class TestModel {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_model());
+        EDGE_LEARNING_TEST_CALL(test_getter());
         EDGE_LEARNING_TEST_CALL(test_load_save());
         EDGE_LEARNING_TEST_CALL(test_classifier_model());
         EDGE_LEARNING_TEST_CALL(test_classifier_model_predict());
@@ -93,6 +99,43 @@ private:
         EDGE_LEARNING_TEST_TRY(Model m_assign; m_assign = m);
         Model m_assign; m_assign = m;
         EDGE_LEARNING_TEST_EQUAL(m_assign.name(), "model");
+
+        SizeType input_size = 4;
+        SizeType output_size = 8;
+        EDGE_LEARNING_TEST_TRY(m.add_layer<DenseLayer>(
+            "first", Layer::Activation::ReLU, input_size, output_size));
+        EDGE_LEARNING_TEST_TRY(m.add_layer<DenseLayer>(
+            "first", Layer::Activation::ReLU, input_size, output_size));
+
+        auto l1 = m.add_layer<DenseLayer>(
+            "first", Layer::Activation::ReLU, input_size, output_size);
+        auto loss = m.add_loss<CustomLossLayer>(
+            output_size, BATCH_SIZE);
+        EDGE_LEARNING_TEST_TRY(m.create_back_arc(l1, loss));
+        EDGE_LEARNING_TEST_TRY(m.init());
+    }
+
+    void test_getter()
+    {
+        SizeType input_size = 4;
+        SizeType output_size = 8;
+        Model m{"model"};
+        auto l1 = m.add_layer<DenseLayer>(
+            "first", Layer::Activation::ReLU, input_size, output_size);
+        auto loss = m.add_loss<CustomLossLayer>(
+            output_size, BATCH_SIZE);
+        m.create_back_arc(l1, loss);
+        EDGE_LEARNING_TEST_EQUAL(m.input_size(), input_size);
+        EDGE_LEARNING_TEST_EQUAL(m.output_size(), output_size);
+        EDGE_LEARNING_TEST_EQUAL(m.layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(m.layers()[0], l1);
+
+        std::vector<NumType> input{1,2,3,4};
+        std::vector<NumType> target{1,2,3,4,5,6,7,8};
+        EDGE_LEARNING_TEST_TRY(m.step(input.data(), target.data()));
+        EDGE_LEARNING_TEST_TRY(m.step(input.data(), target.data()));
+        EDGE_LEARNING_TEST_EQUAL(m.accuracy(), 0.5);
+        EDGE_LEARNING_TEST_EQUAL(m.avg_loss(), 2.0);
     }
 
     void test_load_save()
@@ -258,7 +301,7 @@ private:
             {1.0, 0.0, 1.0, 0.0},
             {1.0, 0.0, 1.0, 0.0},
         };
-        
+
         // Model definition.
         Model m{"recurrent"};
         auto first_layer = m.add_layer<DenseLayer>(
@@ -286,7 +329,7 @@ private:
                     m.step(inputs[i].data(), targets[i].data());
                 }
 
-                std::cout << "Step " << i 
+                std::cout << "Step " << i
                     << " - loss: " << m.avg_loss()
                     << ", accuracy: " << m.accuracy()
                     << std::endl;

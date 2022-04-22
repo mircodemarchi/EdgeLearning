@@ -58,6 +58,11 @@ private:
             );
         auto m = CompileFNN<>(layers_descriptor, "regressor_model");
         EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
+
+        auto m_runtime_err = CompileFNN<>({}, "regressor_model_runtime_err");
+        EDGE_LEARNING_TEST_THROWS(
+            m_runtime_err.fit(dataset, EPOCHS, BATCH_SIZE, 0.03),
+            std::runtime_error);
     }
 
     void test_predict() {

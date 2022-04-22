@@ -259,7 +259,6 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.n_filters(), filters);
     }
 
-
     void test_setter()
     {
         DLMath::Shape3d in_shape{3,3,3};

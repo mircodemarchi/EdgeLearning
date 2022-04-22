@@ -35,6 +35,7 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
         EDGE_LEARNING_TEST_CALL(test_dense_layer());
+        EDGE_LEARNING_TEST_CALL(test_getter());
         EDGE_LEARNING_TEST_CALL(test_setter());
     }
 
@@ -152,14 +153,25 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_output(), nullptr);
     }
 
+    void test_getter()
+    {
+        SizeType input_size = 1;
+        SizeType output_size = 2;
+        auto l = DenseLayer(_m, "dense_layer_test",
+                            Layer::Activation::ReLU, input_size, output_size);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), output_size);
+    }
+
     void test_setter()
     {
         SizeType input_size = 1;
         auto l = DenseLayer(_m, "dense_layer_test",
                             Layer::Activation::ReLU, input_size, 1);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 1);
-        EDGE_LEARNING_TEST_CALL(l.input_size(10));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
+        input_size = 10;
+        EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
     }
 
 

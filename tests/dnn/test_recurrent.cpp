@@ -35,6 +35,8 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
         EDGE_LEARNING_TEST_CALL(test_recurrent_layer());
+        EDGE_LEARNING_TEST_CALL(test_getter());
+        EDGE_LEARNING_TEST_CALL(test_setter());
     }
 
 private:
@@ -122,6 +124,32 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 20);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_input(), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_output(), nullptr);
+    }
+
+    void test_getter()
+    {
+        SizeType input_size = 10;
+        SizeType output_size = 20;
+        SizeType hidden_size = 5;
+        auto l = RecurrentLayer(_m, "recurrent_layer_test",
+                                input_size, output_size, hidden_size);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), output_size);
+    }
+
+    void test_setter()
+    {
+        SizeType input_size = 1;
+        SizeType output_size = 20;
+        SizeType hidden_size = 5;
+        auto l = RecurrentLayer(_m, "recurrent_layer_test",
+                                input_size, output_size, hidden_size);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+        input_size = 10;
+        EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+
+        EDGE_LEARNING_TEST_TRY(l.set_initial_hidden_state({0, 1, 2, 3, 4}));
     }
 
     Model _m = Model("model_recurrent_layer_test");

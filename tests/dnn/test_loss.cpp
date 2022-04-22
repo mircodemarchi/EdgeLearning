@@ -38,16 +38,8 @@ public:
     { }
     void forward(const NumType *inputs) override {
         _last_input = inputs;
-        if (_i % 2 == 0)
-        {
-            ++_correct;
-        }
-        else
-        {
-            ++_incorrect;
-        }
+        if (_i++ % 2 == 0) ++_correct; else ++_incorrect;
         _cumulative_loss += 2.0;
-        ++_i;
     }
 
     void reverse(const NumType *gradients) override { (void) gradients; }
@@ -76,6 +68,8 @@ public:
         EDGE_LEARNING_TEST_CALL(test_layer());
         EDGE_LEARNING_TEST_CALL(test_loss_layer());
         EDGE_LEARNING_TEST_CALL(test_score());
+        EDGE_LEARNING_TEST_CALL(test_getter());
+        EDGE_LEARNING_TEST_CALL(test_setter());
     }
 
 private:
@@ -198,6 +192,24 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(l.reset_score());
         EDGE_LEARNING_TEST_ASSERT(l.accuracy() != l.accuracy());
         EDGE_LEARNING_TEST_ASSERT(l.avg_loss() != l.avg_loss());
+    }
+
+    void test_getter()
+    {
+        SizeType input_size = 1;
+        auto l = CustomLossLayer(input_size);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
+    }
+
+    void test_setter()
+    {
+        SizeType input_size = 1;
+        auto l = CustomLossLayer(input_size, 2);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+        input_size = 10;
+        EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
     }
 };
 
