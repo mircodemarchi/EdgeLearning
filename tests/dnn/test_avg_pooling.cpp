@@ -141,9 +141,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.last_input(), v1.data());
         EDGE_LEARNING_TEST_NOT_EQUAL(l.last_output(), nullptr);
 
-        std::vector<NumType> v2{2,2,2, 2,2,2, 2,2,2,
-                                2,2,2, 2,2,2, 2,2,2,
-                                2,2,2, 2,2,2, 2,2,2};
+        std::vector<NumType> v2{1,2,3, 4,5,6, 7,8,9,
+                                1,2,3, 4,5,6, 7,8,9,
+                                1,2,3, 4,5,6, 7,8,9};
         AvgPoolingLayer l_copy{l};
         EDGE_LEARNING_TEST_NOT_EQUAL(l_copy.last_input(), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input(), v1.data());
