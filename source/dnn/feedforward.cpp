@@ -130,20 +130,13 @@ void FeedforwardLayer::reverse(const NumType *gradients)
 void FeedforwardLayer::next(const NumType *activations)
 {
     (void) activations;
-    // Forward to the next layers.
-    for (const auto& l: this->_subsequents)
-    {
-        l->forward(_activations.data());
-    }
+    Layer::next(_activations.data());
 }
 
 void FeedforwardLayer::previous(const NumType *gradients)
 {
     (void) gradients;
-    for (const auto& l: _antecedents)
-    {
-        l->reverse(_input_gradients.data());
-    }
+    Layer::next(_input_gradients.data());
 }
 
 void FeedforwardLayer::input_size(DLMath::Shape3d input_size) {
