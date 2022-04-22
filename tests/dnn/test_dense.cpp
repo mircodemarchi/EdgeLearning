@@ -35,7 +35,7 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
         EDGE_LEARNING_TEST_CALL(test_dense_layer());
-        EDGE_LEARNING_TEST_CALL(test_input_size());
+        EDGE_LEARNING_TEST_CALL(test_setter());
     }
 
 private:
@@ -152,7 +152,7 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_output(), nullptr);
     }
 
-    void test_input_size()
+    void test_setter()
     {
         SizeType input_size = 1;
         auto l = DenseLayer(_m, "dense_layer_test",

@@ -96,6 +96,27 @@ public:
      */
     void input_size(DLMath::Shape3d input_shape) override;
 
+    /**
+     * \brief Input shape getter of Pooling layer.
+     * \return DLMath::Shape3d the input shape 3D.
+     */
+    [[nodiscard]] const DLMath::Shape3d& input_shape() const
+    { return _input_shape; }
+
+    /**
+     * \brief Output shape getter of Pooling layer.
+     * \return DLMath::Shape3d the output shape 3D.
+     */
+    [[nodiscard]] const DLMath::Shape3d& output_shape() const
+    { return _output_shape; }
+
+    /**
+     * \brief Kernel shape getter of Pooling layer.
+     * \return DLMath::Shape2d the kernel shape 2D.
+     */
+    [[nodiscard]] const DLMath::Shape2d& kernel_shape() const
+    { return _kernel_shape; }
+
 protected:
     /// \brief Input shape. Size: height * width * channels (_input_size).
     DLMath::Shape3d _input_shape;

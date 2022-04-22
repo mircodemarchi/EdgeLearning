@@ -35,7 +35,8 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
         EDGE_LEARNING_TEST_CALL(test_convolutional_layer());
-        EDGE_LEARNING_TEST_CALL(test_input_size());
+        EDGE_LEARNING_TEST_CALL(test_getter());
+        EDGE_LEARNING_TEST_CALL(test_setter());
     }
 
 private:
@@ -166,7 +167,33 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_output(), nullptr);
     }
 
-    void test_input_size()
+    void test_getter()
+    {
+        DLMath::Shape3d in_shape{3,3,3};
+        DLMath::Shape2d k_shape{2,2};
+        SizeType filters = 16;
+        auto l = ConvolutionalLayer(_m, "convolutional_layer_test",
+                                    Layer::Activation::ReLU,
+                                    in_shape, k_shape, filters);
+
+        EDGE_LEARNING_TEST_EQUAL(l.input_shape().height, in_shape.height);
+        EDGE_LEARNING_TEST_EQUAL(l.input_shape().width, in_shape.width);
+        EDGE_LEARNING_TEST_EQUAL(l.input_shape().channels, in_shape.channels);
+
+        EDGE_LEARNING_TEST_EQUAL(l.output_shape().height,
+                                 in_shape.height - k_shape.height + 1);
+        EDGE_LEARNING_TEST_EQUAL(l.output_shape().width,
+                                 in_shape.width - k_shape.width + 1);
+        EDGE_LEARNING_TEST_EQUAL(l.output_shape().channels, filters);
+
+        EDGE_LEARNING_TEST_EQUAL(l.kernel_shape().height, k_shape.height);
+        EDGE_LEARNING_TEST_EQUAL(l.kernel_shape().width, k_shape.width);
+
+        EDGE_LEARNING_TEST_EQUAL(l.n_filters(), filters);
+    }
+
+
+    void test_setter()
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};

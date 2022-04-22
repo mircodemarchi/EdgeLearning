@@ -35,7 +35,8 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
         EDGE_LEARNING_TEST_CALL(test_max_pooling_layer());
-        EDGE_LEARNING_TEST_CALL(test_input_size());
+        EDGE_LEARNING_TEST_CALL(test_getter());
+        EDGE_LEARNING_TEST_CALL(test_setter());
     }
 
 private:
@@ -164,7 +165,28 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_output(), nullptr);
     }
 
-    void test_input_size()
+    void test_getter()
+    {
+        DLMath::Shape3d in_shape{3,3,3};
+        DLMath::Shape2d k_shape{2,2};
+        auto l = MaxPoolingLayer(_m, "max_pooling_layer_test",
+                                 Layer::Activation::ReLU,
+                                 in_shape, k_shape);
+
+        EDGE_LEARNING_TEST_EQUAL(l.input_shape().height, in_shape.height);
+        EDGE_LEARNING_TEST_EQUAL(l.input_shape().width, in_shape.width);
+        EDGE_LEARNING_TEST_EQUAL(l.input_shape().channels, in_shape.channels);
+
+        EDGE_LEARNING_TEST_EQUAL(l.output_shape().height,
+                                 in_shape.height - k_shape.height + 1);
+        EDGE_LEARNING_TEST_EQUAL(l.output_shape().width,
+                                 in_shape.width - k_shape.width + 1);
+
+        EDGE_LEARNING_TEST_EQUAL(l.kernel_shape().height, k_shape.height);
+        EDGE_LEARNING_TEST_EQUAL(l.kernel_shape().width, k_shape.width);
+    }
+
+    void test_setter()
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
