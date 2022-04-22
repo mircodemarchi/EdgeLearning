@@ -78,7 +78,8 @@ public:
      */
     SizeType param_count() const noexcept override
     {
-        return (_input_size + 1UL) * _output_size;
+        return (_kernel_shape.size() * _input_shape.channels * _n_filters)
+            + _n_filters;
     }
 
     NumType* param(SizeType index) override;
