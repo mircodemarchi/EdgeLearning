@@ -60,6 +60,11 @@ public:
              SizeType batch_size = 1,
              NumType learning_rate = 0.03) override
     {
+        if (_layers_name.empty())
+        {
+            throw std::runtime_error(
+                "The FNN has no layer: call add before fit");
+        }
         ens::GradientDescent o(learning_rate, data.size());
         auto trainset = data.trainset().template to_arma<arma::Mat<T>>();
         auto labels = data.labels().template to_arma<arma::Mat<T>>();
