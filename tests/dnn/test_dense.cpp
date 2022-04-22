@@ -35,6 +35,7 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
         EDGE_LEARNING_TEST_CALL(test_dense_layer());
+        EDGE_LEARNING_TEST_CALL(test_input_size());
     }
 
 private:
@@ -150,6 +151,17 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), v2.data());
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_output(), nullptr);
     }
+
+    void test_input_size()
+    {
+        SizeType input_size = 1;
+        auto l = DenseLayer(_m, "dense_layer_test",
+                            Layer::Activation::ReLU, input_size, 1);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 1);
+        EDGE_LEARNING_TEST_CALL(l.input_size(10));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
+    }
+
 
     Model _m = Model("model_dense_layer_test");
 };
