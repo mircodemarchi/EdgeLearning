@@ -38,6 +38,8 @@ using namespace EdgeLearning;
 
 class TestDLMath {
 public:
+    using TestNumType = double;
+
     void test() {
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
         EDGE_LEARNING_TEST_CALL(test_unique());
@@ -68,7 +70,7 @@ private:
 
     void test_normal_pdf() {
         RneType generator{SEED};
-        auto dist = DLMath::normal_pdf<NumType>(0.0, 0.1);
+        auto dist = DLMath::normal_pdf<TestNumType>(0.0, 0.1);
         for (std::size_t i = 0; i < PRINT_TIMES; ++i)
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
@@ -142,9 +144,9 @@ private:
     }
 
     void test_relu() {
-        std::vector<NumType> test_vec{-2,-1,0,1,2};
-        std::vector<NumType> truth_vec{0,0,0,1,2};
-        DLMath::relu<NumType>(test_vec.data(), test_vec.data(), 
+        std::vector<TestNumType> test_vec{-2,-1,0,1,2};
+        std::vector<TestNumType> truth_vec{0,0,0,1,2};
+        DLMath::relu<TestNumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -156,11 +158,11 @@ private:
 
     void test_softmax() 
     {
-        std::vector<NumType> test_vec{-2,-1,0,1,2};
-        std::vector<NumType> truth_vec{
+        std::vector<TestNumType> test_vec{-2,-1,0,1,2};
+        std::vector<TestNumType> truth_vec{
             0.01165623095604, 0.031684920796124, 0.086128544436269,
             0.23412165725274, 0.63640864655883};
-        DLMath::softmax<NumType>(test_vec.data(), test_vec.data(), 
+        DLMath::softmax<TestNumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -171,9 +173,9 @@ private:
     }
 
     void test_relu_1() {
-        std::vector<NumType> test_vec{-2,-1,0,1,2};
-        std::vector<NumType> truth_vec{0,0,0,1,1};
-        DLMath::relu_1<NumType>(test_vec.data(), test_vec.data(), 
+        std::vector<TestNumType> test_vec{-2,-1,0,1,2};
+        std::vector<TestNumType> truth_vec{0,0,0,1,1};
+        DLMath::relu_1<TestNumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -184,11 +186,12 @@ private:
     }
 
     void test_softmax_1() {
-        std::vector<NumType> test_vec{-2.0,-1.0,0.0,1.0,2.0};
-        EDGE_LEARNING_TEST_FAIL(DLMath::softmax_1_opt<NumType>(test_vec.data(), 
-            test_vec.data(), test_vec.size()));
-        EDGE_LEARNING_TEST_EXECUTE(DLMath::softmax_1<NumType>(test_vec.data(), 
-            test_vec.data(), test_vec.size()));
+        std::vector<TestNumType> test_vec{-2.0,-1.0,0.0,1.0,2.0};
+        std::vector<TestNumType> test_gradients{1.0,1.0,1.0,1.0,1.0};
+        EDGE_LEARNING_TEST_FAIL(DLMath::softmax_1_opt<TestNumType>(test_vec.data(), 
+            test_vec.data(), test_gradients.data(), test_vec.size()));
+        EDGE_LEARNING_TEST_EXECUTE(DLMath::softmax_1<TestNumType>(test_vec.data(), 
+            test_vec.data(), test_gradients.data(), test_vec.size()));
         for (std::size_t i = 0; i < test_vec.size(); ++i)
         {
             std::cout << std::fixed << std::setprecision(40) 
@@ -197,25 +200,25 @@ private:
     }
 
     void test_cross_entropy() {
-        std::vector<NumType> test_y    {0.0, 0.0, 0.00, 0.00, 1.0};
-        std::vector<NumType> test_y_hat{0.1, 0.1, 0.25, 0.05, 0.5};
-        NumType truth_ce = 0.6931471805599453;
+        std::vector<TestNumType> test_y    {0.0, 0.0, 0.00, 0.00, 1.0};
+        std::vector<TestNumType> test_y_hat{0.1, 0.1, 0.25, 0.05, 0.5};
+        TestNumType truth_ce = 0.6931471805599453;
         auto ret = DLMath::cross_entropy(test_y.data(), test_y_hat.data(), 
             test_y_hat.size());
         EDGE_LEARNING_TEST_WITHIN(ret, truth_ce, 0.00000000001);
 
-        NumType test_val = 0.5;
-        NumType truth_val = 0.34657359027997264;
+        TestNumType test_val = 0.5;
+        TestNumType truth_val = 0.34657359027997264;
         ret = DLMath::cross_entropy(test_val, test_val);
         EDGE_LEARNING_TEST_WITHIN(ret, truth_val, 0.00000000001);
     }
 
     void test_cross_entropy_1() {
-        std::vector<NumType> test_y    {0.0, 0.0, 0.00, 0.00, 1.0};
-        std::vector<NumType> test_y_hat{0.1, 0.1, 0.25, 0.05, 0.5};
-        std::vector<NumType> truth_ce1 {0.0, 0.0, 0.00, 0.00, -2.0};
-        std::vector<NumType> ret_vec; ret_vec.resize(truth_ce1.size());
-        DLMath::cross_entropy_1(ret_vec.data(), test_y.data(), 
+        std::vector<TestNumType> test_y    {0.0, 0.0, 0.00, 0.00, 1.0};
+        std::vector<TestNumType> test_y_hat{0.1, 0.1, 0.25, 0.05, 0.5};
+        std::vector<TestNumType> truth_ce1 {0.0, 0.0, 0.00, 0.00, -2.0};
+        std::vector<TestNumType> ret_vec; ret_vec.resize(truth_ce1.size());
+        DLMath::cross_entropy_1<TestNumType>(ret_vec.data(), test_y.data(),
             test_y_hat.data(), 1.0, test_y_hat.size());
         for (std::size_t i = 0; i < truth_ce1.size(); ++i)
         {
@@ -223,38 +226,39 @@ private:
         }
         
 
-        NumType test_val = 0.5;
-        NumType truth_val = -1.0;
-        auto ret_val = DLMath::cross_entropy_1(test_val, test_val, 1.0);
+        TestNumType test_val = 0.5;
+        TestNumType truth_val = -1.0;
+        auto ret_val = DLMath::cross_entropy_1<TestNumType>(
+            test_val, test_val);
         EDGE_LEARNING_TEST_WITHIN(ret_val, truth_val, 0.00000000001);
     }
 
     void test_mean_squared_error() {
-        NumType test_val = 1.0;
-        NumType truth_val = 0.0;
+        TestNumType test_val = 1.0;
+        TestNumType truth_val = 0.0;
         auto ret = DLMath::squared_error(test_val, test_val);
         EDGE_LEARNING_TEST_WITHIN(ret, truth_val, 0.00000000001);
 
-        std::vector<NumType> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
-        std::vector<NumType> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
-        NumType truth_mse = 0.272;
+        std::vector<TestNumType> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
+        std::vector<TestNumType> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
+        TestNumType truth_mse = 0.272;
         ret = DLMath::mean_squared_error(test_y.data(), test_y_hat.data(), 
             test_y_hat.size());
         EDGE_LEARNING_TEST_WITHIN(ret, truth_mse, 0.00000000001);
     }
 
     void test_mean_squared_error_1() {
-        NumType test_val1 = 1.0;
-        NumType test_val2 = 1.5;
-        NumType truth_val = 0.5;
-        auto ret = DLMath::squared_error_1(test_val1, test_val2, 0.5);
+        TestNumType test_val1 = 1.0;
+        TestNumType test_val2 = 1.5;
+        TestNumType truth_val = 0.5;
+        auto ret = DLMath::squared_error_1<TestNumType>(test_val1, test_val2, 0.5);
         EDGE_LEARNING_TEST_WITHIN(ret, truth_val, 0.00000000001);
 
-        std::vector<NumType> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
-        std::vector<NumType> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
-        std::vector<NumType> truth_mse1 {0.2, -1.8, 0.4, 1.0, -1.0};
-        std::vector<NumType> ret_vec; ret_vec.resize(truth_mse1.size());
-        DLMath::mean_squared_error_1(ret_vec.data(), test_y.data(), 
+        std::vector<TestNumType> test_y    {1.0, 1.0, 1.0, 1.0, 1.0};
+        std::vector<TestNumType> test_y_hat{1.1, 0.1, 1.2, 1.5, 0.5};
+        std::vector<TestNumType> truth_mse1 {0.2, -1.8, 0.4, 1.0, -1.0};
+        std::vector<TestNumType> ret_vec; ret_vec.resize(truth_mse1.size());
+        DLMath::mean_squared_error_1<TestNumType>(ret_vec.data(), test_y.data(),
             test_y_hat.data(), 1.0, test_y_hat.size());
         for (std::size_t i = 0; i < truth_mse1.size(); ++i)
         {
@@ -263,26 +267,26 @@ private:
     }
 
     void test_max_argmax() {
-        std::vector<NumType> test_vec{0,1,5,4,3};
-        NumType truth_max = 5;
-        NumType ret_max = DLMath::max<NumType>(test_vec.data(), test_vec.size());
+        std::vector<TestNumType> test_vec{0,1,5,4,3};
+        TestNumType truth_max = 5;
+        TestNumType ret_max = DLMath::max<TestNumType>(test_vec.data(), test_vec.size());
         EDGE_LEARNING_TEST_EQUAL(ret_max, truth_max);
 
-        NumType truth_argmax = 2;
-        NumType ret_argmax = DLMath::argmax<NumType>(test_vec.data(), 
+        TestNumType truth_argmax = 2;
+        TestNumType ret_argmax = DLMath::argmax<TestNumType>(test_vec.data(), 
             test_vec.size());
         EDGE_LEARNING_TEST_EQUAL(ret_argmax, truth_argmax);
 
-        auto ret_tuple = DLMath::max_and_argmax<NumType>(test_vec.data(), 
+        auto ret_tuple = DLMath::max_and_argmax<TestNumType>(test_vec.data(), 
             test_vec.size());
         EDGE_LEARNING_TEST_EQUAL(std::get<0>(ret_tuple), truth_max);
         EDGE_LEARNING_TEST_EQUAL(std::get<1>(ret_tuple), truth_argmax);
     }
 
     void test_tanh() {
-        std::vector<NumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
-        std::vector<NumType> truth_vec{-1.0, 0.0, 0.76159416, 0.99999834, 1.0};
-        DLMath::tanh<NumType>(test_vec.data(), test_vec.data(), 
+        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<TestNumType> truth_vec{-1.0, 0.0, 0.76159416, 0.99999834, 1.0};
+        DLMath::tanh<TestNumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -293,10 +297,10 @@ private:
     }
 
     void test_tanh_1() {
-        std::vector<NumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
-        std::vector<NumType> truth_vec{8.24461455e-09, 1.00000000e+00, 
+        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<TestNumType> truth_vec{8.24461455e-09, 1.00000000e+00, 
             4.19974342e-01, 3.32610934e-06, 0.00000000e+00};
-        DLMath::tanh_1<NumType>(test_vec.data(), test_vec.data(), 
+        DLMath::tanh_1<TestNumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -312,21 +316,21 @@ private:
         SizeType f = 2;
         SizeType output_width = 2;
         SizeType output_height = 2;
-        std::vector<NumType> test_img{
+        std::vector<TestNumType> test_img{
             0, 1, 2,
             3, 4, 5,
             6, 7, 8.5
         };
-        std::vector<NumType> test_k{
+        std::vector<TestNumType> test_k{
             0, 0,
             0, 1
         };
-        std::vector<NumType> truth_vec{
+        std::vector<TestNumType> truth_vec{
             4, 5,
             7, 8.5
         };
-        std::vector<NumType> result(truth_vec.size());
-        DLMath::conv2d<NumType>(result.data(),
+        std::vector<TestNumType> result(truth_vec.size());
+        DLMath::conv2d<TestNumType>(result.data(),
                                 test_img.data(), {input_height, input_width},
                                 test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
@@ -344,14 +348,14 @@ private:
 
         output_width = 4;
         output_height = 4;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             0, 1, 2,   0,
             3, 4, 5,   0,
             6, 7, 8.5, 0,
             0, 0, 0,   0
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<NumType>(result.data(),
+        DLMath::conv2d<TestNumType>(result.data(),
                                 test_img.data(), {input_height, input_width},
                                 test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
@@ -369,12 +373,12 @@ private:
 
         output_width = 2;
         output_height = 2;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             0, 2,
             6, 8.5
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<NumType>(result.data(),
+        DLMath::conv2d<TestNumType>(result.data(),
                                 test_img.data(), {input_height, input_width},
                                 test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
@@ -395,23 +399,23 @@ private:
         f = 3;
         output_width = 3;
         output_height = 2;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             0,  1,  2,  4,  5,
             3,  4,  5,  6,  7,
             6,  7,  8,  9,  10,
             9,  10, 11, 12, 13
         };
-        test_k = std::vector<NumType>{
+        test_k = std::vector<TestNumType>{
             0, 0, 0,
             0, 1, 0,
             0, 0, 1
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             12, 14, 16,
             18, 20, 22
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<NumType>(result.data(),
+        DLMath::conv2d<TestNumType>(result.data(),
                                 test_img.data(), {input_height, input_width},
                                 test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
@@ -429,14 +433,14 @@ private:
 
         output_width = 5;
         output_height = 4;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             4,  6,  8,  11, 5,
             10, 12, 14, 16, 7,
             16, 18, 20, 22, 10,
             9,  10, 11, 12, 13
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<NumType>(result.data(),
+        DLMath::conv2d<TestNumType>(result.data(),
                                 test_img.data(), {input_height, input_width},
                                 test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
@@ -454,12 +458,12 @@ private:
 
         output_width = 3;
         output_height = 2;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             4,  8,  5,
             16, 20, 10,
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<NumType>(result.data(),
+        DLMath::conv2d<TestNumType>(result.data(),
                                 test_img.data(), {input_height, input_width},
                                 test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
@@ -483,21 +487,21 @@ private:
         SizeType f = 2;
         SizeType output_width = 2;
         SizeType output_height = 2;
-        std::vector<NumType> test_img{
+        std::vector<TestNumType> test_img{
             0,0, 1,1, 2,2,
             3,3, 4,4, 5,5,
             6,6, 7,7, 8.5,8.5
         };
-        std::vector<NumType> test_k{
+        std::vector<TestNumType> test_k{
             0,0, 0,0,
             0,0, 1,1
         };
-        std::vector<NumType> truth_vec{
+        std::vector<TestNumType> truth_vec{
             4+4, 5+5,
             7+7, 8.5+8.5
         };
-        std::vector<NumType> result(truth_vec.size());
-        DLMath::conv3d<NumType>(result.data(),
+        std::vector<TestNumType> result(truth_vec.size());
+        DLMath::conv3d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f});
@@ -516,14 +520,14 @@ private:
 
         output_width = 4;
         output_height = 4;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             0+0, 1+1, 2+2,     0+0,
             3+3, 4+4, 5+5,     0+0,
             6+6, 7+7, 8.5+8.5, 0+0,
             0+0, 0+0, 0+0,     0+0
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<NumType>(result.data(),
+        DLMath::conv3d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, {1, 1}, {1, 1});
@@ -542,12 +546,12 @@ private:
 
         output_width = 2;
         output_height = 2;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             0+0, 2+2,
             6+6, 8.5+8.5
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<NumType>(result.data(),
+        DLMath::conv3d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, {2, 2}, {1, 1});
@@ -570,23 +574,23 @@ private:
         f = 3;
         output_width = 3;
         output_height = 2;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             0,1,2,   4,5,0,   1,2,4,    5,0,1,   2,4,5,
             3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
             6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
             9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
         };
-        test_k = std::vector<NumType>{
+        test_k = std::vector<TestNumType>{
             0,0,0, 0,0,0, 0,0,0,
             0,0,0, 1,1,1, 0,0,0,
             0,0,0, 0,0,0, 1,1,1
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             40, 38, 41,
             58, 56, 59
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<NumType>(result.data(),
+        DLMath::conv3d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f});
@@ -605,14 +609,14 @@ private:
 
         output_width = 5;
         output_height = 4;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             19, 24, 21, 24, 11,
             37, 40, 38, 41, 18,
             55, 58, 56, 59, 27,
             30, 34, 33, 32, 36
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<NumType>(result.data(),
+        DLMath::conv3d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, {1, 1}, {1, 1});
@@ -631,12 +635,12 @@ private:
 
         output_width = 3;
         output_height = 2;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             19, 21, 11,
             55, 56, 27
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<NumType>(result.data(),
+        DLMath::conv3d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, {2, 2}, {1, 1});
@@ -662,24 +666,24 @@ private:
         SizeType n_filters = 2;
         SizeType output_width = 2 * n_filters;
         SizeType output_height = 2;
-        std::vector<NumType> test_img{
+        std::vector<TestNumType> test_img{
             0,0, 1,1, 2,2,
             3,3, 4,4, 5,5,
             6,6, 7,7, 8.5,8.5
         };
-        std::vector<NumType> test_k{
+        std::vector<TestNumType> test_k{
         /*  ----col0-----   ----col1-----  */
         /*  -ch0-   -ch1-   -ch0-   -ch1-  */
         /*  f0,f1   f0,f1   f0,f1   f0,f1  */
              0,0,    0,0,    0,0,    0,0,
              0,0,    0,0,    1,1,    1,0,
         };
-        std::vector<NumType> truth_vec{
+        std::vector<TestNumType> truth_vec{
             4+4,4, 5+5,5,
             7+7,7, 8.5+8.5,8.5
         };
-        std::vector<NumType> result(truth_vec.size());
-        DLMath::conv4d<NumType>(result.data(),
+        std::vector<TestNumType> result(truth_vec.size());
+        DLMath::conv4d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, n_filters);
@@ -698,14 +702,14 @@ private:
 
         output_width = 4 * n_filters;
         output_height = 4;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             0+0,0, 1+1,1, 2+2,2,       0+0,0,
             3+3,3, 4+4,4, 5+5,5,       0+0,0,
             6+6,6, 7+7,7, 8.5+8.5,8.5, 0+0,0,
             0+0,0, 0+0,0, 0+0,0,       0+0,0
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<NumType>(result.data(),
+        DLMath::conv4d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, n_filters,
@@ -725,12 +729,12 @@ private:
 
         output_width = 2 * n_filters;
         output_height = 2;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             0+0,0, 2+2,2,
             6+6,6, 8.5+8.5,8.5
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<NumType>(result.data(),
+        DLMath::conv4d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, n_filters,
@@ -754,13 +758,13 @@ private:
         f = 3;
         output_width = 3 * n_filters;
         output_height = 2;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             0,1,2,   4,5,0,   1,2,4,    5,0,1,   2,4,5,
             3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
             6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
             9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
         };
-        test_k = std::vector<NumType>{
+        test_k = std::vector<TestNumType>{
         /*  ------col0-------  ------col1-------  ------col2-------  */
         /*  -ch0- -ch1- -ch2-  -ch0- -ch1- -ch2-  -ch0- -ch1- -ch2-  */
         /*  f0,f1 f0,f1 f0,f1  f0,f1 f0,f1 f0,f1  f0,f1 f0,f1 f0,f1  */
@@ -768,12 +772,12 @@ private:
              0,0,  0,0,  0,0,   1,1,  1,0,  1,0,   0,0,  0,0,  0,0,
              0,0,  0,0,  0,0,   0,0,  0,0,  0,0,   1,1,  1,0,  1,0,
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             40,13, 38,14, 41,15,
             58,19, 56,20, 59,21
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<NumType>(result.data(),
+        DLMath::conv4d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, n_filters);
@@ -792,14 +796,14 @@ private:
 
         output_width = 5 * n_filters;
         output_height = 4;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             19,6,  24,8,  21,8,  24,10, 11,2,
             37,12, 40,13, 38,14, 41,15, 18,5,
             55,18, 58,19, 56,20, 59,21, 27,8,
             30,9,  34,12, 33,10, 32,13, 36,11
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<NumType>(result.data(),
+        DLMath::conv4d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, n_filters,
@@ -819,12 +823,12 @@ private:
 
         output_width = 3 * n_filters;
         output_height = 2;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             19,6,  21,8,  11,2,
             55,18, 56,20, 27,8,
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<NumType>(result.data(),
+        DLMath::conv4d<TestNumType>(result.data(),
                                 test_img.data(),
                                 {input_height, input_width, input_channels},
                                 test_k.data(), {f, f}, n_filters,
@@ -849,17 +853,17 @@ private:
         SizeType f = 2;
         SizeType output_width = 2;
         SizeType output_height = 2;
-        std::vector<NumType> test_img{
+        std::vector<TestNumType> test_img{
             10, 1, 2,
             3,  4, 5,
             6,  7, 8.5
         };
-        std::vector<NumType> truth_vec{
+        std::vector<TestNumType> truth_vec{
             10, 5,
             7,  8.5
         };
-        std::vector<NumType> result(truth_vec.size());
-        DLMath::max_pool<NumType>(
+        std::vector<TestNumType> result(truth_vec.size());
+        DLMath::max_pool<TestNumType>(
             result.data(), test_img.data(),
             {input_height, input_width}, {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -878,18 +882,18 @@ private:
         f = 3;
         output_width = 3;
         output_height = 2;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             10,  1,  2,  4,  5,
             3,   4,  5,  6,  7,
             6,   7,  8,  9,  10,
             9,   10, 11, 12, 13
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             10, 9,  10,
             11, 12, 13
         };
         result.resize(truth_vec.size());
-        DLMath::max_pool<NumType>(
+        DLMath::max_pool<TestNumType>(
             result.data(), test_img.data(), {input_height, input_width}, {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
             for (std::size_t c = 0; c < output_width; ++c) {
@@ -904,11 +908,11 @@ private:
 
         output_width = 2;
         output_height = 1;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             10, 10
         };
         result.resize(truth_vec.size());
-        DLMath::max_pool<NumType>(
+        DLMath::max_pool<TestNumType>(
             result.data(), test_img.data(), {input_height, input_width},
             {f, f}, {2, 2});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -926,18 +930,18 @@ private:
         output_width = 3;
         output_height = 2;
         auto step = output_width * channels;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
             3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
             6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
             9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             10,10,10, 10,10,10, 10,10,10,
             12,13,12, 13,13,12, 13,12,13
         };
         result.resize(truth_vec.size());
-        DLMath::max_pool<NumType>(
+        DLMath::max_pool<TestNumType>(
             result.data(), test_img.data(),
             {input_height, input_width, channels}, {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -957,17 +961,17 @@ private:
 
         output_width = 2;
         output_height = 1;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
             3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
             6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
             9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             10,10,10, 10,10,10,
         };
         result.resize(truth_vec.size());
-        DLMath::max_pool<NumType>(
+        DLMath::max_pool<TestNumType>(
             result.data(), test_img.data(),
             {input_height, input_width, channels}, {f, f}, {2, 2});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -992,17 +996,17 @@ private:
         SizeType f = 2;
         SizeType output_width = 2;
         SizeType output_height = 2;
-        std::vector<NumType> test_img{
+        std::vector<TestNumType> test_img{
             10, 1, 2,
             3,  4, 5,
             6,  7, 8.5
         };
-        std::vector<NumType> truth_vec{
+        std::vector<TestNumType> truth_vec{
             4.5, 3,
             5,   6.125
         };
-        std::vector<NumType> result(truth_vec.size());
-        DLMath::avg_pool<NumType>(
+        std::vector<TestNumType> result(truth_vec.size());
+        DLMath::avg_pool<TestNumType>(
             result.data(), test_img.data(), {input_height, input_width},
             {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -1021,18 +1025,18 @@ private:
         f = 3;
         output_width = 3;
         output_height = 2;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             10,  1,  2,  4,  5,
             3,   4,  5,  6,  7,
             6,   7,  8,  9,  10,
             9,   10, 11, 12, 13
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             46.0/9, 46.0/9, 56.0/9,
             63.0/9, 72.0/9, 81.0/9
         };
         result.resize(truth_vec.size());
-        DLMath::avg_pool<NumType>(
+        DLMath::avg_pool<TestNumType>(
             result.data(), test_img.data(), {input_height, input_width},
             {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -1048,11 +1052,11 @@ private:
 
         output_width = 2;
         output_height = 1;
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             46.0/9, 56.0/9
         };
         result.resize(truth_vec.size());
-        DLMath::avg_pool<NumType>(
+        DLMath::avg_pool<TestNumType>(
             result.data(), test_img.data(), {input_height, input_width}, 
             {f, f}, {2, 2});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -1070,18 +1074,18 @@ private:
         output_width = 3;
         output_height = 2;
         auto step = output_width * channels;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
             3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
             6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
             9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             50.0/9,49.0/9,53.0/9, 53.0/9,56.0/9,50.0/9, 49.0/9,53.0/9,53.0/9,
             66.0/9,75.0/9,69.0/9, 78.0/9,72.0/9,66.0/9, 75.0/9,69.0/9,78.0/9
         };
         result.resize(truth_vec.size());
-        DLMath::avg_pool<NumType>(
+        DLMath::avg_pool<TestNumType>(
             result.data(), test_img.data(),
             {input_height, input_width, channels}, {f, f});
         for (std::size_t r = 0; r < output_height; ++r) {
@@ -1101,17 +1105,17 @@ private:
 
         output_width = 2;
         output_height = 1;
-        test_img = std::vector<NumType>{
+        test_img = std::vector<TestNumType>{
             10,1,2,  4,5,10,  1,2,4,    5,10,1,  2,4,5,
             3,4,5,   6,7,3,   4,5,6,    7,3,4,   5,6,7,
             6,7,8,   9,10,6,  7,8,9,    10,6,7,  8,9,10,
             9,10,11, 12,13,9, 10,11,12, 13,9,10, 11,12,13
         };
-        truth_vec = std::vector<NumType>{
+        truth_vec = std::vector<TestNumType>{
             50.0/9,49.0/9,53.0/9, 49.0/9,53.0/9,53.0/9
         };
         result.resize(truth_vec.size());
-        DLMath::avg_pool<NumType>(
+        DLMath::avg_pool<TestNumType>(
             result.data(), test_img.data(),
             {input_height, input_width, channels}, {f, f}, {2, 2});
         for (std::size_t r = 0; r < output_height; ++r) {
