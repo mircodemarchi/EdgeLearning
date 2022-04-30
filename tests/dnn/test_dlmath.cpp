@@ -42,6 +42,7 @@ public:
 
     void test() {
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
+        EDGE_LEARNING_TEST_CALL(test_uniform_pdf());
         EDGE_LEARNING_TEST_CALL(test_unique());
         EDGE_LEARNING_TEST_CALL(test_arr_sum());
         EDGE_LEARNING_TEST_CALL(test_arr_mul());
@@ -66,33 +67,61 @@ public:
 
 private:
     const RneType::result_type SEED = 1;
-    const std::size_t PRINT_TIMES = 4;
+    const std::size_t PRINT_TIMES = 20;
 
     void test_normal_pdf() {
-        RneType generator{SEED};
+        std::random_device rd;
+        RneType generator{rd()};
         auto dist = DLMath::normal_pdf<TestNumType>(0.0, 0.1);
         for (std::size_t i = 0; i < PRINT_TIMES; ++i)
         {
-            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
-                + std::to_string(dist(generator)));
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(dist(generator)));
         }
 
-        std::random_device rd;
-        generator = RneType{rd()};
-        std::size_t gt1_count = 0, lt1_count = 0;
+        generator = RneType{SEED};
+        std::int64_t gt1_count = 0, lt1_count = 0;
         for (std::size_t i = 0; i < 10000; ++i)
         {
             if (dist(generator) > 0.0)
             {
                 ++gt1_count;
             }
-            else 
+            else
             {
                 ++lt1_count;
             }
         }
-        EDGE_LEARNING_TEST_PRINT("Normal distribution >0 count similar to <=0 count:"
+        EDGE_LEARNING_TEST_PRINT(
+            "Normal distribution >0 count similar to <=0 count:"
             + std::to_string(gt1_count) + ", " + std::to_string(lt1_count));
+        EDGE_LEARNING_TEST_WITHIN(gt1_count, lt1_count, 200);
+    }
+
+    void test_uniform_pdf() {
+        auto const range = 0.2;
+        std::random_device rd;
+        RneType generator{rd()};
+        auto dist = DLMath::uniform_pdf<TestNumType>(0.0, range);
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
+                + std::to_string(dist(generator)));
+            EDGE_LEARNING_TEST_ASSERT(dist(generator) <= (range / 2));
+            EDGE_LEARNING_TEST_ASSERT(dist(generator) >= -(range / 2));
+        }
+
+        generator = RneType{SEED};
+        std::int64_t gt1_count = 0, lt1_count = 0;
+        for (std::size_t i = 0; i < 10000; ++i)
+        {
+            if (dist(generator) > 0.0) ++gt1_count;
+            else ++lt1_count;
+        }
+        EDGE_LEARNING_TEST_PRINT(
+            "Normal distribution >0 count similar to <=0 count:"
+            + std::to_string(gt1_count) + ", " + std::to_string(lt1_count));
+        EDGE_LEARNING_TEST_WITHIN(gt1_count, lt1_count, 200);
     }
 
     void test_unique() {

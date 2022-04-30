@@ -315,8 +315,8 @@ int test_case_counter = 0;
 #define EDGE_LEARNING_TEST_WITHIN(expression,expected,tolerance)                         \
     {                                                                   \
         std::cout << #expression << " ~ " << #expected << ": " << std::flush; \
-        auto error=std::abs(expression-expected); \
-        Bool ok = (error <= tolerance);                       \
+        auto error=std::abs((expression)-(expected)); \
+        Bool ok = (error <= (tolerance));                       \
         if(ok) {                                                        \
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \

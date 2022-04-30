@@ -105,7 +105,6 @@ public:
     /**
      * \brief Gaussian Probability Density Function.
      * \tparam T      Input and output type.
-     * \param x       Input value to compute.
      * \param mean    Mean of the probability distribution required.
      * \param std_dev Standard Deviation of the probability distribution required.
      * \return std::function<T(RneType)> The distribution function.
@@ -113,15 +112,29 @@ public:
     template <typename T>
     static std::function<T(RneType&)> normal_pdf(NumType mean, NumType std_dev)
     {
-        T std_dev_coverage = std_dev;
-        
-        std::function<T(RneType&)> ret = 
-            [std_dev_coverage, mean](RneType& x) 
-        {
-            T rand = static_cast<T>(x()) / static_cast<T>(max_rand);
-            rand = (rand * std_dev_coverage) + mean;
-            return rand;
-        };
+        return std::normal_distribution<NumType>{mean, std_dev};
+    }
+
+    /**
+     * \brief Uniform Probability Density Function.
+     * \tparam T      Input and output type.
+     * \param center  Center of the probability distribution required.
+     * \param delta   Range in which the density function will expand.
+     * \return std::function<T(RneType)> The distribution function.
+     */
+    template <typename T>
+    static std::function<T(RneType&)> uniform_pdf(
+        NumType center, NumType delta)
+    {
+        delta /= 2.0;
+        std::function<T(RneType&)> ret =
+            [delta, center](RneType& x)
+            {
+                T rand = ((static_cast<T>(x()) / static_cast<T>(max_rand))
+                          * T{2.0}) - T{1.0};
+                rand = (rand * delta) + center;
+                return rand;
+            };
         return ret;
     }
 
