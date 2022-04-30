@@ -111,14 +111,14 @@ public:
      * \return std::function<T(RneType)> The distribution function.
      */
     template <typename T>
-    static std::function<T(RneType&)> normal_pdf(double mean, double std_dev)
+    static std::function<T(RneType&)> normal_pdf(NumType mean, NumType std_dev)
     {
-        T std_dev_coverage = T{3.0 * std_dev};
+        T std_dev_coverage = std_dev;
         
         std::function<T(RneType&)> ret = 
             [std_dev_coverage, mean](RneType& x) 
         {
-            T rand = ((static_cast<T>(x()) / static_cast<T>(max_rand)) * T{2.0}) - T{1.0};
+            T rand = static_cast<T>(x()) / static_cast<T>(max_rand);
             rand = (rand * std_dev_coverage) + mean;
             return rand;
         };
@@ -286,32 +286,63 @@ public:
     /**
      * \brief Derivative Optimized of Softmax Function with the value of the 
      * argmax already saved in the src array. Source and Destination has to be 
-     * differents.
+     * different. If Source and Destination pointers are equal, a runtime_error
+     * will be thrown.
      * softmax'(z)_i = \sum_j(
      *  softmax(z_i)(1 - softmax(z_i)) if i == j else -softmax(z_i)softmax(z_j))
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    Array to write the result. It has to be different by src.
-     * \param src    Array of read elements. It has to be different by dst.
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       Array to write the result. It has to be different by src.
+     * \param src       Array of input elements that has to already contains the
+     *                  Softmax results of the requested input.
+     *                  It has to be different by dst.
+     * \param gradients Softmax derivation has to be calculated with the
+     *                  reference of the backward gradients in input, in order
+     *                  to obtain the right result.
      * \param length Length of the arrays.
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* softmax_1_opt(T* dst, const T* src, SizeType length)
+    static T* softmax_1_opt(T* dst, const T* src, const T* gradients,
+                            SizeType length)
     {
         if (src == dst) 
         {
             throw std::runtime_error("src, dst have to be different "
-                                    "in order to perform softmax_1_opt");
+                                     "in order to perform softmax_1_opt");
         }
+        return softmax_1_opt_no_check(dst, src, gradients, length);
+    }
 
+    /**
+     * \brief Derivative Optimized of Softmax Function with the value of the
+     * argmax already saved in the src array. Source and Destination has to be
+     * different but if Source and Destination pointers are equal, no exception
+     * will be thrown.
+     * softmax'(z)_i = \sum_j(
+     *  softmax(z_i)(1 - softmax(z_i)) if i == j else -softmax(z_i)softmax(z_j))
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       Array to write the result. It has to be different by src.
+     * \param src       Array of input elements that has to already contains the
+     *                  Softmax results of the requested input.
+     *                  It has to be different by dst.
+     * \param gradients Softmax derivation has to be calculated with the
+     *                  reference of the backward gradients in input, in order
+     *                  to obtain the right result.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* softmax_1_opt_no_check(T* dst, const T* src, const T* gradients,
+                                     SizeType length)
+    {
         for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = T{0.0};
             for(SizeType j = 0; j < length; ++j)
             {
-                dst[i] += (i == j) 
-                    ? src[i] * (T{1.0} - src[i]) 
-                    : -src[i] * src[j];
+                dst[i] += (i == j)
+                          ? src[i] * (T{1.0} - src[i]) * gradients[j]
+                          : -src[i] * src[j] * gradients[j];
             }
         }
         return dst;
@@ -320,20 +351,26 @@ public:
     /**
      * \brief Derivative of Softmax Function.
      * softmax'(z)_i = \sum_j(
-     *  softmax(z_i)(1 - softmax(z_i)) if i == j else -softmax(z_i)softmax(z_j))
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    Array to write the result.
-     * \param src    Array of read elements.
+     *  softmax(z_i) * (1 - softmax(z_i)) * gradients[j] if i == j
+     *      else -softmax(z_i) * softmax(z_j) * gradients[j])
+     * \tparam T        Type of each source and destination elements.
+     * \param dst       Array to write the result.
+     * \param src       Array of input elements that will be used for Softmax
+     *                  calculus.
+     * \param gradients Softmax derivation has to be calculated with the
+     *                  reference of the backward gradients in input, in order
+     *                  to obtain the right result.
      * \param length Length of the arrays.
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* softmax_1(T* dst, const T* src, SizeType length)
+    static T* softmax_1(T* dst, const T* src, const T* gradients,
+                        SizeType length)
     {
         T* tmp = new T[length];
         assert(tmp);
         softmax(tmp, src, length);
-        softmax_1_opt(dst, tmp, length);
+        softmax_1_opt_no_check(dst, tmp, gradients, length);
         delete[] tmp;
         return dst;
     }
@@ -383,10 +420,9 @@ public:
      * \return T The resulting Cross-Entropy first derivative.
      */
     template <typename T>
-    static T cross_entropy_1(T y, T y_hat, T norm)
+    static T cross_entropy_1(T y, T y_hat, T norm = T(1))
     {
-        return norm * (-y / (std::max(y_hat, 
-            std::numeric_limits<T>::epsilon())));
+        return norm * (-y / (std::max(y_hat, std::numeric_limits<T>::min())));
     }
 
     /**
@@ -401,7 +437,7 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* cross_entropy_1(T* dst, const T* y, const T* y_hat, T norm, 
+    static T* cross_entropy_1(T* dst, const T* y, const T* y_hat, T norm,
         SizeType length)
     {
         for (SizeType i = 0; i < length; ++i)
