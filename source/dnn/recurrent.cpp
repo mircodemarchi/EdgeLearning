@@ -101,8 +101,10 @@ void RecurrentLayer::init(RneType& rne)
              * https://arxiv.org/pdf/1706.02515.pdf
              * Normal distribution with variance := sqrt( 1 / n_in )
              */
-            sigma_i = std::sqrt(1.0 / static_cast<NumType>(_input_size));
-            sigma_h = std::sqrt(1.0 / static_cast<NumType>(_hidden_size));
+            sigma_i = std::sqrt(
+                NumType{1.0} / static_cast<NumType>(_input_size));
+            sigma_h = std::sqrt(
+                NumType{1.0} / static_cast<NumType>(_hidden_size));
             break;
         }
     }

@@ -67,7 +67,7 @@ public:
      * \brief Weight matrix entries + bias entries.
      * \return SizeType
      */
-    SizeType param_count() const noexcept override
+    [[nodiscard]] SizeType param_count() const noexcept override
     {
         return (_input_size + 1UL) * _output_size;
     }

@@ -74,12 +74,12 @@ void FeedforwardLayer::forward(const NumType *inputs)
 
 void FeedforwardLayer::reverse(const NumType *gradients)
 {
-    // Calculate dg(z)/dz and put in _activation_gradients.
     switch (_activation)
     {
         case Activation::ReLU:
         {
             /*
+             * Calculate dg(z)/dz and put in _activation_gradients.
              * The input for ReLU derivation is the _activations vector, that
              * is filled with the ReLU of vector z, and not directly the vector
              * z. Considering that the input of ReLU derivation is used only
@@ -91,40 +91,47 @@ void FeedforwardLayer::reverse(const NumType *gradients)
                 _activation_gradients.data(),
                 _activations.data(),
                 _output_size);
+            // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
+            DLMath::arr_mul(_activation_gradients.data(),
+                            _activation_gradients.data(),
+                            gradients, _output_size);
             break;
         }
         case Activation::Softmax:
         {
             /*
-             * The softmax derivation explits the calculus of softmax performed
+             * Calculate dJ/dz.
+             * The softmax derivation exploits the calculus of softmax performed
              * previously and saved in _activations vector.
              */
-            DLMath::softmax_1_opt<NumType>(
+            DLMath::softmax_1_opt_no_check<NumType>(
                 _activation_gradients.data(),
-                _activations.data(),
+                _activations.data(), gradients,
                 _output_size);
             break;
         }
         case Activation::TanH:
         {
+            // Calculate dg(z)/dz and put in _activation_gradients.
             DLMath::tanh_1<NumType>(
                 _activation_gradients.data(),
                 _activations.data(),
                 _output_size);
+            // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
+            DLMath::arr_mul(_activation_gradients.data(),
+                            _activation_gradients.data(),
+                            gradients, _output_size);
             break;
         }
         case Activation::Linear:
         default:
         {
-            std::fill(_activation_gradients.begin(),
-                      _activation_gradients.end(), NumType{1.0});
+            // Linear activation: dg(z)/dz = 1.
+            std::copy(gradients, gradients + _output_size,
+                      _activation_gradients.begin());
             break;
         }
     }
-
-    // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
-    DLMath::arr_mul(_activation_gradients.data(), _activation_gradients.data(),
-                    gradients, _output_size);
 }
 
 void FeedforwardLayer::next(const NumType *activations)
@@ -136,7 +143,7 @@ void FeedforwardLayer::next(const NumType *activations)
 void FeedforwardLayer::previous(const NumType *gradients)
 {
     (void) gradients;
-    Layer::next(_input_gradients.data());
+    Layer::previous(_input_gradients.data());
 }
 
 void FeedforwardLayer::input_size(DLMath::Shape3d input_size) {

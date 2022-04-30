@@ -106,7 +106,7 @@ RneType::result_type Model::init(RneType::result_type seed)
 
 void Model::train(Optimizer& optimizer)
 {
-    for (auto layer: _layers)
+    for (const auto& layer: _layers)
     {
         optimizer.train(*layer);
     }

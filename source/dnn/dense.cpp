@@ -61,7 +61,7 @@ void DenseLayer::init(RneType& rne)
              * https://arxiv.org/pdf/1502.01852.pdf
              * Nrmal distribution with variance := sqrt( 2 / n_in )
              */
-            sigma = std::sqrt(2.0 / static_cast<NumType>(_input_size));
+            sigma = std::sqrt(NumType{2.0} / static_cast<NumType>(_input_size));
             break;
         }
         case Activation::Softmax:
@@ -73,7 +73,7 @@ void DenseLayer::init(RneType& rne)
              * https://arxiv.org/pdf/1706.02515.pdf
              * Normal distribution with variance := sqrt( 1 / n_in )
              */
-            sigma = std::sqrt(1.0 / static_cast<NumType>(_input_size));
+            sigma = std::sqrt(NumType{1.0} / static_cast<NumType>(_input_size));
             break;
         }
     }

@@ -28,6 +28,7 @@ using namespace EdgeLearning;
 
 int main()
 {
+    const SizeType SEED          = 2608174595;
     const SizeType BATCH_SIZE    = 2;
     const SizeType EPOCHS        = 5;
     const SizeType INPUT_SIZE    = 4;
@@ -59,7 +60,8 @@ int main()
         "loss", OUTPUT_SIZE, BATCH_SIZE);
     m.create_edge(first_layer, output_layer);
     m.create_back_arc(output_layer, loss_layer);
-    m.init(2608174595);
+    m.init(SEED);
+    m.print();
 
     for (SizeType e = 0; e < EPOCHS; ++e)
     {
