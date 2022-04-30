@@ -1,5 +1,5 @@
 /***************************************************************************
- *            example/low_level_interface/ll_regression.cpp
+ *            example/low_level_interface/ll_classification.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -29,10 +29,10 @@ using namespace EdgeLearning;
 int main()
 {
     const SizeType BATCH_SIZE    = 2;
-    const SizeType EPOCHS        = 50;
+    const SizeType EPOCHS        = 5;
     const SizeType INPUT_SIZE    = 4;
     const SizeType OUTPUT_SIZE   = 2;
-    const NumType  LEARNING_RATE = 0.03;
+    const NumType  LEARNING_RATE = 0.3;
 
     std::vector<std::vector<NumType>> inputs = {
         {10.0, 1.0, 10.0, 1.0},
@@ -43,9 +43,9 @@ int main()
 
     std::vector<std::vector<NumType>> targets = {
         {1.0, 0.0},
-        {1.0, 0.4},
+        {0.0, 1.0},
         {1.0, 0.0},
-        {1.0, 0.4},
+        {0.0, 1.0},
     };
     
     // Model definition.
@@ -54,9 +54,9 @@ int main()
     auto first_layer = m.add_layer<DenseLayer>(
         "hidden", DenseLayer::Activation::ReLU, INPUT_SIZE, 8);
     auto output_layer = m.add_layer<DenseLayer>(
-        "output", DenseLayer::Activation::Linear, 8, OUTPUT_SIZE);
-    auto loss_layer = m.add_loss<MSELossLayer>(
-        "loss", OUTPUT_SIZE, BATCH_SIZE, 0.2);
+        "output", DenseLayer::Activation::Softmax, 8, OUTPUT_SIZE);
+    auto loss_layer = m.add_loss<CCELossLayer>(
+        "loss", OUTPUT_SIZE, BATCH_SIZE);
     m.create_edge(first_layer, output_layer);
     m.create_back_arc(output_layer, loss_layer);
     m.init(2608174595);
