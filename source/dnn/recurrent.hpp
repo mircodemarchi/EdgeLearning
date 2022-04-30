@@ -50,7 +50,10 @@ public:
         Activation output_activation = Activation::Linear, 
         Activation hidden_activation = Activation::TanH);
 
-    void init(RneType& rne) override;
+    void init(
+        ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
+        RneType rne = RneType(std::random_device{}()))
+        override;
 
     /**
      * \brief The input data should have size _input_size.

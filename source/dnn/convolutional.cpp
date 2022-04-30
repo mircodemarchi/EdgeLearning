@@ -90,7 +90,7 @@ ConvolutionalLayer::ConvolutionalLayer(
     _bias_gradients.resize(n_filters);
 }
 
-void ConvolutionalLayer::init(RneType& rne)
+void ConvolutionalLayer::init(ProbabilityDensityFunction pdf, RneType rne)
 {
     NumType sigma;
     switch (_activation)
@@ -125,7 +125,7 @@ void ConvolutionalLayer::init(RneType& rne)
      * different compilers and platforms, therefore I use my own 
      * distributions to provide deterministic results.
      */
-    auto dist = DLMath::normal_pdf<NumType>(0.0, sigma);
+    auto dist = DLMath::pdf<NumType>(0.0, sigma, pdf);
 
     for (NumType& w: _weights)
     {

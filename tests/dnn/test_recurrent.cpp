@@ -46,7 +46,10 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = RecurrentLayer(_m, "recurrent_layer_test"));
         auto l = RecurrentLayer(_m, "recurrent_layer_test");
-        EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
         EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l.print());
@@ -62,7 +65,10 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(RecurrentLayer l_copy{l});
         EDGE_LEARNING_TEST_TRY(RecurrentLayer l_copy{l});
         RecurrentLayer l_copy{l};
-        EDGE_LEARNING_TEST_TRY(RneType r; l_copy.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
         EDGE_LEARNING_TEST_TRY(l_copy.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l_copy.print());
@@ -80,7 +86,12 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 RecurrentLayer l_assign(_m); l_assign = l);
         RecurrentLayer l_assign(_m); l_assign = l;
-        EDGE_LEARNING_TEST_TRY(RneType r; l_assign.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
+                          RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
+                          RneType()));
         EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));
         EDGE_LEARNING_TEST_TRY(l_assign.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l_assign.print());

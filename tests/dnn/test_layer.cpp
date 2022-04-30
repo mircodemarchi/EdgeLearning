@@ -37,7 +37,14 @@ public:
                 "custom_layer_test")
         , _m{"model_layer_test"}
     { }
-    void init(RneType& rne) override { (void) rne; }
+    void init(
+        ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
+        RneType rne = RneType())
+        override
+    {
+        (void) pdf;
+        (void) rne;
+    }
     void forward(const NumType *inputs) override { _last_input = inputs; }
     void reverse(const NumType *gradients) override { (void) gradients; }
     void print() const override {}
@@ -52,7 +59,14 @@ public:
         : Layer(_m)
         , _m{"model_layer_test"}
     { }
-    void init(RneType& rne) override { (void) rne; }
+    void init(
+        ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
+        RneType rne = RneType())
+        override
+    {
+        (void) pdf;
+        (void) rne;
+    }
     void forward(const NumType *inputs) override { (void) inputs; }
     void reverse(const NumType *gradients) override { (void) gradients; }
     void print() const override {}
@@ -74,7 +88,10 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(auto l = CustomLayer());
         EDGE_LEARNING_TEST_TRY(auto l = CustomLayer());
         auto l = CustomLayer();
-        EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
         EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l.print());
@@ -96,7 +113,10 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(CustomLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(CustomLayer l2_copy{l});
         CustomLayer l_copy{l};
-        EDGE_LEARNING_TEST_TRY(RneType r; l_copy.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_NOT_EQUAL(l_copy.last_input(), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input(), v.data());
         EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
@@ -120,7 +140,12 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(CustomLayer l_assign; l_assign = l);
         EDGE_LEARNING_TEST_TRY(CustomLayer l_assign; l_assign = l);
         CustomLayer l_assign; l_assign = l;
-        EDGE_LEARNING_TEST_TRY(RneType r; l_assign.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
+                          RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
+                          RneType()));
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_input(), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), v.data());
         EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));

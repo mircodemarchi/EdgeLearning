@@ -144,11 +144,15 @@ public:
 
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 
-     * If the seed is 0 a new random seed is chosen instead. 
-     * \param seed Seed provided.  
+     * If the seed is 0 a new random seed is chosen instead.
+     * \param pdf  Distribution function to use.
+     * \param seed Seed provided.
      * \return RneType::result_type Seed used.
      */
-    RneType::result_type init(RneType::result_type seed = 0);
+    RneType::result_type init(
+        Layer::ProbabilityDensityFunction pdf
+            = Layer::ProbabilityDensityFunction::NORMAL,
+        RneType::result_type seed = 0);
 
     /**
      * \brief Adjust all model parameters of constituent layers using the 

@@ -47,7 +47,10 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = ConvolutionalLayer(_m, "convolutional_layer_test"));
         auto l = ConvolutionalLayer(_m, "convolutional_layer_test");
-        EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
@@ -64,7 +67,10 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(ConvolutionalLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(ConvolutionalLayer l2_copy{l});
         ConvolutionalLayer l_copy{l};
-        EDGE_LEARNING_TEST_TRY(RneType r; l_copy.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l_copy.reverse(nullptr));
@@ -81,7 +87,12 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(ConvolutionalLayer l_assign(_m); l_assign = l);
         EDGE_LEARNING_TEST_TRY(ConvolutionalLayer l_assign(_m); l_assign = l);
         ConvolutionalLayer l_assign(_m); l_assign = l;
-        EDGE_LEARNING_TEST_TRY(RneType r; l_assign.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
+                          RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
+                          RneType()));
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l_assign.reverse(nullptr));
@@ -137,7 +148,7 @@ private:
         auto l = ConvolutionalLayer(_m, "convolutional_layer_test",
                                     Layer::Activation::ReLU,
                                     in_shape, k_shape, filters);
-        EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v1.data()));
         EDGE_LEARNING_TEST_TRY(l.reverse(v1.data()));
         EDGE_LEARNING_TEST_NOT_EQUAL(l.last_input(), nullptr);
@@ -170,31 +181,31 @@ private:
         auto l_relu = ConvolutionalLayer(_m, "convolutional_layer_test_relu",
                                     Layer::Activation::ReLU,
                                     in_shape, k_shape, filters);
-        EDGE_LEARNING_TEST_TRY(RneType r; l_relu.init(r));
+        EDGE_LEARNING_TEST_TRY(l_relu.init());
         EDGE_LEARNING_TEST_TRY(l_relu.forward(v1.data()));
         EDGE_LEARNING_TEST_TRY(l_relu.reverse(v1.data()));
         auto l_linear = ConvolutionalLayer(_m, "convolutional_layer_test_linear",
                                          Layer::Activation::Linear,
                                          in_shape, k_shape, filters);
-        EDGE_LEARNING_TEST_TRY(RneType r; l_linear.init(r));
+        EDGE_LEARNING_TEST_TRY(l_linear.init());
         EDGE_LEARNING_TEST_TRY(l_linear.forward(v1.data()));
         EDGE_LEARNING_TEST_TRY(l_linear.reverse(v1.data()));
         auto l_softmax = ConvolutionalLayer(_m, "convolutional_layer_test_softmax",
                                             Layer::Activation::Softmax,
                                             in_shape, k_shape, filters);
-        EDGE_LEARNING_TEST_TRY(RneType r; l_softmax.init(r));
+        EDGE_LEARNING_TEST_TRY(l_softmax.init());
         EDGE_LEARNING_TEST_TRY(l_softmax.forward(v1.data()));
         EDGE_LEARNING_TEST_TRY(l_softmax.reverse(v1.data()));
         auto l_tanh = ConvolutionalLayer(_m, "convolutional_layer_test_tanh",
                                          Layer::Activation::TanH,
                                          in_shape, k_shape, filters);
-        EDGE_LEARNING_TEST_TRY(RneType r; l_tanh.init(r));
+        EDGE_LEARNING_TEST_TRY(l_tanh.init());
         EDGE_LEARNING_TEST_TRY(l_tanh.forward(v1.data()));
         EDGE_LEARNING_TEST_TRY(l_tanh.reverse(v1.data()));
         auto l_none = ConvolutionalLayer(_m, "convolutional_layer_test_none",
                                          Layer::Activation::None,
                                          in_shape, k_shape, filters);
-        EDGE_LEARNING_TEST_TRY(RneType r; l_none.init(r));
+        EDGE_LEARNING_TEST_TRY(l_none.init());
         EDGE_LEARNING_TEST_TRY(l_none.forward(v1.data()));
         EDGE_LEARNING_TEST_TRY(l_none.reverse(v1.data()));
 
@@ -207,7 +218,7 @@ private:
                                             Layer::Activation::ReLU,
                                             in_shape, k_shape, filters,
                                             stride, padding);
-        EDGE_LEARNING_TEST_TRY(RneType r; l_complex.init(r));
+        EDGE_LEARNING_TEST_TRY(l_complex.init());
         EDGE_LEARNING_TEST_TRY(l_complex.forward(v3.data()));
         EDGE_LEARNING_TEST_TRY(l_complex.reverse(v3.data()));
         EDGE_LEARNING_TEST_NOT_EQUAL(l_complex.last_input(), nullptr);

@@ -47,7 +47,7 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test"));
         auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test");
-        EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(l.init());
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
@@ -64,7 +64,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(AvgPoolingLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(AvgPoolingLayer l2_copy{l});
         AvgPoolingLayer l_copy{l};
-        EDGE_LEARNING_TEST_TRY(RneType r; l_copy.init(r));
+        EDGE_LEARNING_TEST_TRY(l_copy.init());
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l_copy.reverse(nullptr));
@@ -81,7 +81,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(AvgPoolingLayer l_assign(_m); l_assign = l);
         EDGE_LEARNING_TEST_TRY(AvgPoolingLayer l_assign(_m); l_assign = l);
         AvgPoolingLayer l_assign(_m); l_assign = l;
-        EDGE_LEARNING_TEST_TRY(RneType r; l_assign.init(r));
+        EDGE_LEARNING_TEST_TRY(l_assign.init());
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l_assign.reverse(nullptr));

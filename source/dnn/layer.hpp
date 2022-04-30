@@ -59,6 +59,7 @@ public:
         None
     };
 
+    using ProbabilityDensityFunction = DLMath::ProbabilityDensityFunction;
     using SharedPtr = std::shared_ptr<Layer>;
 
     /**
@@ -89,17 +90,21 @@ public:
 
     /**
      * \brief Assignment operator of a Layer object.
-     * \param obj
-     * \return Layer&
+     * \param obj       Layer object to copy.
+     * \return Layer&   The assigned Layer object.
      */
     Layer& operator=(const Layer& obj);
 
     /**
      * \brief Virtual method used to describe how a layer should be 
      * initialized.
-     * \param rne RneType
+     * \param pdf ProbabilityDensityFunction The distribution used.
+     * \param rne RneType                    The random generator.
      */
-    virtual void init(RneType& rne) = 0;
+    virtual void init(
+        ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
+        RneType rne = RneType(std::random_device{}()))
+        = 0;
 
     /**
      * \brief Virtual method used to perform forward propagations. During 

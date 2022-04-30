@@ -78,7 +78,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(auto l1 = CustomLossLayer());
         EDGE_LEARNING_TEST_TRY(auto l2 = CustomLossLayer());
         auto l = CustomLossLayer();
-        EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
         EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l.print());
@@ -100,7 +100,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(CustomLossLayer l_copy{l});
         EDGE_LEARNING_TEST_TRY(CustomLossLayer l_copy{l});
         CustomLossLayer l_copy{l};
-        EDGE_LEARNING_TEST_TRY(RneType r; l_copy.init(r));
+        EDGE_LEARNING_TEST_TRY(l_copy.init());
         EDGE_LEARNING_TEST_NOT_EQUAL(l_copy.last_input(), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input(), v.data());
         EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
@@ -124,7 +124,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(CustomLossLayer l_assign; l_assign = l);
         EDGE_LEARNING_TEST_TRY(CustomLossLayer l_assign; l_assign = l);
         CustomLossLayer l_assign; l_assign = l;
-        EDGE_LEARNING_TEST_TRY(RneType r; l_assign.init(r));
+        EDGE_LEARNING_TEST_TRY(l_assign.init());
         EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_input(), nullptr);
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), v.data());
         EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));
@@ -158,7 +158,7 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l2 = CustomLossLayer(0, 0));
         auto l = CustomLossLayer(6, 2);
-        EDGE_LEARNING_TEST_EXECUTE(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_EXECUTE(l.print());
         EDGE_LEARNING_TEST_EXECUTE(l.set_target(nullptr))
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 6);

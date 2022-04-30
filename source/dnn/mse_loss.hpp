@@ -43,12 +43,6 @@ public:
                  SizeType input_size = 0, SizeType batch_size = 1,
                  NumType loss_tolerance=0.1);
 
-    /**
-     * \brief No initiallization is needed for this layer.
-     * \param rne
-     */
-    void init(RneType& rne) override { (void) rne; };
-
     void forward(const NumType *inputs) override;
 
     /**

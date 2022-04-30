@@ -60,7 +60,7 @@ int main()
         "loss", OUTPUT_SIZE, BATCH_SIZE, 0.2);
     m.create_edge(first_layer, output_layer);
     m.create_back_arc(output_layer, loss_layer);
-    m.init(SEED);
+    m.init(Layer::ProbabilityDensityFunction::NORMAL, SEED);
     m.print();
 
     for (SizeType e = 0; e < EPOCHS; ++e)

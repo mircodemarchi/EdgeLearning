@@ -76,7 +76,7 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     _input_gradients.resize(_input_size * _time_steps);
 }
 
-void RecurrentLayer::init(RneType& rne)
+void RecurrentLayer::init(ProbabilityDensityFunction pdf, RneType rne)
 {
     NumType sigma_i, sigma_h;
     switch (_activation)
@@ -115,8 +115,8 @@ void RecurrentLayer::init(RneType& rne)
      * different compilers and platforms, therefore I use my own 
      * distributions to provide deterministic results.
      */
-    auto dist_i = DLMath::normal_pdf<NumType>(0.0, sigma_i);
-    auto dist_h = DLMath::normal_pdf<NumType>(0.0, sigma_h);
+    auto dist_i = DLMath::pdf<NumType>(0.0, sigma_i, pdf);
+    auto dist_h = DLMath::pdf<NumType>(0.0, sigma_h, pdf);
 
     for (NumType& w: _weights_i_to_h)
     {

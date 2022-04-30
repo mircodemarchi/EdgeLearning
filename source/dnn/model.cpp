@@ -84,7 +84,8 @@ void Model::create_edge(
     create_front_arc(src, dst);
 }
 
-RneType::result_type Model::init(RneType::result_type seed)
+RneType::result_type Model::init(Layer::ProbabilityDensityFunction pdf,
+                                 RneType::result_type seed)
 {
     if (seed == 0)
     {
@@ -97,9 +98,9 @@ RneType::result_type Model::init(RneType::result_type seed)
     RneType rne{seed};  
     for (auto& layer: _layers)
     {
-        layer->init(rne);
+        layer->init(pdf, rne);
     }
-    _loss_layer->init(rne);
+    _loss_layer->init(pdf, rne);
 
     return seed;
 }

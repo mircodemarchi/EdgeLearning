@@ -49,7 +49,10 @@ public:
            DLMath::Shape2d kernel_shape = {0}, SizeType n_filters = 0,
            DLMath::Shape2d stride = {1}, DLMath::Shape2d padding = {0});
 
-    void init(RneType& rne) override;
+    void init(
+        ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
+        RneType rne = RneType(std::random_device{}()))
+        override;
 
     /**
      * \brief The input data should have size _input_size, that is the shape of

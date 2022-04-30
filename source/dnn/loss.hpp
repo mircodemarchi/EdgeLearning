@@ -60,9 +60,17 @@ public:
 
     /**
      * \brief No initialization is needed for loss layers.
+     * \param pdf Not used.
      * \param rne Not used.
      */
-    void init(RneType& rne) override { (void) rne; };
+    void init(
+        ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
+        RneType rne = RneType(std::random_device{}()))
+        override
+    {
+        (void) pdf;
+        (void) rne;
+    };
 
     /**
      * \brief Method inheritance.

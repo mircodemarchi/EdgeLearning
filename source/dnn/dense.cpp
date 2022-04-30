@@ -49,7 +49,7 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     _bias_gradients.resize(output_size);
 }
 
-void DenseLayer::init(RneType& rne)
+void DenseLayer::init(ProbabilityDensityFunction pdf, RneType rne)
 {
     NumType sigma;
     switch (_activation)
@@ -84,7 +84,7 @@ void DenseLayer::init(RneType& rne)
      * different compilers and platforms, therefore I use my own 
      * distributions to provide deterministic results.
      */
-    auto dist = DLMath::normal_pdf<NumType>(0.0, sigma);
+    auto dist = DLMath::pdf<NumType>(0.0, sigma, pdf);
 
     for (NumType& w: _weights)
     {

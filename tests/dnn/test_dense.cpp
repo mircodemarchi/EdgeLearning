@@ -47,7 +47,10 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = DenseLayer(_m, "dense_layer_test"));
         auto l = DenseLayer(_m, "dense_layer_test");
-        EDGE_LEARNING_TEST_TRY(RneType r; l.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
@@ -64,7 +67,10 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(DenseLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(DenseLayer l2_copy{l});
         DenseLayer l_copy{l};
-        EDGE_LEARNING_TEST_TRY(RneType r; l_copy.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l_copy.reverse(nullptr));
@@ -81,7 +87,12 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(DenseLayer l_assign(_m); l_assign = l);
         EDGE_LEARNING_TEST_TRY(DenseLayer l_assign(_m); l_assign = l);
         DenseLayer l_assign(_m); l_assign = l;
-        EDGE_LEARNING_TEST_TRY(RneType r; l_assign.init(r));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
+                          RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
+                          RneType()));
         // TODO: Manage forward with nullptr input.
         // EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));
         // EDGE_LEARNING_TEST_TRY(l_assign.reverse(nullptr));
