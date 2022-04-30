@@ -102,6 +102,12 @@ public:
         SizeType channels;
     };
 
+    enum class ProbabilityDensityFunction
+    {
+        NORMAL,
+        UNIFORM
+    };
+
     /**
      * \brief Gaussian Probability Density Function.
      * \tparam T      Input and output type.
@@ -136,6 +142,28 @@ public:
                 return rand;
             };
         return ret;
+    }
+
+    /**
+     * \brief Uniform Probability Density Function.
+     * \tparam T      Input and output type.
+     * \param center  Center of the probability distribution required.
+     * \param delta   Range in which the density function will expand.
+     * \return std::function<T(RneType)> The distribution function.
+     */
+    template <typename T>
+    static std::function<T(RneType&)> pdf(
+        NumType center, NumType delta, ProbabilityDensityFunction type)
+    {
+        switch (type) {
+            case ProbabilityDensityFunction::UNIFORM:
+                return uniform_pdf<T>(center, delta);
+            case ProbabilityDensityFunction::NORMAL:
+                return normal_pdf<T>(center, delta);
+            default:
+                throw std::runtime_error(
+                    "Probability density function not recognized");
+        }
     }
 
     /**

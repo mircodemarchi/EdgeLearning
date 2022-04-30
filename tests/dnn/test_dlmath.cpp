@@ -43,6 +43,7 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
         EDGE_LEARNING_TEST_CALL(test_uniform_pdf());
+        EDGE_LEARNING_TEST_CALL(test_pdf());
         EDGE_LEARNING_TEST_CALL(test_unique());
         EDGE_LEARNING_TEST_CALL(test_arr_sum());
         EDGE_LEARNING_TEST_CALL(test_arr_mul());
@@ -67,7 +68,7 @@ public:
 
 private:
     const RneType::result_type SEED = 1;
-    const std::size_t PRINT_TIMES = 20;
+    const std::size_t PRINT_TIMES = 10;
 
     void test_normal_pdf() {
         std::random_device rd;
@@ -122,6 +123,29 @@ private:
             "Normal distribution >0 count similar to <=0 count:"
             + std::to_string(gt1_count) + ", " + std::to_string(lt1_count));
         EDGE_LEARNING_TEST_WITHIN(gt1_count, lt1_count, 200);
+    }
+
+    void test_pdf() {
+        EDGE_LEARNING_TEST_FAIL(DLMath::pdf<TestNumType>(
+            0.0, 0.1, static_cast<DLMath::ProbabilityDensityFunction>(-1)));
+
+        std::random_device rd;
+        RneType generator{rd()};
+        auto dist = DLMath::pdf<TestNumType>(
+            0.0, 0.1, DLMath::ProbabilityDensityFunction::NORMAL);
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(dist(generator)));
+        }
+
+        dist = DLMath::pdf<TestNumType>(
+            0.0, 0.1, DLMath::ProbabilityDensityFunction::UNIFORM);
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(dist(generator)));
+        }
     }
 
     void test_unique() {
