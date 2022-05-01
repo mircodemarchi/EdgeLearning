@@ -38,7 +38,7 @@ LossLayer::LossLayer(Model& model,
     , _target{nullptr}
     , _gradients{}
     , _inv_batch_size{
-        NumType{1.0} / static_cast<NumType>(std::max(batch_size, 1UL))}
+        NumType{1.0} / static_cast<NumType>(std::max(batch_size, SizeType{1}))}
     , _cumulative_loss{0.0}
     , _correct{0}
     , _incorrect{0}

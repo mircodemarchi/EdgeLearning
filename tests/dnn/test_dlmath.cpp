@@ -239,10 +239,26 @@ private:
     }
 
     void test_softmax_1() {
-        std::vector<TestNumType> test_vec{-2.0,-1.0,0.0,1.0,2.0};
+        std::vector<TestNumType> test_vec;
         std::vector<TestNumType> test_gradients{1.0,1.0,1.0,1.0,1.0};
-        EDGE_LEARNING_TEST_FAIL(DLMath::softmax_1_opt<TestNumType>(test_vec.data(), 
-            test_vec.data(), test_gradients.data(), test_vec.size()));
+        EDGE_LEARNING_TEST_FAIL(DLMath::softmax_1_opt<TestNumType>(
+            test_vec.data(), test_vec.data(), test_gradients.data(),
+            test_vec.size()));
+
+        test_vec = {-2.0,-1.0,0.0,1.0,2.0};
+        std::vector<TestNumType> softmax; softmax.resize(test_vec.size());
+        DLMath::softmax<TestNumType>(test_vec.data(), test_vec.data(),
+                                     test_vec.size());
+        EDGE_LEARNING_TEST_EXECUTE(DLMath::softmax_1_opt<TestNumType>(
+            test_vec.data(), softmax.data(), test_gradients.data(),
+            test_vec.size()));
+        for (std::size_t i = 0; i < test_vec.size(); ++i)
+        {
+            std::cout << std::fixed << std::setprecision(40)
+                      << "test_vec[i]: " << test_vec[i] << std::endl << std::endl;
+        }
+
+        test_vec = {-2.0,-1.0,0.0,1.0,2.0};
         EDGE_LEARNING_TEST_EXECUTE(DLMath::softmax_1<TestNumType>(test_vec.data(), 
             test_vec.data(), test_gradients.data(), test_vec.size()));
         for (std::size_t i = 0; i < test_vec.size(); ++i)
