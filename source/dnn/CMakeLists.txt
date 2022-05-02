@@ -14,6 +14,7 @@ add_library(${LIBRARY_NAME} OBJECT
     pooling.cpp
     max_pooling.cpp
     avg_pooling.cpp
+    dropout.cpp
 )
 
 if(COVERAGE)
