@@ -185,6 +185,25 @@ public:
         return dst;
     }
 
+    /**
+     * \brief Element wise multiplication between two arrays.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    First operand array.
+     * \param val    Value to multiply.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* arr_mul(T* dst, const T* src, T val, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = src[i] * val;
+        }
+        return dst;
+    }
+
     static SizeType unique()
     {
         static SizeType id = 0;
@@ -206,6 +225,25 @@ public:
         for (SizeType i = 0; i < length; ++i)
         {
             dst[i] = src1[i] + src2[i];
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Element wise summation between two arrays.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    First operand array.
+     * \param val    Value to sum.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* arr_sum(T* dst, const T* src, T val, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = src[i] + val;
         }
         return dst;
     }

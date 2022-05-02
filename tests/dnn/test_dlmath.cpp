@@ -165,6 +165,15 @@ private:
         {
             EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
         }
+
+        int val = 10;
+        truth_vec = {16,16,16,16,16};
+        DLMath::arr_sum<int>(test_vec1.data(), test_vec1.data(),
+                             val, test_vec1.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
+        }
     }
 
     void test_arr_mul() {
@@ -173,6 +182,15 @@ private:
         std::vector<int> truth_vec{5,8,9,8,5};
         DLMath::arr_mul<int>(test_vec1.data(), test_vec1.data(), 
             test_vec2.data(), test_vec1.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
+        }
+
+        int val = 10;
+        truth_vec = {50,80,90,80,50};
+        DLMath::arr_mul<int>(test_vec1.data(), test_vec1.data(),
+                             val, test_vec1.size());
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
             EDGE_LEARNING_TEST_EQUAL(test_vec1[i], truth_vec[i]);
