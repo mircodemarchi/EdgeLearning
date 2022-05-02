@@ -9,6 +9,7 @@ set(UNIT_TESTS
     test_convolutional
     test_max_pooling
     test_avg_pooling
+    test_dropout
     test_model
 )
 

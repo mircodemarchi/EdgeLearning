@@ -52,6 +52,7 @@ void DropoutLayer::forward(const NumType *inputs)
     auto dist = DLMath::uniform_pdf<NumType>(0.5, 1.0);
 
     // Input size is equal to the output size.
+    _zero_mask_idxs.clear();
     for (SizeType i = 0; i < _output_size; ++i)
     {
         auto random_value = dist(_random_generator);
