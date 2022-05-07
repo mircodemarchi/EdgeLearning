@@ -2,6 +2,7 @@ set(UNIT_TESTS
     test_type_checker
     test_parser
     test_csv
+    test_mnist
 )
 
 foreach(TEST ${UNIT_TESTS})

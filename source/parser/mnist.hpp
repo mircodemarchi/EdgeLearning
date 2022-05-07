@@ -40,6 +40,7 @@
 #include <limits>
 #include <stdexcept>
 #include <filesystem>
+#include <tuple>
 
 namespace EdgeLearning {
 
@@ -126,9 +127,9 @@ public:
      * \brief Convert the Mnist image in a string representation.
      * \return std::string A string representation of the Mnist image.
      */
-    operator std::string()
+    operator std::string() const
     {
-        std::string ret = "";
+        std::string ret;
         for (size_t i = 0; i != IMAGE_SIDE; ++i)
         {
             size_t offset = i * IMAGE_SIDE;
@@ -138,27 +139,40 @@ public:
                 {
                     if (_image[offset + j] > static_cast<uint8_t>(0.9 * 255))
                     {
-                        ret += "#";
+                        ret += "##";
                     }
                     else if (
                         _image[offset + j] > static_cast<uint8_t>(0.7 * 255))
                     {
-                        ret += "*";
+                        ret += "**";
                     }
                     else
                     {
-                        ret += ".";
+                        ret += "..";
                     }
                 }
                 else
                 {
-                    ret += " ";
+                    ret += "  ";
                 }
             }
             ret += "\n";
         }
         ret += "\n";
         return ret;
+    }
+
+    /**
+     * \brief Output stream operator for MnistImage object.
+     * \param os  Output stream object.
+     * \param obj Mnist Image object to print.
+     * \return Overwritten output stream object.
+     */
+    friend std::ostream& operator<< (
+        std::ostream& os, const MnistImage& obj)
+    {
+        os << std::string(obj);
+        return os;
     }
 
 private:
@@ -210,9 +224,22 @@ public:
      * \brief Convert Mnist label to string.
      * \return std::string The string value of the Mnist label.
      */
-    operator std::string()
+    operator std::string() const
     {
-        return std::to_string(_label);
+        return std::to_string(static_cast<std::uint32_t>(_label));
+    }
+
+    /**
+     * \brief Output stream operator for MnistLabel object.
+     * \param os  Output stream object.
+     * \param obj Mnist Label object to print.
+     * \return Overwritten output stream object.
+     */
+    friend std::ostream& operator<< (
+        std::ostream& os, const MnistLabel& obj)
+    {
+        os << std::string(obj);
+        return os;
     }
 
 private:
@@ -255,27 +282,37 @@ public:
     {
         if(!_image_ifs.is_open() || !_image_ifs.good())
         {
+            _image_ifs.close();
+            _label_ifs.close();
             throw std::runtime_error("Images malformed: could not open file");
         }
         if(!_label_ifs.is_open() || !_label_ifs.good())
         {
+            _image_ifs.close();
+            _label_ifs.close();
             throw std::runtime_error("Labels malformed: could not open file");
         }
 
         if (_is_malformed(_image_ifs, IMAGE_MAGIC))
         {
+            _image_ifs.close();
+            _label_ifs.close();
             throw std::runtime_error("Images malformed: magic number error");
         }
         auto image_count = read_uint32_endian_order(_image_ifs);
 
         if (_is_malformed(_label_ifs, LABEL_MAGIC))
         {
+            _image_ifs.close();
+            _label_ifs.close();
             throw std::runtime_error("Labels malformed: magic number error");
         }
         auto label_count = read_uint32_endian_order(_label_ifs);
 
         if (label_count != image_count)
         {
+            _image_ifs.close();
+            _label_ifs.close();
             throw std::runtime_error("Data malformed: "
                                      "labels amount not match images amount");
         }
@@ -286,6 +323,8 @@ public:
         columns = read_uint32_endian_order(_image_ifs);
         if (rows != MnistImage::IMAGE_SIDE || columns != MnistImage::IMAGE_SIDE)
         {
+            _image_ifs.close();
+            _label_ifs.close();
             throw std::runtime_error("Data malformed: "
                                      "not expected image shape");
         }
@@ -331,7 +370,7 @@ public:
      */
     std::tuple<std::size_t, std::size_t> shape() const
     {
-        return {MnistImage::IMAGE_SIDE, MnistImage::IMAGE_SIDE};
+        return {side(), side()};
     }
 
     /**
@@ -385,10 +424,10 @@ private:
         return magic != num_to_check;
     }
 
-    std::ifstream _image_ifs;
-    std::ifstream _label_ifs;
+    std::ifstream _image_ifs; ///< \brief Images input stream.
+    std::ifstream _label_ifs; ///< \brief Labels input stream.
 
-    std::uint32_t _size;
+    std::uint32_t _size; ///< \brief Number of elements in the MNIST dataset.
 };
 
 
