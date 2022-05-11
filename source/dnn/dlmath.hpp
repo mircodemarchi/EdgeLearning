@@ -702,7 +702,7 @@ public:
     }
 
     /**
-     * \brief Convolution 2D of a source 2D matrix and a squared kernel.
+     * \brief Cross Correlation 2D of a source 2D matrix and a squared kernel.
      * \tparam T        Type of each source and destination elements.
      * \param dst       The destination matrix in which put the resulting
      *                  matrix.
@@ -724,11 +724,12 @@ public:
      *  height_dst = ((height_src - height_k + (2 * p)) / s) + 1
      */
     template <typename T>
-    static T* conv2d(T* dst, const T* src, Shape2d src_shape,
-                     const T* k, Shape2d k_shape,
-                     Shape2d s = {1, 1}, Shape2d p = {0, 0})
+    static T* cross_correlation(
+        T* dst, const T* src, Shape2d src_shape, const T* k, Shape2d k_shape,
+        Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
-        return conv3d<T>(dst, src, Shape3d(src_shape), k, k_shape, s, p);
+        return cross_correlation<T>(
+            dst, src, Shape3d(src_shape), k, k_shape, s, p);
     }
 
     /**
@@ -755,16 +756,16 @@ public:
      *  height_dst = ((height_src - height_k + (2 * p)) / s) + 1
      */
     template <typename T>
-    static T* conv3d(T* dst, const T* src, Shape3d src_shape,
-                     const T* k, Shape2d k_shape,
-                     Shape2d s = {1, 1}, Shape2d p = {0, 0})
+    static T* cross_correlation(
+        T* dst, const T* src, Shape3d src_shape, const T* k, Shape2d k_shape,
+        Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
-        return conv4d<T>(dst, src, Shape3d(src_shape), k, k_shape, 1, s, p);
+        return cross_correlation<T>(dst, src, src_shape, k, k_shape, 1, s, p);
     }
 
     /**
-     * \brief Multi Convolution 2D of a 3D source matrix iterated on n_filters
-     * of cubic kernel.
+     * \brief Multi Cross Correlation 2D of a 3D source matrix iterated on
+     * n_filters of cubic kernel.
      * \tparam T        Type of each source and destination elements.
      * \param dst       The destination matrix in which put the resulting
      *                  matrix.
@@ -789,9 +790,9 @@ public:
      *  height_dst = ((height_src - height_k + (2 * p)) / s) + 1
      */
     template <typename T>
-    static T* conv4d(T* dst, const T* src, Shape3d src_shape,
-                     const T* k, Shape2d k_shape, SizeType n_filters = 1,
-                     Shape2d s = {1, 1}, Shape2d p = {0, 0})
+    static T* cross_correlation(
+        T* dst, const T* src, Shape3d src_shape, const T* k, Shape2d k_shape,
+        SizeType n_filters, Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
         return kernel_slide<T>(
             _conv4d_op<T>, dst, src, src_shape, k, k_shape, n_filters, s, p);

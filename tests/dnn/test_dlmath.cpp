@@ -59,9 +59,10 @@ public:
         EDGE_LEARNING_TEST_CALL(test_max_argmax());
         EDGE_LEARNING_TEST_CALL(test_tanh());
         EDGE_LEARNING_TEST_CALL(test_tanh_1());
-        EDGE_LEARNING_TEST_CALL(test_conv2d());
-        EDGE_LEARNING_TEST_CALL(test_conv3d());
-        EDGE_LEARNING_TEST_CALL(test_conv4d());
+        EDGE_LEARNING_TEST_CALL(test_cross_correlation_without_channels());
+        EDGE_LEARNING_TEST_CALL(test_cross_correlation_with_channels());
+        EDGE_LEARNING_TEST_CALL(
+            test_cross_correlation_with_channels_with_filters());
         EDGE_LEARNING_TEST_CALL(test_max_pool());
         EDGE_LEARNING_TEST_CALL(test_avg_pool());
     }
@@ -397,7 +398,7 @@ private:
         }
     }
 
-    void test_conv2d() {
+    void test_cross_correlation_without_channels() {
         SizeType input_width = 3;
         SizeType input_height = 3;
         SizeType f = 2;
@@ -417,9 +418,10 @@ private:
             7, 8.5
         };
         std::vector<TestNumType> result(truth_vec.size());
-        DLMath::conv2d<TestNumType>(result.data(),
-                                test_img.data(), {input_height, input_width},
-                                test_k.data(), {f, f});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            DLMath::Shape2d{input_height, input_width},
+            test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -442,9 +444,10 @@ private:
             0, 0, 0,   0
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<TestNumType>(result.data(),
-                                test_img.data(), {input_height, input_width},
-                                test_k.data(), {f, f}, {1, 1}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            DLMath::Shape2d{input_height, input_width},
+            test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -465,9 +468,10 @@ private:
             6, 8.5
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<TestNumType>(result.data(),
-                                test_img.data(), {input_height, input_width},
-                                test_k.data(), {f, f}, {2, 2}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            DLMath::Shape2d{input_height, input_width},
+            test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -502,9 +506,10 @@ private:
             18, 20, 22
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<TestNumType>(result.data(),
-                                test_img.data(), {input_height, input_width},
-                                test_k.data(), {f, f});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            DLMath::Shape2d{input_height, input_width},
+            test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -527,9 +532,10 @@ private:
             9,  10, 11, 12, 13
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<TestNumType>(result.data(),
-                                test_img.data(), {input_height, input_width},
-                                test_k.data(), {f, f}, {1, 1}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            DLMath::Shape2d{input_height, input_width},
+            test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -550,9 +556,10 @@ private:
             16, 20, 10,
         };
         result.resize(truth_vec.size());
-        DLMath::conv2d<TestNumType>(result.data(),
-                                test_img.data(), {input_height, input_width},
-                                test_k.data(), {f, f}, {2, 2}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            DLMath::Shape2d{input_height, input_width},
+            test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -567,7 +574,7 @@ private:
         }
     }
 
-    void test_conv3d() {
+    void test_cross_correlation_with_channels() {
         SizeType input_width = 3;
         SizeType input_height = 3;
         SizeType input_channels = 2;
@@ -588,10 +595,10 @@ private:
             7+7, 8.5+8.5
         };
         std::vector<TestNumType> result(truth_vec.size());
-        DLMath::conv3d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -614,10 +621,10 @@ private:
             0+0, 0+0, 0+0,     0+0
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, {1, 1}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -638,10 +645,10 @@ private:
             6+6, 8.5+8.5
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, {2, 2}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -677,10 +684,10 @@ private:
             58, 56, 59
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -703,10 +710,10 @@ private:
             30, 34, 33, 32, 36
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, {1, 1}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -727,10 +734,10 @@ private:
             55, 56, 27
         };
         result.resize(truth_vec.size());
-        DLMath::conv3d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, {2, 2}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -745,7 +752,7 @@ private:
         }
     }
 
-    void test_conv4d() {
+    void test_cross_correlation_with_channels_with_filters() {
         SizeType input_width = 3;
         SizeType input_height = 3;
         SizeType input_channels = 2;
@@ -770,10 +777,10 @@ private:
             7+7,7, 8.5+8.5,8.5
         };
         std::vector<TestNumType> result(truth_vec.size());
-        DLMath::conv4d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, n_filters);
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, n_filters);
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -796,11 +803,10 @@ private:
             0+0,0, 0+0,0, 0+0,0,       0+0,0
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, n_filters,
-                                {1, 1}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, n_filters, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -821,11 +827,10 @@ private:
             6+6,6, 8.5+8.5,8.5
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, n_filters,
-                                {2, 2}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, n_filters, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -864,10 +869,10 @@ private:
             58,19, 56,20, 59,21
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, n_filters);
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, n_filters);
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -890,11 +895,10 @@ private:
             30,9,  34,12, 33,10, 32,13, 36,11
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, n_filters,
-                                {1, 1}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, n_filters, {1, 1}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)
@@ -915,11 +919,10 @@ private:
             55,18, 56,20, 27,8,
         };
         result.resize(truth_vec.size());
-        DLMath::conv4d<TestNumType>(result.data(),
-                                test_img.data(),
-                                {input_height, input_width, input_channels},
-                                test_k.data(), {f, f}, n_filters,
-                                {2, 2}, {1, 1});
+        DLMath::cross_correlation<TestNumType>(
+            result.data(), test_img.data(),
+            {input_height, input_width, input_channels},
+            test_k.data(), {f, f}, n_filters, {2, 2}, {1, 1});
         for (std::size_t r = 0; r < output_height; ++r)
         {
             for (std::size_t c = 0; c < output_width; ++c)

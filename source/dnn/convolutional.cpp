@@ -153,9 +153,11 @@ void ConvolutionalLayer::forward(const NumType *inputs)
      * Perform convolution with n_filters of kernel size contained in
      * _weights vector on the input 3D matrix.
      */
-    DLMath::conv4d<NumType>(_activations.data(), inputs, _input_shape,
-                            _weights.data(), _kernel_shape, _n_filters,
-                            _stride, _padding);
+    DLMath::cross_correlation<NumType>(_activations.data(), inputs,
+                                       _input_shape,
+                                       _weights.data(), _kernel_shape,
+                                       _n_filters,
+                                       _stride, _padding);
 
     FeedforwardLayer::forward(_activations.data());
 

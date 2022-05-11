@@ -105,7 +105,7 @@ private:
                             InitType::AUTO>
                             m(layers_descriptor, "regressor_model");
                         m.fit(data, e, BATCH_SIZE, LEARNING_RATE);
-                    }, 5, "training_on_epochs_amount" + std::to_string(e));
+                    }, 100, "training_on_epochs_amount" + std::to_string(e));
         }
 
         CompileFNN<LossType::MSE,
@@ -177,8 +177,8 @@ private:
                             m(layers_descriptor, "regressor_model");
                         auto subset = data.subdata(0, curr_size);
                         m.fit(subset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                    },
-                    5, "training_on_dataset_size" + std::to_string(curr_size));
+                    }, 100,
+                    "training_on_dataset_size" + std::to_string(curr_size));
         }
 
         CompileFNN<LossType::MSE,
@@ -248,7 +248,7 @@ private:
                             InitType::AUTO>
                             m(layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                    }, 5,
+                    }, 100,
                     "training_on_hidden_layers_amount"
                         + std::to_string(amount));
             CompileFNN<LossType::MSE,
@@ -315,7 +315,7 @@ private:
                             InitType::AUTO>
                             m(layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                    }, 5,
+                    }, 100,
                     "training_on_hidden_layers_shape" + std::to_string(shape));
             CompileFNN<LossType::MSE,
                 OptimizerType::GRADIENT_DESCENT,
