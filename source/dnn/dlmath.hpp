@@ -260,15 +260,10 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* matarr_mul(T* arr_dst, const T* mat_src, const T* arr_src, 
+    static T* matarr_mul_no_check(
+        T* arr_dst, const T* mat_src, const T* arr_src,
         SizeType rows, SizeType cols)
     {
-        if (arr_src == arr_dst) 
-        {
-            throw std::runtime_error("arr_src, arr_dst have to be different "
-                                     "in order to perform matarr_mul");
-        }
-
         for (SizeType i = 0; i < rows; ++i)
         {
             arr_dst[i] = T{0};
@@ -278,6 +273,18 @@ public:
             }
         }
         return arr_dst;
+    }
+
+    template <typename T>
+    static T* matarr_mul(T* arr_dst, const T* mat_src, const T* arr_src, 
+        SizeType rows, SizeType cols)
+    {
+        if (arr_src == arr_dst) 
+        {
+            throw std::runtime_error("arr_src, arr_dst have to be different "
+                                     "in order to perform matarr_mul");
+        }
+        return matarr_mul_no_check<T>(arr_dst, mat_src, arr_src, rows, cols);
     }
 
     /**
@@ -895,10 +902,10 @@ public:
     {
         s.width = std::max(s.width, SizeType(1));
         s.height = std::max(s.height, SizeType(1));
-        auto width_dst = ((src_shape.width - k_shape.width + 2 * p.width)
-            / s.width) + 1;
-        auto height_dst = ((src_shape.height - k_shape.height + 2 * p.height)
-            / s.height) + 1;
+        auto width_dst = src_shape.width == 0 ? 0 :
+            ((src_shape.width - k_shape.width + 2 * p.width) / s.width) + 1;
+        auto height_dst = src_shape.height == 0 ? 0 :
+            ((src_shape.height - k_shape.height + 2 * p.height) / s.height) + 1;
         for (SizeType row_dst = 0; row_dst < height_dst; ++row_dst)
         {
             for (SizeType col_dst = 0; col_dst < width_dst; ++col_dst)

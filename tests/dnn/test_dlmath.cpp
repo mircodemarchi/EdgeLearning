@@ -202,11 +202,20 @@ private:
         std::vector<int> test_mat{1,2,3,4};
         std::vector<int> test_vec{1,2};
         std::vector<int> truth_vec{5,11};
+
+        std::vector<int> res_vec; res_vec.resize(test_vec.size());
+        DLMath::matarr_mul_no_check<int>(res_vec.data(), test_mat.data(),
+                                         test_vec.data(), 2, 2);
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(res_vec[i], truth_vec[i]);
+        }
+
         EDGE_LEARNING_TEST_FAIL(
             DLMath::matarr_mul<int>(test_vec.data(), test_mat.data(), 
                                     test_vec.data(), 2, 2)
         );
-        std::vector<int> res_vec; res_vec.resize(test_vec.size());
+        res_vec.clear();
         DLMath::matarr_mul<int>(res_vec.data(), test_mat.data(), 
                                 test_vec.data(), 2, 2);
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
