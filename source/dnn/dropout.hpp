@@ -60,11 +60,25 @@ public:
         (void) rne;
     };
 
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override
+    {
+        _last_input = inputs.data();
+        FeedforwardLayer::forward(inputs);
+        return Layer::forward(_activations);
+    }
+
     /**
-     * \brief The input data should have size _input_size.
-     * \param inputs
+     * \brief Dropout layer's training forward has a different implementation
+     * of the forward method because the Dropout becomes useful only during
+     * training. Instead the forward method only pass the inputs to the next
+     * layers, as the default method implement.
+     * \param inputs const std::vector<NumType>& The inputs to dropout.
+     * \return const std::vector<NumType>& The inputs with some neuron
+     * dropped out.
      */
-    void forward(const NumType *inputs) override;
+    const std::vector<NumType>& training_forward(
+        const std::vector<NumType>& inputs) override;
 
     /**
      * \brief The gradient data should have size _output_size.
@@ -72,9 +86,11 @@ public:
      * where dJ/dg(z) is the input gradients, dg(z)/dz is the activation_grad 
      * computed in the function and dJ/dz will be the result saved in 
      * _activation_gradients.
-     * \param gradients
+     * \param gradients const std::vector<NumType>&
+     * \return const std::vector<NumType>&
      */
-    void reverse(const NumType *gradients) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
 
     /**
      * \brief Dropout layer doesn't have any learnable parameters.
@@ -90,17 +106,21 @@ public:
      * \param index Not used.
      * \return NumType* nullptr
      */
-    NumType* param(SizeType index) override { (void) index; return nullptr; }
+    NumType& param(SizeType index) override
+    {
+        (void) index;
+        throw std::runtime_error("Dropout layers do not have params");
+    }
 
     /**
      * \brief Dropout layers do not have gradients.
      * \param index Not used.
      * \return NumType* nullptr
      */
-    NumType* gradient(SizeType index) override
+    NumType& gradient(SizeType index) override
     {
         (void) index;
-        return nullptr;
+        throw std::runtime_error("Dropout layers do not have gradients");
     }
 
     void print() const override;

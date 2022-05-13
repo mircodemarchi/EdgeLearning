@@ -115,20 +115,22 @@ void Model::train(Optimizer& optimizer)
     _loss_layer->reset_score();
 }
 
-void Model::step(const NumType* input, const NumType* target)
+void Model::step(const std::vector<NumType>& input,
+                 const std::vector<NumType>& target)
 {
     _loss_layer->set_target(target);
     // TODO: how many input layers there are?
     // TODO: manage multiple input layers.
-    _layers.front()->forward(input);
+    _layers.front()->training_forward(input);
     for(const auto& l: _loss_layer->_antecedents)
     {
-        _loss_layer->forward(l->last_output());
+        _loss_layer->training_forward(l->last_output());
     }
-    _loss_layer->reverse();
+    const std::vector<NumType> not_used;
+    _loss_layer->backward(not_used);
 }
 
-const NumType* Model::predict(const NumType* input)
+const std::vector<NumType>& Model::predict(const std::vector<NumType>& input)
 {
     _layers.front()->forward(input);
     return _layers.back()->last_output();
@@ -175,15 +177,15 @@ void Model::save(std::ofstream& out)
         SizeType param_count = layer->param_count();
         for (SizeType i = 0; i < param_count; ++i)
         {
-            out.write(reinterpret_cast<char const*>(
-                layer->param(i)), sizeof(NumType));
+            out.write(reinterpret_cast<char const*>(&layer->param(i)),
+                      sizeof(NumType));
         }
     }
     SizeType param_count = _loss_layer->param_count();
     for (SizeType i = 0; i < param_count; ++i)
     {
-        out.write(reinterpret_cast<char const*>(
-            _loss_layer->param(i)), sizeof(NumType));
+        out.write(reinterpret_cast<char const*>(&_loss_layer->param(i)),
+                  sizeof(NumType));
     }
 }
 
@@ -194,14 +196,15 @@ void Model::load(std::ifstream& in)
         SizeType param_count = layer->param_count();
         for (SizeType i = 0; i < param_count; ++i)
         {
-            in.read(reinterpret_cast<char*>(layer->param(i)), sizeof(NumType));
+            in.read(reinterpret_cast<char*>(&layer->param(i)),
+                    sizeof(NumType));
         }
     }
     SizeType param_count = _loss_layer->param_count();
     for (SizeType i = 0; i < param_count; ++i)
     {
-        in.read(reinterpret_cast<char*>(
-            _loss_layer->param(i)), sizeof(NumType));
+        in.read(reinterpret_cast<char*>(&_loss_layer->param(i)),
+                sizeof(NumType));
     }
 }
 

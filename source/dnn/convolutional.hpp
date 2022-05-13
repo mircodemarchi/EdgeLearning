@@ -59,7 +59,8 @@ public:
      * the input matrix height x width x channels.
      * \param inputs The input matrix of input size = height * width * channels.
      */
-    void forward(const NumType *inputs) override;
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
 
     /**
      * \brief The gradient data should have size _output_size.
@@ -72,7 +73,8 @@ public:
      *  h_out  = ((h_in - h_kernel + (2 * h_padding)) / h_stride) + 1
      *  w_out  = ((w_in - w_kernel + (2 * w_padding)) / w_stride) + 1
      */
-    void reverse(const NumType *gradients) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
 
     /**
      * \brief The kernels entries + bias entries.
@@ -85,8 +87,8 @@ public:
             + _n_filters;
     }
 
-    NumType* param(SizeType index) override;
-    NumType* gradient(SizeType index) override;
+    NumType& param(SizeType index) override;
+    NumType& gradient(SizeType index) override;
 
     void print() const override;
 

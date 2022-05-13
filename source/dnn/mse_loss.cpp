@@ -37,13 +37,14 @@ MSELossLayer::MSELossLayer(Model& model, std::string name,
 
 }
 
-void MSELossLayer::forward(const NumType *inputs)
+const std::vector<NumType>& MSELossLayer::forward(
+    const std::vector<NumType>& inputs)
 {
     if (_target == nullptr)
     {
         throw std::runtime_error("_target is null, set_target not called");
     }
-    _loss = DLMath::mean_squared_error(_target, inputs, _input_size);
+    _loss = DLMath::mean_squared_error(_target, inputs.data(), _input_size);
     _cumulative_loss += _loss;
 
     if (-_loss_tolerance <= _loss && _loss <= _loss_tolerance)
@@ -56,10 +57,12 @@ void MSELossLayer::forward(const NumType *inputs)
     }
 
     // Store the data pointer to compute gradients later.
-    _last_input = inputs;
+    _last_input = inputs.data();
+    return inputs;
 }
 
-void MSELossLayer::reverse(const NumType *gradients)
+const std::vector<NumType>& MSELossLayer::backward(
+    const std::vector<NumType>& gradients)
 {
     // Parameter ignored because it is a loss layer.
     (void) gradients;
@@ -67,7 +70,7 @@ void MSELossLayer::reverse(const NumType *gradients)
     DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input,
         _inv_batch_size, _input_size);
 
-    Layer::previous(_gradients.data());
+    return Layer::backward(_gradients);
 }
 
 } // namespace EdgeLearning

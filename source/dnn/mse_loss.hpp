@@ -43,14 +43,16 @@ public:
                  SizeType input_size = 0, SizeType batch_size = 1,
                  NumType loss_tolerance=0.1);
 
-    void forward(const NumType *inputs) override;
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
 
     /**
      * \brief As a loss node, the argument to this method is ignored (the 
      * gradient of the loss with respect to itself is unity).
      * \param gradients
      */
-    void reverse(const NumType *gradients = nullptr) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
     
 private:
     /// \brief Tollerange to ensure that the prediction produced is correct.

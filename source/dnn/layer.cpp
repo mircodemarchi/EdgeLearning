@@ -30,6 +30,8 @@
 
 namespace EdgeLearning {
 
+const std::string Layer::Type = "None";
+
 Layer::Layer(Model& model, SizeType input_size, SizeType output_size,
              Activation activation, std::string name, std::string prefix_name)
     : _model(model)
@@ -39,7 +41,7 @@ Layer::Layer(Model& model, SizeType input_size, SizeType output_size,
     , _input_size{input_size}
     , _output_size{output_size}
     , _activation{activation}
-    , _last_input{nullptr}
+    , _last_input{}
 { 
     if (_name.empty())
     {
@@ -73,21 +75,25 @@ Layer& Layer::operator=(const Layer& obj)
     return *this;
 }
 
-void Layer::next(const NumType *activations)
+const std::vector<NumType>& Layer::forward(
+    const std::vector<NumType>& activations)
 {
     // Forward to the next layers.
     for (const auto& l: this->_subsequents)
     {
         l->forward(activations);
     }
+    return activations;
 }
 
-void Layer::previous(const NumType *gradients)
+const std::vector<NumType>& Layer::backward(
+    const std::vector<NumType>& gradients)
 {
     for (const auto& l: _antecedents)
     {
-        l->reverse(gradients);
+        l->backward(gradients);
     }
+    return gradients;
 }
 
 SizeType Layer::input_size() const
@@ -95,7 +101,8 @@ SizeType Layer::input_size() const
     return _input_size;
 }
 
-void Layer::input_size(DLMath::Shape3d input_size) {
+void Layer::input_size(DLMath::Shape3d input_size)
+{
     _input_size = input_size.size();
 }
 

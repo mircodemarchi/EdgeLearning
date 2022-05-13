@@ -69,6 +69,13 @@ enum class InitType
     AUTO,
 };
 
+struct LayerShape
+{
+
+
+};
+
+
 using LayerDescriptor = std::tuple<std::string, SizeType, ActivationType>;
 using LayerDescriptorVector = std::vector<LayerDescriptor>;
 

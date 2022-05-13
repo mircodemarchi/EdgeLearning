@@ -41,6 +41,7 @@ public:
 
 private:
     void test_layer() {
+        std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
                 auto l = ConvolutionalLayer(_m, "convolutional_layer_test"));
@@ -51,18 +52,20 @@ private:
             l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
             l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
-        // TODO: Manage forward with nullptr input.
-        // EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
-        // EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
+        EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
+        EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l.param(0), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_FAIL(l.param(0));
+        EDGE_LEARNING_TEST_THROWS(l.param(0), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l.gradient(0));
+        EDGE_LEARNING_TEST_THROWS(l.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l.name(), "convolutional_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(ConvolutionalLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(ConvolutionalLayer l2_copy{l});
@@ -71,18 +74,19 @@ private:
             l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
             l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
-        // TODO: Manage forward with nullptr input.
-        // EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
-        // EDGE_LEARNING_TEST_TRY(l_copy.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l_copy.print());
         EDGE_LEARNING_TEST_EQUAL(l_copy.param_count(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.param(0), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_FAIL(l_copy.param(0));
+        EDGE_LEARNING_TEST_THROWS(l_copy.param(0), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l_copy.gradient(0));
+        EDGE_LEARNING_TEST_THROWS(l_copy.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_copy.name(), "convolutional_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l_copy.input_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_copy.output_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
+                                 l_copy.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(ConvolutionalLayer l_assign(_m); l_assign = l);
         EDGE_LEARNING_TEST_TRY(ConvolutionalLayer l_assign(_m); l_assign = l);
@@ -93,18 +97,19 @@ private:
         EDGE_LEARNING_TEST_TRY(
             l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
                           RneType()));
-        // TODO: Manage forward with nullptr input.
-        // EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));
-        // EDGE_LEARNING_TEST_TRY(l_assign.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.param(0), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_FAIL(l_copy.param(0));
+        EDGE_LEARNING_TEST_THROWS(l_copy.param(0), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l_copy.gradient(0));
+        EDGE_LEARNING_TEST_THROWS(l_copy.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_assign.name(), "convolutional_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l_assign.input_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_assign.output_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
+                                 l_copy.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = ConvolutionalLayer(_m));
         EDGE_LEARNING_TEST_TRY(auto l2 = ConvolutionalLayer(_m));
@@ -122,19 +127,25 @@ private:
             * ((in_shape.height - k_shape.height) + 1) * filters;
         EDGE_LEARNING_TEST_EQUAL(l_shape.input_size(), in_shape.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape.output_size(), truth_output_size);
-        EDGE_LEARNING_TEST_EQUAL(l_shape.last_input(), nullptr);
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_shape.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_shape.last_input().empty());
+        EDGE_LEARNING_TEST_ASSERT(!l_shape.last_output().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_shape.last_output().size(),
+                                 l_shape.output_size());
         ConvolutionalLayer l_shape_copy{l_shape};
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), in_shape.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), truth_output_size);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_input(), nullptr);
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_shape_copy.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_shape_copy.last_input().empty());
+        EDGE_LEARNING_TEST_ASSERT(!l_shape_copy.last_output().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
+                                 l_shape_copy.output_size());
         ConvolutionalLayer l_shape_assign(_m); l_shape_assign = l_shape;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), in_shape.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(),
                                  truth_output_size);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_input(), nullptr);
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_shape_assign.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_shape_assign.last_input().empty());
+        EDGE_LEARNING_TEST_ASSERT(!l_shape_assign.last_output().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_output().size(),
+                                 l_shape_assign.output_size());
     }
 
     void test_convolutional_layer()
@@ -149,65 +160,74 @@ private:
                                     Layer::Activation::ReLU,
                                     in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l.init());
-        EDGE_LEARNING_TEST_TRY(l.forward(v1.data()));
-        EDGE_LEARNING_TEST_TRY(l.reverse(v1.data()));
-        EDGE_LEARNING_TEST_NOT_EQUAL(l.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l.last_input(), v1.data());
-        EDGE_LEARNING_TEST_NOT_EQUAL(l.last_output(), nullptr);
+        EDGE_LEARNING_TEST_TRY(l.forward(v1));
+        EDGE_LEARNING_TEST_TRY(l.backward(v1));
+        EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v1.size());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input()[0], v1[0]);
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
         std::vector<NumType> v2{2,2,2, 2,2,2, 2,2,2,
                                 2,2,2, 2,2,2, 2,2,2,
                                 2,2,2, 2,2,2, 2,2,2};
         ConvolutionalLayer l_copy{l};
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_copy.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input(), v1.data());
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_copy.last_output(), nullptr);
-        EDGE_LEARNING_TEST_TRY(l_copy.forward(v2.data()));
-        EDGE_LEARNING_TEST_TRY(l_copy.reverse(v2.data()));
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_copy.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input(), v2.data());
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_copy.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v1.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input()[0], v1[0]);
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
+                                 l_copy.output_size());
+        EDGE_LEARNING_TEST_TRY(l_copy.forward(v2));
+        EDGE_LEARNING_TEST_TRY(l_copy.backward(v2));
+        EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v2.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input()[0], v2[0]);
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
+                                 l_copy.output_size());
 
         ConvolutionalLayer l_assign(_m); l_assign = l;
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), v1.data());
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_output(), nullptr);
-        EDGE_LEARNING_TEST_TRY(l_assign.forward(v2.data()));
-        EDGE_LEARNING_TEST_TRY(l_assign.reverse(v2.data()));
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), v2.data());
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_assign.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v1.size());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input()[0], v1[0]);
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
+                                 l_assign.output_size());
+        EDGE_LEARNING_TEST_TRY(l_assign.forward(v2));
+        EDGE_LEARNING_TEST_TRY(l_assign.backward(v2));
+        EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v2.size());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input()[0], v2[0]);
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
+                                 l_assign.output_size());
 
         auto l_relu = ConvolutionalLayer(_m, "convolutional_layer_test_relu",
                                     Layer::Activation::ReLU,
                                     in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l_relu.init());
-        EDGE_LEARNING_TEST_TRY(l_relu.forward(v1.data()));
-        EDGE_LEARNING_TEST_TRY(l_relu.reverse(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l_relu.forward(v1));
+        EDGE_LEARNING_TEST_TRY(l_relu.backward(v1));
         auto l_linear = ConvolutionalLayer(_m, "convolutional_layer_test_linear",
                                          Layer::Activation::Linear,
                                          in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l_linear.init());
-        EDGE_LEARNING_TEST_TRY(l_linear.forward(v1.data()));
-        EDGE_LEARNING_TEST_TRY(l_linear.reverse(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l_linear.forward(v1));
+        EDGE_LEARNING_TEST_TRY(l_linear.backward(v1));
         auto l_softmax = ConvolutionalLayer(_m, "convolutional_layer_test_softmax",
                                             Layer::Activation::Softmax,
                                             in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l_softmax.init());
-        EDGE_LEARNING_TEST_TRY(l_softmax.forward(v1.data()));
-        EDGE_LEARNING_TEST_TRY(l_softmax.reverse(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l_softmax.forward(v1));
+        EDGE_LEARNING_TEST_TRY(l_softmax.backward(v1));
         auto l_tanh = ConvolutionalLayer(_m, "convolutional_layer_test_tanh",
                                          Layer::Activation::TanH,
                                          in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l_tanh.init());
-        EDGE_LEARNING_TEST_TRY(l_tanh.forward(v1.data()));
-        EDGE_LEARNING_TEST_TRY(l_tanh.reverse(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l_tanh.forward(v1));
+        EDGE_LEARNING_TEST_TRY(l_tanh.backward(v1));
         auto l_none = ConvolutionalLayer(_m, "convolutional_layer_test_none",
                                          Layer::Activation::None,
                                          in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l_none.init());
-        EDGE_LEARNING_TEST_TRY(l_none.forward(v1.data()));
-        EDGE_LEARNING_TEST_TRY(l_none.reverse(v1.data()));
+        EDGE_LEARNING_TEST_TRY(l_none.forward(v1));
+        EDGE_LEARNING_TEST_TRY(l_none.backward(v1));
 
         std::vector<NumType> v3{1,2,3, 4,5,6, 7,8,9,
                                 1,2,3, 4,5,6, 7,8,9,
@@ -219,23 +239,24 @@ private:
                                             in_shape, k_shape, filters,
                                             stride, padding);
         EDGE_LEARNING_TEST_TRY(l_complex.init());
-        EDGE_LEARNING_TEST_TRY(l_complex.forward(v3.data()));
-        EDGE_LEARNING_TEST_TRY(l_complex.reverse(v3.data()));
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_complex.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_complex.last_input(), v3.data())
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_complex.last_output(), nullptr);
+        EDGE_LEARNING_TEST_TRY(l_complex.forward(v3));
+        EDGE_LEARNING_TEST_TRY(l_complex.backward(v3));
+        EDGE_LEARNING_TEST_ASSERT(!l_complex.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_complex.last_input().size(), v3.size());
+        EDGE_LEARNING_TEST_EQUAL(l_complex.last_input()[0], v3[0]);
+        EDGE_LEARNING_TEST_ASSERT(!l_complex.last_output().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_complex.last_output().size(),
+                                 l_complex.output_size());
         EDGE_LEARNING_TEST_TRY(l_complex.print());
         EDGE_LEARNING_TEST_EQUAL(l_complex.param_count(),
                                  k_shape.size() * in_shape.channels * filters
                                  + filters);
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_complex.param(0), nullptr);
-        EDGE_LEARNING_TEST_NOT_EQUAL(l_complex.gradient(0), nullptr);
-        EDGE_LEARNING_TEST_NOT_EQUAL(
-            l_complex.param(k_shape.size() * in_shape.channels * filters),
-            nullptr);
-        EDGE_LEARNING_TEST_NOT_EQUAL(
-            l_complex.gradient(k_shape.size() * in_shape.channels * filters),
-            nullptr);
+        EDGE_LEARNING_TEST_TRY(l_complex.param(0));
+        EDGE_LEARNING_TEST_TRY(l_complex.gradient(0));
+        EDGE_LEARNING_TEST_TRY(
+            l_complex.param(k_shape.size() * in_shape.channels * filters));
+        EDGE_LEARNING_TEST_TRY(
+            l_complex.gradient(k_shape.size() * in_shape.channels * filters));
         EDGE_LEARNING_TEST_EQUAL(l_complex.name(), "convolutional_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l_complex.input_size(), v3.size());
         EDGE_LEARNING_TEST_EQUAL(

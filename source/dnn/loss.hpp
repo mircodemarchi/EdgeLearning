@@ -76,13 +76,15 @@ public:
      * \brief Method inheritance.
      * \param inputs
      */
-    virtual void forward(const NumType *inputs) override = 0;
+    virtual const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override = 0;
 
     /**
      * \brief Method inheritance with default parameter overriding. 
      * \param gradients
      */
-    virtual void reverse(const NumType *gradients = nullptr) override = 0;
+    virtual const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override = 0;
 
     /**
      * \brief Loss layers do not have params.
@@ -95,14 +97,22 @@ public:
      * \param index Not used.
      * \return NumType* nullptr
      */
-    NumType* param(SizeType index) override { (void) index; return nullptr; }
+    NumType& param(SizeType index) override
+    {
+        (void) index;
+        throw std::runtime_error("Loss layers do not have params");
+    }
 
     /**
      * \brief Loss layers do not have gradients.
      * \param index Not used.
      * \return NumType* nullptr
      */
-    NumType* gradient(SizeType index) override { (void) index; return nullptr; }
+    NumType& gradient(SizeType index) override
+    {
+        (void) index;
+        throw std::runtime_error("Loss layers do not have gradients");
+    }
 
     /**
      * \brief Setter of the target object.
@@ -110,7 +120,7 @@ public:
      * a given sample.
      * \param target
      */
-    void set_target(const NumType* target);
+    void set_target(const std::vector<NumType>& target);
 
     /**
      * \brief Calculate and return the accuracy until the last forward
@@ -135,6 +145,16 @@ public:
      * \brief Print loss info.
      */
     virtual void print() const override;
+
+    /**
+     * \brief Loss layers do not have output.
+     * \return No return, always throw a std::runtime_error.
+     */
+    const std::vector<NumType>& last_output() override
+    {
+        throw std::runtime_error("Loss layers do not have output");
+    }
+
 
     [[nodiscard]] SizeType input_size() const override
     {

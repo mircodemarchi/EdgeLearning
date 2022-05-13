@@ -153,10 +153,11 @@ void RecurrentLayer::init(ProbabilityDensityFunction pdf, RneType rne)
     }
 }
 
-void RecurrentLayer::forward(const NumType *inputs)
+const std::vector<NumType>& RecurrentLayer::forward(
+    const std::vector<NumType>& inputs)
 {
     // Remember the last input data for backpropagation.
-    _last_input = inputs;
+    _last_input = inputs.data();
 
     const NumType* curr_sequence; //< Ptr to the current sequence to forward.
     SizeType curr_hs_idx;         //< Current hidden state index.
@@ -167,7 +168,7 @@ void RecurrentLayer::forward(const NumType *inputs)
     // Loop the time sequences.
     for (SizeType t = 0; t < _time_steps; ++t)
     {
-        curr_sequence = inputs + t * _input_size;
+        curr_sequence = inputs.data() + t * _input_size;
         curr_hs_idx = t;
         next_hs_idx = (t == (_time_steps - 1)) ? 0 : t + 1;
 
@@ -270,10 +271,11 @@ void RecurrentLayer::forward(const NumType *inputs)
 
     delete[] tmp_mul;
 
-    Layer::next(_activations.data());
+    return Layer::forward(_activations);
 }
 
-void RecurrentLayer::reverse(const NumType *gradients)
+const std::vector<NumType>& RecurrentLayer::backward(
+    const std::vector<NumType>& gradients)
 {
     const NumType* curr_sequence_gradients; //< Ptr to the current gradients.
     SizeType curr_hs_idx; //< Current hidden state index.
@@ -289,7 +291,7 @@ void RecurrentLayer::reverse(const NumType *gradients)
         SizeType t_idx = t - 1;
         curr_hs_idx = (t >= _time_steps) ? 0 : t;
         prev_hs_idx = t_idx;
-        curr_sequence_gradients = gradients + (t_idx * _output_size);
+        curr_sequence_gradients = gradients.data() + (t_idx * _output_size);
 
         /* 
          * Calculate gradient of output activation and put in 
@@ -442,64 +444,72 @@ void RecurrentLayer::reverse(const NumType *gradients)
 
     delete[] tmp_mul;
 
-    Layer::previous(_input_gradients.data());
+    return Layer::backward(_input_gradients);
 }
 
-const NumType* RecurrentLayer::last_output()
+const std::vector<NumType>& RecurrentLayer::last_output()
 {
-    return _activations.data();
+    return _activations;
 }
 
-NumType* RecurrentLayer::param(SizeType index)
+NumType& RecurrentLayer::param(SizeType index)
 {
+    if (index >= param_count())
+    {
+        throw std::runtime_error("index overflow");
+    }
     SizeType acc_size = 0;
     if (index < _weights_i_to_h.size())
     {
-        return &_weights_i_to_h[index];
+        return _weights_i_to_h[index];
     }
     acc_size += _weights_i_to_h.size();
     if (index < acc_size + _weights_h_to_h.size())
     {
-        return &_weights_h_to_h[index - acc_size];
+        return _weights_h_to_h[index - acc_size];
     }
     acc_size += _weights_h_to_h.size();
     if (index < acc_size + _biases_to_h.size())
     {
-        return &_biases_to_h[index - acc_size];
+        return _biases_to_h[index - acc_size];
     }
     acc_size += _biases_to_h.size();
     if (index < acc_size + _weights_h_to_o.size())
     {
-        return &_weights_h_to_o[index - acc_size];
+        return _weights_h_to_o[index - acc_size];
     }
     acc_size += _weights_h_to_o.size();
-    return &_biases_to_o[index - acc_size];
+    return _biases_to_o[index - acc_size];
 }
 
-NumType* RecurrentLayer::gradient(SizeType index)
+NumType& RecurrentLayer::gradient(SizeType index)
 {
+    if (index >= param_count())
+    {
+        throw std::runtime_error("index overflow");
+    }
     SizeType acc_size = 0;
     if (index < _weights_i_to_h_gradients.size())
     {
-        return &_weights_i_to_h_gradients[index];
+        return _weights_i_to_h_gradients[index];
     }
     acc_size += _weights_i_to_h_gradients.size();
     if (index < acc_size + _weights_h_to_h_gradients.size())
     {
-        return &_weights_h_to_h_gradients[index - acc_size];
+        return _weights_h_to_h_gradients[index - acc_size];
     }
     acc_size += _weights_h_to_h_gradients.size();
     if (index < acc_size + _biases_to_h_gradients.size())
     {
-        return &_biases_to_h_gradients[index - acc_size];
+        return _biases_to_h_gradients[index - acc_size];
     }
     acc_size += _biases_to_h_gradients.size();
     if (index < acc_size + _weights_h_to_o_gradients.size())
     {
-        return &_weights_h_to_o_gradients[index - acc_size];
+        return _weights_h_to_o_gradients[index - acc_size];
     }
     acc_size += _weights_h_to_o_gradients.size();
-    return &_biases_to_o_gradients[index - acc_size];
+    return _biases_to_o_gradients[index - acc_size];
 }
 
 void RecurrentLayer::print() const 

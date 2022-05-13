@@ -59,15 +59,17 @@ public:
      * \brief The input data should have size _input_size.
      * \param inputs
      */
-    void forward(const NumType *inputs) override;
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
 
     /**
      * \brief The gradient data should have size _output_size.
      * \param gradients
      */
-    void reverse(const NumType *gradients) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
 
-    const NumType* last_output() override;
+    const std::vector<NumType>& last_output() override;
 
     /**
      * \brief Weight input to hidden, hidden to hidden and hidden to output.
@@ -80,22 +82,22 @@ public:
              + _hidden_size + 1UL * _output_size;
     }
 
-    NumType* param(SizeType index) override;
-    NumType* gradient(SizeType index) override;
+    NumType& param(SizeType index) override;
+    NumType& gradient(SizeType index) override;
 
     void print() const override;
 
-    void set_initial_hidden_state(std::vector<NumType> initial_hidden_state) 
+    void hidden_state(std::vector<NumType> hidden_state)
     {
-        if (initial_hidden_state.size() > _hidden_size)
+        if (hidden_state.size() > _hidden_size)
         {
-            throw std::runtime_error("initial hidden state exceeds the hidden size");
+            throw std::runtime_error("hidden state exceeds the hidden size");
         }
-        std::copy(initial_hidden_state.begin(), initial_hidden_state.end(), 
-            _hidden_state.begin());
+        std::copy(hidden_state.begin(), hidden_state.end(),
+                  _hidden_state.begin());
     }
 
-    void set_time_steps(SizeType time_steps)
+    void time_steps(SizeType time_steps)
     {
         _time_steps = time_steps;
         _hidden_state.resize(

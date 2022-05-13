@@ -144,29 +144,30 @@ void ConvolutionalLayer::init(ProbabilityDensityFunction pdf, RneType rne)
     }
 }
 
-void ConvolutionalLayer::forward(const NumType *inputs)
+const std::vector<NumType>& ConvolutionalLayer::forward(
+    const std::vector<NumType>& inputs)
 {
     // Remember the last input data for backpropagation.
-    _last_input = inputs;
+    _last_input = inputs.data();
 
     /*
      * Perform convolution with n_filters of kernel size contained in
      * _weights vector on the input 3D matrix.
      */
-    DLMath::cross_correlation<NumType>(_activations.data(), inputs,
+    DLMath::cross_correlation<NumType>(_activations.data(), inputs.data(),
                                        _input_shape,
                                        _weights.data(), _kernel_shape,
                                        _n_filters,
                                        _stride, _padding);
 
-    FeedforwardLayer::forward(_activations.data());
-
-    FeedforwardLayer::next();
+    FeedforwardLayer::forward(_activations);
+    return Layer::forward(_activations);
 }
 
-void ConvolutionalLayer::reverse(const NumType *gradients)
+const std::vector<NumType>& ConvolutionalLayer::backward(
+    const std::vector<NumType>& gradients)
 {
-    FeedforwardLayer::reverse(gradients);
+    FeedforwardLayer::backward(gradients);
 
     /*
      * Bias gradient. Calculate dJ/db = dJ/dz.
@@ -241,25 +242,33 @@ void ConvolutionalLayer::reverse(const NumType *gradients)
         _weights.data(), _kernel_shape,
         _n_filters, _stride, _padding);
 
-    FeedforwardLayer::previous();
+    return Layer::backward(_input_gradients);
 }
 
-NumType* ConvolutionalLayer::param(SizeType index)
+NumType& ConvolutionalLayer::param(SizeType index)
 {
+    if (index >= param_count())
+    {
+        throw std::runtime_error("index overflow");
+    }
     if (index < _weights.size())
     {
-        return &_weights[index];
+        return _weights[index];
     }
-    return &_biases[index - _weights.size()];
+    return _biases[index - _weights.size()];
 }
 
-NumType* ConvolutionalLayer::gradient(SizeType index)
+NumType& ConvolutionalLayer::gradient(SizeType index)
 {
+    if (index >= param_count())
+    {
+        throw std::runtime_error("index overflow");
+    }
     if (index < _weight_gradients.size())
     {
-        return &_weight_gradients[index];
+        return _weight_gradients[index];
     }
-    return &_bias_gradients[index - _weight_gradients.size()];
+    return _bias_gradients[index - _weight_gradients.size()];
 }
 
 void ConvolutionalLayer::print() const

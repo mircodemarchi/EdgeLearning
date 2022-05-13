@@ -49,6 +49,8 @@ class Model;
 class Layer 
 {
 public:
+    static const std::string Type;
+
     enum class Activation
     {
         ReLU,
@@ -109,44 +111,68 @@ public:
     /**
      * \brief Virtual method used to perform forward propagations. During 
      * forward propagation nodes transform input data and feed results to all 
-     * subsequent nodes.
-     * \param inputs NumType ptr
+     * subsequent layers.
+     * By default it passes activations vector to the subsequent layers.
+     * \param inputs const std::vector<NumType>& Vector of inputs.
+     * \return const std::vector<NumType>& The computed activations passed to
+     * the subsequent layers.
      */
-    virtual void forward(const NumType *inputs) = 0;
+    virtual const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs);
+
+    /**
+     * \brief Virtual method used to perform forward propagations during model
+     * training. By default it call the forward method.
+     * \param inputs const std::vector<NumType>& Vector of inputs.
+     * \return const std::vector<NumType>& The computed activations passed to
+     * the subsequent layers.
+     */
+    virtual const std::vector<NumType>& training_forward(
+        const std::vector<NumType>& inputs)
+    {
+        if (_input_size == 0)
+        {
+            input_size(inputs.size());
+        }
+        else if (_input_size != inputs.size())
+        {
+            throw std::runtime_error(
+                "Training forward input catch an unpredicted input size: "
+                + std::to_string(_input_size)
+                + " != " + std::to_string(inputs.size()));
+        }
+        return forward(inputs);
+    }
 
     /**
      * \brief Virtual method used to perform reverse propagations. During 
      * reverse propagation nodes receive loss gradients to its previous outputs
      * and compute gradients with respect to each tunable parameter.
      * Compute dJ/dz = dJ/dg(z) * dg(z)/dz.
-     * \param gradients NumType ptr dJ/dg(z)
+     * By default it passes the input_gradients vector to the antecedent layers.
+     * \param gradients const std::vector<NumType>& Vector of gradients dJ/dg(z)
+     * \return const std::vector<NumType>& The computed gradients passed to the
+     * antecedent layers.
      */
-    virtual void reverse(const NumType *gradients) = 0;
-
-    /**
-     * \brief Pass activations vector, that contains the output of the layer
-     * after the non-linear function calculation, to the next layers.
-     * \param activations Activations parameters of size _output_size.
-     */
-    virtual void next(const NumType *activations);
-
-    /**
-     * \brief Pass the input_gradients vector to the previous layers.
-     * \param gradients Activations parameters of size _input_size.
-     */
-    virtual void previous(const NumType *gradients);
+    virtual const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients);
 
     /**
      * \brief Return the last input of the layer.
      * \return const NumType* The last input of the layer of input size.
      */
-    const NumType* last_input() { return _last_input; };
+    std::vector<NumType> last_input()
+    {
+        return _last_input
+            ? std::vector<NumType>{_last_input, _last_input + _input_size}
+            : std::vector<NumType>{};
+    };
 
     /**
      * \brief Return the last output of the layer.
      * \return const NumType* The last output of the layer of output size.
      */
-    virtual const NumType* last_output() { return nullptr; };
+    virtual const std::vector<NumType>& last_output() = 0;
 
     /**
      * \brief Virtual method that return the number of tunable parameters. 
@@ -154,14 +180,14 @@ public:
      * parameters.
      * \return SizeType The amount of tunable parameters. 
      */
-    [[nodiscard]] virtual SizeType param_count() const noexcept { return 0; }
+    [[nodiscard]] virtual SizeType param_count() const noexcept = 0;
 
     /**
      * \brief Virtual method accessor for parameter by index.
      * \param index SizeType Parameter index.
      * \return NumType* Pointer to parameter.
      */
-    virtual NumType* param(SizeType index) { (void) index; return nullptr; }
+    virtual NumType& param(SizeType index) = 0;
 
     /**
      * \brief Virtual method accessor for loss-gradient with respect to a 
@@ -169,10 +195,10 @@ public:
      * \param index SizeType Parameter index.
      * \return NumType* Pointer to gradient value of parameter.
      */
-    virtual NumType* gradient(SizeType index) { (void) index; return nullptr; }
+    virtual NumType& gradient(SizeType index) = 0;
 
     /**
-     * \brief Print.
+     * \brief Print layer info.
      */
     virtual void print() const = 0;
 
@@ -202,7 +228,7 @@ protected:
     friend class Model;
 
     Model& _model;                         ///< Model reference.
-    std::string _name;                     ///< Layer naem (for debug).
+    std::string _name;                     ///< Layer name (for debug).
     std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
     SizeType _input_size;                  ///< Layer input size.

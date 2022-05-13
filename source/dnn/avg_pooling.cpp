@@ -36,22 +36,23 @@ AvgPoolingLayer::AvgPoolingLayer(
                    std::move(name), "avg_pooling_layer_")
 {}
 
-void AvgPoolingLayer::forward(const NumType *inputs)
+const std::vector<NumType>& AvgPoolingLayer::forward(
+    const std::vector<NumType>& inputs)
 {
     // Remember the last input data for backpropagation.
-    _last_input = inputs;
+    _last_input = inputs.data();
 
-    DLMath::avg_pool<NumType>(_activations.data(), inputs, _input_shape,
+    DLMath::avg_pool<NumType>(_activations.data(), inputs.data(), _input_shape,
                               _kernel_shape, _stride);
 
-    FeedforwardLayer::forward(_activations.data());
-
-    FeedforwardLayer::next();
+    FeedforwardLayer::forward(_activations);
+    return Layer::forward(_activations);
 }
 
-void AvgPoolingLayer::reverse(const NumType *gradients)
+const std::vector<NumType>& AvgPoolingLayer::backward(
+    const std::vector<NumType>& gradients)
 {
-    FeedforwardLayer::reverse(gradients);
+    FeedforwardLayer::backward(gradients);
 
     std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
     auto gradients_op = [this](
@@ -92,7 +93,7 @@ void AvgPoolingLayer::reverse(const NumType *gradients)
         nullptr, _kernel_shape,
         1, _stride, {0, 0});
 
-    FeedforwardLayer::previous();
+    return Layer::backward(_input_gradients);
 }
 
 } // namespace EdgeLearning

@@ -54,7 +54,8 @@ public:
      * \brief The input data should have size _input_size.
      * \param inputs
      */
-    void forward(const NumType *inputs) override;
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
 
     /**
      * \brief The gradient data should have size _output_size.
@@ -64,7 +65,8 @@ public:
      * _activation_gradients.
      * \param gradients
      */
-    void reverse(const NumType *gradients) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
 
     /**
      * \brief Weight matrix entries + bias entries.
@@ -75,8 +77,8 @@ public:
         return (_input_size + 1UL) * _output_size;
     }
 
-    NumType* param(SizeType index) override;
-    NumType* gradient(SizeType index) override;
+    NumType& param(SizeType index) override;
+    NumType& gradient(SizeType index) override;
 
     void print() const override;
 

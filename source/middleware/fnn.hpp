@@ -110,8 +110,7 @@ public:
                 for (SizeType b = 0; b < batch_size
                                      && i < data.size(); ++b, ++i)
                 {
-                    _m.step(data.trainset(i).data(),
-                            data.labels(i).data());
+                    _m.step(data.trainset(i), data.labels(i));
                 }
                 _m.train(o);
             }
@@ -126,8 +125,8 @@ public:
 
         for (std::size_t i = 0; i < data.size(); ++i)
         {
-            auto res = _m.predict(data.entry(i).data());
-            std::copy(res, res + output_size,
+            auto res = _m.predict(data.entry(i));
+            std::copy(res.begin(), res.end(),
                       ret.begin() + long(i * output_size));
         }
         return Dataset<T>(ret, output_size);

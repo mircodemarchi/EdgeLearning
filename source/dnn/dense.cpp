@@ -103,28 +103,30 @@ void DenseLayer::init(ProbabilityDensityFunction pdf, RneType rne)
     }
 }
 
-void DenseLayer::forward(const NumType *inputs)
+const std::vector<NumType>& DenseLayer::forward(
+    const std::vector<NumType>& inputs)
 {
     // Remember the last input data for backpropagation.
-    _last_input = inputs;
+    _last_input = inputs.data();
 
     /* 
      * Compute the product of the input data with the weight add the bias.
      * z = W * x + b
      */
-    DLMath::matarr_mul<NumType>(_activations.data(), _weights.data(), inputs, 
+    DLMath::matarr_mul_no_check<NumType>(
+        _activations.data(), _weights.data(), inputs.data(),
         _output_size, _input_size);
-    DLMath::arr_sum<NumType>(_activations.data(), _activations.data(), 
-        _biases.data(), _output_size);
+    DLMath::arr_sum<NumType>(_activations.data(), _activations.data(),
+                             _biases.data(), _output_size);
 
-    FeedforwardLayer::forward(_activations.data());
-
-    FeedforwardLayer::next();
+    FeedforwardLayer::forward(_activations);
+    return Layer::forward(_activations);
 }
 
-void DenseLayer::reverse(const NumType *gradients)
+const std::vector<NumType>& DenseLayer::backward(
+    const std::vector<NumType>& gradients)
 {
-    FeedforwardLayer::reverse(gradients);
+    FeedforwardLayer::backward(gradients);
 
     /*
      * Bias gradient.
@@ -175,25 +177,33 @@ void DenseLayer::reverse(const NumType *gradients)
         }
     }
 
-    FeedforwardLayer::previous();
+    return Layer::backward(_input_gradients);
 }
 
-NumType* DenseLayer::param(SizeType index)
+NumType& DenseLayer::param(SizeType index)
 {
+    if (index >= param_count())
+    {
+        throw std::runtime_error("index overflow");
+    }
     if (index < _weights.size())
     {
-        return &_weights[index];
+        return _weights[index];
     }
-    return &_biases[index - _weights.size()];
+    return _biases[index - _weights.size()];
 }
 
-NumType* DenseLayer::gradient(SizeType index)
+NumType& DenseLayer::gradient(SizeType index)
 {
+    if (index >= param_count())
+    {
+        throw std::runtime_error("index overflow");
+    }
     if (index < _weight_gradients.size())
     {
-        return &_weight_gradients[index];
+        return _weight_gradients[index];
     }
-    return &_bias_gradients[index - _weight_gradients.size()];
+    return _bias_gradients[index - _weight_gradients.size()];
 }
 
 void DenseLayer::print() const 

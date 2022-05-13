@@ -44,10 +44,11 @@ DropoutLayer::DropoutLayer(Model& model, std::string name,
 
 }
 
-void DropoutLayer::forward(const NumType *inputs)
+const std::vector<NumType>& DropoutLayer::training_forward(
+    const std::vector<NumType>& inputs)
 {
     // Last input not used for backpropagation.
-    _last_input = inputs;
+    _last_input = inputs.data();
 
     auto dist = DLMath::uniform_pdf<NumType>(0.5, 1.0);
 
@@ -67,14 +68,14 @@ void DropoutLayer::forward(const NumType *inputs)
         }
     }
 
-    FeedforwardLayer::forward(_activations.data());
-
-    FeedforwardLayer::next();
+    FeedforwardLayer::forward(_activations);
+    return Layer::forward(_activations);
 }
 
-void DropoutLayer::reverse(const NumType *gradients)
+const std::vector<NumType>& DropoutLayer::backward(
+    const std::vector<NumType>& gradients)
 {
-    FeedforwardLayer::reverse(gradients);
+    FeedforwardLayer::backward(gradients);
 
     // Input size is equal to the output size.
     DLMath::arr_mul(_input_gradients.data(), _activation_gradients.data(),
@@ -84,7 +85,7 @@ void DropoutLayer::reverse(const NumType *gradients)
         _input_gradients[i] = 0;
     }
 
-    FeedforwardLayer::previous();
+    return Layer::backward(_input_gradients);
 }
 
 void DropoutLayer::print() const

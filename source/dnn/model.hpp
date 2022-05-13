@@ -166,15 +166,29 @@ public:
      * \brief Train step: forward and backward.
      * This function does not update the layers parameter, this operation will
      * be done by the train function.  
-     * \param input  Inputs data.
-     * \param target Labels data.
+     * \param input  const std::vector<NumType>& The inputs data.
+     * \param target const std::vector<NumType>& The labels data.
      */
-    void step(const NumType* input, const NumType* target);
+    void step(const std::vector<NumType>& input,
+              const std::vector<NumType>& target);
 
-    const NumType* predict(const NumType* input);
+    /**
+     * \brief Predict: only forward.
+     * \param input const std::vector<NumType>& The inputs data.
+     * \return const std::vector<NumType>& The predicted data.
+     */
+    const std::vector<NumType>& predict(const std::vector<NumType>& input);
 
+    /**
+     * \brief Getter for model input size.
+     * \return SizeType The input size of the model.
+     */
     [[nodiscard]] SizeType input_size();
 
+    /**
+     * \brief Getter for model output size.
+     * \return SizeType The output size of the model.
+     */
     [[nodiscard]] SizeType output_size();
 
     /**

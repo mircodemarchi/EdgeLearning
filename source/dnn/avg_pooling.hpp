@@ -52,9 +52,12 @@ public:
     /**
      * \brief The input data should have size _input_size, that is the shape of
      * the input matrix height x width x channels.
-     * \param inputs The input matrix of input size = height * width * channels.
+     * \param inputs const std::vector<NumType>& The input matrix of
+     * input size = height * width * channels.
+     * \return const std::vector<NumType>&
      */
-    void forward(const NumType *inputs) override;
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
 
     /**
      * \brief The gradient data should have size _output_size.
@@ -62,12 +65,15 @@ public:
      * where dJ/dg(z) is the input gradients, dg(z)/dz is the activation_grad
      * computed in the function and dJ/dz will be the result saved in
      * _activation_gradients.
-     * \param gradients The gradients of the subsequent layer. The size of
-     * the gradients is _output_size that is: h_out x w_out x n_filters, where
+     * \param gradients const std::vector<NumType>& The gradients of the
+     * subsequent layer. The size of the gradients is _output_size that
+     * is: h_out x w_out x n_filters, where
      *  h_out  = ((h_in - h_kernel) / h_stride) + 1
      *  w_out  = ((w_in - w_kernel) / w_stride) + 1
+     * \return const std::vector<NumType>&
      */
-    void reverse(const NumType *gradients) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
 
 private:
 };

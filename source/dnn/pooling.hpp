@@ -68,7 +68,7 @@ public:
      * \brief The pooling Layer doesn't have any learnable parameters.
      * \return SizeType 0.
      */
-    SizeType param_count() const noexcept override
+    [[nodiscard]] SizeType param_count() const noexcept override
     {
         return 0;
     }
@@ -78,17 +78,21 @@ public:
      * \param index Not used.
      * \return NumType* nullptr
      */
-    NumType* param(SizeType index) override { (void) index; return nullptr; }
+    NumType& param(SizeType index) override
+    {
+        (void) index;
+        throw std::runtime_error("Pooling layers do not have params");
+    }
 
     /**
      * \brief Pooling layers do not have gradients.
      * \param index Not used.
      * \return NumType* nullptr
      */
-    NumType* gradient(SizeType index) override
+    NumType& gradient(SizeType index) override
     {
         (void) index;
-        return nullptr;
+        throw std::runtime_error("Pooling layers do not have gradients");
     }
 
     void print() const override;

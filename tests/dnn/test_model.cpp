@@ -46,15 +46,21 @@ public:
     }
 
     SizeType param_count() const noexcept override { return _input_size; }
-    NumType* param(SizeType index) override { return &_params[index]; }
+    NumType& param(SizeType index) override { return _params[index]; }
 
-    void forward(const NumType *inputs) override {
-        std::copy(inputs, inputs + _input_size, _params.begin());
-        _last_input = inputs;
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override
+    {
+        std::copy(inputs.begin(),
+                  inputs.begin() + static_cast<std::int64_t>(_input_size),
+                  _params.begin());
+        _last_input = inputs.data();
         if (_i++ % 2 == 0) ++_correct; else ++_incorrect;
         _cumulative_loss += 2.0;
+        return inputs;
     }
-    void reverse(const NumType *gradients) override { (void) gradients; }
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>&gradients) override { return gradients; }
 
 private:
     std::vector<NumType> _params;
@@ -132,8 +138,8 @@ private:
 
         std::vector<NumType> input{1,2,3,4};
         std::vector<NumType> target{1,2,3,4,5,6,7,8};
-        EDGE_LEARNING_TEST_TRY(m.step(input.data(), target.data()));
-        EDGE_LEARNING_TEST_TRY(m.step(input.data(), target.data()));
+        EDGE_LEARNING_TEST_TRY(m.step(input, target));
+        EDGE_LEARNING_TEST_TRY(m.step(input, target));
         EDGE_LEARNING_TEST_EQUAL(m.accuracy(), 0.5);
         EDGE_LEARNING_TEST_EQUAL(m.avg_loss(), 2.0);
     }
@@ -192,7 +198,7 @@ private:
             {
                 for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
-                    m.step(inputs[i].data(), targets[i].data());
+                    m.step(inputs[i], targets[i]);
                 }
 
                 std::cout << "Step " << i 
@@ -252,7 +258,7 @@ private:
             {
                 for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
-                    m.step(inputs[i].data(), targets[i].data());
+                    m.step(inputs[i], targets[i]);
                 }
 
                 std::cout << "Step " << i 
@@ -308,9 +314,9 @@ private:
             "hidden", Layer::Activation::ReLU, input_size * time_steps, input_size * time_steps);
         auto output_layer = m.add_layer<RecurrentLayer>(
             "output", input_size, output_size, 2);
-        output_layer->set_initial_hidden_state({0.01, 0.01});
-        output_layer->set_time_steps(time_steps);
-        output_layer->set_initial_hidden_state({0.0, 0.0});
+        output_layer->hidden_state({0.01, 0.01});
+        output_layer->time_steps(time_steps);
+        output_layer->hidden_state({0.0, 0.0});
         auto loss_layer = m.add_loss<MSELossLayer>("loss",
             time_steps * output_size, BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
@@ -326,7 +332,7 @@ private:
             {
                 for (std::size_t b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
                 {
-                    m.step(inputs[i].data(), targets[i].data());
+                    m.step(inputs[i], targets[i]);
                 }
 
                 std::cout << "Step " << i

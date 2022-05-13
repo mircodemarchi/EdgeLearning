@@ -41,6 +41,7 @@ public:
 
 private:
     void test_layer() {
+        std::vector<NumType> v_empty;
         EDGE_LEARNING_TEST_EXECUTE(
                 auto l = RecurrentLayer(_m, "recurrent_layer_test"));
         EDGE_LEARNING_TEST_TRY(
@@ -50,17 +51,20 @@ private:
             l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
             l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
-        EDGE_LEARNING_TEST_TRY(l.forward(nullptr));
-        EDGE_LEARNING_TEST_TRY(l.reverse(nullptr));
+        EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
+        EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l.param(0), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_FAIL(l.param(0));
+        EDGE_LEARNING_TEST_THROWS(l.param(0), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l.gradient(0));
+        EDGE_LEARNING_TEST_THROWS(l.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l.name(), "recurrent_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(RecurrentLayer l_copy{l});
         EDGE_LEARNING_TEST_TRY(RecurrentLayer l_copy{l});
@@ -69,17 +73,19 @@ private:
             l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
             l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
-        EDGE_LEARNING_TEST_TRY(l_copy.forward(nullptr));
-        EDGE_LEARNING_TEST_TRY(l_copy.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l_copy.print());
         EDGE_LEARNING_TEST_EQUAL(l_copy.param_count(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.param(0), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_FAIL(l_copy.param(0));
+        EDGE_LEARNING_TEST_THROWS(l_copy.param(0), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l_copy.gradient(0));
+        EDGE_LEARNING_TEST_THROWS(l_copy.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_copy.name(), "recurrent_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l_copy.input_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_copy.output_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
+                                 l_copy.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(
                 RecurrentLayer l_assign(_m); l_assign = l);
@@ -92,17 +98,19 @@ private:
         EDGE_LEARNING_TEST_TRY(
             l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
                           RneType()));
-        EDGE_LEARNING_TEST_TRY(l_assign.forward(nullptr));
-        EDGE_LEARNING_TEST_TRY(l_assign.reverse(nullptr));
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.param(0), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.gradient(0), nullptr);
+        EDGE_LEARNING_TEST_FAIL(l_assign.param(0));
+        EDGE_LEARNING_TEST_THROWS(l_assign.param(0), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l_assign.gradient(0));
+        EDGE_LEARNING_TEST_THROWS(l_assign.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_assign.name(), "recurrent_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l_assign.input_size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_assign.output_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_assign.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
+                                 l_assign.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = RecurrentLayer(_m));
         EDGE_LEARNING_TEST_TRY(auto l2 = RecurrentLayer(_m));
@@ -113,28 +121,39 @@ private:
 
     void test_recurrent_layer()
     {
+        std::vector<NumType> v_empty;
         auto l_fail = RecurrentLayer(_m, "recurrent_layer_test");
-        EDGE_LEARNING_TEST_FAIL(l_fail.set_initial_hidden_state({0.0}));
-        EDGE_LEARNING_TEST_THROWS(l_fail.set_initial_hidden_state({0.0}),
+        EDGE_LEARNING_TEST_FAIL(l_fail.hidden_state({0.0}));
+        EDGE_LEARNING_TEST_THROWS(l_fail.hidden_state({0.0}),
                                   std::runtime_error);
-        EDGE_LEARNING_TEST_TRY(l_fail.set_initial_hidden_state({}));
+        EDGE_LEARNING_TEST_TRY(l_fail.hidden_state({}));
         auto l = RecurrentLayer(_m, "recurrent_layer_test",
                                 10, 20, 5);
-        EDGE_LEARNING_TEST_TRY(l.set_initial_hidden_state({0.0}));
+        EDGE_LEARNING_TEST_TRY(l.hidden_state({0.0}));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);
-        EDGE_LEARNING_TEST_EQUAL(l.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_TRY(l.time_steps(1));
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY(l.time_steps(2));
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), 2*l.output_size());
         RecurrentLayer l_shape_copy{l};
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 20);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_shape_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_input().size(),
+                                 v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
+                                 2*l_shape_copy.output_size());
         RecurrentLayer l_shape_assign(_m); l_shape_assign = l;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 20);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_input(), nullptr);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_output(), nullptr);
+        EDGE_LEARNING_TEST_ASSERT(l_shape_assign.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_input().size(),
+                                 v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_output().size(),
+                                 2*l_shape_assign.output_size());
     }
 
     void test_getter()
@@ -160,7 +179,7 @@ private:
         EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
 
-        EDGE_LEARNING_TEST_TRY(l.set_initial_hidden_state({0, 1, 2, 3, 4}));
+        EDGE_LEARNING_TEST_TRY(l.hidden_state({0, 1, 2, 3, 4}));
     }
 
     Model _m = Model("model_recurrent_layer_test");

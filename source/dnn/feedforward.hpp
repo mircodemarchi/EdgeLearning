@@ -57,23 +57,24 @@ public:
      * \brief Virtual method used to perform forward propagations. During 
      * forward propagation nodes transform input data and feed results to all 
      * subsequent nodes.
-     * \param inputs NumType ptr
+     * \param inputs const std::vector<NumType>&
+     * \return const std::vector<NumType>&
      */
-    virtual void forward(const NumType *inputs) override;
+    virtual const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
 
     /**
      * \brief Virtual method used to perform reverse propagations. During 
      * reverse propagation nodes receive loss gradients to its previous outputs
      * and compute gradients with respect to each tunable parameter.
      * Compute dJ/dz = dJ/dg(z) * dg(z)/dz.
-     * \param gradients NumType ptr dJ/dg(z)
+     * \param gradients const std::vector<NumType>& dJ/dg(z)
+     * \return const std::vector<NumType>&
      */
-    virtual void reverse(const NumType *gradients) override;
+    virtual const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
 
-    const NumType* last_output() override { return _activations.data(); }
-
-    void next(const NumType *activations = nullptr) override;
-    void previous(const NumType *gradients = nullptr) override;
+    const std::vector<NumType>& last_output() override { return _activations; }
 
     /**
      * \brief Getter of input_size class field.

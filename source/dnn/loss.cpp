@@ -35,7 +35,7 @@ LossLayer::LossLayer(Model& model,
     : Layer(model, input_size, 0, Activation::None, std::move(name),
             prefix_name.empty() ? "loss_layer_" : prefix_name)
     , _loss{}
-    , _target{nullptr}
+    , _target{}
     , _gradients{}
     , _inv_batch_size{
         NumType{1.0} / static_cast<NumType>(std::max(batch_size, SizeType{1}))}
@@ -46,9 +46,9 @@ LossLayer::LossLayer(Model& model,
     _gradients.resize(input_size);
 }
 
-void LossLayer::set_target(NumType const* target)
+void LossLayer::set_target(const std::vector<NumType>& target)
 {
-    _target = target;
+    _target = target.data();
 }
 
 NumType LossLayer::accuracy() const

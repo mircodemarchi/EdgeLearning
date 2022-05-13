@@ -70,7 +70,7 @@ int main()
         {
             for (SizeType b = 0; b < BATCH_SIZE && i < inputs.size(); ++b, ++i)
             {
-                m.step(inputs[i].data(), targets[i].data());
+                m.step(inputs[i], targets[i]);
             }
 
             std::cout << "Step " << i 
@@ -83,7 +83,7 @@ int main()
     std::cout << "Training End" << std::endl;
 
     std::vector<NumType> new_data = {9.0,  1.0, 9.0,  1.0};
-    auto result = m.predict(new_data.data());
+    auto result = m.predict(new_data);
     std::cout << "Predict: {";
     for (SizeType i = 0; i < m.input_size() - 1; ++i)
     {
