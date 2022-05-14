@@ -47,6 +47,7 @@ DropoutLayer::DropoutLayer(Model& model, std::string name,
 const std::vector<NumType>& DropoutLayer::training_forward(
     const std::vector<NumType>& inputs)
 {
+    Layer::_check_training_input(inputs);
     // Last input not used for backpropagation.
     _last_input = inputs.data();
 
@@ -99,6 +100,8 @@ void DropoutLayer::input_size(DLMath::Shape3d input_size)
 {
     FeedforwardLayer::input_size(input_size);
     _output_size = input_size.size();
+    _activations.resize(_output_size);
+    _activation_gradients.resize(_output_size);
 }
 
 } // namespace EdgeLearning

@@ -43,6 +43,7 @@ private:
     void test_layer() {
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
+        std::vector<NumType> v_diff_size(std::size_t(11));
         EDGE_LEARNING_TEST_EXECUTE(
                 auto l = DropoutLayer(_m, "dropout_layer_test"));
         EDGE_LEARNING_TEST_TRY(
@@ -53,6 +54,7 @@ private:
         EDGE_LEARNING_TEST_TRY(
             l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v_empty));
+        EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
@@ -66,6 +68,12 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY(l.training_forward(v));
+        EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
+        EDGE_LEARNING_TEST_FAIL(l.training_forward(v_diff_size));
+        EDGE_LEARNING_TEST_THROWS(l.training_forward(v_diff_size),
+                                  std::runtime_error);
 
         EDGE_LEARNING_TEST_EXECUTE(DropoutLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(DropoutLayer l2_copy{l});
@@ -81,12 +89,13 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_copy.gradient(0));
         EDGE_LEARNING_TEST_THROWS(l_copy.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_copy.name(), "dropout_layer_test");
-        EDGE_LEARNING_TEST_EQUAL(l_copy.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.output_size(), 0);
-        EDGE_LEARNING_TEST_ASSERT(l_copy.last_input().empty());
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v_empty.size());
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
-                                 l_copy.output_size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.input_size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.output_size(), v.size());
+        EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v.size());
+        EDGE_LEARNING_TEST_FAIL(l_copy.training_forward(v_diff_size));
+        EDGE_LEARNING_TEST_THROWS(l_copy.training_forward(v_diff_size),
+                                  std::runtime_error);
 
         EDGE_LEARNING_TEST_EXECUTE(DropoutLayer l_assign(_m); l_assign = l);
         EDGE_LEARNING_TEST_TRY(DropoutLayer l_assign(_m); l_assign = l);
@@ -104,12 +113,13 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_assign.gradient(0));
         EDGE_LEARNING_TEST_THROWS(l_assign.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_assign.name(), "dropout_layer_test");
-        EDGE_LEARNING_TEST_EQUAL(l_assign.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.output_size(), 0);
-        EDGE_LEARNING_TEST_ASSERT(l_assign.last_input().empty());
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v_empty.size());
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
-                                 l_assign.output_size());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.input_size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.output_size(), v.size());
+        EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v.size());
+        EDGE_LEARNING_TEST_FAIL(l_assign.training_forward(v_diff_size));
+        EDGE_LEARNING_TEST_THROWS(l_assign.training_forward(v_diff_size),
+                                  std::runtime_error);
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = DropoutLayer(_m));
         EDGE_LEARNING_TEST_TRY(auto l2 = DropoutLayer(_m));
@@ -125,6 +135,9 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l_shape.last_output().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape.last_output().size(),
                                  l_shape.output_size());
+        EDGE_LEARNING_TEST_FAIL(l_shape.training_forward(v_diff_size));
+        EDGE_LEARNING_TEST_THROWS(l_shape.training_forward(v_diff_size),
+                                  std::runtime_error);
         DropoutLayer l_shape_copy{l_shape};
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 10);
@@ -132,6 +145,9 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l_shape_copy.last_output().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
                                  l_shape_copy.output_size());
+        EDGE_LEARNING_TEST_FAIL(l_shape_copy.training_forward(v_diff_size));
+        EDGE_LEARNING_TEST_THROWS(l_shape_copy.training_forward(v_diff_size),
+                                  std::runtime_error);
         DropoutLayer l_shape_assign(_m); l_shape_assign = l_shape;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 10);
@@ -139,6 +155,9 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l_shape_assign.last_output().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_output().size(),
                                  l_shape_assign.output_size());
+        EDGE_LEARNING_TEST_FAIL(l_shape_assign.training_forward(v_diff_size));
+        EDGE_LEARNING_TEST_THROWS(l_shape_assign.training_forward(v_diff_size),
+                                  std::runtime_error);
     }
 
     void test_dropout_layer()
@@ -148,6 +167,7 @@ private:
                               Layer::Activation::ReLU, 1);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v1));
+        EDGE_LEARNING_TEST_TRY(l.forward(v1));
         EDGE_LEARNING_TEST_TRY(l.backward(v1));
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v1.size());
@@ -163,6 +183,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
         EDGE_LEARNING_TEST_TRY(l_copy.training_forward(v2));
+        EDGE_LEARNING_TEST_TRY(l_copy.forward(v2));
         EDGE_LEARNING_TEST_TRY(l_copy.backward(v2));
         EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v2.size());
@@ -178,6 +199,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
         EDGE_LEARNING_TEST_TRY(l_assign.training_forward(v2));
+        EDGE_LEARNING_TEST_TRY(l_assign.forward(v2));
         EDGE_LEARNING_TEST_TRY(l_assign.backward(v2));
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v2.size());
@@ -191,12 +213,14 @@ private:
                                       Layer::Activation::Linear,
                                       v_complex.size(), p);
         EDGE_LEARNING_TEST_TRY(l_complex.training_forward(v_complex));
+        EDGE_LEARNING_TEST_TRY(l_complex.forward(v_complex));
         EDGE_LEARNING_TEST_TRY(l_complex.backward(v_complex));
         p = 1.0;
         l_complex = DropoutLayer(_m, "dropout_layer_test",
                                  Layer::Activation::ReLU,
                                  v_complex.size(), p);
         EDGE_LEARNING_TEST_TRY(l_complex.training_forward(v_complex));
+        EDGE_LEARNING_TEST_TRY(l_complex.forward(v_complex));
         EDGE_LEARNING_TEST_TRY(l_complex.backward(v_complex));
         p = 0.4;
         RneType rne(0);
@@ -204,6 +228,7 @@ private:
                                  Layer::Activation::ReLU,
                                  v_complex.size(), p, rne);
         EDGE_LEARNING_TEST_TRY(l_complex.training_forward(v_complex));
+        EDGE_LEARNING_TEST_TRY(l_complex.forward(v_complex));
         EDGE_LEARNING_TEST_TRY(l_complex.backward(v_complex));
     }
 
