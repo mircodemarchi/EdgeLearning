@@ -102,17 +102,31 @@ public:
         SizeType channels;
     };
 
+    /**
+     * \brief Enumeration of the PDFs (Probability Density Functions).
+     */
     enum class ProbabilityDensityFunction
     {
-        NORMAL,
-        UNIFORM
+        NORMAL, ///< \brief Normal distribution.
+        UNIFORM ///< \brief Uniform distribution.
     };
 
     /**
+     * \brief Enumeration of the initialization functions.
+     */
+    enum class InitializationFunction
+    {
+        XAVIER, ///< \brief sqrt( 2 / n_in )
+        KAIMING ///< \brief sqrt( 1 / n_in )
+    };
+
+
+    /**
      * \brief Gaussian Probability Density Function.
-     * \tparam T      Input and output type.
+     * \tparam T      Output type.
      * \param mean    Mean of the probability distribution required.
-     * \param std_dev Standard Deviation of the probability distribution required.
+     * \param std_dev Standard Deviation of the probability distribution
+     * required.
      * \return std::function<T(RneType)> The distribution function.
      */
     template <typename T>
@@ -123,7 +137,7 @@ public:
 
     /**
      * \brief Uniform Probability Density Function.
-     * \tparam T      Input and output type.
+     * \tparam T      Return function output type.
      * \param center  Center of the probability distribution required.
      * \param delta   Range in which the density function will expand.
      * \return std::function<T(RneType)> The distribution function.
@@ -146,7 +160,7 @@ public:
 
     /**
      * \brief Uniform Probability Density Function.
-     * \tparam T      Input and output type.
+     * \tparam T      Return function output type.
      * \param center  Center of the probability distribution required.
      * \param delta   Range in which the density function will expand.
      * \return std::function<T(RneType)> The distribution function.
@@ -165,6 +179,140 @@ public:
                     "Probability density function not recognized");
         }
     }
+
+    /**
+     * \brief Kaiming He, et. al. initialization
+     * https://arxiv.org/pdf/1502.01852.pdf
+     * Normal distribution with variance := sqrt( 2 / n_in )
+     * \tparam T    Output type.
+     * \param n     The input size.
+     * \return T The variance defined by Kaiming for neural network
+     * initialization.
+     */
+    template <typename T>
+    static T kaiming_initialization_variance(SizeType n)
+    {
+        return std::sqrt(T{2.0} / static_cast<T>(n));
+    }
+
+    /**
+     * \brief Kaiming He, et. al. initialization
+     * https://arxiv.org/pdf/1502.01852.pdf
+     * Normal distribution with mean := 0.0
+     * \tparam T Output type.
+     * \return The mean defined by Kaiming for neural network
+     * initialization.
+     */
+    template <typename T>
+    static T kaiming_initialization_mean()
+    {
+        return T(0.0);
+    }
+
+    /**
+     * \brief Kaiming He, et. al. initialization
+     * https://arxiv.org/pdf/1502.01852.pdf
+     * Normal distribution with mean := 0.0 and variance := sqrt( 2 / n_in )
+     * \tparam T    Tuple output type.
+     * \param n     The input size.
+     * \return A tuple of Kaiming initialization mean and variance.
+     */
+    template <typename T>
+    static std::tuple<T, T> kaiming_initialization(SizeType n)
+    {
+        return {
+            kaiming_initialization_mean<T>(),
+            kaiming_initialization_variance<T>(n)
+        };
+    }
+
+    /**
+     * \brief Xavier initialization
+     * https://arxiv.org/pdf/1706.02515.pdf
+     * Normal distribution with variance := sqrt( 1 / n_in )
+     * \tparam T    Output type.
+     * \param n     The input size.
+     * \return T The variance defined by Kaiming for neural network
+     * initialization.
+     */
+    template <typename T>
+    static T xavier_initialization_variance(SizeType n)
+    {
+        return std::sqrt(T{1.0} / static_cast<T>(n));
+    }
+
+    /**
+     * \brief Xavier initialization
+     * https://arxiv.org/pdf/1706.02515.pdf
+     * Normal distribution with mean := 0.0
+     * \tparam T Output type.
+     * \return The mean defined by Xavier for neural network
+     * initialization.
+     */
+    template <typename T>
+    static T xavier_initialization_mean()
+    {
+        return T(0.0);
+    }
+
+    /**
+     * \brief Xavier initialization
+     * https://arxiv.org/pdf/1706.02515.pdf
+     * Normal distribution with mean := 0.0 and variance := sqrt( 1 / n_in )
+     * \tparam T    Tuple output type.
+     * \param n     The input size.
+     * \return A tuple of Xavier initialization mean and variance.
+     */
+    template <typename T>
+    static std::tuple<T, T> xavier_initialization(SizeType n)
+    {
+        return {
+            xavier_initialization_mean<T>(),
+            xavier_initialization_variance<T>(n)
+        };
+    }
+
+    /**
+     * \brief Initialization mean and variance parameters selector.
+     * \tparam T    Tuple output type.
+     * \param type  Type of initialization requested.
+     * \param n     The input size.
+     * \return A tuple of initialization mean and variance.
+     */
+    template <typename T>
+    static std::tuple<T, T> initialization(
+        InitializationFunction type, SizeType n)
+    {
+        switch (type) {
+            case InitializationFunction::XAVIER:
+                return xavier_initialization<T>(n);
+            case InitializationFunction::KAIMING:
+                return kaiming_initialization<T>(n);
+            default:
+                throw std::runtime_error(
+                    "Initialization function not recognized");
+        }
+    }
+
+    /**
+     * \brief Initialization probability density function.
+     * \tparam T            Return function output type.
+     * \param init_type     Type of initialization requested.
+     * \param pdf_type      Type of Probability density function.
+     * \param n             The input size.
+     * \return std::function<T(RneType)> The distribution function.
+     */
+    template <typename T>
+    static std::function<T(RneType&)> initialization_pdf(
+        InitializationFunction init_type,
+        ProbabilityDensityFunction pdf_type,
+        SizeType n)
+    {
+        auto pdf_params = initialization<T>(init_type, n);
+        return pdf<T>(std::get<0>(pdf_params), std::get<1>(pdf_params),
+                      pdf_type);
+    }
+
 
     /**
      * \brief Element wise multiplication between two arrays.

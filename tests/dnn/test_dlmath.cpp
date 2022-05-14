@@ -127,8 +127,13 @@ private:
     }
 
     void test_pdf() {
-        EDGE_LEARNING_TEST_FAIL(DLMath::pdf<TestNumType>(
-            0.0, 0.1, static_cast<DLMath::ProbabilityDensityFunction>(-1)));
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::pdf<TestNumType>(
+                0.0, 0.1, static_cast<DLMath::ProbabilityDensityFunction>(-1)));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::pdf<TestNumType>(
+                0.0, 0.1, static_cast<DLMath::ProbabilityDensityFunction>(-1)),
+                std::runtime_error);
 
         std::random_device rd;
         RneType generator{rd()};
@@ -148,6 +153,191 @@ private:
                                      + std::to_string(dist(generator)));
         }
     }
+
+    void test_kaiming_initialization()
+    {
+        int truth_mean = 0;
+        EDGE_LEARNING_TEST_EQUAL(
+            DLMath::kaiming_initialization_mean<int>(), truth_mean);
+        EDGE_LEARNING_TEST_EQUAL(
+            std::get<0>(DLMath::kaiming_initialization<int>(100)), truth_mean);
+
+        SizeType n = 10;
+        TestNumType truth_variance = 0.4472135954999579;
+        EDGE_LEARNING_TEST_WITHIN(
+            DLMath::kaiming_initialization_variance<TestNumType>(n),
+            truth_variance, 0.000000000000001);
+        EDGE_LEARNING_TEST_WITHIN(
+            std::get<1>(DLMath::kaiming_initialization<int>(n)),
+            truth_variance, 0.000000000000001);
+
+        n = 1;
+        truth_variance = 1.4142135623730951;
+        EDGE_LEARNING_TEST_WITHIN(
+            DLMath::kaiming_initialization_variance<TestNumType>(n),
+            truth_variance, 0.000000000000001);
+        EDGE_LEARNING_TEST_WITHIN(
+            std::get<1>(DLMath::kaiming_initialization<int>(n)),
+            truth_variance, 0.000000000000001);
+
+        n = 2;
+        truth_variance = 1.0;
+        EDGE_LEARNING_TEST_WITHIN(
+            DLMath::kaiming_initialization_variance<TestNumType>(n),
+            truth_variance, 0.000000000000001);
+        EDGE_LEARNING_TEST_WITHIN(
+            std::get<1>(DLMath::kaiming_initialization<int>(n)),
+            truth_variance, 0.000000000000001);
+    }
+
+    void test_xavier_initialization()
+    {
+        int truth_mean = 0;
+        EDGE_LEARNING_TEST_EQUAL(
+            DLMath::xavier_initialization_mean<int>(), truth_mean);
+        EDGE_LEARNING_TEST_EQUAL(
+            std::get<0>(DLMath::xavier_initialization<int>(100)), truth_mean);
+
+        SizeType n = 10;
+        TestNumType truth_variance = 0.31622776601683794;
+        EDGE_LEARNING_TEST_WITHIN(
+            DLMath::xavier_initialization_variance<TestNumType>(n),
+            truth_variance, 0.000000000000001);
+        EDGE_LEARNING_TEST_WITHIN(
+            std::get<1>(DLMath::xavier_initialization<int>(n)),
+            truth_variance, 0.000000000000001);
+
+        n = 1;
+        truth_variance = 1.0;
+        EDGE_LEARNING_TEST_WITHIN(
+            DLMath::xavier_initialization_variance<TestNumType>(n),
+            truth_variance, 0.000000000000001);
+        EDGE_LEARNING_TEST_WITHIN(
+            std::get<1>(DLMath::xavier_initialization<int>(n)),
+            truth_variance, 0.000000000000001);
+
+        n = 2;
+        truth_variance = 0.7071067811865476;
+        EDGE_LEARNING_TEST_WITHIN(
+            DLMath::xavier_initialization_variance<TestNumType>(n),
+            truth_variance, 0.000000000000001);
+        EDGE_LEARNING_TEST_WITHIN(
+            std::get<1>(DLMath::xavier_initialization<int>(n)),
+            truth_variance, 0.000000000000001);
+    }
+
+    void test_initialization()
+    {
+        int truth_mean = 0;
+        auto kaiming_mean = std::get<0>(DLMath::initialization<int>(
+            DLMath::InitializationFunction::KAIMING, 100));
+        auto xavier_mean = std::get<0>(DLMath::initialization<int>(
+            DLMath::InitializationFunction::XAVIER, 100));
+        EDGE_LEARNING_TEST_EQUAL(kaiming_mean, truth_mean);
+        EDGE_LEARNING_TEST_EQUAL(xavier_mean, truth_mean);
+
+        SizeType n = 10;
+        auto kaiming_variance = std::get<1>(
+            DLMath::initialization<TestNumType>(
+                DLMath::InitializationFunction::KAIMING, n));
+        TestNumType kaiming_truth_variance = 0.4472135954999579;
+        auto xavier_variance = std::get<1>(
+            DLMath::initialization<TestNumType>(
+                DLMath::InitializationFunction::XAVIER, n));
+        TestNumType xavier_truth_variance = 0.31622776601683794;
+        EDGE_LEARNING_TEST_WITHIN(kaiming_variance, kaiming_truth_variance,
+                                  0.000000000000001);
+        EDGE_LEARNING_TEST_WITHIN(xavier_variance, xavier_truth_variance,
+                                  0.000000000000001);
+
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::initialization<TestNumType>(
+                static_cast<DLMath::InitializationFunction>(-1), n));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::initialization<TestNumType>(
+                static_cast<DLMath::InitializationFunction>(-1), n),
+                std::runtime_error);
+    }
+
+    void test_initialization_pdf()
+    {
+        SizeType n = 10;
+
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::initialization_pdf<TestNumType>(
+                DLMath::InitializationFunction::KAIMING,
+                static_cast<DLMath::ProbabilityDensityFunction>(-1), n));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::initialization_pdf<TestNumType>(
+                DLMath::InitializationFunction::KAIMING,
+                static_cast<DLMath::ProbabilityDensityFunction>(-1), n),
+            std::runtime_error);
+
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::initialization_pdf<TestNumType>(
+                static_cast<DLMath::InitializationFunction>(-1),
+                DLMath::ProbabilityDensityFunction::NORMAL, n));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::initialization_pdf<TestNumType>(
+                static_cast<DLMath::InitializationFunction>(-1),
+                DLMath::ProbabilityDensityFunction::NORMAL, n),
+            std::runtime_error);
+
+        std::random_device rd;
+        RneType generator{rd()};
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::initialization_pdf<TestNumType>(
+                DLMath::InitializationFunction::KAIMING,
+                DLMath::ProbabilityDensityFunction::NORMAL, n));
+        auto dist = DLMath::initialization_pdf<TestNumType>(
+            DLMath::InitializationFunction::KAIMING,
+            DLMath::ProbabilityDensityFunction::NORMAL, n);
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(dist(generator)));
+        }
+
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::initialization_pdf<TestNumType>(
+                DLMath::InitializationFunction::XAVIER,
+                DLMath::ProbabilityDensityFunction::NORMAL, n));
+        dist = DLMath::initialization_pdf<TestNumType>(
+            DLMath::InitializationFunction::XAVIER,
+            DLMath::ProbabilityDensityFunction::NORMAL,n);
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(dist(generator)));
+        }
+
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::initialization_pdf<TestNumType>(
+                DLMath::InitializationFunction::KAIMING,
+                DLMath::ProbabilityDensityFunction::UNIFORM, n));
+        dist = DLMath::initialization_pdf<TestNumType>(
+            DLMath::InitializationFunction::KAIMING,
+            DLMath::ProbabilityDensityFunction::UNIFORM, n);
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(dist(generator)));
+        }
+
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::initialization_pdf<TestNumType>(
+                DLMath::InitializationFunction::XAVIER,
+                DLMath::ProbabilityDensityFunction::UNIFORM, n));
+        dist = DLMath::initialization_pdf<TestNumType>(
+            DLMath::InitializationFunction::XAVIER,
+            DLMath::ProbabilityDensityFunction::UNIFORM, n);
+        for (std::size_t i = 0; i < PRINT_TIMES; ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(dist(generator)));
+        }
+    }
+
 
     void test_unique() {
         for (std::size_t i = 0; i < 100; ++i)
