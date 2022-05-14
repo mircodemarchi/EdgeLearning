@@ -89,6 +89,7 @@ const std::vector<NumType>& Layer::training_forward(
     const std::vector<NumType>& inputs)
 {
     _check_training_input(inputs);
+    _last_input = inputs.data();
     return forward(inputs);
 }
 

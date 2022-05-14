@@ -5,6 +5,7 @@ set(UNIT_TESTS
     test_cce_loss
     test_mse_loss
     test_dense
+    test_activation
     test_recurrent
     test_convolutional
     test_max_pooling

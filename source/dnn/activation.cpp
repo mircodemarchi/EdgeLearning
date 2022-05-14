@@ -62,6 +62,7 @@ ReluLayer::ReluLayer(Model& model, std::string name, SizeType size)
 const std::vector<NumType>& ReluLayer::forward(
     const std::vector<NumType>& inputs)
 {
+    _last_input = inputs.data();
     DLMath::relu<NumType>(_output_activations.data(), inputs.data(),
                           _output_size);
     return ActivationLayer::forward(_output_activations);
@@ -96,6 +97,7 @@ SoftmaxLayer::SoftmaxLayer(Model& model, std::string name, SizeType size)
 const std::vector<NumType>& SoftmaxLayer::forward(
     const std::vector<NumType>& inputs)
 {
+    _last_input = inputs.data();
     DLMath::softmax<NumType>(_output_activations.data(), inputs.data(),
                              _output_size);
     return ActivationLayer::forward(_output_activations);
@@ -125,6 +127,7 @@ TanhLayer::TanhLayer(Model& model, std::string name, SizeType size)
 const std::vector<NumType>& TanhLayer::forward(
     const std::vector<NumType>& inputs)
 {
+    _last_input = inputs.data();
     DLMath::tanh<NumType>(_output_activations.data(), inputs.data(),
                           _output_size);
     return ActivationLayer::forward(_output_activations);
@@ -151,7 +154,8 @@ LinearLayer::LinearLayer(Model& model, std::string name, SizeType size)
 const std::vector<NumType>& LinearLayer::forward(
     const std::vector<NumType>& inputs)
 {
-    (void) inputs;
+    _last_input = inputs.data();
+    _output_activations = inputs;
     return ActivationLayer::forward(_output_activations);
 }
 

@@ -94,6 +94,15 @@ public:
     void print() const override;
 
     /**
+     * \brief Getter of input_size class field.
+     * \return The size of the layer input.
+     */
+    [[nodiscard]] virtual SizeType input_size() const override
+    {
+        return FeedforwardLayer::input_size();
+    }
+
+    /**
      * \brief Activation layer setter.
      * Since input_size == output_size in activation layer, it overrides also
      * the output_size.

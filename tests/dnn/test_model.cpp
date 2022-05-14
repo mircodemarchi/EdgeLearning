@@ -125,6 +125,8 @@ private:
         EDGE_LEARNING_TEST_TRY(m.create_edge(l1, l1_relu));
         EDGE_LEARNING_TEST_TRY(m.create_back_arc(l1_relu, loss));
         EDGE_LEARNING_TEST_TRY(m.init());
+        EDGE_LEARNING_TEST_TRY(m.init(Model::InitializationFunction::KAIMING));
+        EDGE_LEARNING_TEST_TRY(m.init(Model::InitializationFunction::XAVIER));
     }
 
     void test_getter()
