@@ -130,17 +130,7 @@ public:
     virtual const std::vector<NumType>& training_forward(
         const std::vector<NumType>& inputs)
     {
-        if (_input_size == 0)
-        {
-            input_size(inputs.size());
-        }
-        else if (_input_size != inputs.size())
-        {
-            throw std::runtime_error(
-                "Training forward input catch an unpredicted input size: "
-                + std::to_string(_input_size)
-                + " != " + std::to_string(inputs.size()));
-        }
+        _check_training_input(inputs);
         return forward(inputs);
     }
 
@@ -225,6 +215,25 @@ public:
     [[nodiscard]] SizeType output_size() const;
 
 protected:
+    /**
+     * \brief Check the input of the forward pass during layer training.
+     * \param inputs The input of the layer.
+     */
+    void _check_training_input(const std::vector<NumType>& inputs)
+    {
+        if (_input_size == 0)
+        {
+            input_size(inputs.size());
+        }
+        else if (_input_size != inputs.size())
+        {
+            throw std::runtime_error(
+                "Training forward input catch an unpredicted input size: "
+                + std::to_string(_input_size)
+                + " != " + std::to_string(inputs.size()));
+        }
+    }
+
     friend class Model;
 
     Model& _model;                         ///< Model reference.
