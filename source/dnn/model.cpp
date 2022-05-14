@@ -25,6 +25,7 @@
 #include "model.hpp"
 
 #include "dlmath.hpp"
+#include "activation.hpp"
 
 #include <cstdio>
 #include <cassert>
@@ -84,7 +85,8 @@ void Model::create_edge(
     create_front_arc(src, dst);
 }
 
-RneType::result_type Model::init(Layer::ProbabilityDensityFunction pdf,
+RneType::result_type Model::init(InitializationFunction init,
+                                 ProbabilityDensityFunction pdf,
                                  RneType::result_type seed)
 {
     if (seed == 0)
@@ -98,9 +100,43 @@ RneType::result_type Model::init(Layer::ProbabilityDensityFunction pdf,
     RneType rne{seed};  
     for (auto& layer: _layers)
     {
-        layer->init(pdf, rne);
+        switch (init)
+        {
+            case InitializationFunction::KAIMING:
+            {
+                layer->init(Layer::InitializationFunction::KAIMING, pdf, rne);
+                break;
+            }
+            case InitializationFunction::XAVIER:
+            {
+                layer->init(Layer::InitializationFunction::XAVIER, pdf, rne);
+                break;
+            }
+            case InitializationFunction::AUTO:
+            default:
+            {
+                bool init_done = false;
+                for (auto const& next_layer: layer->_subsequents)
+                {
+                    if (next_layer->is_type<ReluLayer>())
+                    {
+                        layer->init(Layer::InitializationFunction::KAIMING,
+                                    pdf, rne);
+                        init_done = true;
+                        break;
+                    }
+                }
+                if (!init_done)
+                {
+                    layer->init(Layer::InitializationFunction::XAVIER,
+                                pdf, rne);
+                }
+                break;
+            }
+
+        }
     }
-    _loss_layer->init(pdf, rne);
+    _loss_layer->init(Layer::InitializationFunction::XAVIER, pdf, rne);
 
     return seed;
 }

@@ -4,6 +4,7 @@ add_library(${LIBRARY_NAME} OBJECT
     layer.cpp
     model.cpp
     feedforward.cpp
+    activation.cpp
     dense.cpp
     loss.cpp
     cce_loss.cpp

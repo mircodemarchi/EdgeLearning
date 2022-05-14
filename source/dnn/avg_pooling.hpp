@@ -44,7 +44,6 @@ class AvgPoolingLayer : public PoolingLayer
 public:
     AvgPoolingLayer(Model& model,
                     std::string name = std::string(),
-                    Activation activation = Activation::ReLU,
                     DLMath::Shape3d input_shape = {0, 0, 1},
                     DLMath::Shape2d kernel_shape = {0},
                     DLMath::Shape2d stride = {1});

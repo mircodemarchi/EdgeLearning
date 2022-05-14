@@ -49,10 +49,7 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = DropoutLayer(_m, "dropout_layer_test"));
         auto l = DropoutLayer(_m, "dropout_layer_test");
-        EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
-        EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
@@ -78,10 +75,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(DropoutLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(DropoutLayer l2_copy{l});
         DropoutLayer l_copy{l};
-        EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
-        EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(l_copy.init());
         EDGE_LEARNING_TEST_TRY(l_copy.print());
         EDGE_LEARNING_TEST_EQUAL(l_copy.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l_copy.param(0));
@@ -100,12 +94,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(DropoutLayer l_assign(_m); l_assign = l);
         EDGE_LEARNING_TEST_TRY(DropoutLayer l_assign(_m); l_assign = l);
         DropoutLayer l_assign(_m); l_assign = l;
-        EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
-                          RneType()));
-        EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
-                          RneType()));
+        EDGE_LEARNING_TEST_TRY(l_assign.init());
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l_assign.param(0));
@@ -127,8 +116,7 @@ private:
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
 
-        auto l_shape = DropoutLayer(_m, "dropout_layer_test",
-                                    Layer::Activation::ReLU, 10);
+        auto l_shape = DropoutLayer(_m, "dropout_layer_test", 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape.output_size(), 10);
         EDGE_LEARNING_TEST_ASSERT(l_shape.last_input().empty());
@@ -163,8 +151,7 @@ private:
     void test_dropout_layer()
     {
         std::vector<NumType> v1{1};
-        auto l = DropoutLayer(_m, "dropout_layer_test",
-                              Layer::Activation::ReLU, 1);
+        auto l = DropoutLayer(_m, "dropout_layer_test", 1);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v1));
         EDGE_LEARNING_TEST_TRY(l.forward(v1));
@@ -210,14 +197,12 @@ private:
         NumType p = 0.9;
         std::vector<NumType> v_complex{0,1,2,3,4,5,6,7,8,9};
         auto l_complex = DropoutLayer(_m, "dropout_layer_test",
-                                      Layer::Activation::Linear,
                                       v_complex.size(), p);
         EDGE_LEARNING_TEST_TRY(l_complex.training_forward(v_complex));
         EDGE_LEARNING_TEST_TRY(l_complex.forward(v_complex));
         EDGE_LEARNING_TEST_TRY(l_complex.backward(v_complex));
         p = 1.0;
         l_complex = DropoutLayer(_m, "dropout_layer_test",
-                                 Layer::Activation::ReLU,
                                  v_complex.size(), p);
         EDGE_LEARNING_TEST_TRY(l_complex.training_forward(v_complex));
         EDGE_LEARNING_TEST_TRY(l_complex.forward(v_complex));
@@ -225,7 +210,6 @@ private:
         p = 0.4;
         RneType rne(0);
         l_complex = DropoutLayer(_m, "dropout_layer_test",
-                                 Layer::Activation::ReLU,
                                  v_complex.size(), p, rne);
         EDGE_LEARNING_TEST_TRY(l_complex.training_forward(v_complex));
         EDGE_LEARNING_TEST_TRY(l_complex.forward(v_complex));
@@ -235,8 +219,7 @@ private:
     void test_getter()
     {
         SizeType size = 1;
-        auto l = DropoutLayer(_m, "dropout_layer_test",
-                              Layer::Activation::ReLU, size);
+        auto l = DropoutLayer(_m, "dropout_layer_test", size);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), size);
     }
@@ -244,8 +227,7 @@ private:
     void test_setter()
     {
         SizeType input_size = 1;
-        auto l = DropoutLayer(_m, "dropout_layer_test",
-                              Layer::Activation::ReLU, input_size, 1);
+        auto l = DropoutLayer(_m, "dropout_layer_test", input_size, 1);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), input_size);
         input_size = 10;

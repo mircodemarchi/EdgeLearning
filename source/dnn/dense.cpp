@@ -31,9 +31,9 @@
 
 namespace EdgeLearning {
 
-DenseLayer::DenseLayer(Model& model, std::string name, Activation activation, 
+DenseLayer::DenseLayer(Model& model, std::string name,
     SizeType input_size, SizeType output_size)
-    : FeedforwardLayer(model, input_size, output_size, activation,
+    : FeedforwardLayer(model, input_size, output_size,
                        std::move(name), "dense_layer_")
 {
     // std::cout << _name << ": " << input_size
@@ -49,42 +49,17 @@ DenseLayer::DenseLayer(Model& model, std::string name, Activation activation,
     _bias_gradients.resize(output_size);
 }
 
-void DenseLayer::init(ProbabilityDensityFunction pdf, RneType rne)
+void DenseLayer::init(InitializationFunction init,
+                      ProbabilityDensityFunction pdf,
+                      RneType rne)
 {
-    NumType sigma;
-    switch (_activation)
-    {
-        case Activation::ReLU:
-        {   
-            /*
-             * Kaiming He, et. al. weight initialization for ReLU networks 
-             * https://arxiv.org/pdf/1502.01852.pdf
-             * Nrmal distribution with variance := sqrt( 2 / n_in )
-             */
-            sigma = std::sqrt(NumType{2.0} / static_cast<NumType>(_input_size));
-            break;
-        }
-        case Activation::Softmax:
-        case Activation::Linear:
-        default:
-        {
-            /* 
-             * Xavier initialization
-             * https://arxiv.org/pdf/1706.02515.pdf
-             * Normal distribution with variance := sqrt( 1 / n_in )
-             */
-            sigma = std::sqrt(NumType{1.0} / static_cast<NumType>(_input_size));
-            break;
-        }
-    }
-
     /*
      * The C++ standard does not guarantee that the results obtained from a 
      * distribution function will be identical given the same inputs across 
      * different compilers and platforms, therefore I use my own 
      * distributions to provide deterministic results.
      */
-    auto dist = DLMath::pdf<NumType>(0.0, sigma, pdf);
+    auto dist = DLMath::initialization_pdf<NumType>(init, pdf, _input_size);
 
     for (NumType& w: _weights)
     {
@@ -114,20 +89,17 @@ const std::vector<NumType>& DenseLayer::forward(
      * z = W * x + b
      */
     DLMath::matarr_mul_no_check<NumType>(
-        _activations.data(), _weights.data(), inputs.data(),
+        _output_activations.data(), _weights.data(), inputs.data(),
         _output_size, _input_size);
-    DLMath::arr_sum<NumType>(_activations.data(), _activations.data(),
+    DLMath::arr_sum<NumType>(_output_activations.data(),
+                             _output_activations.data(),
                              _biases.data(), _output_size);
-
-    FeedforwardLayer::forward(_activations);
-    return Layer::forward(_activations);
+    return FeedforwardLayer::forward(_output_activations);
 }
 
 const std::vector<NumType>& DenseLayer::backward(
     const std::vector<NumType>& gradients)
 {
-    FeedforwardLayer::backward(gradients);
-
     /*
      * Bias gradient.
      * Calculate dJ/db = dJ/dg(z) * dg(z)/db
@@ -137,8 +109,8 @@ const std::vector<NumType>& DenseLayer::backward(
      *                 = dJ/dg(z) * dg(z)/dz
      *                 = dJ/dz
      */
-    DLMath::arr_sum(_bias_gradients.data(), _bias_gradients.data(), 
-        _activation_gradients.data(), _output_size);
+    DLMath::arr_sum(_bias_gradients.data(), _bias_gradients.data(),
+                    gradients.data(), _output_size);
 
     /*
      * Weight gradient.
@@ -153,8 +125,8 @@ const std::vector<NumType>& DenseLayer::backward(
     {
         for (SizeType j = 0; j < _input_size; ++j)
         {
-            _weight_gradients[(i * _input_size) + j] += 
-                _activation_gradients[i] * _last_input[j];
+            _weight_gradients[(i * _input_size) + j] +=
+                gradients[i] * _last_input[j];
         }
     }
 
@@ -172,12 +144,12 @@ const std::vector<NumType>& DenseLayer::backward(
     {
         for (SizeType j = 0; j < _input_size; ++j)
         {
-            _input_gradients[j] += 
-                _activation_gradients[i] * _weights[(i * _input_size) + j];
+            _input_gradients[j] +=
+                gradients[i] * _weights[(i * _input_size) + j];
         }
     }
 
-    return Layer::backward(_input_gradients);
+    return FeedforwardLayer::backward(_input_gradients);;
 }
 
 NumType& DenseLayer::param(SizeType index)

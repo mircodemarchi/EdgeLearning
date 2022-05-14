@@ -57,14 +57,11 @@ static inline SizeType pooling_output_size(
 }
 
 PoolingLayer::PoolingLayer(
-    Model& model, Activation activation,
-    DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
-    DLMath::Shape2d stride,
-    std::string name, std::string prefix_name)
+    Model& model, DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
+    DLMath::Shape2d stride, std::string name, std::string prefix_name)
     : FeedforwardLayer(
         model, input_shape.size(),
-        pooling_output_size(input_shape, kernel_shape, stride),
-        activation, std::move(name),
+        pooling_output_size(input_shape, kernel_shape, stride), std::move(name),
         prefix_name.empty() ? "pooling_layer_" : prefix_name)
     , _input_shape(input_shape)
     , _output_shape(pooling_output_shape(input_shape, kernel_shape, stride))
@@ -89,8 +86,7 @@ void PoolingLayer::input_size(DLMath::Shape3d input_shape)
 
     // Update output size accordingly (see Layer and FeedforwardLayer constr.).
     _output_size = _output_shape.size();
-    _activations.resize(_output_size);
-    _activation_gradients.resize(_output_size);
+    _output_activations.resize(_output_size);
 }
 
 } // namespace EdgeLearning

@@ -46,17 +46,22 @@ namespace EdgeLearning {
 
 template <>
 struct MapActivation<Framework::EDGE_LEARNING, ActivationType::ReLU> {
-    static const ActivationType type = ActivationType::ReLU;
+    using type = ReluLayer;
 };
 
 template <>
 struct MapActivation<Framework::EDGE_LEARNING, ActivationType::Softmax> {
-    static const ActivationType type = ActivationType::Softmax;
+    using type = SoftmaxLayer;
+};
+
+template <>
+struct MapActivation<Framework::EDGE_LEARNING, ActivationType::TanH> {
+    using type = TanhLayer;
 };
 
 template <>
 struct MapActivation<Framework::EDGE_LEARNING, ActivationType::Linear> {
-    static const ActivationType type = ActivationType::Linear;
+    using type = LinearLayer;
 };
 
 template <>

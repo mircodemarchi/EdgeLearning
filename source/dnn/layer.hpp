@@ -51,16 +51,7 @@ class Layer
 public:
     static const std::string Type;
 
-    enum class Activation
-    {
-        ReLU,
-        Softmax,
-        TanH,
-        // Sigmoid, // TODO: Implement sigmoid activation function.
-        Linear,
-        None
-    };
-
+    using InitializationFunction = DLMath::InitializationFunction;
     using ProbabilityDensityFunction = DLMath::ProbabilityDensityFunction;
     using SharedPtr = std::shared_ptr<Layer>;
 
@@ -69,13 +60,11 @@ public:
      * \param model       The model in which the layer takes part.
      * \param input_size  The size of inputs of the layer.
      * \param output_size The size of outputs of the layer.
-     * \param activation  The output activation function.
      * \param name        The name of the layer.
      * If empty, a default generated one is chosen.
      * \param prefix_name The prefix name of the default generated name.
      */
     Layer(Model& model, SizeType input_size = 0, SizeType output_size = 0,
-          Activation activation = Activation::None,
           std::string name = std::string(),
           std::string prefix_name = std::string());
 
@@ -100,10 +89,12 @@ public:
     /**
      * \brief Virtual method used to describe how a layer should be 
      * initialized.
+     * \param init InitializationFunction    The initialization used.
      * \param pdf ProbabilityDensityFunction The distribution used.
      * \param rne RneType                    The random generator.
      */
     virtual void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType(std::random_device{}()))
         = 0;
@@ -128,11 +119,7 @@ public:
      * the subsequent layers.
      */
     virtual const std::vector<NumType>& training_forward(
-        const std::vector<NumType>& inputs)
-    {
-        _check_training_input(inputs);
-        return forward(inputs);
-    }
+        const std::vector<NumType>& inputs);
 
     /**
      * \brief Virtual method used to perform reverse propagations. During 
@@ -146,6 +133,12 @@ public:
      */
     virtual const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients);
+
+    template<class LayerT>
+    bool is_type() const
+    {
+        return dynamic_cast<const LayerT*>(this) != nullptr;
+    }
 
     /**
      * \brief Return the last input of the layer.
@@ -206,6 +199,11 @@ public:
      * \return The size of the layer input.
      */
     [[nodiscard]] virtual SizeType input_size() const;
+    /**
+     * \brief Setter of input_size class field.
+     * \param input_size DLMath::Shape3d Shape param used to take the size and
+     * assign it to input_size.
+     */
     virtual void input_size(DLMath::Shape3d input_size);
 
     /**
@@ -219,20 +217,7 @@ protected:
      * \brief Check the input of the forward pass during layer training.
      * \param inputs The input of the layer.
      */
-    void _check_training_input(const std::vector<NumType>& inputs)
-    {
-        if (_input_size == 0)
-        {
-            input_size(inputs.size());
-        }
-        else if (_input_size != inputs.size())
-        {
-            throw std::runtime_error(
-                "Training forward input catch an unpredicted input size: "
-                + std::to_string(_input_size)
-                + " != " + std::to_string(inputs.size()));
-        }
-    }
+    void _check_training_input(const std::vector<NumType>& inputs);
 
     friend class Model;
 
@@ -242,8 +227,6 @@ protected:
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
     SizeType _input_size;                  ///< Layer input size.
     SizeType _output_size;                 ///< Layer output size.
-
-    Activation _activation;
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss

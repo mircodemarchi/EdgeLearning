@@ -49,9 +49,17 @@ private:
                 auto l = DenseLayer(_m, "dense_layer_test"));
         auto l = DenseLayer(_m, "dense_layer_test");
         EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+            l.init(Layer::InitializationFunction::KAIMING,
+                   Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+            l.init(Layer::InitializationFunction::KAIMING,
+                   Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::InitializationFunction::XAVIER,
+                   Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::InitializationFunction::XAVIER,
+                   Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.print());
@@ -71,9 +79,17 @@ private:
         EDGE_LEARNING_TEST_TRY(DenseLayer l2_copy{l});
         DenseLayer l_copy{l};
         EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+            l_copy.init(Layer::InitializationFunction::KAIMING,
+                        Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+            l_copy.init(Layer::InitializationFunction::KAIMING,
+                        Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::InitializationFunction::XAVIER,
+                        Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::InitializationFunction::XAVIER,
+                        Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l_copy.print());
         EDGE_LEARNING_TEST_EQUAL(l_copy.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l_copy.param(0));
@@ -92,11 +108,21 @@ private:
         EDGE_LEARNING_TEST_TRY(DenseLayer l_assign(_m); l_assign = l);
         DenseLayer l_assign(_m); l_assign = l;
         EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
-                          RneType()));
+            l_assign.init(
+                Layer::InitializationFunction::KAIMING,
+                Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
-                          RneType()));
+            l_assign.init(
+                Layer::InitializationFunction::KAIMING,
+                Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(
+                Layer::InitializationFunction::XAVIER,
+                Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(
+                Layer::InitializationFunction::XAVIER,
+                Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l_assign.param(0));
@@ -117,9 +143,7 @@ private:
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
 
-        auto l_shape = DenseLayer(_m, "dense_layer_test",
-                                  Layer::Activation::ReLU,
-                                  10, 20);
+        auto l_shape = DenseLayer(_m, "dense_layer_test", 10, 20);
         EDGE_LEARNING_TEST_EQUAL(l_shape.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape.output_size(), 20);
         EDGE_LEARNING_TEST_ASSERT(l_shape.last_input().empty());
@@ -145,8 +169,7 @@ private:
     void test_dense_layer()
     {
         std::vector<NumType> v1{1};
-        auto l = DenseLayer(_m, "dense_layer_test",
-                            Layer::Activation::ReLU, 1, 1);
+        auto l = DenseLayer(_m, "dense_layer_test", 1, 1);
         EDGE_LEARNING_TEST_TRY(l.forward(v1));
         EDGE_LEARNING_TEST_TRY(l.backward(v1));
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
@@ -188,8 +211,7 @@ private:
     {
         SizeType input_size = 1;
         SizeType output_size = 2;
-        auto l = DenseLayer(_m, "dense_layer_test",
-                            Layer::Activation::ReLU, input_size, output_size);
+        auto l = DenseLayer(_m, "dense_layer_test", input_size, output_size);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), output_size);
     }
@@ -197,8 +219,7 @@ private:
     void test_setter()
     {
         SizeType input_size = 1;
-        auto l = DenseLayer(_m, "dense_layer_test",
-                            Layer::Activation::ReLU, input_size, 1);
+        auto l = DenseLayer(_m, "dense_layer_test", input_size, 1);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 1);
         input_size = 10;
         EDGE_LEARNING_TEST_CALL(l.input_size(input_size));

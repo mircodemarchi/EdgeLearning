@@ -33,10 +33,8 @@ namespace EdgeLearning {
 
 RecurrentLayer::RecurrentLayer(Model& model, std::string name, 
     SizeType input_size, SizeType output_size, SizeType hidden_size,
-    SizeType time_steps, 
-    Activation output_activation, Activation hidden_activation)
-    : Layer(model, input_size, output_size, output_activation,
-            std::move(name), "recurrent_layer_")
+    SizeType time_steps, HiddenActivation hidden_activation)
+    : Layer(model, input_size, output_size, std::move(name), "recurrent_layer_")
     , _hidden_activation{hidden_activation}
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
@@ -61,13 +59,12 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     _biases_to_o.resize(_output_size);
 
     // The outputs of each neuron within the layer is an "activation".
-    _activations.resize(_output_size * _time_steps);
+    _output_activations.resize(_output_size * _time_steps);
 
     // The hidden state is of hidden_size for each time step of the sequences.
     _hidden_state = std::vector<NumType>(
         _hidden_size * std::max(_time_steps, SizeType(1U)), 0.0);
 
-    _activation_gradients.resize(_output_size * _time_steps);
     _weights_i_to_h_gradients.resize(ih_size);
     _weights_h_to_h_gradients.resize(hh_size);
     _weights_h_to_o_gradients.resize(ho_size);
@@ -76,47 +73,12 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     _input_gradients.resize(_input_size * _time_steps);
 }
 
-void RecurrentLayer::init(ProbabilityDensityFunction pdf, RneType rne)
+void RecurrentLayer::init(InitializationFunction init,
+                          ProbabilityDensityFunction pdf,
+                          RneType rne)
 {
-    NumType sigma_i, sigma_h;
-    switch (_activation)
-    {
-        // case Activation::ReLU:
-        // {   
-        //     /*
-        //      * Kaiming He, et. al. weight initialization for ReLU networks 
-        //      * https://arxiv.org/pdf/1502.01852.pdf
-        //      * Nrmal distribution with variance := sqrt( 2 / n_in )
-        //      */
-        //     sigma_i = std::sqrt(2.0 / static_cast<NumType>(_input_size));
-        //     sigma_h = std::sqrt(2.0 / static_cast<NumType>(_hidden_size));
-        //     break;
-        // }
-        // case Activation::Softmax:
-        case Activation::Linear:
-        default:
-        {
-            /* 
-             * Xavier initialization
-             * https://arxiv.org/pdf/1706.02515.pdf
-             * Normal distribution with variance := sqrt( 1 / n_in )
-             */
-            sigma_i = std::sqrt(
-                NumType{1.0} / static_cast<NumType>(_input_size));
-            sigma_h = std::sqrt(
-                NumType{1.0} / static_cast<NumType>(_hidden_size));
-            break;
-        }
-    }
-
-    /*
-     * The C++ standard does not guarantee that the results obtained from a 
-     * distribution function will be identical given the same inputs across 
-     * different compilers and platforms, therefore I use my own 
-     * distributions to provide deterministic results.
-     */
-    auto dist_i = DLMath::pdf<NumType>(0.0, sigma_i, pdf);
-    auto dist_h = DLMath::pdf<NumType>(0.0, sigma_h, pdf);
+    auto dist_i = DLMath::initialization_pdf<NumType>(init, pdf, _input_size);
+    auto dist_h = DLMath::initialization_pdf<NumType>(init, pdf, _hidden_size);
 
     for (NumType& w: _weights_i_to_h)
     {
@@ -131,19 +93,13 @@ void RecurrentLayer::init(ProbabilityDensityFunction pdf, RneType rne)
         w = dist_h(rne);
     }
 
-    /*
-     * Setting biases to zero is a common practice, as is initializing the 
-     * bias to a small value (e.g. on the order of 0.01). The thinking is
-     * that a non-zero bias will ensure that the neuron always "fires" at 
-     * the beginning to produce a signal.
-     */
     for (NumType& b: _biases_to_h)
     {
-        b = 0.01; ///< You can try also with 0.0 or other strategies.
+        b = 0.01;
     }
     for (NumType& b: _biases_to_o)
     {
-        b = 0.01; ///< You can try also with 0.0 or other strategies.
+        b = 0.01;
     }
 
     // Init first hidden state.
@@ -219,7 +175,7 @@ const std::vector<NumType>& RecurrentLayer::forward(
             //     // Linear activation disables non-linear function.
             //     break;
             // }
-            case Activation::TanH:
+            case HiddenActivation::TanH:
             default:
             {
                 /*
@@ -239,39 +195,19 @@ const std::vector<NumType>& RecurrentLayer::forward(
          * hidden_to_output weights and the sum with the to_output bias.
          * a(t) = W_ho * h(t + 1) + b_o
          */
-        DLMath::matarr_mul<NumType>(_activations.data() + t * _output_size, 
+        DLMath::matarr_mul<NumType>(_output_activations.data() + t * _output_size,
             _weights_h_to_o.data(),
             _hidden_state.data() + next_hs_idx * _hidden_size, 
             _output_size, _hidden_size);
         DLMath::arr_sum<NumType>(
-            _activations.data() + t * _output_size,
-            _activations.data() + t * _output_size,
+            _output_activations.data() + t * _output_size,
+            _output_activations.data() + t * _output_size,
             _biases_to_o.data(), _output_size);
-
-        // Calculate output activations.
-        switch (_activation)
-        {
-            // TODO: to test.
-            // case Activation::Softmax:
-            // {
-            //     DLMath::softmax<NumType>(
-            //         _activations.data() + i * _output_size, 
-            //         _activations.data() + i * _output_size,
-            //         SizeType(_output_size));
-            //     break;
-            // }
-            case Activation::Linear:
-            default:
-            {
-                // Linear activation disables non-linear function.
-                break;
-            }
-        }
     }
 
     delete[] tmp_mul;
 
-    return Layer::forward(_activations);
+    return Layer::forward(_output_activations);
 }
 
 const std::vector<NumType>& RecurrentLayer::backward(
@@ -293,50 +229,19 @@ const std::vector<NumType>& RecurrentLayer::backward(
         prev_hs_idx = t_idx;
         curr_sequence_gradients = gradients.data() + (t_idx * _output_size);
 
-        /* 
-         * Calculate gradient of output activation and put in 
-         * _activation_gradients.
-         */
-        NumType* curr_activation_gradients = _activation_gradients.data() 
-            + (t_idx * _output_size);
-        switch (_activation)
-        {
-            // TODO: to test.
-            // case Activation::Softmax:
-            // {
-            //     DLMath::softmax_1_opt<NumType>(
-            //         curr_activation_gradients,
-            //         _activations.data() + t_idx * _output_size, 
-            //         _output_size);
-            //     break;
-            // }
-            case Activation::Linear:
-            default:
-            {
-                std::fill(curr_activation_gradients, 
-                    curr_activation_gradients + _output_size, NumType{1.0});
-                break;
-            }
-        }
-
-        // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
-        DLMath::arr_mul(
-            curr_activation_gradients, curr_activation_gradients,
-            curr_sequence_gradients, _output_size);
-
         // Bias gradient to output.
         DLMath::arr_sum(
             _biases_to_o_gradients.data(), 
-            _biases_to_o_gradients.data(), 
-            curr_activation_gradients, _output_size);
+            _biases_to_o_gradients.data(),
+            curr_sequence_gradients, _output_size);
 
         // Weight gradient hidden to output.
         for (SizeType i = 0; i < _output_size; ++i)
         {
             for (SizeType j = 0; j < _hidden_size; ++j)
             {
-                _weights_h_to_o_gradients[(i * _hidden_size) + j] += 
-                    curr_activation_gradients[i] 
+                _weights_h_to_o_gradients[(i * _hidden_size) + j] +=
+                    curr_sequence_gradients[i]
                     * _hidden_state[(SizeType(curr_hs_idx) * _hidden_size) + j];
             }
         }
@@ -348,7 +253,7 @@ const std::vector<NumType>& RecurrentLayer::backward(
             for (SizeType i = 0; i < _output_size; ++i)
             {
                 tmp_mul[j] += _weights_h_to_o[(i * _hidden_size) + j] 
-                    * curr_activation_gradients[i];
+                    * curr_sequence_gradients[i];
             }
         }
         DLMath::arr_sum(
@@ -373,7 +278,7 @@ const std::vector<NumType>& RecurrentLayer::backward(
             //         NumType{1.0});
             //     break;
             // }
-            case Activation::TanH:
+            case HiddenActivation::TanH:
             default:
             {
                 DLMath::tanh_1<NumType>(
@@ -449,7 +354,7 @@ const std::vector<NumType>& RecurrentLayer::backward(
 
 const std::vector<NumType>& RecurrentLayer::last_output()
 {
-    return _activations;
+    return _output_activations;
 }
 
 NumType& RecurrentLayer::param(SizeType index)

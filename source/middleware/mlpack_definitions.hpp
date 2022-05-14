@@ -58,6 +58,11 @@ struct MapActivation<Framework::MLPACK, ActivationType::Softmax> {
 };
 
 template <>
+struct MapActivation<Framework::MLPACK, ActivationType::TanH> {
+    using type = mlpack::ann::TanHLayer<>;
+};
+
+template <>
 struct MapActivation<Framework::MLPACK, ActivationType::Linear> {
     using type = mlpack::ann::IdentityLayer<>;
 };

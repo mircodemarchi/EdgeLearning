@@ -33,16 +33,17 @@ using namespace EdgeLearning;
 class CustomLayer: public Layer {
 public:
     CustomLayer(SizeType input_size = 0, SizeType output_size = 0)
-        : Layer(_m, input_size, output_size, Activation::None,
-                "custom_layer_test")
+        : Layer(_m, input_size, output_size, "custom_layer_test")
         , _m{"model_layer_test"}
     { }
 
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType())
         override
     {
+        (void) init;
         (void) pdf;
         (void) rne;
     }
@@ -90,10 +91,12 @@ public:
     { }
 
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType())
         override
     {
+        (void) init;
         (void) pdf;
         (void) rne;
     }
@@ -145,9 +148,17 @@ private:
         EDGE_LEARNING_TEST_TRY(auto l = CustomLayer());
         auto l = CustomLayer();
         EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+            l.init(Layer::InitializationFunction::KAIMING,
+                   Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+            l.init(Layer::InitializationFunction::KAIMING,
+                   Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::InitializationFunction::XAVIER,
+                   Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::InitializationFunction::XAVIER,
+                   Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l.param(0));
@@ -177,9 +188,17 @@ private:
         EDGE_LEARNING_TEST_TRY(CustomLayer l2_copy{l});
         CustomLayer l_copy{l};
         EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+            l_copy.init(Layer::InitializationFunction::KAIMING,
+                        Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+            l_copy.init(Layer::InitializationFunction::KAIMING,
+                        Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::InitializationFunction::XAVIER,
+                        Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::InitializationFunction::XAVIER,
+                        Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v.size());
         EDGE_LEARNING_TEST_TRY(l_copy.input_size(0));
@@ -215,11 +234,21 @@ private:
         EDGE_LEARNING_TEST_TRY(CustomLayer l_assign; l_assign = l);
         CustomLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
-                          RneType()));
+            l_assign.init(
+                Layer::InitializationFunction::KAIMING,
+                Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
-                          RneType()));
+            l_assign.init(
+                Layer::InitializationFunction::KAIMING,
+                Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(
+                Layer::InitializationFunction::XAVIER,
+                Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(
+                Layer::InitializationFunction::XAVIER,
+                Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v.size());
         EDGE_LEARNING_TEST_TRY(l_assign.input_size(0));

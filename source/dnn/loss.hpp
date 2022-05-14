@@ -60,31 +60,20 @@ public:
 
     /**
      * \brief No initialization is needed for loss layers.
-     * \param pdf Not used.
-     * \param rne Not used.
+     * \param init  Not used.
+     * \param pdf   Not used.
+     * \param rne   Not used.
      */
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType(std::random_device{}()))
         override
     {
+        (void) init;
         (void) pdf;
         (void) rne;
     };
-
-    /**
-     * \brief Method inheritance.
-     * \param inputs
-     */
-    virtual const std::vector<NumType>& forward(
-        const std::vector<NumType>& inputs) override = 0;
-
-    /**
-     * \brief Method inheritance with default parameter overriding. 
-     * \param gradients
-     */
-    virtual const std::vector<NumType>& backward(
-        const std::vector<NumType>& gradients) override = 0;
 
     /**
      * \brief Loss layers do not have params.

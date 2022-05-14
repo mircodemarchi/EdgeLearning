@@ -48,9 +48,17 @@ private:
                 auto l = RecurrentLayer(_m, "recurrent_layer_test"));
         auto l = RecurrentLayer(_m, "recurrent_layer_test");
         EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+            l.init(Layer::InitializationFunction::KAIMING,
+                   Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+            l.init(Layer::InitializationFunction::KAIMING,
+                   Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::InitializationFunction::XAVIER,
+                   Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l.init(Layer::InitializationFunction::XAVIER,
+                   Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.print());
@@ -70,9 +78,17 @@ private:
         EDGE_LEARNING_TEST_TRY(RecurrentLayer l_copy{l});
         RecurrentLayer l_copy{l};
         EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+            l_copy.init(Layer::InitializationFunction::KAIMING,
+                        Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l_copy.init(Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+            l_copy.init(Layer::InitializationFunction::KAIMING,
+                        Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::InitializationFunction::XAVIER,
+                        Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_copy.init(Layer::InitializationFunction::XAVIER,
+                        Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l_copy.print());
         EDGE_LEARNING_TEST_EQUAL(l_copy.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l_copy.param(0));
@@ -93,11 +109,21 @@ private:
                 RecurrentLayer l_assign(_m); l_assign = l);
         RecurrentLayer l_assign(_m); l_assign = l;
         EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::NORMAL,
-                          RneType()));
+            l_assign.init(
+                Layer::InitializationFunction::KAIMING,
+                Layer::ProbabilityDensityFunction::NORMAL, RneType()));
         EDGE_LEARNING_TEST_TRY(
-            l_assign.init(Layer::ProbabilityDensityFunction::UNIFORM,
-                          RneType()));
+            l_assign.init(
+                Layer::InitializationFunction::KAIMING,
+                Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(
+                Layer::InitializationFunction::XAVIER,
+                Layer::ProbabilityDensityFunction::NORMAL, RneType()));
+        EDGE_LEARNING_TEST_TRY(
+            l_assign.init(
+                Layer::InitializationFunction::XAVIER,
+                Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l_assign.param(0));

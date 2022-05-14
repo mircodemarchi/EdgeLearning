@@ -43,7 +43,6 @@ class PoolingLayer : public FeedforwardLayer
 {
 public:
     PoolingLayer(Model& model,
-                 Activation activation = Activation::ReLU,
                  DLMath::Shape3d input_shape = {0, 0, 1},
                  DLMath::Shape2d kernel_shape = {0},
                  DLMath::Shape2d stride = {1},
@@ -52,14 +51,17 @@ public:
 
     /**
      * \brief No initialization is needed for Pooling layers.
-     * \param pdf Not used.
-     * \param rne Not used.
+     * \param init  Not used.
+     * \param pdf   Not used.
+     * \param rne   Not used.
      */
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType(std::random_device{}()))
         override
     {
+        (void) init;
         (void) pdf;
         (void) rne;
     };

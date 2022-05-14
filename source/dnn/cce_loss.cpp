@@ -68,6 +68,7 @@ const std::vector<NumType>& CCELossLayer::forward(
 
     // Store the data pointer to compute gradients later.
     _last_input = inputs.data();
+    // No more forward.
     return inputs;
 }
 
@@ -80,7 +81,7 @@ const std::vector<NumType>& CCELossLayer::backward(
     DLMath::cross_entropy_1(_gradients.data(), _target, _last_input,
         _inv_batch_size, _input_size);
 
-    return Layer::backward(_gradients);
+    return LossLayer::backward(_gradients);
 }
 
 SizeType CCELossLayer::_argactive() const

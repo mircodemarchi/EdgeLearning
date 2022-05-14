@@ -31,11 +31,9 @@
 
 namespace EdgeLearning {
 
-DropoutLayer::DropoutLayer(Model& model, std::string name,
-                           Activation activation, SizeType size,
+DropoutLayer::DropoutLayer(Model& model, std::string name, SizeType size,
                            NumType drop_probability, RneType random_generator)
-    : FeedforwardLayer(model, size, size, activation,
-                       std::move(name), "dropout_layer_")
+    : FeedforwardLayer(model, size, size, std::move(name), "dropout_layer_")
     , _drop_probability{drop_probability}
     , _scale{(_drop_probability == 1.0) ? 1.0 : 1.0 / (1.0 - drop_probability)}
     , _random_generator{random_generator}
@@ -60,33 +58,30 @@ const std::vector<NumType>& DropoutLayer::training_forward(
         auto random_value = dist(_random_generator);
         if (random_value > _drop_probability)
         {
-            _activations[i] = inputs[i] * _scale;
+            _output_activations[i] = inputs[i] * _scale;
         }
         else
         {
-            _activations[i] = NumType(0.0);
+            _output_activations[i] = NumType(0.0);
             _zero_mask_idxs.push_back(i);
         }
     }
 
-    FeedforwardLayer::forward(_activations);
-    return Layer::forward(_activations);
+    return FeedforwardLayer::forward(_output_activations);
 }
 
 const std::vector<NumType>& DropoutLayer::backward(
     const std::vector<NumType>& gradients)
 {
-    FeedforwardLayer::backward(gradients);
-
     // Input size is equal to the output size.
-    DLMath::arr_mul(_input_gradients.data(), _activation_gradients.data(),
+    DLMath::arr_mul(_input_gradients.data(), gradients.data(),
                     _scale, _input_size);
     for (const auto& i: _zero_mask_idxs)
     {
         _input_gradients[i] = 0;
     }
 
-    return Layer::backward(_input_gradients);
+    return FeedforwardLayer::backward(_input_gradients);
 }
 
 void DropoutLayer::print() const
@@ -100,8 +95,7 @@ void DropoutLayer::input_size(DLMath::Shape3d input_size)
 {
     FeedforwardLayer::input_size(input_size);
     _output_size = input_size.size();
-    _activations.resize(_output_size);
-    _activation_gradients.resize(_output_size);
+    _output_activations.resize(_output_size);
 }
 
 } // namespace EdgeLearning

@@ -53,14 +53,19 @@ int main()
     GDOptimizer o{NumType{LEARNING_RATE}};
     Model m{"regressor"};
     auto first_layer = m.add_layer<DenseLayer>(
-        "hidden", DenseLayer::Activation::ReLU, INPUT_SIZE, 8);
+        "hidden", INPUT_SIZE, 8);
+    auto first_activation = m.add_layer<ReluLayer>(
+        "hidden_relu", 8);
     auto output_layer = m.add_layer<DenseLayer>(
-        "output", DenseLayer::Activation::Softmax, 8, OUTPUT_SIZE);
+        "output", 8, OUTPUT_SIZE);
+    auto output_activation = m.add_layer<SoftmaxLayer>(
+        "output_softmax", OUTPUT_SIZE);
     auto loss_layer = m.add_loss<CCELossLayer>(
         "loss", OUTPUT_SIZE, BATCH_SIZE);
     m.create_edge(first_layer, output_layer);
     m.create_back_arc(output_layer, loss_layer);
-    m.init(Layer::ProbabilityDensityFunction::NORMAL, SEED);
+    m.init(Model::InitializationFunction::AUTO,
+           Layer::ProbabilityDensityFunction::NORMAL, SEED);
     m.print();
 
     for (SizeType e = 0; e < EPOCHS; ++e)

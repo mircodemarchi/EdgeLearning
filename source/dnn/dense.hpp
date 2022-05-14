@@ -42,10 +42,10 @@ class DenseLayer : public FeedforwardLayer
 public:
     DenseLayer(Model& model,
                std::string name = std::string(),
-               Activation activation = Activation::ReLU,
                SizeType input_size = 0, SizeType output_size = 0);
 
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType(std::random_device{}()))
         override;
@@ -82,12 +82,22 @@ public:
 
     void print() const override;
 
-    [[nodiscard]] SizeType input_size() const override
+    /**
+     * \brief Getter of input_size class field.
+     * \return The size of the layer input.
+     */
+    [[nodiscard]] virtual SizeType input_size() const override
     {
-        return Layer::input_size();
+        return FeedforwardLayer::input_size();
     }
-    void input_size(DLMath::Shape3d input_size) override;
 
+    /**
+     * \brief Setter of input_size class field.
+     * \param input_size DLMath::Shape3d Shape param used to take the size and
+     * assign it to input_size.
+     * The operation also performs a resize of the weights and its gradients.
+     */
+    void input_size(DLMath::Shape3d input_size) override;
 private:
 
     // == Layer parameters ==

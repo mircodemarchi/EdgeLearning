@@ -41,16 +41,23 @@ namespace EdgeLearning {
 class RecurrentLayer : public Layer 
 {
 public:
+    enum class HiddenActivation
+    {
+        ReLU,
+        TanH,
+        Linear
+    };
+
     // TODO: test softmax output activation.
     // TODO: test relu and linear hidden activation.
 
     RecurrentLayer(Model& model, std::string name = std::string(),
         SizeType input_size = 0, SizeType output_size = 0,
         SizeType hidden_size = 0, SizeType time_steps = 0,
-        Activation output_activation = Activation::Linear, 
-        Activation hidden_activation = Activation::TanH);
+        HiddenActivation hidden_activation = HiddenActivation::TanH);
 
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType(std::random_device{}()))
         override;
@@ -102,8 +109,7 @@ public:
         _time_steps = time_steps;
         _hidden_state.resize(
                 _hidden_size * std::max(_time_steps, SizeType(1U)));
-        _activations.resize(_output_size * _time_steps);
-        _activation_gradients.resize(_output_size * _time_steps);
+        _output_activations.resize(_output_size * _time_steps);
         _input_gradients.resize(_input_size * _time_steps);
     }
 
@@ -122,7 +128,7 @@ public:
     void input_size(DLMath::Shape3d input_size) override;
 
 private:
-    Activation _hidden_activation;
+    HiddenActivation _hidden_activation;
     SizeType _hidden_size;
 
     std::vector<NumType> _hidden_state;
@@ -151,7 +157,7 @@ private:
     std::vector<NumType> _biases_to_o;
 
     /// \brief Activations of the layer. Size: _output_size.
-    std::vector<NumType> _activations;
+    std::vector<NumType> _output_activations;
 
     /**
      * \brief Weights gradients input to hidden of the layer. 
@@ -173,9 +179,6 @@ private:
     std::vector<NumType> _biases_to_h_gradients;
     /// \brief Biases gradients to output of the layer. Size: _output_size. 
     std::vector<NumType> _biases_to_o_gradients;
-
-    /// \brief Activation gradients of the layer. Size: _output_size.
-    std::vector<NumType> _activation_gradients;
 
     /**
      * \brief Input gradients of the layer. Size: _input_size.

@@ -44,6 +44,10 @@ public:
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
         EDGE_LEARNING_TEST_CALL(test_uniform_pdf());
         EDGE_LEARNING_TEST_CALL(test_pdf());
+        EDGE_LEARNING_TEST_CALL(test_kaiming_initialization());
+        EDGE_LEARNING_TEST_CALL(test_xavier_initialization());
+        EDGE_LEARNING_TEST_CALL(test_initialization());
+        EDGE_LEARNING_TEST_CALL(test_initialization_pdf());
         EDGE_LEARNING_TEST_CALL(test_unique());
         EDGE_LEARNING_TEST_CALL(test_arr_sum());
         EDGE_LEARNING_TEST_CALL(test_arr_mul());
@@ -168,7 +172,7 @@ private:
             DLMath::kaiming_initialization_variance<TestNumType>(n),
             truth_variance, 0.000000000000001);
         EDGE_LEARNING_TEST_WITHIN(
-            std::get<1>(DLMath::kaiming_initialization<int>(n)),
+            std::get<1>(DLMath::kaiming_initialization<TestNumType>(n)),
             truth_variance, 0.000000000000001);
 
         n = 1;
@@ -177,7 +181,7 @@ private:
             DLMath::kaiming_initialization_variance<TestNumType>(n),
             truth_variance, 0.000000000000001);
         EDGE_LEARNING_TEST_WITHIN(
-            std::get<1>(DLMath::kaiming_initialization<int>(n)),
+            std::get<1>(DLMath::kaiming_initialization<TestNumType>(n)),
             truth_variance, 0.000000000000001);
 
         n = 2;
@@ -186,7 +190,7 @@ private:
             DLMath::kaiming_initialization_variance<TestNumType>(n),
             truth_variance, 0.000000000000001);
         EDGE_LEARNING_TEST_WITHIN(
-            std::get<1>(DLMath::kaiming_initialization<int>(n)),
+            std::get<1>(DLMath::kaiming_initialization<TestNumType>(n)),
             truth_variance, 0.000000000000001);
     }
 
@@ -204,7 +208,7 @@ private:
             DLMath::xavier_initialization_variance<TestNumType>(n),
             truth_variance, 0.000000000000001);
         EDGE_LEARNING_TEST_WITHIN(
-            std::get<1>(DLMath::xavier_initialization<int>(n)),
+            std::get<1>(DLMath::xavier_initialization<TestNumType>(n)),
             truth_variance, 0.000000000000001);
 
         n = 1;
@@ -213,7 +217,7 @@ private:
             DLMath::xavier_initialization_variance<TestNumType>(n),
             truth_variance, 0.000000000000001);
         EDGE_LEARNING_TEST_WITHIN(
-            std::get<1>(DLMath::xavier_initialization<int>(n)),
+            std::get<1>(DLMath::xavier_initialization<TestNumType>(n)),
             truth_variance, 0.000000000000001);
 
         n = 2;
@@ -222,7 +226,7 @@ private:
             DLMath::xavier_initialization_variance<TestNumType>(n),
             truth_variance, 0.000000000000001);
         EDGE_LEARNING_TEST_WITHIN(
-            std::get<1>(DLMath::xavier_initialization<int>(n)),
+            std::get<1>(DLMath::xavier_initialization<TestNumType>(n)),
             truth_variance, 0.000000000000001);
     }
 

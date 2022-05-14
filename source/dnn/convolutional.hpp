@@ -44,12 +44,12 @@ class ConvolutionalLayer : public FeedforwardLayer
 public:
     ConvolutionalLayer(Model& model,
            std::string name = std::string(),
-           Activation activation = Activation::ReLU,
            DLMath::Shape3d input_shape = {0, 0, 1},
            DLMath::Shape2d kernel_shape = {0}, SizeType n_filters = 0,
            DLMath::Shape2d stride = {1}, DLMath::Shape2d padding = {0});
 
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType(std::random_device{}()))
         override;
@@ -92,15 +92,22 @@ public:
 
     void print() const override;
 
-    [[nodiscard]] SizeType input_size() const override
+    /**
+     * \brief Getter of input_size class field.
+     * \return The size of the layer input.
+     */
+    [[nodiscard]] virtual SizeType input_size() const override
     {
-        return Layer::input_size();
+        return FeedforwardLayer::input_size();
     }
 
     /**
      * \brief Input shape setter. In this layer, all the 3 fields contained in
      * DLMath::Shape3d are used to calculate the layer input size.
      * \param input_shape 3D object with input matrix shape.
+     * The operation also performs a resize of the weights and its gradients.
+     * Since input_size == output_size in activation layer, it overrides also
+     * the output_size.
      */
     void input_size(DLMath::Shape3d input_shape) override;
 

@@ -192,7 +192,7 @@ public:
     template <typename T>
     static T kaiming_initialization_variance(SizeType n)
     {
-        return std::sqrt(T{2.0} / static_cast<T>(n));
+        return std::sqrt(T{2} / static_cast<T>(n));
     }
 
     /**
@@ -206,7 +206,7 @@ public:
     template <typename T>
     static T kaiming_initialization_mean()
     {
-        return T(0.0);
+        return T{0};
     }
 
     /**
@@ -238,7 +238,7 @@ public:
     template <typename T>
     static T xavier_initialization_variance(SizeType n)
     {
-        return std::sqrt(T{1.0} / static_cast<T>(n));
+        return std::sqrt(T{1} / static_cast<T>(n));
     }
 
     /**
@@ -252,7 +252,7 @@ public:
     template <typename T>
     static T xavier_initialization_mean()
     {
-        return T(0.0);
+        return T{0};
     }
 
     /**

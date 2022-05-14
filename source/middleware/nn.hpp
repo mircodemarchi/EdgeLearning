@@ -30,6 +30,7 @@
 #define EDGE_LEARNING_MIDDLEWARE_NN_HPP
 
 #include "dnn/dense.hpp"
+#include "dnn/activation.hpp"
 #include "dnn/mse_loss.hpp"
 #include "dnn/cce_loss.hpp"
 #include "dnn/gd_optimizer.hpp"
@@ -49,7 +50,15 @@ enum class Framework
 #endif
 };
 
-using ActivationType = Layer::Activation;
+enum class ActivationType
+{
+    ReLU,
+    Softmax,
+    TanH,
+    // Sigmoid, // TODO: Implement sigmoid activation function.
+    Linear,
+    None
+};
 
 enum class LossType
 {

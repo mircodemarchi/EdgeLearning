@@ -110,6 +110,11 @@ public:
 #endif
                     break;
                 }
+                case ActivationType::TanH:
+                {
+                    _m.template Add<mlpack::ann::TanHLayer<>>();
+                    break;
+                }
                 case ActivationType::Linear:
                 default:
                 {

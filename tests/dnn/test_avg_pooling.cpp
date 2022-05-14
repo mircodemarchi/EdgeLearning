@@ -109,7 +109,6 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         auto l_shape = AvgPoolingLayer(_m, "avg_pooling_layer_test",
-                                       Layer::Activation::ReLU,
                                        in_shape, k_shape);
         auto truth_output_size = ((in_shape.width - k_shape.width) + 1)
             * ((in_shape.height - k_shape.height) + 1) * in_shape.channels;
@@ -144,7 +143,6 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test",
-                                 Layer::Activation::ReLU,
                                  in_shape, k_shape);
         EDGE_LEARNING_TEST_TRY(l.forward(v1));
         EDGE_LEARNING_TEST_TRY(l.backward(v1));
@@ -190,7 +188,6 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test",
-                                 Layer::Activation::ReLU,
                                  in_shape, k_shape);
 
         EDGE_LEARNING_TEST_EQUAL(l.input_shape().height, in_shape.height);
@@ -211,7 +208,6 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test",
-                                 Layer::Activation::ReLU,
                                  in_shape, k_shape);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), in_shape.size());
         DLMath::Shape3d new_in_shape{5,5,3};

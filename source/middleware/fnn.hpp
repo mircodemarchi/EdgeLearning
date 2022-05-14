@@ -71,11 +71,41 @@ public:
                 prev_layer = _m.layers().back();
             }
             auto layer = _m.template add_layer<DenseLayer>(
-                layer_name, layer_activation,
-                _output_size, layer_size);
+                layer_name, _output_size, layer_size);
             if (prev_layer)
             {
                 _m.create_edge(prev_layer, layer);
+            }
+            switch (layer_activation) {
+                case ActivationType::ReLU:
+                {
+                    auto activation_layer = _m.template add_layer<ReluLayer>(
+                        layer_name, layer_size);
+                    _m.create_edge(layer, activation_layer);
+                    break;
+                }
+                case ActivationType::Softmax:
+                {
+                    auto activation_layer = _m.template add_layer<ReluLayer>(
+                        layer_name, layer_size);
+                    _m.create_edge(layer, activation_layer);
+                    break;
+                }
+                case ActivationType::TanH:
+                {
+                    auto activation_layer = _m.template add_layer<ReluLayer>(
+                        layer_name, layer_size);
+                    _m.create_edge(layer, activation_layer);
+                    break;
+                }
+                case ActivationType::Linear:
+                default:
+                {
+                    auto activation_layer = _m.template add_layer<ReluLayer>(
+                        layer_name, layer_size);
+                    _m.create_edge(layer, activation_layer);
+                    break;
+                }
             }
         }
         _output_size = layer_size;

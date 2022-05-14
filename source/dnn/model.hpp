@@ -49,6 +49,15 @@ namespace EdgeLearning {
 class Model
 {
 public:
+    enum class InitializationFunction
+    {
+        XAVIER,
+        KAIMING,
+        AUTO
+    };
+
+    using ProbabilityDensityFunction = Layer::ProbabilityDensityFunction;
+
     /**
      * \brief Construct a new Model object.
      * \param name
@@ -145,13 +154,14 @@ public:
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 
      * If the seed is 0 a new random seed is chosen instead.
-     * \param pdf  Distribution function to use.
-     * \param seed Seed provided.
+     * \param init InitializationFunction       Initialization to use.
+     * \param pdf  ProbabilityDensityFunction   Distribution to use.
+     * \param seed RneType::result_type         Seed provided.
      * \return RneType::result_type Seed used.
      */
     RneType::result_type init(
-        Layer::ProbabilityDensityFunction pdf
-            = Layer::ProbabilityDensityFunction::NORMAL,
+        InitializationFunction init = InitializationFunction::AUTO,
+        ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType::result_type seed = 0);
 
     /**

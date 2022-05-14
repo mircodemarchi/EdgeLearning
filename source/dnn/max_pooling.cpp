@@ -29,10 +29,9 @@
 namespace EdgeLearning {
 
 MaxPoolingLayer::MaxPoolingLayer(
-    Model& model, std::string name, Activation activation,
-    DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
-    DLMath::Shape2d stride)
-    : PoolingLayer(model, activation, input_shape, kernel_shape, stride,
+    Model& model, std::string name, DLMath::Shape3d input_shape,
+    DLMath::Shape2d kernel_shape, DLMath::Shape2d stride)
+    : PoolingLayer(model, input_shape, kernel_shape, stride,
                    std::move(name), "max_pooling_layer_")
 {}
 
@@ -42,20 +41,17 @@ const std::vector<NumType>& MaxPoolingLayer::forward(
     // Remember the last input data for backpropagation.
     _last_input = inputs.data();
 
-    DLMath::max_pool<NumType>(_activations.data(), inputs.data(), _input_shape,
-                              _kernel_shape, _stride);
+    DLMath::max_pool<NumType>(_output_activations.data(), inputs.data(),
+                              _input_shape, _kernel_shape, _stride);
 
-    FeedforwardLayer::forward(_activations);
-    return Layer::forward(_activations);
+    return PoolingLayer::forward(_output_activations);
 }
 
 const std::vector<NumType>& MaxPoolingLayer::backward(
     const std::vector<NumType>& gradients)
 {
-    FeedforwardLayer::backward(gradients);
-
     std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
-    auto gradients_op = [this](
+    auto gradients_op = [&](
         NumType* dst, DLMath::Shape2d dst_shape, DLMath::Coord2d dst_coord,
         const NumType* src, DLMath::Shape3d src_shape,
         const NumType* k, DLMath::Shape2d k_shape, SizeType n_filters,
@@ -69,7 +65,7 @@ const std::vector<NumType>& MaxPoolingLayer::backward(
         auto dst_step = dst_shape.width * src_shape.channels;
         for (SizeType c = 0; c < src_shape.channels; ++c)
         {
-            auto output_gradient = _activation_gradients[
+            auto output_gradient = gradients[
                 dst_coord.row * dst_step
                 + dst_coord.col * src_shape.channels
                 + c];
@@ -103,7 +99,7 @@ const std::vector<NumType>& MaxPoolingLayer::backward(
         nullptr, _kernel_shape,
         1, _stride, {0, 0});
 
-    return Layer::backward(_input_gradients);
+    return PoolingLayer::backward(_input_gradients);
 }
 
 } // namespace EdgeLearning

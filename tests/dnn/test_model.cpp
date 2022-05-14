@@ -26,6 +26,7 @@
 #include "dnn/layer.hpp"
 #include "dnn/model.hpp"
 #include "dnn/dense.hpp"
+#include "dnn/activation.hpp"
 #include "dnn/recurrent.hpp"
 #include "dnn/cce_loss.hpp"
 #include "dnn/mse_loss.hpp"
@@ -109,15 +110,20 @@ private:
         SizeType input_size = 4;
         SizeType output_size = 8;
         EDGE_LEARNING_TEST_TRY(m.add_layer<DenseLayer>(
-            "first", Layer::Activation::ReLU, input_size, output_size));
+            "first", input_size, output_size));
+        EDGE_LEARNING_TEST_TRY(m.add_layer<ReluLayer>(
+            "first_relu", output_size));
         EDGE_LEARNING_TEST_TRY(m.add_layer<DenseLayer>(
-            "first", Layer::Activation::ReLU, input_size, output_size));
+            "second", input_size, output_size));
+        EDGE_LEARNING_TEST_TRY(m.add_layer<ReluLayer>(
+            "second_relu", output_size));
 
-        auto l1 = m.add_layer<DenseLayer>(
-            "first", Layer::Activation::ReLU, input_size, output_size);
+        auto l1 = m.add_layer<DenseLayer>("first", input_size, output_size);
+        auto l1_relu = m.add_layer<ReluLayer>("first_relu", output_size);
         auto loss = m.add_loss<CustomLossLayer>(
             output_size, BATCH_SIZE);
-        EDGE_LEARNING_TEST_TRY(m.create_back_arc(l1, loss));
+        EDGE_LEARNING_TEST_TRY(m.create_edge(l1, l1_relu));
+        EDGE_LEARNING_TEST_TRY(m.create_back_arc(l1_relu, loss));
         EDGE_LEARNING_TEST_TRY(m.init());
     }
 
@@ -126,14 +132,15 @@ private:
         SizeType input_size = 4;
         SizeType output_size = 8;
         Model m{"model"};
-        auto l1 = m.add_layer<DenseLayer>(
-            "first", Layer::Activation::ReLU, input_size, output_size);
+        auto l1 = m.add_layer<DenseLayer>("first", input_size, output_size);
+        auto l1_relu = m.add_layer<ReluLayer>("first_relu", output_size);
         auto loss = m.add_loss<CustomLossLayer>(
             output_size, BATCH_SIZE);
-        m.create_back_arc(l1, loss);
+        m.create_edge(l1, l1_relu);
+        m.create_back_arc(l1_relu, loss);
         EDGE_LEARNING_TEST_EQUAL(m.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(m.output_size(), output_size);
-        EDGE_LEARNING_TEST_EQUAL(m.layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(m.layers().size(), 2);
         EDGE_LEARNING_TEST_EQUAL(m.layers()[0], l1);
 
         std::vector<NumType> input{1,2,3,4};
@@ -147,14 +154,16 @@ private:
     void test_load_save()
     {
         Model m{"test_model_load_save"};
-        auto first_layer = m.add_layer<DenseLayer>(
-                "first", Layer::Activation::ReLU, 4, 8);
-        auto output_layer = m.add_layer<DenseLayer>(
-                "second", Layer::Activation::Linear, 8, 2);
+        auto first_layer = m.add_layer<DenseLayer>("first", 4, 8);
+        auto first_relu = m.add_layer<ReluLayer>("first_relu", 8);
+        auto output_layer = m.add_layer<DenseLayer>("second", 8, 2);
+        auto output_linear = m.add_layer<LinearLayer>("second_relu", 2);
         auto loss_layer = m.add_loss<CustomLossLayer>(
                 2, BATCH_SIZE);
-        m.create_edge(first_layer, output_layer);
-        m.create_edge(output_layer, loss_layer);
+        m.create_edge(first_layer, first_relu);
+        m.create_edge(first_relu, output_layer);
+        m.create_edge(output_layer, output_linear);
+        m.create_back_arc(output_linear, loss_layer);
 
         EDGE_LEARNING_TEST_TRY(m.init());
         std::ofstream ofile{
@@ -311,7 +320,9 @@ private:
         // Model definition.
         Model m{"recurrent"};
         auto first_layer = m.add_layer<DenseLayer>(
-            "hidden", Layer::Activation::ReLU, input_size * time_steps, input_size * time_steps);
+            "hidden", input_size * time_steps, input_size * time_steps);
+        auto first_layer_relu = m.add_layer<ReluLayer>(
+            "hidden_relu", input_size * time_steps);
         auto output_layer = m.add_layer<RecurrentLayer>(
             "output", input_size, output_size, 2);
         output_layer->hidden_state({0.01, 0.01});
@@ -320,7 +331,8 @@ private:
         auto loss_layer = m.add_loss<MSELossLayer>("loss",
             time_steps * output_size, BATCH_SIZE, 0.5);
         GDOptimizer o{NumType{0.01}};
-        m.create_edge(first_layer, output_layer);
+        m.create_edge(first_layer, first_layer_relu);
+        m.create_edge(first_layer_relu, output_layer);
         m.create_back_arc(output_layer, loss_layer);
         m.init();
         m.print();
@@ -353,13 +365,19 @@ private:
     {
         Model m{"binary_classifier"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "hidden", Layer::Activation::ReLU, 4, 8);
+            "hidden", 4, 8);
+        auto first_layer_relu = m.add_layer<ReluLayer>(
+            "hidden_relu", 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "output", Layer::Activation::Softmax, 8, 2);
+            "output", 8, 2);
+        auto output_layer_softmax = m.add_layer<SoftmaxLayer>(
+            "output_softmax", 2);
         auto loss_layer = m.add_loss<CCELossLayer>(
             "loss", 2, BATCH_SIZE);
-        m.create_edge(first_layer, output_layer);
-        m.create_back_arc(output_layer, loss_layer);
+        m.create_edge(first_layer, first_layer_relu);
+        m.create_edge(first_layer_relu, output_layer);
+        m.create_edge(output_layer, output_layer_softmax);
+        m.create_back_arc(output_layer_softmax, loss_layer);
         return m;
     }
 
@@ -367,13 +385,19 @@ private:
     {
         Model m{"regressor"};
         auto first_layer = m.add_layer<DenseLayer>(
-                "hidden", Layer::Activation::ReLU, 4, 8);
+            "hidden", 4, 8);
+        auto first_layer_relu = m.add_layer<ReluLayer>(
+            "hidden_relu", 8);
         auto output_layer = m.add_layer<DenseLayer>(
-                "output", Layer::Activation::Linear, 8, 2);
+            "output", 8, 2);
+        auto output_layer_linear = m.add_layer<LinearLayer>(
+            "output_linear", 2);
         auto loss_layer = m.add_loss<MSELossLayer>(
             "loss", 2, BATCH_SIZE, 0.5);
-        m.create_edge(first_layer, output_layer);
-        m.create_back_arc(output_layer, loss_layer);
+        m.create_edge(first_layer, first_layer_relu);
+        m.create_edge(first_layer_relu, output_layer);
+        m.create_edge(output_layer, output_layer_linear);
+        m.create_back_arc(output_layer_linear, loss_layer);
         return m;
     }
 };

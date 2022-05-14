@@ -33,14 +33,13 @@ namespace EdgeLearning {
 const std::string Layer::Type = "None";
 
 Layer::Layer(Model& model, SizeType input_size, SizeType output_size,
-             Activation activation, std::string name, std::string prefix_name)
+             std::string name, std::string prefix_name)
     : _model(model)
     , _name{std::move(name)}
     , _antecedents{}
     , _subsequents{}
     , _input_size{input_size}
     , _output_size{output_size}
-    , _activation{activation}
     , _last_input{}
 { 
     if (_name.empty())
@@ -86,6 +85,13 @@ const std::vector<NumType>& Layer::forward(
     return activations;
 }
 
+const std::vector<NumType>& Layer::training_forward(
+    const std::vector<NumType>& inputs)
+{
+    _check_training_input(inputs);
+    return forward(inputs);
+}
+
 const std::vector<NumType>& Layer::backward(
     const std::vector<NumType>& gradients)
 {
@@ -109,6 +115,21 @@ void Layer::input_size(DLMath::Shape3d input_size)
 SizeType Layer::output_size() const
 {
     return _output_size;
+}
+
+void Layer::_check_training_input(const std::vector<NumType>& inputs)
+{
+    if (_input_size == 0)
+    {
+        input_size(inputs.size());
+    }
+    else if (_input_size != inputs.size())
+    {
+        throw std::runtime_error(
+            "Training forward input catch an unpredicted input size: "
+            + std::to_string(_input_size)
+            + " != " + std::to_string(inputs.size()));
+    }
 }
 
 } // namespace EdgeLearning

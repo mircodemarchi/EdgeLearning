@@ -41,21 +41,23 @@ class DropoutLayer : public FeedforwardLayer
 {
 public:
     DropoutLayer(Model& model,
-                 std::string name = std::string(),
-                 Activation activation = Activation::ReLU, SizeType size = 0,
+                 std::string name = std::string(), SizeType size = 0,
                  NumType drop_probability = 0.1,
                  RneType random_generator = RneType(std::random_device{}()));
 
     /**
      * \brief No initialization is needed for Pooling layers.
-     * \param pdf Not used.
-     * \param rne Not used.
+     * \param init  Not used.
+     * \param pdf   Not used.
+     * \param rne   Not used.
      */
     void init(
+        InitializationFunction init = InitializationFunction::KAIMING,
         ProbabilityDensityFunction pdf = ProbabilityDensityFunction::NORMAL,
         RneType rne = RneType(std::random_device{}()))
-    override
+        override
     {
+        (void) init;
         (void) pdf;
         (void) rne;
     };
@@ -64,8 +66,7 @@ public:
         const std::vector<NumType>& inputs) override
     {
         _last_input = inputs.data();
-        FeedforwardLayer::forward(inputs);
-        return Layer::forward(_activations);
+        return FeedforwardLayer::forward(inputs);
     }
 
     /**
