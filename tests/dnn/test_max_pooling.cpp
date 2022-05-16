@@ -41,6 +41,7 @@ public:
 
 private:
     void test_layer() {
+        EDGE_LEARNING_TEST_EQUAL(MaxPoolingLayer::TYPE, "MaxPool");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
@@ -48,6 +49,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = MaxPoolingLayer(_m, "max_pooling_layer_test"));
         auto l = MaxPoolingLayer(_m, "max_pooling_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "MaxPool");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "MaxPool");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));

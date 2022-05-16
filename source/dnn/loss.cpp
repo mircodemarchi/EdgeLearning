@@ -29,6 +29,8 @@
 
 namespace EdgeLearning {
 
+const std::string LossLayer::TYPE = "Loss";
+
 LossLayer::LossLayer(Model& model,
     SizeType input_size, SizeType batch_size,
     std::string name, std::string prefix_name)

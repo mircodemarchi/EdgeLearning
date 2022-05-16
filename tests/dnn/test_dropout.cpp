@@ -41,6 +41,7 @@ public:
 
 private:
     void test_layer() {
+        EDGE_LEARNING_TEST_EQUAL(DropoutLayer::TYPE, "Dropout");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         std::vector<NumType> v_diff_size(std::size_t(11));
@@ -49,6 +50,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = DropoutLayer(_m, "dropout_layer_test"));
         auto l = DropoutLayer(_m, "dropout_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Dropout");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Dropout");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));

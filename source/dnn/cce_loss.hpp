@@ -38,6 +38,8 @@ namespace EdgeLearning {
 
 class CCELossLayer : public LossLayer {
 public:
+    static const std::string TYPE;
+
     /**
      * \brief Construct a new CCELossLayer object.
      * \param model
@@ -47,6 +49,9 @@ public:
      */
     CCELossLayer(Model& model, std::string name = std::string(), 
         SizeType input_size = 0, SizeType batch_size = 1);
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;

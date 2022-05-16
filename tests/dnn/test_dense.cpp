@@ -41,6 +41,7 @@ public:
 
 private:
     void test_layer() {
+        EDGE_LEARNING_TEST_EQUAL(DenseLayer::TYPE, "Dense");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
@@ -48,6 +49,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = DenseLayer(_m, "dense_layer_test"));
         auto l = DenseLayer(_m, "dense_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Dense");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Dense");
         EDGE_LEARNING_TEST_TRY(
             l.init(Layer::InitializationFunction::KAIMING,
                    Layer::ProbabilityDensityFunction::NORMAL, RneType()));

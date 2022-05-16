@@ -41,11 +41,14 @@ public:
 
 private:
     void test_layer() {
+        EDGE_LEARNING_TEST_EQUAL(MSELossLayer::TYPE, "MSELoss");
         EDGE_LEARNING_TEST_EXECUTE(
                 auto l1 = MSELossLayer(_m, "mse_loss_layer_test"));
         EDGE_LEARNING_TEST_TRY(
                 auto l2 = MSELossLayer(_m, "mse_loss_layer_test"));
         auto l = MSELossLayer(_m, "mse_loss_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "MSELoss");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "MSELoss");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);

@@ -39,9 +39,14 @@ namespace EdgeLearning {
 
 class MSELossLayer : public LossLayer {
 public:
+    static const std::string TYPE;
+
     MSELossLayer(Model& model, std::string name = std::string(),
                  SizeType input_size = 0, SizeType batch_size = 1,
                  NumType loss_tolerance=0.1);
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;

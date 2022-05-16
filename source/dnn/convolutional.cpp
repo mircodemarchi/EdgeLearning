@@ -61,6 +61,8 @@ static inline SizeType convolutional_output_size(
                                       stride, padding, n_filters).size();
 }
 
+const std::string ConvolutionalLayer::TYPE = "Conv";
+
 ConvolutionalLayer::ConvolutionalLayer(
     Model& model, std::string name,
     DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,

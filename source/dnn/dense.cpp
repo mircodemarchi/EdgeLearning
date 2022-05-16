@@ -31,6 +31,8 @@
 
 namespace EdgeLearning {
 
+const std::string DenseLayer::TYPE = "Dense";
+
 DenseLayer::DenseLayer(Model& model, std::string name,
     SizeType input_size, SizeType output_size)
     : FeedforwardLayer(model, input_size, output_size,

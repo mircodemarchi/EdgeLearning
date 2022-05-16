@@ -41,6 +41,7 @@ public:
 
 private:
     void test_relu() {
+        EDGE_LEARNING_TEST_EQUAL(ReluLayer::TYPE, "Relu");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
@@ -48,6 +49,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = ReluLayer(_m, "relu_layer_test"));
         auto l = ReluLayer(_m, "relu_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Relu");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Relu");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
@@ -138,6 +141,7 @@ private:
     }
 
     void test_softmax() {
+        EDGE_LEARNING_TEST_EQUAL(SoftmaxLayer::TYPE, "Softmax");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
@@ -145,6 +149,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
             auto l = SoftmaxLayer(_m, "softmax_layer_test"));
         auto l = SoftmaxLayer(_m, "softmax_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Softmax");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Softmax");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
@@ -235,6 +241,7 @@ private:
     }
 
     void test_tanh() {
+        EDGE_LEARNING_TEST_EQUAL(TanhLayer::TYPE, "Tanh");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
@@ -242,6 +249,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
             auto l = TanhLayer(_m, "tanh_layer_test"));
         auto l = TanhLayer(_m, "tanh_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Tanh");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Tanh");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
@@ -332,6 +341,7 @@ private:
     }
 
     void test_linear() {
+        EDGE_LEARNING_TEST_EQUAL(LinearLayer::TYPE, "Linear");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
@@ -339,6 +349,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
             auto l = LinearLayer(_m, "linear_layer_test"));
         auto l = LinearLayer(_m, "linear_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Linear");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Linear");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));

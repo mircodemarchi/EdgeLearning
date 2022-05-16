@@ -41,6 +41,8 @@ namespace EdgeLearning {
 class RecurrentLayer : public Layer 
 {
 public:
+    static const std::string TYPE;
+
     enum class HiddenActivation
     {
         ReLU,
@@ -55,6 +57,9 @@ public:
         SizeType input_size = 0, SizeType output_size = 0,
         SizeType hidden_size = 0, SizeType time_steps = 0,
         HiddenActivation hidden_activation = HiddenActivation::TanH);
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     void init(
         InitializationFunction init = InitializationFunction::KAIMING,

@@ -89,11 +89,14 @@ public:
 
 private:
     void test_layer() {
+        EDGE_LEARNING_TEST_EQUAL(LossLayer::TYPE, "Loss");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(auto l1 = CustomLossLayer());
         EDGE_LEARNING_TEST_TRY(auto l2 = CustomLossLayer());
         auto l = CustomLossLayer();
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Loss");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Loss");
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));

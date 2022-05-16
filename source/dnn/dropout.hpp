@@ -40,10 +40,15 @@ namespace EdgeLearning {
 class DropoutLayer : public FeedforwardLayer
 {
 public:
+    static const std::string TYPE;
+
     DropoutLayer(Model& model,
                  std::string name = std::string(), SizeType size = 0,
                  NumType drop_probability = 0.1,
                  RneType random_generator = RneType(std::random_device{}()));
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     /**
      * \brief No initialization is needed for Pooling layers.

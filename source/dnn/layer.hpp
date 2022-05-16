@@ -49,7 +49,7 @@ class Model;
 class Layer 
 {
 public:
-    static const std::string Type;
+    static const std::string TYPE;
 
     using InitializationFunction = DLMath::InitializationFunction;
     using ProbabilityDensityFunction = DLMath::ProbabilityDensityFunction;
@@ -134,8 +134,20 @@ public:
     virtual const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients);
 
+    /**
+     * \brief Getter of layer type.
+     * \return std::string The layer type.
+     */
+    [[nodiscard]] virtual inline const std::string& type() const
+    { return TYPE; }
+
+    /**
+     * \brief Check if this instance is of type LayerT.
+     * \tparam LayerT The Layer type to check.
+     * \return bool True if this is of type LayerT, otherwise false.
+     */
     template<class LayerT>
-    bool is_type() const
+    [[nodiscard]] bool is_type() const
     {
         return dynamic_cast<const LayerT*>(this) != nullptr;
     }

@@ -40,9 +40,14 @@ namespace EdgeLearning {
 class DenseLayer : public FeedforwardLayer
 {
 public:
+    static const std::string TYPE;
+
     DenseLayer(Model& model,
                std::string name = std::string(),
                SizeType input_size = 0, SizeType output_size = 0);
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     void init(
         InitializationFunction init = InitializationFunction::KAIMING,

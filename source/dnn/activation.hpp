@@ -116,8 +116,11 @@ private:
 class ReluLayer : public ActivationLayer
 {
 public:
+    static const std::string TYPE;
     ReluLayer(Model& model, std::string name = std::string(),
               SizeType size = 0);
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(
@@ -128,8 +131,11 @@ private:
 class SoftmaxLayer : public ActivationLayer
 {
 public:
+    static const std::string TYPE;
     SoftmaxLayer(Model& model, std::string name = std::string(),
                  SizeType size = 0);
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(
@@ -140,8 +146,11 @@ private:
 class TanhLayer : public ActivationLayer
 {
 public:
+    static const std::string TYPE;
     TanhLayer(Model& model, std::string name = std::string(),
               SizeType size = 0);
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(
@@ -152,8 +161,11 @@ private:
 class LinearLayer : public ActivationLayer
 {
 public:
+    static const std::string TYPE;
     LinearLayer(Model& model, std::string name = std::string(),
                 SizeType size = 0);
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(

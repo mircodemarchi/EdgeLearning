@@ -147,6 +147,8 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(auto l = CustomLayer());
         EDGE_LEARNING_TEST_TRY(auto l = CustomLayer());
         auto l = CustomLayer();
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "None");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "None");
         EDGE_LEARNING_TEST_TRY(
             l.init(Layer::InitializationFunction::KAIMING,
                    Layer::ProbabilityDensityFunction::NORMAL, RneType()));

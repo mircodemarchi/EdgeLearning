@@ -40,6 +40,8 @@ namespace EdgeLearning {
 class LossLayer : public Layer 
 {
 public:
+    static const std::string TYPE;
+
     /**
      * \brief Construct a new LossLayer object.
      * \param model
@@ -52,6 +54,9 @@ public:
         SizeType input_size = 0, SizeType batch_size = 1,
         std::string name = std::string(),
         std::string prefix_name = std::string());
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     /**
      * \brief Destroy the LossLayer object.

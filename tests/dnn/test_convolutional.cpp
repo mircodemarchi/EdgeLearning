@@ -41,6 +41,7 @@ public:
 
 private:
     void test_layer() {
+        EDGE_LEARNING_TEST_EQUAL(ConvolutionalLayer::TYPE, "Conv");
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
@@ -48,6 +49,8 @@ private:
         EDGE_LEARNING_TEST_TRY(
                 auto l = ConvolutionalLayer(_m, "convolutional_layer_test"));
         auto l = ConvolutionalLayer(_m, "convolutional_layer_test");
+        EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Conv");
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Conv");
         EDGE_LEARNING_TEST_TRY(
             l.init(Layer::InitializationFunction::KAIMING,
                    Layer::ProbabilityDensityFunction::NORMAL, RneType()));

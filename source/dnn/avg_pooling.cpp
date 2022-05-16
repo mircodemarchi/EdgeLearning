@@ -28,6 +28,8 @@
 
 namespace EdgeLearning {
 
+const std::string AvgPoolingLayer::TYPE = "AveragePool";
+
 AvgPoolingLayer::AvgPoolingLayer(
     Model& model, std::string name,
     DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,

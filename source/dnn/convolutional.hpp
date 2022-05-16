@@ -42,11 +42,16 @@ namespace EdgeLearning {
 class ConvolutionalLayer : public FeedforwardLayer
 {
 public:
+    static const std::string TYPE;
+
     ConvolutionalLayer(Model& model,
            std::string name = std::string(),
            DLMath::Shape3d input_shape = {0, 0, 1},
            DLMath::Shape2d kernel_shape = {0}, SizeType n_filters = 0,
            DLMath::Shape2d stride = {1}, DLMath::Shape2d padding = {0});
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     void init(
         InitializationFunction init = InitializationFunction::KAIMING,

@@ -30,7 +30,7 @@
 
 namespace EdgeLearning {
 
-const std::string Layer::Type = "None";
+const std::string Layer::TYPE = "None";
 
 Layer::Layer(Model& model, SizeType input_size, SizeType output_size,
              std::string name, std::string prefix_name)

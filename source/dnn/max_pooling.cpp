@@ -28,6 +28,8 @@
 
 namespace EdgeLearning {
 
+const std::string MaxPoolingLayer::TYPE = "MaxPool";
+
 MaxPoolingLayer::MaxPoolingLayer(
     Model& model, std::string name, DLMath::Shape3d input_shape,
     DLMath::Shape2d kernel_shape, DLMath::Shape2d stride)

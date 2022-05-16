@@ -28,6 +28,8 @@
 
 namespace EdgeLearning {
 
+const std::string MSELossLayer::TYPE = "MSELoss";
+
 MSELossLayer::MSELossLayer(Model& model, std::string name, 
     SizeType input_size, SizeType batch_size, NumType loss_tolerance)
     : LossLayer(model, input_size, batch_size,

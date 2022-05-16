@@ -55,6 +55,8 @@ void ActivationLayer::input_size(DLMath::Shape3d input_size)
 // =============================================================================
 
 // ================================= ReLU ======================================
+const std::string ReluLayer::TYPE = "Relu";
+
 ReluLayer::ReluLayer(Model& model, std::string name, SizeType size)
     : ActivationLayer(model, size, std::move(name), "relu_layer_")
 { }
@@ -90,6 +92,8 @@ const std::vector<NumType>& ReluLayer::backward(
 // =============================================================================
 
 // ================================ Softmax ====================================
+const std::string SoftmaxLayer::TYPE = "Softmax";
+
 SoftmaxLayer::SoftmaxLayer(Model& model, std::string name, SizeType size)
     : ActivationLayer(model, size, std::move(name), "softmax_layer_")
 { }
@@ -120,6 +124,8 @@ const std::vector<NumType>& SoftmaxLayer::backward(
 // =============================================================================
 
 // ================================= TanH ======================================
+const std::string TanhLayer::TYPE = "Tanh";
+
 TanhLayer::TanhLayer(Model& model, std::string name, SizeType size)
     : ActivationLayer(model, size, std::move(name), "tanh_layer_")
 { }
@@ -147,6 +153,8 @@ const std::vector<NumType>& TanhLayer::backward(
 // =============================================================================
 
 // ================================ Linear =====================================
+const std::string LinearLayer::TYPE = "Linear";
+
 LinearLayer::LinearLayer(Model& model, std::string name, SizeType size)
     : ActivationLayer(model, size, std::move(name), "linear_layer_")
 { }

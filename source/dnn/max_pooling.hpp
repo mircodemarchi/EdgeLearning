@@ -42,6 +42,8 @@ namespace EdgeLearning {
 class MaxPoolingLayer : public PoolingLayer
 {
 public:
+    static const std::string TYPE;
+
     MaxPoolingLayer(Model& model,
                     std::string name = std::string(),
                     DLMath::Shape3d input_shape = {0, 0, 1},
@@ -55,6 +57,9 @@ public:
      */
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
 
     /**
      * \brief The gradient data should have size _output_size.
