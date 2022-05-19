@@ -94,7 +94,8 @@ public:
      * \param idx The image index in the dataset.
      */
     MnistImage(std::ifstream& data, std::size_t idx)
-        : _image{}
+        : Parser()
+        , _image{}
         , _idx{idx}
     {
         _image.resize(IMAGE_SIDE * IMAGE_SIDE);
@@ -196,7 +197,8 @@ public:
      * \param idx The label index in the dataset.
      */
     MnistLabel(std::ifstream& data, std::size_t idx)
-        : _label{}
+        : Parser()
+        , _label{}
         , _idx{idx}
     {
         data.read(reinterpret_cast<char *>(&_label), 1);
@@ -277,7 +279,8 @@ public:
      * \param label_fp File path of the labels.
      */
     Mnist(fs::path image_fp, fs::path label_fp)
-        : _image_ifs{image_fp}
+        : Parser()
+        , _image_ifs{image_fp}
         , _label_ifs{label_fp}
     {
         if(!_image_ifs.is_open() || !_image_ifs.good())

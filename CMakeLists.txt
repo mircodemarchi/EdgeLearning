@@ -93,6 +93,7 @@ add_subdirectory(profile)
 add_library(edgelearning ${LIBRARY_KIND}
     $<TARGET_OBJECTS:edgelearning-dnn>
     $<TARGET_OBJECTS:edgelearning-middleware>
+    $<TARGET_OBJECTS:edgelearning-parser>
 )
 
 if(ENABLE_MLPACK)
