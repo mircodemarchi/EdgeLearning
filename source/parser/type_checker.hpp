@@ -125,6 +125,29 @@ bool convert<bool>(const std::string &s, bool *ptr)
 }
 
 /**
+ * \brief Convert a value in string.
+ * \tparam T The type of the value.
+ * \param v T The value to convert.
+ * \return std::string The string converted.
+ */
+template<typename T>
+std::string convert(T v)
+{
+    return std::to_string(v);
+}
+
+/**
+ * \brief Template specialization for boolean of convert<T>.
+ * \param v The boolean to convert.
+ * \return std::string "true" or "false"
+ */
+template<>
+std::string convert<bool>(bool v)
+{
+    return v ? "true" : "false";
+}
+
+/**
  * \brief TypeChecker class that manages the types of parsed strings in input.
  */
 class TypeChecker
@@ -198,6 +221,18 @@ public:
     Type operator()(const std::string &field) const 
     {
         return parse(field);
+    }
+
+    /**
+     * \brief Operator overloading that convert a value in string.
+     * \tparam T The type of the value.
+     * \param v T The value to convert.
+     * \return std::string The string converted.
+     */
+    template<typename T>
+    std::string operator()(T v) const
+    {
+        return convert<T>(v);
     }
 
     /**

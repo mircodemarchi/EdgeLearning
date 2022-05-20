@@ -90,6 +90,10 @@ private:
         auto values_cpy = std::vector<Type>(values);
         values_cpy.push_back(Type::NONE);
         EDGE_LEARNING_TEST_ASSERT(parsed_values != values_cpy);
+
+        EDGE_LEARNING_TEST_EQUAL(parser(1), "1");
+        EDGE_LEARNING_TEST_EQUAL(parser.operator()<float>(1), "1.000000");
+        EDGE_LEARNING_TEST_EQUAL(parser.operator()<bool>(1), "true");
     }
 
     void test_is() {
@@ -115,6 +119,10 @@ private:
         EDGE_LEARNING_TEST_EQUAL(s, "1");
 
         EDGE_LEARNING_TEST_ASSERT(!convert("1string", &i));
+
+        EDGE_LEARNING_TEST_EQUAL(convert<int>(1), "1");
+        EDGE_LEARNING_TEST_EQUAL(convert<float>(1), "1.000000");
+        EDGE_LEARNING_TEST_EQUAL(convert<bool>(1), "true");
     }
 };
 

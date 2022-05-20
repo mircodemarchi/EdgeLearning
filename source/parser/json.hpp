@@ -219,13 +219,7 @@ public:
     template<typename T>
     void value(T val)
     {
-        _val = std::to_string(val);
-        _type = _tc(_val);
-    }
-    template<>
-    void value<bool>(bool val)
-    {
-        _val = val ? "true" : "false";
+        _val = _tc(val);
         _type = _tc(_val);
     }
 
@@ -391,7 +385,7 @@ public:
      */
     JsonDict(std::map<std::string, JsonItem> map = {})
         : JsonObject(JsonType::DICT)
-        , _map{map}
+        , _map{std::move(map)}
     { }
 
     /**
