@@ -167,9 +167,8 @@ private:
         EDGE_LEARNING_TEST_PRINT(ji_empty);
         EDGE_LEARNING_TEST_EQUAL(ji_empty.json_type(),
                                  JsonObject::JsonType::NONE);
-        EDGE_LEARNING_TEST_FAIL(ji_empty.value().json_type());
-        EDGE_LEARNING_TEST_THROWS(ji_empty.value().json_type(),
-                                  std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(ji_empty.value());
+        EDGE_LEARNING_TEST_THROWS(ji_empty.value(), std::runtime_error);
 
         JsonItem ji(10);
         EDGE_LEARNING_TEST_PRINT(ji);
@@ -249,7 +248,11 @@ private:
 
     void test_json() {
         Json j_list;
+        EDGE_LEARNING_TEST_EQUAL(j_list.json_type(),
+                                 JsonObject::JsonType::NONE);
         EDGE_LEARNING_TEST_TRY(j_list.append(10));
+        EDGE_LEARNING_TEST_EQUAL(j_list.json_type(),
+                                 JsonObject::JsonType::LIST);
         EDGE_LEARNING_TEST_TRY(j_list.append(true));
         EDGE_LEARNING_TEST_TRY(j_list.append("test"));
         EDGE_LEARNING_TEST_TRY(j_list.append(1.0));
@@ -261,7 +264,11 @@ private:
                                   std::runtime_error);
 
         Json j_dict;
+        EDGE_LEARNING_TEST_EQUAL(j_dict.json_type(),
+                                 JsonObject::JsonType::NONE);
         EDGE_LEARNING_TEST_TRY(j_dict["test"] = 1);
+        EDGE_LEARNING_TEST_EQUAL(j_dict.json_type(),
+                                 JsonObject::JsonType::DICT);
         EDGE_LEARNING_TEST_TRY(j_dict["b"] = 10);
         EDGE_LEARNING_TEST_ASSERT(j_dict == Json({{"test", 1}, {"b", 10}}));
         EDGE_LEARNING_TEST_TRY(j_dict["list"] = Json({10, true, "test", 1.0}));
@@ -271,6 +278,8 @@ private:
                                   std::runtime_error);
 
         Json j_comb1 = j_list;
+        EDGE_LEARNING_TEST_EQUAL(j_comb1.json_type(),
+                                 JsonObject::JsonType::LIST);
         EDGE_LEARNING_TEST_TRY(j_comb1.append(j_dict));
         EDGE_LEARNING_TEST_PRINT(j_comb1);
         EDGE_LEARNING_TEST_TRY(j_comb1.append(j_list));
@@ -279,6 +288,8 @@ private:
         EDGE_LEARNING_TEST_PRINT(j_comb1);
 
         Json j_comb2 = j_dict;
+        EDGE_LEARNING_TEST_EQUAL(j_comb2.json_type(),
+                                 JsonObject::JsonType::DICT);
         EDGE_LEARNING_TEST_TRY(j_comb2["j_list"] = j_list);
         EDGE_LEARNING_TEST_PRINT(j_comb2);
         EDGE_LEARNING_TEST_TRY(j_comb2["j_dict"] = j_dict);
