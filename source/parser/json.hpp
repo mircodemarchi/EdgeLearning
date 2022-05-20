@@ -66,7 +66,7 @@ public:
     /**
      * \brief JSON Types that identify an implemented JSON class.
      */
-    enum JsonType
+    enum class JsonType : int
     {
         LEAF,   ///< \brief Enum for JsonLeaf type.
         LIST,   ///< \brief Enum for JsonList type.
@@ -128,12 +128,16 @@ public:
      * the objects are equals, otherwise false.
      */
     bool operator==(const JsonObject& rhs) const;
+    bool operator!=(const JsonObject& rhs) const
+    {
+        return !(operator==(rhs));
+    }
 
     /**
      * \brief Getter of json_type attribute.
      * \return JsonType The type of the instantiated object.
      */
-    [[nodiscard]] JsonType json_type() const { return _json_type; }
+    [[nodiscard]] virtual JsonType json_type() const { return _json_type; }
 
 protected:
     JsonType _json_type; ///< \brief Type of the instantiated object.
@@ -265,6 +269,10 @@ public:
      * \return bool True if the values are equals, otherwise false.
      */
     bool operator==(const JsonLeaf& rhs) const;
+    bool operator!=(const JsonLeaf& rhs) const
+    {
+        return !(operator==(rhs));
+    }
 
     /**
      * \brief Output stream of a JsonLeaf.
@@ -288,184 +296,6 @@ private:
     Type _type;         ///< \brief Type of the value field.
 };
 
-/**
- * \brief The list class of a JSON, identified by two squared bracket: [ ... ].
- */
-class JsonList : public JsonObject
-{
-public:
-    /**
-     * \brief Constructor of a JsonList with a vector of JsonItem.
-     * \param list std::vector<JsonItem> The vector of JsonItem.
-     */
-    JsonList(std::vector<JsonItem> list = {})
-        : JsonObject(JsonType::LIST)
-        , _list{std::move(list)}
-    { }
-
-    /**
-     * \brief Default deconstruct.
-     */
-    ~JsonList() = default;
-
-    /**
-     * \brief Subscript operator overloading to access a JsonItem contained in
-     * the list.
-     * \param idx std::size_t The index to access.
-     * \return const JsonItem& The item accessed at the index.
-     */
-    const JsonItem& operator[](std::size_t idx) const
-    {
-        if (idx >= _list.size())
-        {
-            throw std::runtime_error(
-                "operator[] failed: idx >= list size");
-        }
-        return _list[idx];
-    }
-
-    /**
-     * \brief Insert a JsonItem in the list.
-     * \param ji JsonItem The JsonItem object to append.
-     */
-    void append(JsonItem ji);
-
-    /**
-     * \brief Return the length of the list.
-     * \return std::size_t The length of the list.
-     */
-    [[nodiscard]] std::size_t size() const { return _list.size(); }
-
-    /**
-     * \brief Check if the list is empty.
-     * \return bool True if the list is empty, otherwise false.
-     */
-    [[nodiscard]] bool empty() const { return _list.empty(); }
-
-    /**
-     * \brief Overloading of equals operator.
-     * \param rhs const JsonList& The object to compare with.
-     * \return bool True if equals in size and the items in the lists are
-     * equals in element-wise order, otherwise false.
-     */
-    bool operator==(const JsonList& rhs) const;
-
-    /**
-     * \brief Output stream of a JsonList.
-     * \param os  std::ostream& The output stream to use.
-     * \param obj const JsonList& The object to stream out.
-     * \return std::ostream& The updated output stream with the items of the
-     * JsonList with two squared bracket at the beginning and at the end.
-     */
-    friend std::ostream& operator<<(std::ostream& os, const JsonList& obj);
-
-    /**
-     * \brief Input stream of a JsonList.
-     * \param os  std::istream& The input stream to use.
-     * \param obj JsonList& The object to stream in the items of the JsonList.
-     * \return std::istream& The updated input stream.
-     */
-    friend std::istream& operator>>(std::istream& os, JsonList& obj);
-
-private:
-    std::vector<JsonItem> _list; ///< \brief The list of items.
-};
-
-/**
- * \brief The dictionary class of a JSON, identified by two bracket: { ... }.
- */
-class JsonDict : public JsonObject
-{
-public:
-
-    /**
-     * \brief Constructor of a JsonDict with a map of string keys and JsonItem
-     * values.
-     * \param map std::map<std::string, JsonItem> The map string to JsonItem.
-     */
-    JsonDict(std::map<std::string, JsonItem> map = {})
-        : JsonObject(JsonType::DICT)
-        , _map{std::move(map)}
-    { }
-
-    /**
-     * \brief Default deconstruct.
-     */
-    ~JsonDict() = default;
-
-    /**
-     * \brief Read-only subscript operator for a JsonItem in the dictionary map.
-     * If the item is not contained in the map, it throws a runtime_error.
-     * \param key std::string The key item to access.
-     * \return const JsonItem& A read-only JsonItem in key.
-     */
-    const JsonItem& at(std::string key) const
-    {
-        if (!_map.contains(key))
-        {
-            throw std::runtime_error(
-                "operator[] failed: idx not contained in dict");
-        }
-        return _map.at(key);
-    }
-
-    /**
-     * \brief Subscript operator overloading for read-write JsonItem in the
-     * dictionary map.
-     * \param key std::string The key item to read or write.
-     * \return JsonItem& The reference of a JsonItem in the map.
-     */
-    JsonItem& operator[](std::string key)
-    {
-        return _map[key];
-    }
-
-    /**
-     * \brief Return the size of the dictionary.
-     * \return std::size_t The size of the map dictionary.
-     */
-    [[nodiscard]] std::size_t size() const { return _map.size(); }
-
-    /**
-     * \brief Check if the map is empty.
-     * \return
-     */
-    [[nodiscard]] bool empty() const { return _map.empty(); }
-
-    /**
-     * \brief Overloading of equals operator.
-     * \param rhs const JsonDict& The object to compare with.
-     * \return bool True if equals in size the items in the maps contain the
-     * same keys and if items accessed through the keys are equals,
-     * otherwise false.
-     */
-    bool operator==(const JsonDict& rhs) const;
-
-    /**
-     * \brief Output stream of a JsonDict.
-     * \param os  std::ostream& The output stream to use.
-     * \param obj const JsonDict& The object to stream out.
-     * \return std::ostream& The updated output stream with the keys and the
-     * items of the JsonDict separated by a comma and two brackets one at the
-     * beginning and one at the end.
-     */
-    friend std::ostream& operator<<(std::ostream& os, const JsonDict& obj);
-
-    /**
-     * \brief Input stream of a JsonDict.
-     * \param os  std::istream& The input stream to use.
-     * \param obj JsonDict& The object to stream in the keys and the items of
-     * the JsonDict.
-     * \return std::istream& The updated input stream.
-     */
-    friend std::istream& operator>>(std::istream& os, JsonDict& obj);
-
-private:
-    /**
-     * \brief The map with the pairs string, JsonItem.
-     */
-    std::map<std::string, JsonItem> _map;
-};
 
 /**
  * \brief An item of a JSON that contains a generic shared ptr of a JsonObject
@@ -483,6 +313,15 @@ public:
     JsonItem()
         : JsonObject()
         , _value{}
+    { }
+
+    /**
+     * \brief Constructor of a JsonItem with a generic reference of JsonObject.
+     * \param value const JsonObject& The JsonObject reference object.
+     */
+    JsonItem(const JsonObject& value)
+        : JsonObject()
+        , _value(std::make_shared<JsonObject>(value))
     { }
 
     /**
@@ -536,38 +375,28 @@ public:
 
     /**
      * \brief Constructor of a JsonItem with a JsonList.
-     * \param value JsonList The JsonList object.
+     * \param value const JsonList& The JsonList object.
      */
-    JsonItem(JsonList value)
-        : JsonObject()
-        , _value(std::make_shared<JsonList>(value))
-    { }
+    JsonItem(const JsonList& value);
 
     /**
      * \brief Constructor of a JsonItem with a JsonList.
      * \param value JsonList The JsonList initialized with a vector of JsonItem.
      */
-    JsonItem(std::vector<JsonItem> value)
-        : JsonItem(JsonList(value))
-    { }
+    JsonItem(std::vector<JsonItem> value);
 
     /**
      * \brief Constructor of a JsonItem with a JsonDict.
-     * \param value JsonDict The JsonDict object.
+     * \param value const JsonDict& The JsonDict object.
      */
-    JsonItem(JsonDict value)
-        : JsonObject()
-        , _value(std::make_shared<JsonDict>(value))
-    { }
+    JsonItem(const JsonDict& value);
 
     /**
      * \brief Constructor of a JsonItem with a JsonDict.
      * \param value JsonDict The JsonDict initialized with a (string,JsonItem)
      * pairs map.
      */
-    JsonItem(std::map<std::string, JsonItem> value)
-        : JsonItem(JsonDict(value))
-    { }
+    JsonItem(std::map<std::string, JsonItem> value);
 
     /**
      * \brief Default deconstruct.
@@ -683,6 +512,10 @@ public:
      * otherwise false.
      */
     bool operator==(const JsonItem& rhs) const;
+    bool operator!=(const JsonItem& rhs) const
+    {
+        return !(operator==(rhs));
+    }
 
     /**
      * \brief Output stream of a JsonItem.
@@ -703,6 +536,209 @@ public:
 
 private:
     Shared _value; ///< \brief The shared ptr of the JsonObject.
+};
+
+/**
+ * \brief The list class of a JSON, identified by two squared bracket: [ ... ].
+ */
+class JsonList : public JsonObject
+{
+public:
+    /**
+     * \brief Empty constructor.
+     */
+    JsonList()
+        : JsonObject(JsonType::LIST)
+        , _list()
+    { }
+
+    /**
+     * \brief Constructor of a JsonList with a vector of JsonItem.
+     * \param list std::vector<JsonItem> The vector of JsonItem.
+     */
+    JsonList(std::vector<JsonItem> list)
+        : JsonObject(JsonType::LIST)
+        , _list(std::move(list))
+    { }
+
+    /**
+     * \brief Default deconstruct.
+     */
+    ~JsonList() = default;
+
+    /**
+     * \brief Subscript operator overloading to access a JsonItem contained in
+     * the list.
+     * \param idx std::size_t The index to access.
+     * \return const JsonItem& The item accessed at the index.
+     */
+    const JsonItem& operator[](std::size_t idx) const
+    {
+        if (idx >= _list.size())
+        {
+            throw std::runtime_error(
+                "operator[] failed: idx >= list size");
+        }
+        return _list[idx];
+    }
+
+    /**
+     * \brief Insert a JsonItem in the list.
+     * \param ji JsonItem The JsonItem object to append.
+     */
+    void append(JsonItem ji);
+
+    /**
+     * \brief Return the length of the list.
+     * \return std::size_t The length of the list.
+     */
+    [[nodiscard]] std::size_t size() const { return _list.size(); }
+
+    /**
+     * \brief Check if the list is empty.
+     * \return bool True if the list is empty, otherwise false.
+     */
+    [[nodiscard]] bool empty() const { return _list.empty(); }
+
+    /**
+     * \brief Overloading of equals operator.
+     * \param rhs const JsonList& The object to compare with.
+     * \return bool True if equals in size and the items in the lists are
+     * equals in element-wise order, otherwise false.
+     */
+    bool operator==(const JsonList& rhs) const;
+    bool operator!=(const JsonList& rhs) const
+    {
+        return !(operator==(rhs));
+    }
+
+    /**
+     * \brief Output stream of a JsonList.
+     * \param os  std::ostream& The output stream to use.
+     * \param obj const JsonList& The object to stream out.
+     * \return std::ostream& The updated output stream with the items of the
+     * JsonList with two squared bracket at the beginning and at the end.
+     */
+    friend std::ostream& operator<<(std::ostream& os, const JsonList& obj);
+
+    /**
+     * \brief Input stream of a JsonList.
+     * \param os  std::istream& The input stream to use.
+     * \param obj JsonList& The object to stream in the items of the JsonList.
+     * \return std::istream& The updated input stream.
+     */
+    friend std::istream& operator>>(std::istream& os, JsonList& obj);
+
+private:
+    std::vector<JsonItem> _list; ///< \brief The list of items.
+};
+
+/**
+ * \brief The dictionary class of a JSON, identified by two bracket: { ... }.
+ */
+class JsonDict : public JsonObject
+{
+public:
+
+    /**
+     * \brief Empty constructor.
+     */
+    JsonDict()
+        : JsonObject(JsonType::DICT)
+        , _map()
+    { }
+
+    /**
+     * \brief Constructor of a JsonDict with a map of string keys and JsonItem
+     * values.
+     * \param map std::map<std::string, JsonItem> The map string to JsonItem.
+     */
+    JsonDict(std::map<std::string, JsonItem> map)
+        : JsonObject(JsonType::DICT)
+        , _map(std::move(map))
+    { }
+
+    /**
+     * \brief Default deconstruct.
+     */
+    ~JsonDict() = default;
+
+    /**
+     * \brief Read-only subscript operator for a JsonItem in the dictionary map.
+     * If the item is not contained in the map, it throws a runtime_error.
+     * \param key std::string The key item to access.
+     * \return const JsonItem& A read-only JsonItem in key.
+     */
+    const JsonItem& at(std::string key) const
+    {
+        if (!_map.contains(key))
+        {
+            throw std::runtime_error(
+                "operator[] failed: idx not contained in dict");
+        }
+        return _map.at(key);
+    }
+
+    /**
+     * \brief Subscript operator overloading for read-write JsonItem in the
+     * dictionary map.
+     * \param key std::string The key item to read or write.
+     * \return JsonItem& The reference of a JsonItem in the map.
+     */
+    JsonItem& operator[](std::string key)
+    {
+        return _map[key];
+    }
+
+    /**
+     * \brief Return the size of the dictionary.
+     * \return std::size_t The size of the map dictionary.
+     */
+    [[nodiscard]] std::size_t size() const { return _map.size(); }
+
+    /**
+     * \brief Check if the map is empty.
+     * \return
+     */
+    [[nodiscard]] bool empty() const { return _map.empty(); }
+
+    /**
+     * \brief Overloading of equals operator.
+     * \param rhs const JsonDict& The object to compare with.
+     * \return bool True if equals in size the items in the maps contain the
+     * same keys and if items accessed through the keys are equals,
+     * otherwise false.
+     */
+    bool operator==(const JsonDict& rhs) const;
+    bool operator!=(const JsonDict& rhs) const
+    {
+        return !(operator==(rhs));
+    }
+
+    /**
+     * \brief Output stream of a JsonDict.
+     * \param os  std::ostream& The output stream to use.
+     * \param obj const JsonDict& The object to stream out.
+     * \return std::ostream& The updated output stream with the keys and the
+     * items of the JsonDict separated by a comma and two brackets one at the
+     * beginning and one at the end.
+     */
+    friend std::ostream& operator<<(std::ostream& os, const JsonDict& obj);
+
+    /**
+     * \brief Input stream of a JsonDict.
+     * \param os  std::istream& The input stream to use.
+     * \param obj JsonDict& The object to stream in the keys and the items of
+     * the JsonDict.
+     * \return std::istream& The updated input stream.
+     */
+    friend std::istream& operator>>(std::istream& os, JsonDict& obj);
+
+private:
+    /**
+     * \brief The map with the pairs string, JsonItem.
+     */
+    std::map<std::string, JsonItem> _map;
 };
 
 /**
@@ -820,6 +856,10 @@ public:
     {
         return _obj == rhs._obj;
     }
+    bool operator!=(const Json& rhs) const
+    {
+        return !(operator==(rhs));
+    }
 
     /**
      * \brief Output stream of a Json.
@@ -850,13 +890,27 @@ private:
     JsonItem _obj; ///< \brief The JsonItem that contains the whole JSON.
 };
 
-void JsonList::append(JsonItem ji)
-{
-    _list.push_back(ji);
-}
+JsonItem::JsonItem(const JsonList& value)
+    : JsonObject()
+    , _value(std::make_shared<JsonList>(value))
+{ }
+
+JsonItem::JsonItem(std::vector<JsonItem> value)
+    : JsonItem(JsonList(value))
+{ }
+
+JsonItem::JsonItem(const JsonDict& value)
+    : JsonObject()
+    , _value(std::make_shared<JsonDict>(value))
+{ }
+
+JsonItem::JsonItem(std::map<std::string, JsonItem> value)
+    : JsonItem(JsonDict(value))
+{ }
 
 JsonItem::JsonItem(const JsonItem& obj)
-    : _value{}
+    : JsonObject()
+    , _value{}
 {
     if (!obj._value) return;
     switch(obj._value->json_type())
@@ -885,6 +939,11 @@ JsonItem::JsonItem(const JsonItem& obj)
             break;
         }
     };
+}
+
+void JsonList::append(JsonItem ji)
+{
+    _list.push_back(ji);
 }
 
 JsonItem& JsonItem::operator=(JsonItem obj)
