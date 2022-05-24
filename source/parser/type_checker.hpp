@@ -80,7 +80,7 @@ const std::regex _string_regex  { "^\".*\"$" };
  * \return false If convertion fails.
  */
 template<typename T>
-bool convert(const std::string &s, T *ptr)
+inline bool convert(const std::string &s, T *ptr)
 {
     std::stringstream ss{s};
     ss >> *ptr;
@@ -96,7 +96,7 @@ bool convert(const std::string &s, T *ptr)
  * \return false If convertion fails.
  */
 template<>
-bool convert<std::string>(const std::string &s, std::string *ptr)
+inline bool convert<std::string>(const std::string &s, std::string *ptr)
 {
     *ptr = s;
     return true;
@@ -111,7 +111,7 @@ bool convert<std::string>(const std::string &s, std::string *ptr)
  * \return false If convertion fails.
  */
 template<>
-bool convert<bool>(const std::string &s, bool *ptr)
+inline bool convert<bool>(const std::string &s, bool *ptr)
 {
     if (s == "true" || s == "1")
     {
@@ -131,7 +131,7 @@ bool convert<bool>(const std::string &s, bool *ptr)
  * \return std::string The string converted.
  */
 template<typename T>
-std::string convert(T v)
+inline std::string convert(T v)
 {
     return std::to_string(v);
 }
@@ -142,7 +142,7 @@ std::string convert(T v)
  * \return std::string "true" or "false"
  */
 template<>
-std::string convert<bool>(bool v)
+inline std::string convert<bool>(bool v)
 {
     return v ? "true" : "false";
 }
@@ -318,7 +318,7 @@ public:
  * \param obj Type to print.
  * \return std::ostream& Output stream.
  */
-std::ostream& operator<<(std::ostream& os, const Type& obj)
+inline std::ostream& operator<<(std::ostream& os, const Type& obj)
 {
    switch(obj)
    {
@@ -341,7 +341,7 @@ std::ostream& operator<<(std::ostream& os, const Type& obj)
  * \param obj Types to print.
  * \return std::ostream& Output stream.
  */
-std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
+inline std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
 {
     os << "{";
     for (auto &pt: obj)
@@ -359,7 +359,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
  * \return true  Equals.
  * \return false Not equals.
  */
-bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
+inline bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
 {
     if (lhs.size() != rhs.size()) return false;
     for (std::size_t i = 0; i < lhs.size(); ++i)
@@ -379,7 +379,7 @@ bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
  * \return true  Different.
  * \return false Equals.
  */
-bool operator!=(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
+inline bool operator!=(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
 {
     return !operator==(lhs, rhs);
 }
