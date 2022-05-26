@@ -82,20 +82,17 @@ private:
         LayerDescriptorVector layers_descriptor(
             {
                 {"input_layer",   input_size,  ActivationType::Linear },
-                {"hidden_layer0", 10,          ActivationType::ReLU },
-                {"hidden_layer1", 20,          ActivationType::ReLU },
-                {"hidden_layer2", 25,          ActivationType::ReLU },
-                {"hidden_layer3", 28,          ActivationType::ReLU },
-                {"hidden_layer4", 30,          ActivationType::ReLU },
-                {"hidden_layer5", 28,          ActivationType::ReLU },
-                {"hidden_layer6", 25,          ActivationType::ReLU },
-                {"hidden_layer7", 20,          ActivationType::ReLU },
-                {"hidden_layer8", 10,          ActivationType::ReLU },
+                {"hidden_layer0", 15,          ActivationType::ReLU },
+                {"hidden_layer1", 15,          ActivationType::ReLU },
+                {"hidden_layer2", 15,          ActivationType::ReLU },
+                {"hidden_layer3", 15,          ActivationType::ReLU },
+                {"hidden_layer4", 15,          ActivationType::ReLU },
+                {"hidden_layer5", 15,          ActivationType::ReLU },
                 {"output_layer",  output_size, ActivationType::Linear },
             }
         );
 
-        for (SizeType e = 1; e < EPOCHS; ++e)
+        for (SizeType e = 1; e <= EPOCHS; ++e)
         {
             profile("training epochs amount: " + std::to_string(e),
                     [&](SizeType i){
@@ -132,41 +129,35 @@ private:
         const SizeType BATCH_SIZE            = 1;
         const SizeType EPOCHS                = 5;
         const NumType  LEARNING_RATE         = 0.03;
-        const SizeType MIN_SET_SIZE = 10;
-        const SizeType MAX_SET_SIZE = 1000;
 
         auto csv = CSV(DATA_TRAINING_FP.string());
         auto labels_idx = std::set<SizeType>{4};
         auto vec = csv.to_vec<NumType>();
         vec.erase(vec.begin());
         auto data = Dataset<NumType>(vec, csv.cols_size(), 1, labels_idx);
-        auto training_set_size = data.size() - MIN_SET_SIZE;
+        auto training_set_size = data.size();
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
         LayerDescriptorVector layers_descriptor(
             {
                 {"input_layer",   input_size,  ActivationType::Linear },
-                {"hidden_layer0", 10,          ActivationType::ReLU },
-                {"hidden_layer1", 20,          ActivationType::ReLU },
-                {"hidden_layer2", 25,          ActivationType::ReLU },
-                {"hidden_layer3", 28,          ActivationType::ReLU },
-                {"hidden_layer4", 30,          ActivationType::ReLU },
-                {"hidden_layer5", 28,          ActivationType::ReLU },
-                {"hidden_layer6", 25,          ActivationType::ReLU },
-                {"hidden_layer7", 20,          ActivationType::ReLU },
-                {"hidden_layer8", 10,          ActivationType::ReLU },
+                {"hidden_layer0", 15,          ActivationType::ReLU },
+                {"hidden_layer1", 15,          ActivationType::ReLU },
+                {"hidden_layer2", 15,          ActivationType::ReLU },
+                {"hidden_layer3", 15,          ActivationType::ReLU },
+                {"hidden_layer4", 15,          ActivationType::ReLU },
+                {"hidden_layer5", 15,          ActivationType::ReLU },
                 {"output_layer",  output_size, ActivationType::Linear },
             }
         );
 
-        auto max_size_training_set = std::min(
-            training_set_size, MAX_SET_SIZE);
-        for (std::int64_t div_factor = 10; div_factor >= 0; div_factor-=2)
+        std::vector<std::size_t> training_set_sizes = {
+            10, 50, 100, 200, 300, 400, 600, 800, 1000, 10000
+        };
+        for (const auto& size: training_set_sizes)
         {
-            auto curr_size = MIN_SET_SIZE
-                + max_size_training_set / static_cast<std::size_t>(
-                    div_factor + 1);
+            auto curr_size = std::min(training_set_size, size);
             profile("training with dataset size (#entries): "
                         + std::to_string(curr_size),
                     [&](SizeType i) {
@@ -179,6 +170,7 @@ private:
                         m.fit(subset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
                     }, 100,
                     "training_on_dataset_size" + std::to_string(curr_size));
+            if (curr_size == training_set_size) break;
         }
 
         CompileFNN<LossType::MSE,
@@ -186,11 +178,9 @@ private:
             InitType::AUTO>
             m(layers_descriptor, "regressor_model");
         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-        for (std::int64_t div_factor = 10; div_factor >= 0; div_factor-=2)
+        for (const auto& size: training_set_sizes)
         {
-            auto curr_size = MIN_SET_SIZE
-                + max_size_training_set / static_cast<std::size_t>(
-                    div_factor + 1);
+            auto curr_size = std::min(training_set_size, size);
             profile("prediction with dataset size (#entries): "
                         + std::to_string(curr_size),
                     [&](SizeType i) {
@@ -202,6 +192,7 @@ private:
                     },
                     100,
                     "prediction_on_dataset_size" + std::to_string(curr_size));
+            if (curr_size == training_set_size) break;
         }
     }
 
@@ -212,7 +203,7 @@ private:
     void profile_on_layers_amount() {
         const SizeType BATCH_SIZE    = 1;
         const SizeType EPOCHS        = 5;
-        const SizeType LAYERS_AMOUNT = 15;
+        const SizeType LAYERS_AMOUNT = 10;
         const NumType  LEARNING_RATE = 0.03;
 
         auto csv = CSV(DATA_TRAINING_FP.string());
@@ -230,13 +221,13 @@ private:
             }
         );
 
-        for (std::size_t amount = 0; amount < LAYERS_AMOUNT; ++amount)
+        for (std::size_t amount = 1; amount <= LAYERS_AMOUNT; ++amount)
         {
             layers_descriptor.insert(
                 layers_descriptor.end() - 1,
                 {
-                    "hidden_layer" + std::to_string(amount),
-                    input_size * 2,
+                    "hidden_layer" + std::to_string(amount-1),
+                    15,
                     ActivationType::ReLU
                 });
             profile("training with hidden layers amount: "
@@ -287,22 +278,17 @@ private:
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
-        for (std::size_t shape = 10; shape < LAYERS_MAX_SIZE; ++shape)
+        for (std::size_t shape = 10; shape <= LAYERS_MAX_SIZE; ++shape)
         {
             LayerDescriptorVector layers_descriptor(
                 {
                     {"input_layer", input_size, ActivationType::Linear},
-                    {
-                        "hidden_layer0",
-                        static_cast<SizeType>(shape / 2),
-                        ActivationType::ReLU
-                    },
+                    {"hidden_layer0", shape, ActivationType::ReLU},
                     {"hidden_layer1", shape, ActivationType::ReLU},
-                    {
-                        "hidden_layer2",
-                        static_cast<SizeType>(shape / 2),
-                        ActivationType::ReLU
-                    },
+                    {"hidden_layer2", shape, ActivationType::ReLU},
+                    {"hidden_layer3", shape, ActivationType::ReLU},
+                    {"hidden_layer4", shape, ActivationType::ReLU},
+                    {"hidden_layer5", shape, ActivationType::ReLU},
                     {"output_layer", output_size, ActivationType::Linear},
                 }
             );
