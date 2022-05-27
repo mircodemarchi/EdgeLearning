@@ -44,13 +44,13 @@ void ActivationLayer::print() const
     std::cout << std::endl;
 }
 
-void ActivationLayer::input_size(DLMath::Shape3d input_size)
+void ActivationLayer::input_shape(DLMath::Shape3d input_shape)
 {
-    FeedforwardLayer::input_size(input_size);
+    FeedforwardLayer::input_shape(input_shape);
 
     // Update output size accordingly (see Layer and FeedforwardLayer constr.).
-    _output_size = input_size.size();
-    _output_activations.resize(_output_size);
+    _output_shape = input_shape.size();
+    _output_activations.resize(_output_shape.size());
 }
 // =============================================================================
 
@@ -66,7 +66,7 @@ const std::vector<NumType>& ReluLayer::forward(
 {
     _last_input = inputs.data();
     DLMath::relu<NumType>(_output_activations.data(), inputs.data(),
-                          _output_size);
+                          _output_shape.size());
     return ActivationLayer::forward(_output_activations);
 }
 
@@ -83,10 +83,10 @@ const std::vector<NumType>& ReluLayer::backward(
      * there is no differences.
      */
     DLMath::relu_1<NumType>(_input_gradients.data(), _output_activations.data(),
-                            _output_size);
+                            _output_shape.size());
     // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
     DLMath::arr_mul(_input_gradients.data(), _input_gradients.data(),
-                    gradients.data(), _output_size);
+                    gradients.data(), _output_shape.size());
     return ActivationLayer::backward(_input_gradients);
 }
 // =============================================================================
@@ -103,7 +103,7 @@ const std::vector<NumType>& SoftmaxLayer::forward(
 {
     _last_input = inputs.data();
     DLMath::softmax<NumType>(_output_activations.data(), inputs.data(),
-                             _output_size);
+                             _output_shape.size());
     return ActivationLayer::forward(_output_activations);
 }
 
@@ -118,7 +118,7 @@ const std::vector<NumType>& SoftmaxLayer::backward(
     DLMath::softmax_1_opt_no_check<NumType>(
         _input_gradients.data(),
         _output_activations.data(), gradients.data(),
-        _output_size);
+        _output_shape.size());
     return ActivationLayer::backward(_input_gradients);
 }
 // =============================================================================
@@ -135,7 +135,7 @@ const std::vector<NumType>& TanhLayer::forward(
 {
     _last_input = inputs.data();
     DLMath::tanh<NumType>(_output_activations.data(), inputs.data(),
-                          _output_size);
+                          _output_shape.size());
     return ActivationLayer::forward(_output_activations);
 }
 
@@ -144,10 +144,10 @@ const std::vector<NumType>& TanhLayer::backward(
 {
     // Calculate dg(z)/dz and put in _activation_gradients.
     DLMath::tanh_1<NumType>(_input_gradients.data(), _output_activations.data(),
-                            _output_size);
+                            _output_shape.size());
     // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
     DLMath::arr_mul(_input_gradients.data(), _input_gradients.data(),
-                    gradients.data(), _output_size);
+                    gradients.data(), _output_shape.size());
     return ActivationLayer::backward(_input_gradients);
 }
 // =============================================================================
@@ -171,9 +171,10 @@ const std::vector<NumType>& LinearLayer::backward(
     const std::vector<NumType>& gradients)
 {
     // Linear activation: dg(z)/dz = 1.
-    std::copy(gradients.begin(),
-              gradients.begin() + static_cast<std::int64_t>(_output_size),
-              _input_gradients.begin());
+    std::copy(
+        gradients.begin(),
+        gradients.begin() + static_cast<std::int64_t>(_output_shape.size()),
+        _input_gradients.begin());
     return ActivationLayer::backward(_input_gradients);
 }
 // =============================================================================

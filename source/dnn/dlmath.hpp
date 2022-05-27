@@ -95,7 +95,7 @@ public:
             , channels{c}
         {}
 
-        SizeType size() { return height * width * channels; }
+        SizeType size() const { return height * width * channels; }
 
         SizeType height;
         SizeType width;

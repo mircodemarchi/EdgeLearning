@@ -46,14 +46,14 @@ public:
         _params.resize(input_size);
     }
 
-    SizeType param_count() const noexcept override { return _input_size; }
+    SizeType param_count() const noexcept override { return input_size(); }
     NumType& param(SizeType index) override { return _params[index]; }
 
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override
     {
         std::copy(inputs.begin(),
-                  inputs.begin() + static_cast<std::int64_t>(_input_size),
+                  inputs.begin() + static_cast<std::int64_t>(input_size()),
                   _params.begin());
         _last_input = inputs.data();
         if (_i++ % 2 == 0) ++_correct; else ++_incorrect;

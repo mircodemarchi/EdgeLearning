@@ -94,21 +94,21 @@ public:
     void print() const override;
 
     /**
-     * \brief Getter of input_size class field.
+     * \brief Getter of input_shape class field.
      * \return The size of the layer input.
      */
-    [[nodiscard]] virtual SizeType input_size() const override
+    [[nodiscard]] virtual const DLMath::Shape3d & input_shape() const override
     {
-        return FeedforwardLayer::input_size();
+        return FeedforwardLayer::input_shape();
     }
 
     /**
      * \brief Activation layer setter.
-     * Since input_size == output_size in activation layer, it overrides also
+     * Since input_shape == output_size in activation layer, it overrides also
      * the output_size.
-     * \param input_size The input size to set.
+     * \param input_shape The input size to set.
      */
-    void input_size(DLMath::Shape3d input_size) override;
+    void input_shape(DLMath::Shape3d input_shape) override;
 
 private:
 };

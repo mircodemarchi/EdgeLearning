@@ -79,7 +79,7 @@ public:
      */
     [[nodiscard]] SizeType param_count() const noexcept override
     {
-        return (_input_size + 1UL) * _output_size;
+        return (input_size() + 1UL) * output_size();
     }
 
     NumType& param(SizeType index) override;
@@ -88,21 +88,34 @@ public:
     void print() const override;
 
     /**
-     * \brief Getter of input_size class field.
+     * \brief Getter of input_shape class field.
      * \return The size of the layer input.
      */
-    [[nodiscard]] virtual SizeType input_size() const override
+    [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const override
     {
-        return FeedforwardLayer::input_size();
+        return FeedforwardLayer::input_shape();
     }
 
     /**
-     * \brief Setter of input_size class field.
-     * \param input_size DLMath::Shape3d Shape param used to take the size and
-     * assign it to input_size.
+     * \brief Setter of input_shape class field.
+     * \param input_shape DLMath::Shape3d Shape param used to take the size and
+     * assign it to input_shape.
      * The operation also performs a resize of the weights and its gradients.
      */
-    void input_size(DLMath::Shape3d input_size) override;
+    void input_shape(DLMath::Shape3d input_shape) override;
+
+    /**
+     * \brief Save the layer infos and weights to disk.
+     * \param out Json& out Json to write.
+     */
+    void dump(Json& out) const override;
+
+    /**
+     * \brief Load the layer infos and weights from disk.
+     * \param in const Json& Json to read.
+     */
+    void load(Json& in) override;
+
 private:
 
     // == Layer parameters ==

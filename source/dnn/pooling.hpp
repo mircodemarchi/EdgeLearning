@@ -39,6 +39,17 @@
 
 namespace EdgeLearning {
 
+/**
+ * \brief Pooling Layer.
+ *
+ * Input shape.
+ * Size: height * width * channels (_input_size).
+ *
+ * Output shape.
+ * Size: height_out * width_out * channels (_output_size).
+ *  height_out  = ((h_in - h_kernel) / h_stride) + 1
+ *  width_out   = ((w_in - w_kernel) / w_stride) + 1
+ */
 class PoolingLayer : public FeedforwardLayer
 {
 public:
@@ -99,30 +110,21 @@ public:
 
     void print() const override;
 
-    [[nodiscard]] SizeType input_size() const override
+    /**
+     * \brief Input shape getter of Pooling layer.
+     * \return DLMath::Shape3d the input shape 3D.
+     */
+    [[nodiscard]] const DLMath::Shape3d& input_shape() const override
     {
-        return Layer::input_size();
+        return FeedforwardLayer::input_shape();
     }
+
     /**
      * \brief Input shape setter. In this layer, all the 3 fields contained in
      * DLMath::Shape3d are used to calculate the layer input size.
      * \param input_shape 3D object with input matrix shape.
      */
-    void input_size(DLMath::Shape3d input_shape) override;
-
-    /**
-     * \brief Input shape getter of Pooling layer.
-     * \return DLMath::Shape3d the input shape 3D.
-     */
-    [[nodiscard]] const DLMath::Shape3d& input_shape() const
-    { return _input_shape; }
-
-    /**
-     * \brief Output shape getter of Pooling layer.
-     * \return DLMath::Shape3d the output shape 3D.
-     */
-    [[nodiscard]] const DLMath::Shape3d& output_shape() const
-    { return _output_shape; }
+    void input_shape(DLMath::Shape3d input_shape) override;
 
     /**
      * \brief Kernel shape getter of Pooling layer.
@@ -132,15 +134,6 @@ public:
     { return _kernel_shape; }
 
 protected:
-    /// \brief Input shape. Size: height * width * channels (_input_size).
-    DLMath::Shape3d _input_shape;
-    /**
-     * \brief Output shape.
-     * Size: height_out * width_out * channels (_output_size).
-     *  height_out  = ((h_in - h_kernel) / h_stride) + 1
-     *  width_out   = ((w_in - w_kernel) / w_stride) + 1
-     */
-    DLMath::Shape3d _output_shape;
     /// \brief Kernel shape. Size: height_kernel * width_kernel.
     DLMath::Shape2d _kernel_shape;
 

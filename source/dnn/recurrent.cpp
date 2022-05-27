@@ -41,12 +41,12 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
 {
-    // std::cout << _name << ": " << _input_size
-    //    << " -{" << _hidden_size << "}-> " << _output_size << std::endl;
+    // std::cout << _name << ": " << input_size()
+    //    << " -{" << _hidden_size << "}-> " << output_size() << std::endl;
 
-    auto ih_size = _input_size * _hidden_size;
+    auto ih_size = input_size * _hidden_size;
     auto hh_size = _hidden_size * _hidden_size;
-    auto ho_size = _hidden_size * _output_size;
+    auto ho_size = _hidden_size * output_size;
 
     // The weight input to hidden parameters are an HxI matrix.
     _weights_i_to_h.resize(ih_size);
@@ -58,10 +58,10 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     // The bias to hidden parameters are a Hx1 vector. 
     _biases_to_h.resize(_hidden_size);
     // The bias to output parameters are a Ox1 vector. 
-    _biases_to_o.resize(_output_size);
+    _biases_to_o.resize(output_size);
 
     // The outputs of each neuron within the layer is an "activation".
-    _output_activations.resize(_output_size * _time_steps);
+    _output_activations.resize(output_size * _time_steps);
 
     // The hidden state is of hidden_size for each time step of the sequences.
     _hidden_state = std::vector<NumType>(
@@ -71,15 +71,15 @@ RecurrentLayer::RecurrentLayer(Model& model, std::string name,
     _weights_h_to_h_gradients.resize(hh_size);
     _weights_h_to_o_gradients.resize(ho_size);
     _biases_to_h_gradients.resize(_hidden_size);
-    _biases_to_o_gradients.resize(_output_size);
-    _input_gradients.resize(_input_size * _time_steps);
+    _biases_to_o_gradients.resize(output_size);
+    _input_gradients.resize(input_size * _time_steps);
 }
 
 void RecurrentLayer::init(InitializationFunction init,
                           ProbabilityDensityFunction pdf,
                           RneType rne)
 {
-    auto dist_i = DLMath::initialization_pdf<NumType>(init, pdf, _input_size);
+    auto dist_i = DLMath::initialization_pdf<NumType>(init, pdf, input_size());
     auto dist_h = DLMath::initialization_pdf<NumType>(init, pdf, _hidden_size);
 
     for (NumType& w: _weights_i_to_h)
@@ -126,7 +126,7 @@ const std::vector<NumType>& RecurrentLayer::forward(
     // Loop the time sequences.
     for (SizeType t = 0; t < _time_steps; ++t)
     {
-        curr_sequence = inputs.data() + t * _input_size;
+        curr_sequence = inputs.data() + t * input_size();
         curr_hs_idx = t;
         next_hs_idx = (t == (_time_steps - 1)) ? 0 : t + 1;
 
@@ -137,7 +137,7 @@ const std::vector<NumType>& RecurrentLayer::forward(
         DLMath::matarr_mul<NumType>(
             _hidden_state.data() + next_hs_idx * _hidden_size, 
             _weights_i_to_h.data(),
-            curr_sequence, _hidden_size, _input_size);
+            curr_sequence, _hidden_size, input_size());
 
         /*
          * Compute the product of the hidden state with its 
@@ -197,14 +197,14 @@ const std::vector<NumType>& RecurrentLayer::forward(
          * hidden_to_output weights and the sum with the to_output bias.
          * a(t) = W_ho * h(t + 1) + b_o
          */
-        DLMath::matarr_mul<NumType>(_output_activations.data() + t * _output_size,
+        DLMath::matarr_mul<NumType>(_output_activations.data() + t * output_size(),
             _weights_h_to_o.data(),
             _hidden_state.data() + next_hs_idx * _hidden_size, 
-            _output_size, _hidden_size);
+            output_size(), _hidden_size);
         DLMath::arr_sum<NumType>(
-            _output_activations.data() + t * _output_size,
-            _output_activations.data() + t * _output_size,
-            _biases_to_o.data(), _output_size);
+            _output_activations.data() + t * output_size(),
+            _output_activations.data() + t * output_size(),
+            _biases_to_o.data(), output_size());
     }
 
     delete[] tmp_mul;
@@ -229,16 +229,16 @@ const std::vector<NumType>& RecurrentLayer::backward(
         SizeType t_idx = t - 1;
         curr_hs_idx = (t >= _time_steps) ? 0 : t;
         prev_hs_idx = t_idx;
-        curr_sequence_gradients = gradients.data() + (t_idx * _output_size);
+        curr_sequence_gradients = gradients.data() + (t_idx * output_size());
 
         // Bias gradient to output.
         DLMath::arr_sum(
             _biases_to_o_gradients.data(), 
             _biases_to_o_gradients.data(),
-            curr_sequence_gradients, _output_size);
+            curr_sequence_gradients, output_size());
 
         // Weight gradient hidden to output.
-        for (SizeType i = 0; i < _output_size; ++i)
+        for (SizeType i = 0; i < output_size(); ++i)
         {
             for (SizeType j = 0; j < _hidden_size; ++j)
             {
@@ -252,7 +252,7 @@ const std::vector<NumType>& RecurrentLayer::backward(
         for (SizeType j = 0; j < _hidden_size; ++j)
         {
             tmp_mul[j] = NumType(0.0);
-            for (SizeType i = 0; i < _output_size; ++i)
+            for (SizeType i = 0; i < output_size(); ++i)
             {
                 tmp_mul[j] += _weights_h_to_o[(i * _hidden_size) + j] 
                     * curr_sequence_gradients[i];
@@ -302,11 +302,11 @@ const std::vector<NumType>& RecurrentLayer::backward(
         // Weight gradient input to hidden.
         for (SizeType i = 0; i < _hidden_size; ++i)
         {
-            for (SizeType j = 0; j < _input_size; ++j)
+            for (SizeType j = 0; j < input_size(); ++j)
             {
-                _weights_i_to_h_gradients[(i * _input_size) + j] += 
+                _weights_i_to_h_gradients[(i * input_size()) + j] += 
                     next_hidden_state[i] 
-                    * _last_input[(t_idx * _input_size) + j];
+                    * _last_input[(t_idx * input_size()) + j];
             }
         }
 
@@ -323,15 +323,15 @@ const std::vector<NumType>& RecurrentLayer::backward(
 
         // Input gradient.
         NumType* curr_input_gradients = _input_gradients.data() 
-            + (t_idx * _input_size);
-        std::fill(curr_input_gradients, curr_input_gradients + _input_size, 0);
+            + (t_idx * input_size());
+        std::fill(curr_input_gradients, curr_input_gradients + input_size(), 0);
         for (SizeType i = 0; i < _hidden_size; ++i)
         {
-            for (SizeType j = 0; j < _input_size; ++j)
+            for (SizeType j = 0; j < input_size(); ++j)
             {
                 curr_input_gradients[j] += 
                     next_hidden_state[i] 
-                        * _weights_i_to_h[(i * _input_size) + j];
+                        * _weights_i_to_h[(i * input_size()) + j];
             }
         }
 
@@ -423,11 +423,11 @@ void RecurrentLayer::print() const
 {
     std::cout << _name << std::endl;
     std::cout << "Weights input to hidden (" 
-        << _hidden_size << " x " << _input_size << ")" << std::endl;
+        << _hidden_size << " x " << input_size() << ")" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
-        SizeType offset = i * _input_size;
-        for (SizeType j = 0; j < _input_size; ++j)
+        SizeType offset = i * input_size();
+        for (SizeType j = 0; j < input_size(); ++j)
         {
             std::cout << "\t[" << (offset + j) << "]" 
                 << _weights_i_to_h[offset + j];
@@ -435,7 +435,7 @@ void RecurrentLayer::print() const
         std::cout << std::endl;
     }
     std::cout << "Weights hidden to hidden (" 
-        << _hidden_size << " x " << _input_size << ")" << std::endl;
+        << _hidden_size << " x " << input_size() << ")" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
         SizeType offset = i * _hidden_size;
@@ -447,8 +447,8 @@ void RecurrentLayer::print() const
         std::cout << std::endl;
     }
     std::cout << "Weights hidden to output (" 
-        << _output_size << " x " << _input_size << ")" << std::endl;
-    for (SizeType i = 0; i < _output_size; ++i)
+        << output_size() << " x " << input_size() << ")" << std::endl;
+    for (SizeType i = 0; i < output_size(); ++i)
     {
         SizeType offset = i * _hidden_size;
         for (SizeType j = 0; j < _hidden_size; ++j)
@@ -463,7 +463,7 @@ void RecurrentLayer::print() const
     {
         std::cout << "\t" << _biases_to_h[i] << std::endl;
     }
-    std::cout << "Biases to output (" << _output_size << " x 1)" << std::endl;
+    std::cout << "Biases to output (" << output_size() << " x 1)" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
         std::cout << "\t" << _biases_to_h[i] << std::endl;
@@ -471,12 +471,12 @@ void RecurrentLayer::print() const
     std::cout << std::endl;
 }
 
-void RecurrentLayer::input_size(DLMath::Shape3d input_size) {
-    Layer::input_size(input_size);
-    auto ih_size = input_size.height * _hidden_size;
+void RecurrentLayer::input_shape(DLMath::Shape3d input_shape) {
+    Layer::input_shape(input_shape);
+    auto ih_size = input_shape.height * _hidden_size;
     _weights_i_to_h.resize(ih_size);
     _weights_i_to_h_gradients.resize(ih_size);
-    _input_gradients.resize(input_size.height * _time_steps);
+    _input_gradients.resize(input_shape.height * _time_steps);
 }
 
 } // namespace EdgeLearning

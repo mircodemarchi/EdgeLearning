@@ -60,11 +60,9 @@ PoolingLayer::PoolingLayer(
     Model& model, DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
     DLMath::Shape2d stride, std::string name, std::string prefix_name)
     : FeedforwardLayer(
-        model, input_shape.size(),
-        pooling_output_size(input_shape, kernel_shape, stride), std::move(name),
+        model, input_shape,
+        pooling_output_shape(input_shape, kernel_shape, stride), std::move(name),
         prefix_name.empty() ? "pooling_layer_" : prefix_name)
-    , _input_shape(input_shape)
-    , _output_shape(pooling_output_shape(input_shape, kernel_shape, stride))
     , _kernel_shape(kernel_shape)
     , _stride(stride)
 {}
@@ -76,17 +74,16 @@ void PoolingLayer::print() const
     std::cout << std::endl;
 }
 
-void PoolingLayer::input_size(DLMath::Shape3d input_shape)
+void PoolingLayer::input_shape(DLMath::Shape3d input_shape)
 {
-    FeedforwardLayer::input_size(input_shape);
+    FeedforwardLayer::input_shape(input_shape);
 
     // Update input and output shape accordingly (see this constructor).
     _input_shape = input_shape;
     _output_shape = pooling_output_shape(input_shape, _kernel_shape, _stride);
 
     // Update output size accordingly (see Layer and FeedforwardLayer constr.).
-    _output_size = _output_shape.size();
-    _output_activations.resize(_output_size);
+    _output_activations.resize(output_size());
 }
 
 } // namespace EdgeLearning

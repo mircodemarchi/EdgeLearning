@@ -68,14 +68,10 @@ ConvolutionalLayer::ConvolutionalLayer(
     DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
     SizeType n_filters, DLMath::Shape2d stride, DLMath::Shape2d padding)
     : FeedforwardLayer(
-        model, input_shape.size(),
-        convolutional_output_size(input_shape, kernel_shape,
+        model, input_shape,
+        convolutional_output_shape(input_shape, kernel_shape,
                                   stride, padding, n_filters),
         std::move(name), "convolutional_layer_")
-    , _input_shape(input_shape)
-    , _output_shape(
-        convolutional_output_shape(input_shape, kernel_shape,
-                                   stride, padding, n_filters))
     , _kernel_shape(kernel_shape)
     , _n_filters(n_filters)
     , _stride(stride)
@@ -96,7 +92,7 @@ void ConvolutionalLayer::init(InitializationFunction init,
                               ProbabilityDensityFunction pdf,
                               RneType rne)
 {
-    auto dist = DLMath::initialization_pdf<NumType>(init, pdf, _input_size);
+    auto dist = DLMath::initialization_pdf<NumType>(init, pdf, input_size());
 
     for (NumType& w: _weights)
     {
@@ -270,9 +266,9 @@ void ConvolutionalLayer::print() const
     std::cout << std::endl;
 }
 
-void ConvolutionalLayer::input_size(DLMath::Shape3d input_shape)
+void ConvolutionalLayer::input_shape(DLMath::Shape3d input_shape)
 {
-    FeedforwardLayer::input_size(input_shape);
+    FeedforwardLayer::input_shape(input_shape);
     _weights.resize(_kernel_shape.size() * input_shape.channels * _n_filters);
     _weight_gradients.resize(_kernel_shape.size() * input_shape.channels
                              * _n_filters);
@@ -283,8 +279,7 @@ void ConvolutionalLayer::input_size(DLMath::Shape3d input_shape)
                                                _stride, _padding, _n_filters);
 
     // Update output size accordingly (see Layer and FeedforwardLayer constr.).
-    _output_size = _output_shape.size();
-    _output_activations.resize(_output_size);
+    _output_activations.resize(output_size());
 }
 
 } // namespace EdgeLearning

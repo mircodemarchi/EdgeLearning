@@ -234,7 +234,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), input_size);
         input_size = 10;
-        EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
+        EDGE_LEARNING_TEST_CALL(l.input_shape(input_size));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), input_size);
     }

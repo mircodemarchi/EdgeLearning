@@ -131,11 +131,11 @@ public:
 
     void print() const override;
 
-    [[nodiscard]] SizeType input_size() const override
+    [[nodiscard]] const DLMath::Shape3d& input_shape() const override
     {
-        return Layer::input_size();
+        return FeedforwardLayer::input_shape();
     }
-    void input_size(DLMath::Shape3d input_size) override;
+    void input_shape(DLMath::Shape3d input_shape) override;
 
 private:
 

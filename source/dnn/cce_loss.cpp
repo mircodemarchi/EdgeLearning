@@ -51,10 +51,10 @@ const std::vector<NumType>& CCELossLayer::forward(
     {
         throw std::runtime_error("_target is null, set_target not called");
     }
-    _loss = DLMath::cross_entropy(_target, inputs.data(), _input_size);
+    _loss = DLMath::cross_entropy(_target, inputs.data(), input_size());
     _cumulative_loss += _loss;
     
-    auto max = DLMath::max_and_argmax(inputs.data(), _input_size);
+    auto max = DLMath::max_and_argmax(inputs.data(), input_size());
     // NumType max_value = std::get<0>(max);
     SizeType max_index = std::get<1>(max);
 
@@ -81,14 +81,14 @@ const std::vector<NumType>& CCELossLayer::backward(
     (void) gradients;
 
     DLMath::cross_entropy_1(_gradients.data(), _target, _last_input,
-        _inv_batch_size, _input_size);
+        _inv_batch_size, input_size());
 
     return LossLayer::backward(_gradients);
 }
 
 SizeType CCELossLayer::_argactive() const
 {
-    for (SizeType i = 0; i < _input_size; ++i)
+    for (SizeType i = 0; i < input_size(); ++i)
     {
         if (_target[i] != NumType{0.0})
         {

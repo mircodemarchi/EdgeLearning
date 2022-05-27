@@ -235,25 +235,13 @@ public:
 
     /**
      * \brief Save the model weights to disk.
-     * 
-     * To save the model to disk, we employ a very simple scheme. All nodes are
-     * looped through in the order they were added to the model. Then, all
-     * advertised learnable parameters are serialized in host byte-order to the
-     * supplied output stream.
-     *
-     * This simplistic method of saving the model to disk isn't very
-     * robust or practical in the real world. It contains no reflection data 
-     * about the topology of the model. Furthermore, the data will be parsed 
-     * incorrectly if the program is recompiled to operate with a different 
-     * precision. 
-     * 
-     * \param out Out file stream
+     * \param out Out file stream.
      */
     void save(std::ofstream& out);
 
     /**
      * \brief Load the model weights to disk.
-     * \param in In file stream
+     * \param in In file stream.
      */
     void load(std::ifstream& in);
 private:

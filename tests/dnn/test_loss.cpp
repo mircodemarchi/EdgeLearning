@@ -128,7 +128,7 @@ private:
         EDGE_LEARNING_TEST_TRY(l_copy.init());
         EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v.size());
-        EDGE_LEARNING_TEST_TRY(l_copy.input_size(0));
+        EDGE_LEARNING_TEST_TRY(l_copy.input_shape(0));
         EDGE_LEARNING_TEST_TRY(l_copy.training_forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_copy.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_copy.backward(v_empty));
@@ -160,7 +160,7 @@ private:
         EDGE_LEARNING_TEST_TRY(l_assign.init());
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v.size());
-        EDGE_LEARNING_TEST_TRY(l_assign.input_size(0));
+        EDGE_LEARNING_TEST_TRY(l_assign.input_shape(0));
         EDGE_LEARNING_TEST_TRY(l_assign.training_forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_assign.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_assign.backward(v_empty));
@@ -256,7 +256,7 @@ private:
         auto l = CustomLossLayer(input_size, 2);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         input_size = 10;
-        EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
+        EDGE_LEARNING_TEST_CALL(l.input_shape(input_size));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
     }
 };

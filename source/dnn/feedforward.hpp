@@ -39,15 +39,16 @@ class FeedforwardLayer : public Layer
 public:
     /**
      * \brief Construct a new Layer object.
-     * \param model       The model in which the layer takes part.
-     * \param input_size  The size of inputs of the layer.
-     * \param output_size The size of outputs of the layer.
-     * \param name        The name of the layer.
+     * \param model        The model in which the layer takes part.
+     * \param input_shape  The shape of inputs of the layer.
+     * \param output_shape The shape of outputs of the layer.
+     * \param name         The name of the layer.
      * If empty, a default generated one is chosen.
      * \param prefix_name The prefix name of the default generated name.
      */
     FeedforwardLayer(Model& model,
-                     SizeType input_size = 0, SizeType output_size = 0,
+                     DLMath::Shape3d input_shape = {0, 0, 0},
+                     DLMath::Shape3d output_shape = {0, 0, 0},
                      std::string name = std::string(),
                      std::string prefix_name = std::string());
 
@@ -62,21 +63,21 @@ public:
     }
 
     /**
-     * \brief Getter of input_size class field.
+     * \brief Getter of input_shape class field.
      * \return The size of the layer input.
      */
-    [[nodiscard]] virtual SizeType input_size() const override
+    [[nodiscard]] virtual const DLMath::Shape3d & input_shape() const override
     {
-        return Layer::input_size();
+        return Layer::input_shape();
     }
 
     /**
-     * \brief Setter of input_size class field.
-     * \param input_size DLMath::Shape3d Shape param used to take the size and
-     * assign it to input_size.
+     * \brief Setter of input_shape class field.
+     * \param input_shape DLMath::Shape3d Shape param used to take the size and
+     * assign it to input_shape.
      * The operation also performs a resize of the input_gradients.
      */
-    virtual void input_size(DLMath::Shape3d input_size) override;
+    virtual void input_shape(DLMath::Shape3d input_shape) override;
 
 protected:
     /// \brief Activations of the layer. Size: _output_size.

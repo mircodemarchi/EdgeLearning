@@ -55,7 +55,7 @@ const std::vector<NumType>& DropoutLayer::training_forward(
 
     // Input size is equal to the output size.
     _zero_mask_idxs.clear();
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < output_size(); ++i)
     {
         auto random_value = dist(_random_generator);
         if (random_value > _drop_probability)
@@ -77,7 +77,7 @@ const std::vector<NumType>& DropoutLayer::backward(
 {
     // Input size is equal to the output size.
     DLMath::arr_mul(_input_gradients.data(), gradients.data(),
-                    _scale, _input_size);
+                    _scale, input_size());
     for (const auto& i: _zero_mask_idxs)
     {
         _input_gradients[i] = 0;
@@ -93,11 +93,11 @@ void DropoutLayer::print() const
     std::cout << std::endl;
 }
 
-void DropoutLayer::input_size(DLMath::Shape3d input_size)
+void DropoutLayer::input_shape(DLMath::Shape3d input_shape)
 {
-    FeedforwardLayer::input_size(input_size);
-    _output_size = input_size.size();
-    _output_activations.resize(_output_size);
+    FeedforwardLayer::input_shape(input_shape);
+    _output_shape = input_shape;
+    _output_activations.resize(output_size());
 }
 
 } // namespace EdgeLearning

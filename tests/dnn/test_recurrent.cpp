@@ -205,7 +205,7 @@ private:
                                 input_size, output_size, hidden_size);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         input_size = 10;
-        EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
+        EDGE_LEARNING_TEST_CALL(l.input_shape(input_size));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
 
         EDGE_LEARNING_TEST_TRY(l.hidden_state({0, 1, 2, 3, 4}));

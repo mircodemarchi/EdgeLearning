@@ -61,7 +61,7 @@ void DenseLayer::init(InitializationFunction init,
      * different compilers and platforms, therefore I use my own 
      * distributions to provide deterministic results.
      */
-    auto dist = DLMath::initialization_pdf<NumType>(init, pdf, _input_size);
+    auto dist = DLMath::initialization_pdf<NumType>(init, pdf, input_size());
 
     for (NumType& w: _weights)
     {
@@ -92,10 +92,10 @@ const std::vector<NumType>& DenseLayer::forward(
      */
     DLMath::matarr_mul_no_check<NumType>(
         _output_activations.data(), _weights.data(), inputs.data(),
-        _output_size, _input_size);
+        output_size(), input_size());
     DLMath::arr_sum<NumType>(_output_activations.data(),
                              _output_activations.data(),
-                             _biases.data(), _output_size);
+                             _biases.data(), output_size());
     return FeedforwardLayer::forward(_output_activations);
 }
 
@@ -112,7 +112,7 @@ const std::vector<NumType>& DenseLayer::backward(
      *                 = dJ/dz
      */
     DLMath::arr_sum(_bias_gradients.data(), _bias_gradients.data(),
-                    gradients.data(), _output_size);
+                    gradients.data(), output_size());
 
     /*
      * Weight gradient.
@@ -123,11 +123,11 @@ const std::vector<NumType>& DenseLayer::backward(
      *                     = dJ/dg(z) * dg(z)/dz * x_j
      *                     = dJ/dz * x_j
      */
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < output_size(); ++i)
     {
-        for (SizeType j = 0; j < _input_size; ++j)
+        for (SizeType j = 0; j < input_size(); ++j)
         {
-            _weight_gradients[(i * _input_size) + j] +=
+            _weight_gradients[(i * input_size()) + j] +=
                 gradients[i] * _last_input[j];
         }
     }
@@ -142,12 +142,12 @@ const std::vector<NumType>& DenseLayer::backward(
      *                 = dJ/dz * W
      */
     std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < output_size(); ++i)
     {
-        for (SizeType j = 0; j < _input_size; ++j)
+        for (SizeType j = 0; j < input_size(); ++j)
         {
             _input_gradients[j] +=
-                gradients[i] * _weights[(i * _input_size) + j];
+                gradients[i] * _weights[(i * input_size()) + j];
         }
     }
 
@@ -183,31 +183,42 @@ NumType& DenseLayer::gradient(SizeType index)
 void DenseLayer::print() const 
 {
     std::cout << _name << std::endl;
-    std::cout << "Weights (" << _output_size << " x " << _input_size << ")"
+    std::cout << "Weights (" << output_size() << " x " << input_size() << ")"
         << std::endl;
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < output_size(); ++i)
     {
-        SizeType offset = i * _input_size;
-        for (SizeType j = 0; j < _input_size; ++j)
+        SizeType offset = i * input_size();
+        for (SizeType j = 0; j < input_size(); ++j)
         {
             std::cout << "\t[" << (offset + j) << "]" << _weights[offset + j]
                 << std::endl;
         }
         std::cout << std::endl;
     }
-    std::cout << "Biases (" << _output_size << " x 1)" << std::endl;
-    for (SizeType i = 0; i < _output_size; ++i)
+    std::cout << "Biases (" << output_size() << " x 1)" << std::endl;
+    for (SizeType i = 0; i < output_size(); ++i)
     {
         std::cout << "\t" << _biases[i] << std::endl;
     }
     std::cout << std::endl;
 }
 
-void DenseLayer::input_size(DLMath::Shape3d input_size)
+void DenseLayer::input_shape(DLMath::Shape3d input_shape)
 {
-    FeedforwardLayer::input_size(input_size);
-    _weights.resize(_output_size * input_size.size());
-    _weight_gradients.resize(_output_size * input_size.size());
+    FeedforwardLayer::input_shape(input_shape);
+    _weights.resize(output_size() * input_shape.size());
+    _weight_gradients.resize(output_size() * input_shape.size());
+}
+
+void DenseLayer::dump(Json& out) const
+{
+    FeedforwardLayer::dump(out);
+    Json weights;
+}
+
+void DenseLayer::load(Json& in)
+{
+    FeedforwardLayer::load(in);
 }
 
 } // namespace EdgeLearning

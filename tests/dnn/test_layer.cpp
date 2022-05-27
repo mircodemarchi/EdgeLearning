@@ -203,7 +203,7 @@ private:
                         Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v.size());
-        EDGE_LEARNING_TEST_TRY(l_copy.input_size(0));
+        EDGE_LEARNING_TEST_TRY(l_copy.input_shape(0));
         EDGE_LEARNING_TEST_TRY(l_copy.training_forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_copy.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_copy.backward(v_empty));
@@ -253,7 +253,7 @@ private:
                 Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v.size());
-        EDGE_LEARNING_TEST_TRY(l_assign.input_size(0));
+        EDGE_LEARNING_TEST_TRY(l_assign.input_shape(0));
         EDGE_LEARNING_TEST_TRY(l_assign.training_forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_assign.forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_assign.backward(v_empty));

@@ -39,6 +39,17 @@
 
 namespace EdgeLearning {
 
+/**
+ * \brief Convolutional Layer.
+ *
+ * Input shape.
+ * Size: height * width * channels (_input_size).
+ *
+ * Output shape.
+ * Size: height_out * width_out * n_filters (_output_size).
+ *  height_out  = ((h_in - h_kernel + (2 * h_padding)) / h_stride) + 1
+ *  width_out   = ((w_in - w_kernel + (2 * w_padding)) / w_stride) + 1
+ */
 class ConvolutionalLayer : public FeedforwardLayer
 {
 public:
@@ -98,12 +109,12 @@ public:
     void print() const override;
 
     /**
-     * \brief Getter of input_size class field.
-     * \return The size of the layer input.
+     * \brief Input shape getter of Convolution layer.
+     * \return DLMath::Shape3d the input shape 3D.
      */
-    [[nodiscard]] virtual SizeType input_size() const override
+    [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const override
     {
-        return FeedforwardLayer::input_size();
+        return FeedforwardLayer::input_shape();
     }
 
     /**
@@ -111,24 +122,10 @@ public:
      * DLMath::Shape3d are used to calculate the layer input size.
      * \param input_shape 3D object with input matrix shape.
      * The operation also performs a resize of the weights and its gradients.
-     * Since input_size == output_size in activation layer, it overrides also
+     * Since input_shape == output_size in activation layer, it overrides also
      * the output_size.
      */
-    void input_size(DLMath::Shape3d input_shape) override;
-
-    /**
-     * \brief Input shape getter of Convolution layer.
-     * \return DLMath::Shape3d the input shape 3D.
-     */
-    [[nodiscard]] const DLMath::Shape3d& input_shape() const
-    { return _input_shape; }
-
-    /**
-     * \brief Output shape getter of Convolution layer.
-     * \return DLMath::Shape3d the output shape 3D.
-     */
-    [[nodiscard]] const DLMath::Shape3d& output_shape() const
-    { return _output_shape; }
+    void input_shape(DLMath::Shape3d input_shape) override;
 
     /**
      * \brief Kernel shape getter of Convolution layer.
@@ -145,15 +142,6 @@ public:
     { return _n_filters; }
 
 private:
-    /// \brief Input shape. Size: height * width * channels (_input_size).
-    DLMath::Shape3d _input_shape;
-    /**
-     * \brief Output shape.
-     * Size: height_out * width_out * n_filters (_output_size).
-     *  height_out  = ((h_in - h_kernel + (2 * h_padding)) / h_stride) + 1
-     *  width_out   = ((w_in - w_kernel + (2 * w_padding)) / w_stride) + 1
-     */
-    DLMath::Shape3d _output_shape;
     /// \brief Kernel shape. Size: height_kernel * width_kernel.
     DLMath::Shape2d _kernel_shape;
 

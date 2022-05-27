@@ -68,14 +68,14 @@ public:
         override;
 
     /**
-     * \brief The input data should have size _input_size.
+     * \brief The input data should have size input_size().
      * \param inputs
      */
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
 
     /**
-     * \brief The gradient data should have size _output_size.
+     * \brief The gradient data should have size output_size().
      * \param gradients
      */
     const std::vector<NumType>& backward(
@@ -90,8 +90,8 @@ public:
      */
     [[nodiscard]] SizeType param_count() const noexcept override
     {
-        return (_input_size + _hidden_size + 1UL) * _hidden_size
-             + (_hidden_size + 1UL) * _output_size;
+        return (input_size() + _hidden_size + 1UL) * _hidden_size
+             + (_hidden_size + 1UL) * output_size();
     }
 
     NumType& param(SizeType index) override;
@@ -114,8 +114,8 @@ public:
         _time_steps = time_steps;
         _hidden_state.resize(
                 _hidden_size * std::max(_time_steps, SizeType(1U)));
-        _output_activations.resize(_output_size * _time_steps);
-        _input_gradients.resize(_input_size * _time_steps);
+        _output_activations.resize(output_size() * _time_steps);
+        _input_gradients.resize(input_size() * _time_steps);
     }
 
     void reset_hidden_state()
@@ -126,11 +126,11 @@ public:
         }
     }
 
-    [[nodiscard]] SizeType input_size() const override
+    [[nodiscard]] const DLMath::Shape3d & input_shape() const override
     {
-        return Layer::input_size();
+        return Layer::input_shape();
     }
-    void input_size(DLMath::Shape3d input_size) override;
+    void input_shape(DLMath::Shape3d input_shape) override;
 
 private:
     HiddenActivation _hidden_activation;
@@ -142,7 +142,7 @@ private:
     // == Layer parameters ==
     /**
      * \brief Weights input to hidden of the layer. 
-     * Size: _hidden_size * _input_size.
+     * Size: _hidden_size * input_size().
      */
     std::vector<NumType> _weights_i_to_h;
     /**
@@ -152,21 +152,21 @@ private:
     std::vector<NumType> _weights_h_to_h;
     /**
      * \brief Weights hidden to output of the layer. 
-     * Size: _output_size * _hidden_size.
+     * Size: output_size() * _hidden_size.
      */
     std::vector<NumType> _weights_h_to_o;
 
     /// \brief Biases to hidden of the layer. Size: _hidden_size. 
     std::vector<NumType> _biases_to_h;
-    /// \brief Biases to output of the layer. Size: _output_size. 
+    /// \brief Biases to output of the layer. Size: output_size(). 
     std::vector<NumType> _biases_to_o;
 
-    /// \brief Activations of the layer. Size: _output_size.
+    /// \brief Activations of the layer. Size: output_size().
     std::vector<NumType> _output_activations;
 
     /**
      * \brief Weights gradients input to hidden of the layer. 
-     * Size: _hidden_size * _input_size.
+     * Size: _hidden_size * input_size().
      */
     std::vector<NumType> _weights_i_to_h_gradients;
     /**
@@ -176,17 +176,17 @@ private:
     std::vector<NumType> _weights_h_to_h_gradients;
     /**
      * \brief Weights gradients hidden to output of the layer. 
-     * Size: _output_size * _hidden_size.
+     * Size: output_size() * _hidden_size.
      */
     std::vector<NumType> _weights_h_to_o_gradients;
 
     /// \brief Biases gradients to hidden of the layer. Size: _hidden_size. 
     std::vector<NumType> _biases_to_h_gradients;
-    /// \brief Biases gradients to output of the layer. Size: _output_size. 
+    /// \brief Biases gradients to output of the layer. Size: output_size(). 
     std::vector<NumType> _biases_to_o_gradients;
 
     /**
-     * \brief Input gradients of the layer. Size: _input_size.
+     * \brief Input gradients of the layer. Size: input_size().
      * This buffer is used to store temporary gradients used in a **single**
      * backpropagation pass. Note that this does not accumulate like the weight
      * and bias gradients do.

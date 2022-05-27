@@ -225,7 +225,7 @@ private:
         auto l = DenseLayer(_m, "dense_layer_test", input_size, 1);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 1);
         input_size = 10;
-        EDGE_LEARNING_TEST_CALL(l.input_size(input_size));
+        EDGE_LEARNING_TEST_CALL(l.input_shape(input_size));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
     }
 

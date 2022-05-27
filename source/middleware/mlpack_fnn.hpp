@@ -89,13 +89,13 @@ public:
     {
         auto layer_name = std::get<0>(ld);
         auto layer_size = std::get<1>(ld);
-        auto layer_ActivationType = std::get<2>(ld);
+        auto layer_activation = std::get<2>(ld);
 
         _layers_name.push_back(layer_name);
         if (_output_size != 0)
         {
             _m.template Add<mlpack::ann::Linear<>>(_output_size, layer_size);
-            switch (layer_ActivationType) {
+            switch (layer_activation) {
                 case ActivationType::ReLU:
                 {
                     _m.template Add<mlpack::ann::ReLULayer<>>();

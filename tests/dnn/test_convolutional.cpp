@@ -294,7 +294,7 @@ private:
                                     in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), in_shape.size());
         DLMath::Shape3d new_in_shape{5,5,3};
-        EDGE_LEARNING_TEST_CALL(l.input_size(new_in_shape));
+        EDGE_LEARNING_TEST_CALL(l.input_shape(new_in_shape));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), new_in_shape.size());
     }
 
