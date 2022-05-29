@@ -31,12 +31,14 @@
 
 #include "type.hpp"
 #include "dlmath.hpp"
+#include "parser/json.hpp"
 
 #include <cstdint>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <map>
 
 
 namespace EdgeLearning {
@@ -49,7 +51,21 @@ class Model;
 class Layer 
 {
 public:
+    enum class DumpFields
+    {
+        TYPE,
+        NAME,
+        INPUT_SIZE,
+        OUTPUT_SIZE,
+        WEIGHTS,
+        BIASES,
+        ANTECEDENTS,
+        SUBSEQUENTS,
+        OTHERS
+    };
+
     static const std::string TYPE;
+    static const std::map<DumpFields, std::string> dump_fields;
 
     using InitializationFunction = DLMath::InitializationFunction;
     using ProbabilityDensityFunction = DLMath::ProbabilityDensityFunction;
@@ -57,14 +73,15 @@ public:
 
     /**
      * \brief Construct a new Layer object.
-     * \param model       The model in which the layer takes part.
-     * \param input_size  The size of inputs of the layer.
-     * \param output_size The size of outputs of the layer.
-     * \param name        The name of the layer.
+     * \param model        The model in which the layer takes part.
+     * \param input_shape  The shape of inputs of the layer.
+     * \param output_shape The shape of outputs of the layer.
+     * \param name         The name of the layer.
      * If empty, a default generated one is chosen.
      * \param prefix_name The prefix name of the default generated name.
      */
-    Layer(Model& model, SizeType input_size = 0, SizeType output_size = 0,
+    Layer(Model& model,
+          DLMath::Shape3d input_shape = 0, DLMath::Shape3d output_shape = 0,
           std::string name = std::string(),
           std::string prefix_name = std::string());
 
@@ -159,7 +176,8 @@ public:
     std::vector<NumType> last_input()
     {
         return _last_input
-            ? std::vector<NumType>{_last_input, _last_input + _input_size}
+            ? std::vector<NumType>{
+                _last_input, _last_input + _input_shape.size()}
             : std::vector<NumType>{};
     };
 
@@ -207,22 +225,47 @@ public:
     }
 
     /**
-     * \brief Getter of input_size class field.
+     * \brief Getter of input_shape class field.
      * \return The size of the layer input.
      */
-    [[nodiscard]] virtual SizeType input_size() const;
-    /**
-     * \brief Setter of input_size class field.
-     * \param input_size DLMath::Shape3d Shape param used to take the size and
-     * assign it to input_size.
-     */
-    virtual void input_size(DLMath::Shape3d input_size);
+    [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const;
 
     /**
-     * \brief Getter of input_size class field.
+     * \brief Setter of input_shape class field.
+     * \param input_shape DLMath::Shape3d Shape param used to take the size and
+     * assign it to input_shape.
+     */
+    virtual void input_shape(DLMath::Shape3d input_shape);
+
+    /**
+     * \brief Getter of output_shape class field.
+     * \return The size of the layer output.
+     */
+    [[nodiscard]] virtual const DLMath::Shape3d& output_shape() const;
+
+    /**
+     * \brief Getter of input_shape class field.
+     * \return The size of the layer input.
+     */
+    [[nodiscard]] SizeType input_size() const;
+
+    /**
+     * \brief Getter of output_shape class field.
      * \return The size of the layer output.
      */
     [[nodiscard]] SizeType output_size() const;
+
+    /**
+     * \brief Save the layer infos to disk.
+     * \param out Json& out Json to write.
+     */
+    virtual void dump(Json& out) const;
+
+    /**
+     * \brief Load the layer infos from disk.
+     * \param in const Json& Json to read.
+     */
+    virtual void load(Json& in);
 
 protected:
     /**
@@ -237,8 +280,8 @@ protected:
     std::string _name;                     ///< Layer name (for debug).
     std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
-    SizeType _input_size;                  ///< Layer input size.
-    SizeType _output_size;                 ///< Layer output size.
+    DLMath::Shape3d _input_shape;          ///< Layer input shape.
+    DLMath::Shape3d _output_shape;         ///< Layer output shape.
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss

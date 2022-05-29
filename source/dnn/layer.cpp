@@ -31,15 +31,27 @@
 namespace EdgeLearning {
 
 const std::string Layer::TYPE = "None";
+const std::map<Layer::DumpFields, std::string> Layer::dump_fields = {
+    { DumpFields::TYPE,          "type"          },
+    { DumpFields::NAME,          "name"          },
+    { DumpFields::INPUT_SIZE,    "input_shape"    },
+    { DumpFields::OUTPUT_SIZE,   "output_size"   },
+    { DumpFields::WEIGHTS,       "weights"       },
+    { DumpFields::BIASES,        "biases"        },
+    { DumpFields::ANTECEDENTS,   "antecedents"   },
+    { DumpFields::SUBSEQUENTS,   "subsequents"   },
+    { DumpFields::OTHERS,        "others"        }
+};
 
-Layer::Layer(Model& model, SizeType input_size, SizeType output_size,
+Layer::Layer(Model& model,
+             DLMath::Shape3d input_shape, DLMath::Shape3d output_shape,
              std::string name, std::string prefix_name)
     : _model(model)
     , _name{std::move(name)}
     , _antecedents{}
     , _subsequents{}
-    , _input_size{input_size}
-    , _output_size{output_size}
+    , _input_shape{input_shape}
+    , _output_shape{output_shape}
     , _last_input{}
 { 
     if (_name.empty())
@@ -54,8 +66,8 @@ Layer::Layer(const Layer& obj)
     , _name{obj._name}
     , _antecedents{obj._antecedents}
     , _subsequents{obj._subsequents}
-    , _input_size{obj._input_size}
-    , _output_size{obj._output_size}
+    , _input_shape{obj._input_shape}
+    , _output_shape{obj._output_shape}
     , _last_input{obj._last_input}
 {
 
@@ -68,8 +80,8 @@ Layer& Layer::operator=(const Layer& obj)
     _name = obj._name;
     _antecedents = obj._antecedents;
     _subsequents = obj._subsequents;
-    _input_size = obj._input_size;
-    _output_size = obj._output_size;
+    _input_shape = obj._input_shape;
+    _output_shape = obj._output_shape;
     _last_input = obj._last_input;
     return *this;
 }
@@ -103,32 +115,102 @@ const std::vector<NumType>& Layer::backward(
     return gradients;
 }
 
-SizeType Layer::input_size() const
+const DLMath::Shape3d & Layer::input_shape() const
 {
-    return _input_size;
+    return _input_shape;
 }
 
-void Layer::input_size(DLMath::Shape3d input_size)
+void Layer::input_shape(DLMath::Shape3d input_shape)
 {
-    _input_size = input_size.size();
+    _input_shape = input_shape;
+}
+
+const DLMath::Shape3d& Layer::output_shape() const
+{
+    return _output_shape;
+}
+
+SizeType Layer::input_size() const
+{
+    return _input_shape.size();
 }
 
 SizeType Layer::output_size() const
 {
-    return _output_size;
+    return _output_shape.size();
+}
+
+void Layer::dump(Json& out) const
+{
+    out[dump_fields.at(DumpFields::TYPE)] = type();
+    out[dump_fields.at(DumpFields::NAME)] = _name;
+
+    Json antecedent_names;
+    for (const auto& antecedent : _antecedents)
+    {
+        antecedent_names.append(antecedent->name());
+    }
+    out[dump_fields.at(DumpFields::ANTECEDENTS)] = antecedent_names;
+
+    Json subsequent_names;
+    for (const auto& subsequent : _subsequents)
+    {
+        subsequent_names.append(subsequent->name());
+    }
+    out[dump_fields.at(DumpFields::SUBSEQUENTS)] = subsequent_names;
+}
+
+void Layer::load(Json& in)
+{
+    auto t = in[dump_fields.at(DumpFields::TYPE)];
+    if (t != type())
+    {
+        throw std::runtime_error(
+            "The current layer of type " + type() +
+            " do not correspond with loaded type " + std::string(t));
+    }
+
+    _name = std::string(in[dump_fields.at(DumpFields::NAME)]);
+    auto antecedent_layer_names = std::vector<std::string>(
+        in[dump_fields.at(DumpFields::ANTECEDENTS)]);
+    for (const auto& antecedent : _antecedents)
+    {
+        if (std::find(antecedent_layer_names.begin(),
+                      antecedent_layer_names.end(),
+                      antecedent->name()) == antecedent_layer_names.end())
+        {
+            throw std::runtime_error(
+                "The loaded json " + _name + " of type " + type() +
+                " do not have antecedent layer " + antecedent->name());
+        }
+    }
+
+    auto subsequent_layer_names = std::vector<std::string>(
+        in[dump_fields.at(DumpFields::SUBSEQUENTS)]);
+    for (const auto& subsequent : _subsequents)
+    {
+        if (std::find(subsequent_layer_names.begin(),
+                      subsequent_layer_names.end(),
+                      subsequent->name()) == subsequent_layer_names.end())
+        {
+            throw std::runtime_error(
+                "The loaded json " + _name + " of type " + type() +
+                " do not have subsequent layer " + subsequent->name());
+        }
+    }
 }
 
 void Layer::_check_training_input(const std::vector<NumType>& inputs)
 {
-    if (_input_size == 0)
+    if (input_size() == 0)
     {
-        input_size(inputs.size());
+        input_shape(inputs.size());
     }
-    else if (_input_size != inputs.size())
+    else if (input_size() != inputs.size())
     {
         throw std::runtime_error(
             "Training forward input catch an unpredicted input size: "
-            + std::to_string(_input_size)
+            + std::to_string(input_size())
             + " != " + std::to_string(inputs.size()));
     }
 }
