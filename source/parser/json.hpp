@@ -206,6 +206,15 @@ public:
     JsonLeaf(int val)
         : JsonLeaf(std::to_string(val), Type::INT)
     { }
+    JsonLeaf(unsigned int val)
+        : JsonLeaf(std::to_string(val), Type::INT)
+    { }
+    JsonLeaf(long val)
+        : JsonLeaf(std::to_string(val), Type::INT)
+    { }
+    JsonLeaf(unsigned long val)
+        : JsonLeaf(std::to_string(val), Type::INT)
+    { }
 
     /**
      * \brief Construct a JsonLeaf with a double.
@@ -314,10 +323,10 @@ public:
      * \brief Convert the value of the JsonLeaf in int.
      * \return T The converted int value.
      */
-    operator int() const
-    {
-        return as<int>();
-    }
+    operator int() const { return as<int>(); }
+    operator unsigned() const { return as<unsigned>(); }
+    operator long() const { return as<long>(); }
+    operator unsigned long() const { return as<unsigned long>(); }
 
     /**
      * \brief Convert the value of the JsonLeaf in float.
@@ -384,6 +393,15 @@ public:
      * \param value int The JsonLeaf initialized with an integer.
      */
     JsonItem(int value)
+        : JsonItem(JsonLeaf(value))
+    { }
+    JsonItem(unsigned int value)
+        : JsonItem(JsonLeaf(value))
+    { }
+    JsonItem(long value)
+        : JsonItem(JsonLeaf(value))
+    { }
+    JsonItem(unsigned long value)
         : JsonItem(JsonLeaf(value))
     { }
 
@@ -475,6 +493,9 @@ public:
      * \return JsonItem& The assigned object.
      */
     JsonItem& operator=(const int& obj);
+    JsonItem& operator=(const unsigned int& obj);
+    JsonItem& operator=(const long& obj);
+    JsonItem& operator=(const unsigned long& obj);
 
     /**
      * \brief Copy assignment overloading with a double value.
@@ -1151,6 +1172,18 @@ inline JsonItem& JsonItem::operator=(const JsonLeaf& obj)
     return *this;
 }
 inline JsonItem& JsonItem::operator=(const int& obj)
+{
+    return operator=(JsonLeaf(obj));
+}
+inline JsonItem& JsonItem::operator=(const unsigned int& obj)
+{
+    return operator=(JsonLeaf(obj));
+}
+inline JsonItem& JsonItem::operator=(const long& obj)
+{
+    return operator=(JsonLeaf(obj));
+}
+inline JsonItem& JsonItem::operator=(const unsigned long& obj)
 {
     return operator=(JsonLeaf(obj));
 }

@@ -98,6 +98,10 @@ private:
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl), "true");
 
         JsonLeaf i = JsonLeaf(int(10));
+        EDGE_LEARNING_TEST_EQUAL(static_cast<unsigned>(JsonLeaf(10U)), 10U);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<long>(JsonLeaf(10L)), 10L);
+        EDGE_LEARNING_TEST_EQUAL(
+            static_cast<unsigned long>(JsonLeaf(10UL)), 10UL);
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(), JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(i.value(), "10");
         EDGE_LEARNING_TEST_EQUAL(i.type(), Type::INT);
@@ -343,6 +347,30 @@ private:
         ji = 10;
         EDGE_LEARNING_TEST_PRINT(ji);
         EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10);
+        EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
+                                 JsonObject::JsonType::NONE);
+        EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
+                                 JsonObject::JsonType::LEAF);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
+        ji = 10U;
+        EDGE_LEARNING_TEST_PRINT(ji);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10U);
+        EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
+                                 JsonObject::JsonType::NONE);
+        EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
+                                 JsonObject::JsonType::LEAF);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
+        ji = 10L;
+        EDGE_LEARNING_TEST_PRINT(ji);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10L);
+        EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
+                                 JsonObject::JsonType::NONE);
+        EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
+                                 JsonObject::JsonType::LEAF);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
+        ji = 10UL;
+        EDGE_LEARNING_TEST_PRINT(ji);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10UL);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
                                  JsonObject::JsonType::NONE);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
