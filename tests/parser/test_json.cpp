@@ -60,6 +60,9 @@ private:
             dynamic_cast<const JsonObject&>(j_dict), jo_dict);
         JsonObject j_obj;
         EDGE_LEARNING_TEST_NOT_EQUAL(j_obj, j_obj);
+        JsonObject j_copy(jo_dict);
+        EDGE_LEARNING_TEST_NOT_EQUAL(j_copy, jo_dict);
+        EDGE_LEARNING_TEST_EQUAL(j_copy.json_type(), jo_dict.json_type());
     }
 
     void test_json_leaf() {
@@ -70,7 +73,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(jl.as<int>(), 10);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(jl), 10);
         EDGE_LEARNING_TEST_EQUAL(jl.as<float>(), 10.0);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(jl), 10);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(jl), 10);
         EDGE_LEARNING_TEST_EQUAL(jl.as<bool>(), false);
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(jl), false);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl), std::string("10"));
@@ -81,7 +84,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(jl.as<int>(), 1);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(jl), 1);
         EDGE_LEARNING_TEST_EQUAL(jl.as<float>(), 1.0);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(jl), 1.0);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(jl), 1.0);
         EDGE_LEARNING_TEST_EQUAL(jl.as<bool>(), false);
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(jl), false);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl), "1.0");
@@ -92,7 +95,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(jl.as<int>(), 0);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(jl), 0);
         EDGE_LEARNING_TEST_EQUAL(jl.as<float>(), 0.0);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(jl), 0.0);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(jl), 0.0);
         EDGE_LEARNING_TEST_EQUAL(jl.as<bool>(), true);
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(jl), true);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl), "true");
@@ -108,7 +111,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(i.as<int>(), 10);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(i), 10);
         EDGE_LEARNING_TEST_EQUAL(i.as<float>(), 10.0);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(i), 10.0);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(i), 10.0);
         EDGE_LEARNING_TEST_EQUAL(i.as<bool>(), false);
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(i), false);
         JsonLeaf f = JsonLeaf(float(1.0));
@@ -119,7 +122,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(f.as<int>(), 1);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(f), 1);
         EDGE_LEARNING_TEST_EQUAL(f.as<float>(), 1.0);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(f), 1.0);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(f), 1.0);
         EDGE_LEARNING_TEST_EQUAL(f.as<bool>(), false);
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(f), false);
         JsonLeaf b = JsonLeaf(true);
@@ -129,7 +132,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(b.as<int>(), 0);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(b), 0);
         EDGE_LEARNING_TEST_EQUAL(b.as<float>(), 0.0);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(b), 0.0);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(b), 0.0);
         EDGE_LEARNING_TEST_EQUAL(b.as<bool>(), true);
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(b), true);
 
@@ -159,7 +162,8 @@ private:
         EDGE_LEARNING_TEST_THROWS(jl_empty[10], std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl_empty), "[]");
 
-        JsonList jl = JsonList({10, 10.0, "string", true});
+        JsonList jl = JsonList(
+            std::vector<JsonItem>({10, 10.0, "string", true}));
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(),
                                  JsonObject::JsonType::LIST);
         EDGE_LEARNING_TEST_PRINT(jl);
@@ -179,7 +183,89 @@ private:
                                      static_cast<std::string>(jl[i]));
         }
 
-        JsonList jl_int = JsonList({10, 11, 12, 13});
+        jl = JsonList(std::vector<int>({10, 11, 12, 13}));
+        EDGE_LEARNING_TEST_EQUAL(jl.json_type(),
+                                 JsonObject::JsonType::LIST);
+        EDGE_LEARNING_TEST_PRINT(jl);
+        EDGE_LEARNING_TEST_PRINT(jl[0]);
+        EDGE_LEARNING_TEST_ASSERT(!jl.empty());
+        EDGE_LEARNING_TEST_EQUAL(jl.size(), 4);
+        EDGE_LEARNING_TEST_FAIL(jl[10]);
+        EDGE_LEARNING_TEST_THROWS(jl[10], std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl),
+                                 "[10,11,12,13]");
+        EDGE_LEARNING_TEST_EQUAL(
+            static_cast<std::vector<std::string>>(jl).size(), jl.size());
+        jl_vec = static_cast<std::vector<std::string>>(jl);
+        for (std::size_t i = 0; i < jl_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(jl_vec[i],
+                                     static_cast<std::string>(jl[i]));
+        }
+        jl = JsonList(std::vector<unsigned int>({10U, 11U, 12U, 13U}));
+        EDGE_LEARNING_TEST_EQUAL(jl.json_type(),
+                                 JsonObject::JsonType::LIST);
+        EDGE_LEARNING_TEST_ASSERT(!jl.empty());
+        EDGE_LEARNING_TEST_EQUAL(jl.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl),
+                                 "[10,11,12,13]");
+        jl = JsonList(std::vector<long>({10L, 11L, 12L, 13L}));
+        EDGE_LEARNING_TEST_EQUAL(jl.json_type(),
+                                 JsonObject::JsonType::LIST);
+        EDGE_LEARNING_TEST_ASSERT(!jl.empty());
+        EDGE_LEARNING_TEST_EQUAL(jl.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl),
+                                 "[10,11,12,13]");
+        jl = JsonList(std::vector<unsigned long>({10UL, 11UL, 12UL, 13UL}));
+        EDGE_LEARNING_TEST_EQUAL(jl.json_type(),
+                                 JsonObject::JsonType::LIST);
+        EDGE_LEARNING_TEST_ASSERT(!jl.empty());
+        EDGE_LEARNING_TEST_EQUAL(jl.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl),
+                                 "[10,11,12,13]");
+
+        jl = JsonList(std::vector<double>({10.0, 11.0, 12.5, 13.5}));
+        EDGE_LEARNING_TEST_EQUAL(jl.json_type(),
+                                 JsonObject::JsonType::LIST);
+        EDGE_LEARNING_TEST_PRINT(jl);
+        EDGE_LEARNING_TEST_PRINT(jl[0]);
+        EDGE_LEARNING_TEST_ASSERT(!jl.empty());
+        EDGE_LEARNING_TEST_EQUAL(jl.size(), 4);
+        EDGE_LEARNING_TEST_FAIL(jl[10]);
+        EDGE_LEARNING_TEST_THROWS(jl[10], std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl),
+                                 "[10.000000,11.000000,12.500000,13.500000]");
+        EDGE_LEARNING_TEST_EQUAL(
+            static_cast<std::vector<std::string>>(jl).size(), jl.size());
+        jl_vec = static_cast<std::vector<std::string>>(jl);
+        for (std::size_t i = 0; i < jl_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(jl_vec[i],
+                                     static_cast<std::string>(jl[i]));
+        }
+
+        jl = JsonList(std::vector<bool>({true, false, true, true}));
+        EDGE_LEARNING_TEST_EQUAL(jl.json_type(),
+                                 JsonObject::JsonType::LIST);
+        EDGE_LEARNING_TEST_PRINT(jl);
+        EDGE_LEARNING_TEST_PRINT(jl[0]);
+        EDGE_LEARNING_TEST_ASSERT(!jl.empty());
+        EDGE_LEARNING_TEST_EQUAL(jl.size(), 4);
+        EDGE_LEARNING_TEST_FAIL(jl[10]);
+        EDGE_LEARNING_TEST_THROWS(jl[10], std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jl),
+                                 "[true,false,true,true]");
+        EDGE_LEARNING_TEST_EQUAL(
+            static_cast<std::vector<std::string>>(jl).size(), jl.size());
+        jl_vec = static_cast<std::vector<std::string>>(jl);
+        for (std::size_t i = 0; i < jl_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(jl_vec[i],
+                                     static_cast<std::string>(jl[i]));
+        }
+
+        JsonList jl_int = JsonList(
+            std::vector<JsonItem>({10, 11, 12, 13}));
         auto jl_vec_int = static_cast<std::vector<int>>(jl_int);
         for (std::size_t i = 0; i < jl_vec_int.size(); ++i)
         {
@@ -187,8 +273,10 @@ private:
                                      static_cast<int>(jl_int[i]));
         }
 
-        JsonList jl1 = JsonList({10, 10.0, "string", true});
-        JsonList jl2 = JsonList({10, 10.0, "string", true, "1_more"});
+        JsonList jl1 = JsonList(
+            std::vector<JsonItem>({10, 10.0, "string", true}));
+        JsonList jl2 = JsonList(
+            std::vector<JsonItem>({10, 10.0, "string", true, "1_more"}));
         EDGE_LEARNING_TEST_ASSERT(jl1 != jl2);
         EDGE_LEARNING_TEST_TRY(jl1.append("1_more"));
         EDGE_LEARNING_TEST_ASSERT(jl1 == jl2);
@@ -204,7 +292,8 @@ private:
         EDGE_LEARNING_TEST_THROWS(jd_empty.at("key"), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd_empty), "{}");
 
-        JsonDict jd = JsonDict({{"a", 0}, {"b", true}});
+        JsonDict jd = JsonDict(
+            std::map<std::string, JsonItem>({{"a", 0}, {"b", true}}));
         EDGE_LEARNING_TEST_EQUAL(jd.json_type(),
                                  JsonObject::JsonType::DICT);
         EDGE_LEARNING_TEST_PRINT(jd);
@@ -224,7 +313,97 @@ private:
                                      e.second);
         }
 
-        JsonDict jd_int = JsonDict({{"a", 0}, {"b", 1}});
+        jd = JsonDict(std::map<std::string, int>({{"a", 1}, {"b", 2}}));
+        EDGE_LEARNING_TEST_EQUAL(jd.json_type(),
+                                 JsonObject::JsonType::DICT);
+        EDGE_LEARNING_TEST_PRINT(jd);
+        EDGE_LEARNING_TEST_PRINT(jd["a"]);
+        EDGE_LEARNING_TEST_EQUAL(jd.at("a"), jd["a"]);
+        EDGE_LEARNING_TEST_ASSERT(!jd.empty());
+        EDGE_LEARNING_TEST_EQUAL(jd.size(), 2);
+        EDGE_LEARNING_TEST_FAIL(jd.at("key"));
+        EDGE_LEARNING_TEST_THROWS(jd.at("key"), std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd),
+                                 "{\"a\":1,\"b\":2}");
+        jd_map = static_cast<std::map<std::string, std::string>>(jd);
+        EDGE_LEARNING_TEST_EQUAL(jd_map.size(), jd.size());
+        for (const auto& e: jd_map)
+        {
+            EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd[e.first]),
+                                     e.second);
+        }
+        jd = JsonDict(
+            std::map<std::string, unsigned int>({{"a", 1U}, {"b", 2U}}));
+        EDGE_LEARNING_TEST_EQUAL(jd.json_type(),
+                                 JsonObject::JsonType::DICT);
+        EDGE_LEARNING_TEST_EQUAL(jd.at("a"), jd["a"]);
+        EDGE_LEARNING_TEST_ASSERT(!jd.empty());
+        EDGE_LEARNING_TEST_EQUAL(jd.size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd),
+                                 "{\"a\":1,\"b\":2}");
+        jd = JsonDict(
+            std::map<std::string, long>({{"a", 1L}, {"b", 2L}}));
+        EDGE_LEARNING_TEST_EQUAL(jd.json_type(),
+                                 JsonObject::JsonType::DICT);
+        EDGE_LEARNING_TEST_EQUAL(jd.at("a"), jd["a"]);
+        EDGE_LEARNING_TEST_ASSERT(!jd.empty());
+        EDGE_LEARNING_TEST_EQUAL(jd.size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd),
+                                 "{\"a\":1,\"b\":2}");
+        jd = JsonDict(
+            std::map<std::string, unsigned long>({{"a", 1UL}, {"b", 2UL}}));
+        EDGE_LEARNING_TEST_EQUAL(jd.json_type(),
+                                 JsonObject::JsonType::DICT);
+        EDGE_LEARNING_TEST_EQUAL(jd.at("a"), jd["a"]);
+        EDGE_LEARNING_TEST_ASSERT(!jd.empty());
+        EDGE_LEARNING_TEST_EQUAL(jd.size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd),
+                                 "{\"a\":1,\"b\":2}");
+
+        jd = JsonDict(
+            std::map<std::string, double>({{"a", 1.0}, {"b", 2.5}}));
+        EDGE_LEARNING_TEST_EQUAL(jd.json_type(),
+                                 JsonObject::JsonType::DICT);
+        EDGE_LEARNING_TEST_PRINT(jd);
+        EDGE_LEARNING_TEST_PRINT(jd["a"]);
+        EDGE_LEARNING_TEST_EQUAL(jd.at("a"), jd["a"]);
+        EDGE_LEARNING_TEST_ASSERT(!jd.empty());
+        EDGE_LEARNING_TEST_EQUAL(jd.size(), 2);
+        EDGE_LEARNING_TEST_FAIL(jd.at("key"));
+        EDGE_LEARNING_TEST_THROWS(jd.at("key"), std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd),
+                                 "{\"a\":1.000000,\"b\":2.500000}");
+        jd_map = static_cast<std::map<std::string, std::string>>(jd);
+        EDGE_LEARNING_TEST_EQUAL(jd_map.size(), jd.size());
+        for (const auto& e: jd_map)
+        {
+            EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd[e.first]),
+                                     e.second);
+        }
+
+        jd = JsonDict(
+            std::map<std::string, bool>({{"a", true}, {"b", false}}));
+        EDGE_LEARNING_TEST_EQUAL(jd.json_type(),
+                                 JsonObject::JsonType::DICT);
+        EDGE_LEARNING_TEST_PRINT(jd);
+        EDGE_LEARNING_TEST_PRINT(jd["a"]);
+        EDGE_LEARNING_TEST_EQUAL(jd.at("a"), jd["a"]);
+        EDGE_LEARNING_TEST_ASSERT(!jd.empty());
+        EDGE_LEARNING_TEST_EQUAL(jd.size(), 2);
+        EDGE_LEARNING_TEST_FAIL(jd.at("key"));
+        EDGE_LEARNING_TEST_THROWS(jd.at("key"), std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd),
+                                 "{\"a\":true,\"b\":false}");
+        jd_map = static_cast<std::map<std::string, std::string>>(jd);
+        EDGE_LEARNING_TEST_EQUAL(jd_map.size(), jd.size());
+        for (const auto& e: jd_map)
+        {
+            EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(jd[e.first]),
+                                     e.second);
+        }
+
+        JsonDict jd_int = JsonDict(
+            std::map<std::string, JsonItem>({{"a", 0}, {"b", 1}}));
         auto jd_map_int = static_cast<std::map<std::string, int>>(jd_int);
         for (const auto& e: jd_map_int)
         {
@@ -232,8 +411,10 @@ private:
                                      e.second);
         }
 
-        JsonDict jd1 = JsonDict({{"a", 0}, {"b", true}});
-        JsonDict jd2 = JsonDict({{"a", 0}, {"b", true}, {"c", "1_more"}});
+        JsonDict jd1 = JsonDict(
+            std::map<std::string, JsonItem>({{"a", 0}, {"b", true}}));
+        JsonDict jd2 = JsonDict(
+            std::map<std::string, JsonItem>({{"a", 0}, {"b", true}, {"c", "1_more"}}));
         EDGE_LEARNING_TEST_ASSERT(jd1 != jd2);
         EDGE_LEARNING_TEST_TRY(jd1["c"] = "1_more");
         EDGE_LEARNING_TEST_ASSERT(jd1 == jd2);
@@ -261,8 +442,8 @@ private:
         EDGE_LEARNING_TEST_FAIL((void) static_cast<int>(ji_empty));
         EDGE_LEARNING_TEST_THROWS((void) static_cast<int>(ji_empty),
                                   std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL((void) static_cast<float>(ji_empty));
-        EDGE_LEARNING_TEST_THROWS((void) static_cast<float>(ji_empty),
+        EDGE_LEARNING_TEST_FAIL((void) static_cast<double>(ji_empty));
+        EDGE_LEARNING_TEST_THROWS((void) static_cast<double>(ji_empty),
                                   std::runtime_error);
         EDGE_LEARNING_TEST_FAIL((void) static_cast<bool>(ji_empty));
         EDGE_LEARNING_TEST_THROWS((void) static_cast<bool>(ji_empty),
@@ -283,7 +464,7 @@ private:
         EDGE_LEARNING_TEST_PRINT(ji);
         EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
@@ -295,7 +476,7 @@ private:
         EDGE_LEARNING_TEST_THROWS(ji["key"], std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(ji_empty.size(), 0);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(ji), 10);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(ji), 10.0);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(ji), 10.0);
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(ji), false);
         EDGE_LEARNING_TEST_FAIL(
             (void) static_cast<std::vector<std::string>>(ji));
@@ -309,15 +490,15 @@ private:
         EDGE_LEARNING_TEST_PRINT(ji);
         EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
         ji = JsonItem(1.0);
         EDGE_LEARNING_TEST_PRINT(ji);
-        EDGE_LEARNING_TEST_ASSERT(static_cast<float>(ji) == 1.0);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<double>(ji) == 1.0);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "1.000000");
@@ -325,7 +506,7 @@ private:
         EDGE_LEARNING_TEST_PRINT(ji);
         EDGE_LEARNING_TEST_ASSERT(static_cast<bool>(ji) == false);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "false");
@@ -333,7 +514,7 @@ private:
         EDGE_LEARNING_TEST_PRINT(ji);
         EDGE_LEARNING_TEST_ASSERT(static_cast<std::string>(ji) == "stringtest");
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         ji = JsonItem(std::string("stringtest"));
@@ -341,46 +522,46 @@ private:
         EDGE_LEARNING_TEST_ASSERT(
             static_cast<std::string>(ji) == std::string("stringtest"));
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         ji = 10;
         EDGE_LEARNING_TEST_PRINT(ji);
         EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
         ji = 10U;
         EDGE_LEARNING_TEST_PRINT(ji);
-        EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10U);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<unsigned int>(ji) == 10U);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
         ji = 10L;
         EDGE_LEARNING_TEST_PRINT(ji);
-        EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10L);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<long>(ji) == 10L);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
         ji = 10UL;
         EDGE_LEARNING_TEST_PRINT(ji);
-        EDGE_LEARNING_TEST_ASSERT(static_cast<int>(ji) == 10UL);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<unsigned long>(ji) == 10UL);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "10");
         ji = 1.0;
         EDGE_LEARNING_TEST_PRINT(ji);
-        EDGE_LEARNING_TEST_ASSERT(static_cast<float>(ji) == 1.0);
+        EDGE_LEARNING_TEST_ASSERT(static_cast<double>(ji) == 1.0);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "1.000000");
@@ -388,7 +569,7 @@ private:
         EDGE_LEARNING_TEST_PRINT(ji);
         EDGE_LEARNING_TEST_ASSERT(static_cast<bool>(ji) == false);
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji), "false");
@@ -397,7 +578,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(
             static_cast<std::string>(ji) == "stringtest");
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         ji = std::string("stringtest");
@@ -405,7 +586,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(
             static_cast<std::string>(ji) == std::string("stringtest"));
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LEAF);
         ji = JsonItem({10, "test1", false, "test1", 1.0});
@@ -413,7 +594,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(
             ji == JsonItem({10, "test1", false, "test1", 1.0}));
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LIST);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LIST);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji),
@@ -421,15 +602,15 @@ private:
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(ji[0]), 10);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji[1]), "test1");
         EDGE_LEARNING_TEST_EQUAL(static_cast<bool>(ji[2]), false);
-        EDGE_LEARNING_TEST_EQUAL(static_cast<float>(ji[4]), 1.0);
+        EDGE_LEARNING_TEST_EQUAL(static_cast<double>(ji[4]), 1.0);
         EDGE_LEARNING_TEST_FAIL(ji["key"]);
         EDGE_LEARNING_TEST_THROWS(ji["key"], std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(ji.size(), 5);
         EDGE_LEARNING_TEST_FAIL((void) static_cast<int>(ji));
         EDGE_LEARNING_TEST_THROWS((void) static_cast<int>(ji),
                                   std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL((void) static_cast<float>(ji));
-        EDGE_LEARNING_TEST_THROWS((void) static_cast<float>(ji),
+        EDGE_LEARNING_TEST_FAIL((void) static_cast<double>(ji));
+        EDGE_LEARNING_TEST_THROWS((void) static_cast<double>(ji),
                                   std::runtime_error);
         EDGE_LEARNING_TEST_FAIL((void) static_cast<bool>(ji));
         EDGE_LEARNING_TEST_THROWS((void) static_cast<bool>(ji),
@@ -452,7 +633,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(
             ji == JsonItem({10, "test2", false, "test2", 1.0}));
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::LIST);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::LIST);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji),
@@ -462,7 +643,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(
             ji == JsonItem({{"test1a", 10}, {"test1b", false}}));
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::DICT);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::DICT);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji),
@@ -477,8 +658,8 @@ private:
         EDGE_LEARNING_TEST_FAIL((void) static_cast<int>(ji));
         EDGE_LEARNING_TEST_THROWS((void) static_cast<int>(ji),
                                   std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL((void) static_cast<float>(ji));
-        EDGE_LEARNING_TEST_THROWS((void) static_cast<float>(ji),
+        EDGE_LEARNING_TEST_FAIL((void) static_cast<double>(ji));
+        EDGE_LEARNING_TEST_THROWS((void) static_cast<double>(ji),
                                   std::runtime_error);
         EDGE_LEARNING_TEST_FAIL((void) static_cast<bool>(ji));
         EDGE_LEARNING_TEST_THROWS((void) static_cast<bool>(ji),
@@ -502,7 +683,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(
             ji == JsonItem({{"test2a", 10}, {"test2b", false}}));
         EDGE_LEARNING_TEST_EQUAL(ji.json_type(),
-                                 JsonObject::JsonType::NONE);
+                                 JsonObject::JsonType::DICT);
         EDGE_LEARNING_TEST_EQUAL(ji.value().json_type(),
                                  JsonObject::JsonType::DICT);
         EDGE_LEARNING_TEST_EQUAL(static_cast<std::string>(ji),
@@ -523,8 +704,8 @@ private:
         EDGE_LEARNING_TEST_FAIL((void) static_cast<bool>(ji_leaf));
         EDGE_LEARNING_TEST_THROWS((void) static_cast<bool>(ji_leaf),
                                   std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL((void) static_cast<float>(ji_leaf));
-        EDGE_LEARNING_TEST_THROWS((void) static_cast<float>(ji_leaf),
+        EDGE_LEARNING_TEST_FAIL((void) static_cast<double>(ji_leaf));
+        EDGE_LEARNING_TEST_THROWS((void) static_cast<double>(ji_leaf),
                                   std::runtime_error);
         JsonItem ji_list(jo_list);
         EDGE_LEARNING_TEST_ASSERT(static_cast<std::string>(ji_list).empty());
@@ -565,6 +746,10 @@ private:
         EDGE_LEARNING_TEST_FAIL(j_list["fail_test"] = -1);
         EDGE_LEARNING_TEST_THROWS(j_list["fail_test"] = -1,
                                   std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(j_list[0].as<int>(), 10);
+        EDGE_LEARNING_TEST_EQUAL(j_list[1].as<bool>(), true);
+        EDGE_LEARNING_TEST_EQUAL(j_list[2].as<std::string>(), "test");
+        EDGE_LEARNING_TEST_EQUAL(j_list[3].as<float>(), 1.0);
 
         Json j_dict;
         EDGE_LEARNING_TEST_EQUAL(j_dict.json_type(),
@@ -579,6 +764,8 @@ private:
         EDGE_LEARNING_TEST_FAIL(j_dict.append({"fail_test"}));
         EDGE_LEARNING_TEST_THROWS(j_dict.append({"fail_test"}),
                                   std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(j_dict[0] = -1);
+        EDGE_LEARNING_TEST_THROWS(j_dict[0] = -1, std::runtime_error);
 
         Json j_comb1 = j_list;
         EDGE_LEARNING_TEST_EQUAL(j_comb1.json_type(),
@@ -599,6 +786,15 @@ private:
         EDGE_LEARNING_TEST_PRINT(j_comb2);
         EDGE_LEARNING_TEST_TRY(j_comb2["j_comb"] = j_comb2);
         EDGE_LEARNING_TEST_PRINT(j_comb2);
+
+        Json j_item(j_list[0]);
+        EDGE_LEARNING_TEST_EQUAL(j_item.json_type(),
+                                 JsonObject::JsonType::LEAF);
+        EDGE_LEARNING_TEST_PRINT(j_item);
+        EDGE_LEARNING_TEST_EQUAL(j_item, Json(10));
+        EDGE_LEARNING_TEST_EQUAL(JsonItem(j_item), j_list[0]);
+        EDGE_LEARNING_TEST_EQUAL(std::string(j_item),
+                                 std::string(j_list[0]));
     }
 
     void test_stream()
@@ -644,7 +840,7 @@ private:
 
         JsonList jlist_in;
 
-        JsonList jlist_out({"string", 10, 1.0, true});
+        JsonList jlist_out(std::vector<JsonItem>({"string", 10, 1.0, true}));
         ofs = std::ofstream("tmp.json", std::ofstream::trunc);
         EDGE_LEARNING_TEST_TRY(ofs << jlist_out);
         ofs.close();
@@ -659,7 +855,8 @@ private:
 
         JsonDict jdict_in;
 
-        JsonDict jdict_out({{"a", 10}, {"b", "string"}, {"c", true}});
+        JsonDict jdict_out(
+            std::map<std::string, JsonItem>({{"a", 10}, {"b", "string"}, {"c", true}}));
         ofs = std::ofstream("tmp.json", std::ofstream::trunc);
         EDGE_LEARNING_TEST_TRY(ofs << jdict_out);
         ofs.close();
