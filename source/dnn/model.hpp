@@ -237,7 +237,7 @@ public:
      * \brief Save the model weights to disk.
      * \param out Out file stream.
      */
-    void save(std::ofstream& out);
+    void dump(std::ofstream& out);
 
     /**
      * \brief Load the model weights to disk.

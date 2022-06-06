@@ -26,6 +26,7 @@
 
 #include "dlmath.hpp"
 #include "activation.hpp"
+#include "parser/json.hpp"
 
 #include <cstdio>
 #include <cassert>
@@ -206,42 +207,41 @@ NumType Model::avg_loss() const
     return _loss_layer->avg_loss();
 }
 
-void Model::save(std::ofstream& out)
+void Model::dump(std::ofstream& out)
 {
+    Json model;
+    model["name"] = _name;
+
+    Json layers_json;
     for (auto& layer: _layers)
     {
-        SizeType param_count = layer->param_count();
-        for (SizeType i = 0; i < param_count; ++i)
-        {
-            out.write(reinterpret_cast<char const*>(&layer->param(i)),
-                      sizeof(NumType));
-        }
+        Json layer_json;
+        layer->dump(layer_json);
+        layers_json.append(layer_json);
     }
-    SizeType param_count = _loss_layer->param_count();
-    for (SizeType i = 0; i < param_count; ++i)
-    {
-        out.write(reinterpret_cast<char const*>(&_loss_layer->param(i)),
-                  sizeof(NumType));
-    }
+    model["layer"] = layers_json;
+
+    Json loss_layer_json;
+    _loss_layer->dump(loss_layer_json);
+    layers_json.append(loss_layer_json);
+    model["loss_layer"] = loss_layer_json;
+    out << model;
 }
 
 void Model::load(std::ifstream& in)
 {
-    for (auto& layer: _layers)
+    Json model;
+    in >> model;
+
+    _name = model["name"].as<std::string>();
+    for (std::size_t l_i = 0; l_i < _layers.size(); ++l_i)
     {
-        SizeType param_count = layer->param_count();
-        for (SizeType i = 0; i < param_count; ++i)
-        {
-            in.read(reinterpret_cast<char*>(&layer->param(i)),
-                    sizeof(NumType));
-        }
+        auto layer_json = Json(model["layer"][l_i]);
+        _layers[l_i]->load(layer_json);
     }
-    SizeType param_count = _loss_layer->param_count();
-    for (SizeType i = 0; i < param_count; ++i)
-    {
-        in.read(reinterpret_cast<char*>(&_loss_layer->param(i)),
-                sizeof(NumType));
-    }
+
+    auto loss_layer_json = Json(model["loss_layer"][0]);
+    _loss_layer->load(loss_layer_json);
 }
 
 } // namespace EdgeLearning

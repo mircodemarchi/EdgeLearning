@@ -171,7 +171,7 @@ private:
         std::ofstream ofile{
             std::filesystem::path{"classifier.weight"},
             std::ios::binary};
-        EDGE_LEARNING_TEST_TRY(m.save(ofile));
+        EDGE_LEARNING_TEST_TRY(m.dump(ofile));
 
         EDGE_LEARNING_TEST_TRY(m.init());
         std::ifstream ifile{
@@ -226,7 +226,7 @@ private:
         std::ofstream params_file{
             std::filesystem::path{"classifier.weight"}, 
             std::ios::binary};
-        m.save(params_file);
+        m.dump(params_file);
     }
 
     void test_classifier_model_predict() {
@@ -286,7 +286,7 @@ private:
         std::ofstream params_file{
             std::filesystem::path{"regressor.weight"}, 
             std::ios::binary};
-        m.save(params_file);
+        m.dump(params_file);
     }
 
     void test_regressor_model_predict() {
