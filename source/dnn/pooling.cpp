@@ -86,4 +86,31 @@ void PoolingLayer::input_shape(DLMath::Shape3d input_shape)
     _output_activations.resize(output_size());
 }
 
+void PoolingLayer::dump(Json& out) const
+{
+    FeedforwardLayer::dump(out);
+
+    Json others;
+    std::vector<std::size_t> kernel_size = {
+        _kernel_shape.height, _kernel_shape.width
+    };
+    others["kernel_size"] = Json(kernel_size);
+    std::vector<std::size_t> stride = { _stride.height, _stride.width };
+    others["stride"] = Json(stride);
+
+    out[dump_fields.at(DumpFields::OTHERS)] = others;
+}
+
+void PoolingLayer::load(Json& in)
+{
+    FeedforwardLayer::load(in);
+
+    auto kernel_size = std::vector<SizeType>(
+        in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]);
+    _kernel_shape = DLMath::Shape2d(kernel_size.at(0), kernel_size.at(1));
+    auto stride = std::vector<SizeType>(
+        in[dump_fields.at(DumpFields::OTHERS)]["stride"]);
+    _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
+}
+
 } // namespace EdgeLearning

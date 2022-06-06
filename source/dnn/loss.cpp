@@ -83,4 +83,15 @@ void LossLayer::input_shape(DLMath::Shape3d input_shape) {
     _gradients.resize(input_shape.height);
 }
 
+void LossLayer::dump(Json& out) const
+{
+    Layer::dump(out);
+}
+
+void LossLayer::load(Json& in)
+{
+    Layer::load(in);
+    _gradients.resize(input_size());
+}
+
 } // namespace EdgeLearning

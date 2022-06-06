@@ -100,4 +100,22 @@ void DropoutLayer::input_shape(DLMath::Shape3d input_shape)
     _output_activations.resize(output_size());
 }
 
+void DropoutLayer::dump(Json& out) const
+{
+    FeedforwardLayer::dump(out);
+
+    Json others;
+    others["drop_probability"] = _drop_probability;
+    out[dump_fields.at(DumpFields::OTHERS)] = others;
+}
+
+void DropoutLayer::load(Json& in)
+{
+    FeedforwardLayer::load(in);
+
+    _drop_probability = in[dump_fields.at(DumpFields::OTHERS)]
+        ["drop_probability"].as<NumType>();
+    _scale = (_drop_probability == 1.0) ? 1.0 : 1.0 / (1.0 - _drop_probability);
+}
+
 } // namespace EdgeLearning

@@ -282,4 +282,103 @@ void ConvolutionalLayer::input_shape(DLMath::Shape3d input_shape)
     _output_activations.resize(output_size());
 }
 
+void ConvolutionalLayer::dump(Json& out) const
+{
+    FeedforwardLayer::dump(out);
+
+    Json weights;
+    for (SizeType r = 0; r < _kernel_shape.height; ++r)
+    {
+        SizeType r_offset = r * _kernel_shape.width * _input_shape.channels
+                            * _n_filters;
+        Json weights_row;
+        for (SizeType c = 0; c < _kernel_shape.width; ++c)
+        {
+            SizeType c_offset = c * _input_shape.channels * _n_filters;
+            Json weights_col;
+            for (SizeType ch = 0; ch < _input_shape.channels; ++ch)
+            {
+                SizeType ch_offset = ch * _n_filters;
+                Json weights_channel;
+                for (SizeType f = 0; f < _n_filters - 1; ++f)
+                {
+                    weights_channel.append(
+                        _weights[r_offset + c_offset + ch_offset + f]);
+                }
+                weights_col.append(weights_channel);
+            }
+            weights_row.append(weights_col);
+        }
+        weights.append(weights_row);
+    }
+
+    Json biases;
+    for (SizeType i = 0; i < _n_filters; ++i)
+    {
+        biases.append(_biases[i]);
+    }
+
+    Json others;
+    std::vector<std::size_t> kernel_size = {
+        _kernel_shape.height, _kernel_shape.width
+    };
+    others["kernel_size"] = Json(kernel_size);
+    others["n_filters"] = _n_filters;
+    std::vector<std::size_t> stride = { _stride.height, _stride.width };
+    others["stride"] = Json(stride);
+    std::vector<std::size_t> padding = { _padding.height, _padding.width };
+    others["padding"] = Json(padding);
+
+    out[dump_fields.at(DumpFields::WEIGHTS)] = weights;
+    out[dump_fields.at(DumpFields::BIASES)] = biases;
+    out[dump_fields.at(DumpFields::OTHERS)] = others;
+}
+
+void ConvolutionalLayer::load(Json& in)
+{
+    FeedforwardLayer::load(in);
+
+    auto kernel_size = std::vector<SizeType>(
+        in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]);
+    _kernel_shape = DLMath::Shape2d(kernel_size.at(0), kernel_size.at(1));
+    _n_filters = in[dump_fields.at(DumpFields::OTHERS)]["n_filters"]
+        .as<SizeType>();
+    auto stride = std::vector<SizeType>(
+        in[dump_fields.at(DumpFields::OTHERS)]["stride"]);
+    _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
+    auto padding = std::vector<SizeType>(
+        in[dump_fields.at(DumpFields::OTHERS)]["padding"]);
+    _padding = DLMath::Shape2d(padding.at(0), padding.at(1));
+
+    _weights.resize(_kernel_shape.size() * _input_shape.channels * _n_filters);
+    _biases.resize(_n_filters);
+    _weight_gradients.resize(_kernel_shape.size() * _input_shape.channels
+                             * _n_filters);
+    _bias_gradients.resize(_n_filters);
+
+    for (SizeType r = 0; r < _kernel_shape.height; ++r)
+    {
+        SizeType r_offset = r * _kernel_shape.width * _input_shape.channels
+                            * _n_filters;
+        for (SizeType c = 0; c < _kernel_shape.width; ++c)
+        {
+            SizeType c_offset = c * _input_shape.channels * _n_filters;
+            for (SizeType ch = 0; ch < _input_shape.channels; ++ch)
+            {
+                SizeType ch_offset = ch * _n_filters;
+                for (SizeType f = 0; f < _n_filters - 1; ++f)
+                {
+                    _weights[r_offset + c_offset + ch_offset + f] = in[
+                        dump_fields.at(DumpFields::WEIGHTS)][r][c][ch][f];
+                }
+            }
+        }
+    }
+
+    for (SizeType i = 0; i < _n_filters; ++i)
+    {
+        _biases[i] = in[dump_fields.at(DumpFields::BIASES)][i];
+    }
+}
+
 } // namespace EdgeLearning

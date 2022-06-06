@@ -58,6 +58,18 @@ public:
      */
     const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients) override;
+
+    /**
+     * \brief Save the layer infos to disk.
+     * \param out Json& out Json to write.
+     */
+    void dump(Json& out) const override;
+
+    /**
+     * \brief Load the layer infos from disk.
+     * \param in const Json& Json to read.
+     */
+    void load(Json& in) override;
     
 private:
     /// \brief Tollerange to ensure that the prediction produced is correct.

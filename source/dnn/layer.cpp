@@ -144,6 +144,18 @@ void Layer::dump(Json& out) const
 {
     out[dump_fields.at(DumpFields::TYPE)] = type();
     out[dump_fields.at(DumpFields::NAME)] = _name;
+    std::vector<SizeType> input_size = {
+        _input_shape.height,
+        _input_shape.width,
+        _input_shape.channels
+    };
+    out[dump_fields.at(DumpFields::INPUT_SIZE)] = Json(input_size);
+    std::vector<SizeType> output_size = {
+        _output_shape.height,
+        _output_shape.width,
+        _output_shape.channels
+    };
+    out[dump_fields.at(DumpFields::OUTPUT_SIZE)] = Json(output_size);
 
     Json antecedent_names;
     for (const auto& antecedent : _antecedents)
@@ -171,6 +183,17 @@ void Layer::load(Json& in)
     }
 
     _name = std::string(in[dump_fields.at(DumpFields::NAME)]);
+    _input_shape = DLMath::Shape3d(
+        in[dump_fields.at(DumpFields::INPUT_SIZE)][0].as<SizeType>(),
+        in[dump_fields.at(DumpFields::INPUT_SIZE)][1].as<SizeType>(),
+        in[dump_fields.at(DumpFields::INPUT_SIZE)][2].as<SizeType>()
+    );
+    _output_shape = DLMath::Shape3d(
+        in[dump_fields.at(DumpFields::OUTPUT_SIZE)][0].as<SizeType>(),
+        in[dump_fields.at(DumpFields::OUTPUT_SIZE)][1].as<SizeType>(),
+        in[dump_fields.at(DumpFields::OUTPUT_SIZE)][2].as<SizeType>()
+    );
+
     auto antecedent_layer_names = std::vector<std::string>(
         in[dump_fields.at(DumpFields::ANTECEDENTS)]);
     for (const auto& antecedent : _antecedents)

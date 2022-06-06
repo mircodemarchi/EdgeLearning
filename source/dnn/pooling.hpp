@@ -133,6 +133,18 @@ public:
     [[nodiscard]] const DLMath::Shape2d& kernel_shape() const
     { return _kernel_shape; }
 
+    /**
+     * \brief Save the layer infos to disk.
+     * \param out Json& out Json to write.
+     */
+    void dump(Json& out) const override;
+
+    /**
+     * \brief Load the layer infos from disk.
+     * \param in const Json& Json to read.
+     */
+    void load(Json& in) override;
+
 protected:
     /// \brief Kernel shape. Size: height_kernel * width_kernel.
     DLMath::Shape2d _kernel_shape;

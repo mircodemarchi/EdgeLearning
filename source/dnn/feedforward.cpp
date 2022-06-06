@@ -45,5 +45,16 @@ void FeedforwardLayer::input_shape(DLMath::Shape3d input_shape)
     _input_gradients.resize(input_shape.size());
 }
 
+void FeedforwardLayer::dump(Json& out) const
+{
+    Layer::dump(out);
+}
+
+void FeedforwardLayer::load(Json& in)
+{
+    Layer::load(in);
+    _output_activations.resize(output_size());
+    _input_gradients.resize(input_size());
+}
 
 } // namespace EdgeLearning

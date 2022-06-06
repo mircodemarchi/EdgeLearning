@@ -141,6 +141,18 @@ public:
     [[nodiscard]] SizeType n_filters() const
     { return _n_filters; }
 
+    /**
+     * \brief Save the layer infos and weights to disk.
+     * \param out Json& out Json to write.
+     */
+    void dump(Json& out) const override;
+
+    /**
+     * \brief Load the layer infos and weights from disk.
+     * \param in const Json& Json to read.
+     */
+    void load(Json& in) override;
+
 private:
     /// \brief Kernel shape. Size: height_kernel * width_kernel.
     DLMath::Shape2d _kernel_shape;
@@ -150,13 +162,15 @@ private:
     DLMath::Shape2d _padding;   ///< \brief Padding along axis.
 
     // == Layer parameters ==
-    /// \brief Kernels of the layer. Size: height_k * width_k * n_filters.
+    /// \brief Kernels of the layer.
+    /// Size: height_k * width_k * channels * n_filters.
     std::vector<NumType> _weights;
     /// \brief Biases of the layer. Size: n_filters.
     std::vector<NumType> _biases;
 
     // == Loss Gradients ==
-    /// \brief Weight gradients. Size: height_k * width_k * n_filters.
+    /// \brief Weight gradients.
+    /// Size: height_k * width_k * channels * n_filters.
     std::vector<NumType> _weight_gradients;
     /// \brief Biase gradients. Size: n_filters.
     std::vector<NumType> _bias_gradients;

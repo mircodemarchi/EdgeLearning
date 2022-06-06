@@ -79,6 +79,18 @@ public:
      */
     virtual void input_shape(DLMath::Shape3d input_shape) override;
 
+    /**
+     * \brief Save the layer infos to disk.
+     * \param out Json& out Json to write.
+     */
+    void dump(Json& out) const override;
+
+    /**
+     * \brief Load the layer infos from disk.
+     * \param in const Json& Json to read.
+     */
+    void load(Json& in) override;
+
 protected:
     /// \brief Activations of the layer. Size: _output_size.
     std::vector<NumType> _output_activations;

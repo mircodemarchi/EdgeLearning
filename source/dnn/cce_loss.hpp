@@ -71,7 +71,7 @@ private:
      */
     SizeType _argactive() const;
 
-    // Last active classification in the target one-hot encoding. 
+    /// \brief Last active classification in the target one-hot encoding.
     SizeType _active; 
 };
 

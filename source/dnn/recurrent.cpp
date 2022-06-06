@@ -464,9 +464,9 @@ void RecurrentLayer::print() const
         std::cout << "\t" << _biases_to_h[i] << std::endl;
     }
     std::cout << "Biases to output (" << output_size() << " x 1)" << std::endl;
-    for (SizeType i = 0; i < _hidden_size; ++i)
+    for (SizeType i = 0; i < output_size(); ++i)
     {
-        std::cout << "\t" << _biases_to_h[i] << std::endl;
+        std::cout << "\t" << _biases_to_o[i] << std::endl;
     }
     std::cout << std::endl;
 }
@@ -477,6 +477,145 @@ void RecurrentLayer::input_shape(DLMath::Shape3d input_shape) {
     _weights_i_to_h.resize(ih_size);
     _weights_i_to_h_gradients.resize(ih_size);
     _input_gradients.resize(input_shape.height * _time_steps);
+}
+
+void RecurrentLayer::dump(Json& out) const
+{
+    Layer::dump(out);
+
+    Json weights_i_to_h;
+    for (SizeType i = 0; i < _hidden_size; ++i)
+    {
+        SizeType offset = i * input_size();
+        Json weights_i_to_h_row;
+        for (SizeType j = 0; j < input_size(); ++j)
+        {
+            weights_i_to_h_row.append(_weights_i_to_h[offset + j]);
+        }
+        weights_i_to_h.append(weights_i_to_h_row);
+    }
+
+    Json weights_h_to_h;
+    for (SizeType i = 0; i < _hidden_size; ++i)
+    {
+        SizeType offset = i * _hidden_size;
+        Json weights_h_to_h_row;
+        for (SizeType j = 0; j < _hidden_size; ++j)
+        {
+            weights_h_to_h_row.append(_weights_h_to_h[offset + j]);
+        }
+        weights_h_to_h.append(weights_h_to_h_row);
+    }
+
+    Json weights_h_to_o;
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        SizeType offset = i * _hidden_size;
+        Json weights_h_to_o_row;
+        for (SizeType j = 0; j < _hidden_size; ++j)
+        {
+            weights_h_to_o_row.append(_weights_h_to_o[offset + j]);
+        }
+        weights_h_to_o.append(weights_h_to_o_row);
+    }
+
+    Json weights;
+    weights.append(weights_i_to_h);
+    weights.append(weights_h_to_h);
+    weights.append(weights_h_to_o);
+
+    Json biases_to_h;
+    for (SizeType i = 0; i < _hidden_size; ++i)
+    {
+        biases_to_h.append(_biases_to_h[i]);
+    }
+    Json biases_to_o;
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        std::cout << "\t" << _biases_to_o[i] << std::endl;
+    }
+
+    Json biases;
+    biases.append(biases_to_h);
+    biases.append(biases_to_o);
+
+    Json others;
+    others["hidden_activation"] = static_cast<int>(_hidden_activation);
+    others["hidden_size"] = _hidden_size;
+    others["time_steps"] = _time_steps;
+
+    out[dump_fields.at(DumpFields::WEIGHTS)] = weights;
+    out[dump_fields.at(DumpFields::BIASES)] = biases;
+    out[dump_fields.at(DumpFields::OTHERS)] = others;
+}
+
+void RecurrentLayer::load(Json& in)
+{
+    Layer::load(in);
+
+    _hidden_activation = static_cast<HiddenActivation>(
+        in[dump_fields.at(DumpFields::OTHERS)]["hidden_activation"].as<int>());
+    _hidden_size = in[dump_fields.at(DumpFields::OTHERS)]
+        ["hidden_size"].as<SizeType>();
+    _time_steps = in[dump_fields.at(DumpFields::OTHERS)]
+        ["time_steps"].as<SizeType>();
+
+    auto ih_size = input_size() * _hidden_size;
+    auto hh_size = _hidden_size * _hidden_size;
+    auto ho_size = _hidden_size * output_size();
+    _weights_i_to_h.resize(ih_size);
+    _weights_h_to_h.resize(hh_size);
+    _weights_h_to_o.resize(ho_size);
+    _biases_to_h.resize(_hidden_size);
+    _biases_to_o.resize(output_size());
+    _output_activations.resize(output_size() * _time_steps);
+    _hidden_state.resize(_hidden_size * std::max(_time_steps, SizeType(1U)));
+    _weights_i_to_h_gradients.resize(ih_size);
+    _weights_h_to_h_gradients.resize(hh_size);
+    _weights_h_to_o_gradients.resize(ho_size);
+    _biases_to_h_gradients.resize(_hidden_size);
+    _biases_to_o_gradients.resize(output_size());
+    _input_gradients.resize(input_size() * _time_steps);
+
+    for (SizeType i = 0; i < _hidden_size; ++i)
+    {
+        SizeType offset = i * input_size();
+        for (SizeType j = 0; j < input_size(); ++j)
+        {
+            _weights_i_to_h[offset + j] = in[
+                dump_fields.at(DumpFields::WEIGHTS)][0][i][j];
+        }
+    }
+
+    for (SizeType i = 0; i < _hidden_size; ++i)
+    {
+        SizeType offset = i * _hidden_size;
+        for (SizeType j = 0; j < _hidden_size; ++j)
+        {
+            _weights_h_to_h[offset + j] = in[
+                dump_fields.at(DumpFields::WEIGHTS)][1][i][j];
+        }
+    }
+
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        SizeType offset = i * _hidden_size;
+        for (SizeType j = 0; j < _hidden_size; ++j)
+        {
+            _weights_h_to_o[offset + j] = in[
+                dump_fields.at(DumpFields::WEIGHTS)][2][i][j];
+        }
+    }
+
+    for (SizeType i = 0; i < _hidden_size; ++i)
+    {
+        _biases_to_h[i] = in[dump_fields.at(DumpFields::BIASES)][0][i];
+    }
+
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        _biases_to_o[i] = in[dump_fields.at(DumpFields::BIASES)][1][i];
+    }
 }
 
 } // namespace EdgeLearning

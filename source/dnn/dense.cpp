@@ -213,12 +213,52 @@ void DenseLayer::input_shape(DLMath::Shape3d input_shape)
 void DenseLayer::dump(Json& out) const
 {
     FeedforwardLayer::dump(out);
+
     Json weights;
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        SizeType offset = i * input_size();
+
+        Json weights_row;
+        for (SizeType j = 0; j < input_size(); ++j)
+        {
+            weights_row.append(_weights[offset + j]);
+        }
+        weights.append(weights_row);
+    }
+
+    Json biases;
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        biases.append(_biases[i]);
+    }
+
+    out[dump_fields.at(DumpFields::WEIGHTS)] = weights;
+    out[dump_fields.at(DumpFields::BIASES)] = biases;
 }
 
 void DenseLayer::load(Json& in)
 {
     FeedforwardLayer::load(in);
+
+    _weights.resize(output_size() * input_size());
+    _biases.resize(output_size());
+    _weight_gradients.resize(output_size() * input_size());
+    _bias_gradients.resize(output_size());
+
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        for (SizeType j = 0; j < input_size(); ++j)
+        {
+            _weights[i * input_size() + j] = in[
+                dump_fields.at(DumpFields::WEIGHTS)][i][j];
+        }
+    }
+
+    for (SizeType i = 0; i < output_size(); ++i)
+    {
+        _biases[i] = in[dump_fields.at(DumpFields::BIASES)][i];
+    }
 }
 
 } // namespace EdgeLearning

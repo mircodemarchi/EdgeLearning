@@ -43,7 +43,7 @@ class RecurrentLayer : public Layer
 public:
     static const std::string TYPE;
 
-    enum class HiddenActivation
+    enum class HiddenActivation : int
     {
         ReLU,
         TanH,
@@ -132,6 +132,18 @@ public:
     }
     void input_shape(DLMath::Shape3d input_shape) override;
 
+    /**
+     * \brief Save the layer infos to disk.
+     * \param out Json& out Json to write.
+     */
+    void dump(Json& out) const override;
+
+    /**
+     * \brief Load the layer infos from disk.
+     * \param in const Json& Json to read.
+     */
+    void load(Json& in) override;
+
 private:
     HiddenActivation _hidden_activation;
     SizeType _hidden_size;
@@ -142,7 +154,7 @@ private:
     // == Layer parameters ==
     /**
      * \brief Weights input to hidden of the layer. 
-     * Size: _hidden_size * input_size().
+     * Size: _hidden_size * _input_size.
      */
     std::vector<NumType> _weights_i_to_h;
     /**
@@ -152,7 +164,7 @@ private:
     std::vector<NumType> _weights_h_to_h;
     /**
      * \brief Weights hidden to output of the layer. 
-     * Size: output_size() * _hidden_size.
+     * Size: _output_size * _hidden_size.
      */
     std::vector<NumType> _weights_h_to_o;
 

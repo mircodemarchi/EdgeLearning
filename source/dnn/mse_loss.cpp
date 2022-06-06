@@ -76,4 +76,21 @@ const std::vector<NumType>& MSELossLayer::backward(
     return LossLayer::backward(_gradients);
 }
 
+void MSELossLayer::dump(Json& out) const
+{
+    LossLayer::dump(out);
+
+    Json others;
+    others["loss_tolerance"] = _loss_tolerance;
+    out[dump_fields.at(DumpFields::OTHERS)] = others;
+}
+
+void MSELossLayer::load(Json& in)
+{
+    LossLayer::load(in);
+
+    _loss_tolerance = in[dump_fields.at(DumpFields::OTHERS)]["loss_tolerance"]
+        .as<NumType>();
+}
+
 } // namespace EdgeLearning
