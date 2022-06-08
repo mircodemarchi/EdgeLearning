@@ -37,6 +37,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_convolutional_layer());
         EDGE_LEARNING_TEST_CALL(test_getter());
         EDGE_LEARNING_TEST_CALL(test_setter());
+        EDGE_LEARNING_TEST_CALL(test_stream());
     }
 
 private:
@@ -296,6 +297,104 @@ private:
         DLMath::Shape3d new_in_shape{5,5,3};
         EDGE_LEARNING_TEST_CALL(l.input_shape(new_in_shape));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), new_in_shape.size());
+    }
+
+    void test_stream()
+    {
+        DLMath::Shape3d in_shape{3,3,3};
+        DLMath::Shape2d k_shape{2,2};
+        SizeType filters = 16;
+        auto l = ConvolutionalLayer(_m, "convolutional_layer_test",
+                                    in_shape, k_shape, filters);
+
+        Json l_dump;
+        EDGE_LEARNING_TEST_TRY(l.dump(l_dump));
+        EDGE_LEARNING_TEST_PRINT(l_dump);
+        EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "Conv");
+        EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
+
+        auto input_size_arr = l_dump["input_size"].as_vec<std::size_t>();
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
+        std::size_t input_size = input_size_arr[0]
+                                 * input_size_arr[1] * input_size_arr[2];
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+
+        auto output_size_arr = l_dump["output_size"].as_vec<std::size_t>();
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
+        std::size_t output_size = output_size_arr[0]
+                                  * output_size_arr[1] * output_size_arr[2];
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+
+        EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
+
+        l = ConvolutionalLayer(_m);
+        EDGE_LEARNING_TEST_TRY(l.load(l_dump));
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "Conv");
+        EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+
+        Json json_void;
+        EDGE_LEARNING_TEST_FAIL(l.load(json_void));
+        EDGE_LEARNING_TEST_THROWS(l.load(json_void), std::runtime_error);
+
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["weights"].size(),
+            l.kernel_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["weights"][0].size(),
+            l.kernel_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["weights"][l.kernel_shape().height - 1].size(),
+            l.kernel_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["weights"][0][0].size(),
+            l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["weights"][0][l.kernel_shape().width - 1].size(),
+            l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["weights"][0][0][0].size(),
+            l.n_filters());
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["weights"][0][0][l.input_shape().channels - 1].size(),
+            l.n_filters());
+        EDGE_LEARNING_TEST_EQUAL(l_dump["biases"].size(), l.n_filters());
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["kernel_size"].size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["kernel_size"][0].as<SizeType>(),
+            l.kernel_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["kernel_size"][1].as<SizeType>(),
+            l.kernel_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["stride"].size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["stride"][0].as<SizeType>(), 1);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["stride"][1].as<SizeType>(), 1);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["padding"].size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["padding"][0].as<SizeType>(), 0);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["padding"][1].as<SizeType>(), 0);
+        EDGE_LEARNING_TEST_EQUAL(
+            l_dump["others"]["n_filters"].as<SizeType>(), l.n_filters());
     }
 
     Model _m = Model("model_convolutional_layer_test");

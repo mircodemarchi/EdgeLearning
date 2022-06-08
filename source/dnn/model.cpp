@@ -221,10 +221,11 @@ void Model::dump(std::ofstream& out)
     }
     model["layer"] = layers_json;
 
+    Json loss_layers_json;
     Json loss_layer_json;
     _loss_layer->dump(loss_layer_json);
-    layers_json.append(loss_layer_json);
-    model["loss_layer"] = loss_layer_json;
+    loss_layers_json.append(loss_layer_json);
+    model["loss_layer"] = loss_layers_json;
     out << model;
 }
 

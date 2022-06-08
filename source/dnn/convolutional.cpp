@@ -52,15 +52,6 @@ static inline DLMath::Shape3d convolutional_output_shape(
         n_filters};
 }
 
-static inline SizeType convolutional_output_size(
-    DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
-    DLMath::Shape2d stride, DLMath::Shape2d padding, SizeType n_filters
-)
-{
-    return convolutional_output_shape(input_shape, kernel_shape,
-                                      stride, padding, n_filters).size();
-}
-
 const std::string ConvolutionalLayer::TYPE = "Conv";
 
 ConvolutionalLayer::ConvolutionalLayer(
@@ -300,7 +291,7 @@ void ConvolutionalLayer::dump(Json& out) const
             {
                 SizeType ch_offset = ch * _n_filters;
                 Json weights_channel;
-                for (SizeType f = 0; f < _n_filters - 1; ++f)
+                for (SizeType f = 0; f < _n_filters; ++f)
                 {
                     weights_channel.append(
                         _weights[r_offset + c_offset + ch_offset + f]);
@@ -338,16 +329,16 @@ void ConvolutionalLayer::load(Json& in)
 {
     FeedforwardLayer::load(in);
 
-    auto kernel_size = std::vector<SizeType>(
-        in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]);
+    auto kernel_size = in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]
+        .as_vec<std::size_t>();
     _kernel_shape = DLMath::Shape2d(kernel_size.at(0), kernel_size.at(1));
     _n_filters = in[dump_fields.at(DumpFields::OTHERS)]["n_filters"]
         .as<SizeType>();
-    auto stride = std::vector<SizeType>(
-        in[dump_fields.at(DumpFields::OTHERS)]["stride"]);
+    auto stride = in[dump_fields.at(DumpFields::OTHERS)]["stride"]
+        .as_vec<std::size_t>();
     _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
-    auto padding = std::vector<SizeType>(
-        in[dump_fields.at(DumpFields::OTHERS)]["padding"]);
+    auto padding = in[dump_fields.at(DumpFields::OTHERS)]["padding"]
+        .as_vec<std::size_t>();
     _padding = DLMath::Shape2d(padding.at(0), padding.at(1));
 
     _weights.resize(_kernel_shape.size() * _input_shape.channels * _n_filters);
@@ -366,7 +357,7 @@ void ConvolutionalLayer::load(Json& in)
             for (SizeType ch = 0; ch < _input_shape.channels; ++ch)
             {
                 SizeType ch_offset = ch * _n_filters;
-                for (SizeType f = 0; f < _n_filters - 1; ++f)
+                for (SizeType f = 0; f < _n_filters; ++f)
                 {
                     _weights[r_offset + c_offset + ch_offset + f] = in[
                         dump_fields.at(DumpFields::WEIGHTS)][r][c][ch][f];

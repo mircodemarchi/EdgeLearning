@@ -532,7 +532,7 @@ void RecurrentLayer::dump(Json& out) const
     Json biases_to_o;
     for (SizeType i = 0; i < output_size(); ++i)
     {
-        std::cout << "\t" << _biases_to_o[i] << std::endl;
+        biases_to_o.append(_biases_to_o[i]);
     }
 
     Json biases;

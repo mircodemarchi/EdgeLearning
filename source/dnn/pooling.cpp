@@ -48,14 +48,6 @@ static inline DLMath::Shape3d pooling_output_shape(
         input_shape.channels};
 }
 
-static inline SizeType pooling_output_size(
-    DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
-    DLMath::Shape2d stride
-)
-{
-    return pooling_output_shape(input_shape, kernel_shape, stride).size();
-}
-
 PoolingLayer::PoolingLayer(
     Model& model, DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
     DLMath::Shape2d stride, std::string name, std::string prefix_name)
@@ -105,11 +97,11 @@ void PoolingLayer::load(Json& in)
 {
     FeedforwardLayer::load(in);
 
-    auto kernel_size = std::vector<SizeType>(
-        in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]);
+    auto kernel_size = in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]
+        .as_vec<std::size_t>();
     _kernel_shape = DLMath::Shape2d(kernel_size.at(0), kernel_size.at(1));
-    auto stride = std::vector<SizeType>(
-        in[dump_fields.at(DumpFields::OTHERS)]["stride"]);
+    auto stride = in[dump_fields.at(DumpFields::OTHERS)]["stride"]
+        .as_vec<std::size_t>();
     _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
 }
 

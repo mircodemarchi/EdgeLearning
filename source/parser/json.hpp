@@ -54,7 +54,6 @@ class JsonLeaf;
 class JsonList;
 class JsonDict;
 class JsonItem;
-class Json;
 
 /**
  * \brief Abstract JSON class for generalization.
@@ -93,15 +92,6 @@ public:
     JsonObject(JsonType json_type)
         : Parser()
         , _json_type(json_type)
-    { }
-
-    /**
-     * \brief Copy constructor.
-     * \param obj Object to copy.
-     */
-    JsonObject(const JsonObject& obj)
-        : Parser()
-        , _json_type(obj._json_type)
     { }
 
     /**
@@ -159,11 +149,10 @@ protected:
  * passed, the function throws an exception.
  * \tparam T     The type of the Json class to convert the JsonObject.
  * \param jo_ptr The pointer to a JsonObject.
- * \return The type cast of the JsonObject.
+ * \return T The type cast of the JsonObject.
  */
 template <typename T>
-inline T convert(JsonObject::Shared jo_ptr);
-
+T convert_json_object(JsonObject::Shared jo_ptr);
 
 /**
  * \brief An item of a JSON that contains a generic shared ptr of a JsonObject
@@ -173,14 +162,12 @@ inline T convert(JsonObject::Shared jo_ptr);
  */
 class JsonItem : public JsonObject
 {
-    friend class Json;
-
 public:
     /**
      * \brief Empty constructor of a JsonItem.
      */
     JsonItem()
-        : JsonObject()
+        : JsonObject(JsonType::NONE)
         , _value{}
     { }
 
@@ -188,71 +175,77 @@ public:
      * \brief Constructor of a JsonItem with a generic reference of JsonObject.
      * \param value const JsonObject& The JsonObject reference object.
      */
-    JsonItem(const JsonObject& value);
+    JsonItem(const JsonObject& value)
+        : JsonObject(value.json_type())
+        , _value(std::make_shared<JsonObject>(value))
+    { }
 
     /**
-     * \brief Constructor of a JsonItem with a JsonLeaf.
-     * \param value const JsonLeaf& The JsonLeaf object.
+     * \brief Constructor of a JsonItem with a JsonLeaf reference object.
+     * \param jl const JsonLeaf& The leaf reference to use as JsonItem.
      */
-    JsonItem(const JsonLeaf& value);
+    JsonItem(const JsonLeaf& jl);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonLeaf.
-     * \param value int The JsonLeaf initialized with an integer.
+     * \brief Constructor of a JsonItem with a std::string value.
+     * \param val std::string The string value.
      */
-    JsonItem(int value);
-    JsonItem(unsigned int value);
-    JsonItem(long value);
-    JsonItem(unsigned long value);
+    JsonItem(std::string val);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonLeaf.
-     * \param value double The JsonLeaf initialized with a double.
+     * \brief Constructor of a JsonItem with a inline string value.
+     * \param val const char* The string value.
      */
-    JsonItem(double value);
+    JsonItem(const char* val);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonLeaf.
-     * \param value bool The JsonLeaf initialized with a boolean.
+     * \brief Constructor of a JsonItem with an integer value.
+     * \param val The integer value: int, unsigned int, long, unsigned long,
+     * long long, unsigned long long.
      */
-    JsonItem(bool value);
+    JsonItem(int val);
+    JsonItem(unsigned int val);
+    JsonItem(long val);
+    JsonItem(unsigned long val);
+    JsonItem(long long val);
+    JsonItem(unsigned long long val);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonLeaf.
-     * \param value std::string The JsonLeaf initialized with a string.
+     * \brief Constructor of a JsonItem with a double value.
+     * \param val double The floating point value.
      */
-    JsonItem(std::string value);
+    JsonItem(double val);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonLeaf.
-     * \param value const char* The JsonLeaf initialized with a char array.
+     * \brief Constructor of a JsonItem with a bool value.
+     * \param val bool The boolean value.
      */
-    JsonItem(const char* value);
+    JsonItem(bool val);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonList.
-     * \param value const JsonList& The JsonList object.
+     * \brief Constructor of a JsonItem with a JsonList object.
+     * \param list JsonList The list of JsonItem to use as JsonItem.
      */
-    JsonItem(const JsonList& value);
+    JsonItem(const JsonList& list);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonList.
-     * \param value JsonList The JsonList initialized with a vector of JsonItem.
+     * \brief Constructor of a JsonItem with a vector of JsonItem.
+     * \param list std::vector<JsonItem> The JsonItem list to use as JsonItem.
      */
-    JsonItem(std::vector<JsonItem> value);
+    JsonItem(std::vector<JsonItem> list);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonDict.
-     * \param value const JsonDict& The JsonDict object.
+     * \brief Constructor of a JsonItem with a JsonDict object.
+     * \param dict JsonDict The dictionary of JsonItem to use as JsonItem.
      */
-    JsonItem(const JsonDict& value);
+    JsonItem(const JsonDict& dict);
 
     /**
-     * \brief Constructor of a JsonItem with a JsonDict.
-     * \param value JsonDict The JsonDict initialized with a (string,JsonItem)
-     * pairs map.
+     * \brief Constructor of a JsonItem with a string-JsonItem map.
+     * \param dict std::map<std::string, JsonItem> The JsonItem string-JsonItem
+     * map to use as JsonItem.
      */
-    JsonItem(std::map<std::string, JsonItem> value);
+    JsonItem(std::map<std::string, JsonItem> dict);
 
     /**
      * \brief Default deconstruct.
@@ -270,95 +263,13 @@ public:
      * \param obj JsonItem The object to copy.
      * \return JsonItem& The assigned object.
      */
-    JsonItem& operator=(JsonItem obj);
-
-    /**
-     * \brief Copy assignment overloading with a JsonLeaf object.
-     * \param obj const JsonLeaf& The object to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const JsonLeaf& obj);
-
-    /**
-     * \brief Copy assignment overloading with an integer value.
-     * \param obj const int& The JsonLeaf integer value to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const int& obj);
-    JsonItem& operator=(const unsigned int& obj);
-    JsonItem& operator=(const long& obj);
-    JsonItem& operator=(const unsigned long& obj);
-
-    /**
-     * \brief Copy assignment overloading with a double value.
-     * \param obj const double& The JsonLeaf double value to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const double& obj);
-
-    /**
-     * \brief Copy assignment overloading with a boolean value.
-     * \param obj const bool& The JsonLeaf bool value to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const bool& obj);
-
-    /**
-     * \brief Copy assignment overloading with a string object.
-     * \param obj const std::string& The JsonLeaf string object to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const std::string& obj);
-
-    /**
-     * \brief Copy assignment overloading with a char array object.
-     * \param obj const char* The JsonLeaf char array object to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const char* obj);
-
-    /**
-     * \brief Copy assignment overloading with JsonList object.
-     * \param obj const JsonList& The JsonList object to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const JsonList& obj);
-
-    /**
-     * \brief Copy assignment overloading with a vector of JsonItem.
-     * \param obj const std::vector<JsonItem>& The JsonList vector of JsonItem
-     * to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const std::vector<JsonItem>& obj);
-
-    /**
-     * \brief Copy assignment overloading with JsonDict object.
-     * \param obj const JsonDict& The JsonDict object to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const JsonDict& obj);
-
-    /**
-     * \brief Copy assignment overloading with a (string,JsonItem) pair map.
-     * \param obj const std::map<std::string, JsonItem>& The JsonDict
-     * initialized with a (string,JsonItem) pair map to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(const std::map<std::string, JsonItem>& obj);
-
-    /**
-     * \brief Copy assignment overloading with Json object.
-     * \param obj const Json& The Json object to copy.
-     * \return JsonItem& The assigned object.
-     */
-    JsonItem& operator=(Json obj);
+    JsonItem& operator=(const JsonItem& obj);
 
     /**
      * \brief Subscript operator overloading for contained list json.
-     * If the JsonItem is empty or there are no json list, then it throws a
-     * runtime_error exception.
-     * \param idx std::size_t The index of the list.
+     * It can be used to write the object and if the JsonItem is empty or there
+     * are no json list, then it throws a runtime_error exception.
+     * \param idx unsigned long The index of the list.
      * \return JsonItem& The JsonItem at the index.
      */
     JsonItem& operator[](std::size_t idx);
@@ -369,8 +280,8 @@ public:
 
     /**
      * \brief Subscript operator overloading for contained dict json.
-     * If the JsonItem is empty or there are no json dict, then it throws a
-     * runtime_error exception.
+     * It can be used to write the object and if the JsonItem is empty then
+     * it creates a JsonItem of type DICT.
      * \param key std::string The key of the dict.
      * \return JsonItem& The JsonItem value at the key.
      */
@@ -380,12 +291,44 @@ public:
         return operator[](std::string(key));
     }
 
+    /**
+     * \brief Constant read-only subscript method for contained list json.
+     * If the JsonItem is empty or there are no json list, then it throws a
+     * runtime_error exception.
+     * \param idx unsigned long The index of the list.
+     * \return JsonItem& The JsonItem at the index.
+     */
+    [[nodiscard]] const JsonItem& at(unsigned long idx) const;
+    [[nodiscard]] const JsonItem& at(int idx) const
+    {
+        return at(static_cast<unsigned long>(idx));
+    }
+
+    /**
+     * \brief Constant read-only subscript method for contained dict json.
+     * If the JsonItem is empty or there are no json dict, then it throws a
+     * runtime_error exception.
+     * \param key std::string The key of the dict.
+     * \return const JsonItem& The JsonItem value at the key.
+     */
+    [[nodiscard]] const JsonItem& at(std::string key) const;
+    [[nodiscard]] const JsonItem& at(const char* key) const
+    {
+        return at(std::string(key));
+    }
+
+    /**
+     * \brief Append a new JsonItem element in the contained list json.
+     * If the JsonItem is empty then it creates a JsonItem of type LIST.
+     * \param ji JsonItem The item to add in the list.
+     */
+    void append(JsonItem ji);
 
     /**
      * \brief Getter of the JsonObject reference.
      * \return The JsonObject reference.
      */
-    const JsonObject& value() const
+    [[nodiscard]] const JsonObject& value() const
     {
         if (!_value) throw std::runtime_error("value failed: empty object");
         return *_value;
@@ -393,9 +336,9 @@ public:
 
     /**
      * \brief Getter of the size of the JsonItem.
-     * \return std::size_t Size of the item.
+     * \return unsigned long Size of the item.
      */
-    [[nodiscard]] std::size_t size() const;
+    [[nodiscard]] unsigned long size() const;
 
     /**
      * \brief Convert the json object in the templated type and put in the ptr.
@@ -403,10 +346,25 @@ public:
      * \param ptr T* Pointer in which put the result.
      */
     template<typename T>
-    void as(T* ptr) const
-    {
-        *ptr = convert<T>(_value);
-    }
+    void as(T* ptr) const;
+
+    /**
+     * \brief Convert the json object in the templated vector type and put in
+     * the ptr.
+     * \tparam T  Field type requested for vector elements.
+     * \param ptr std::vector<T>& Reference in which put the result.
+     */
+    template<typename T>
+    void as_vec(std::vector<T>& ptr) const;
+
+    /**
+     * \brief Convert the json object in the templated map values type and put
+     * in the ptr.
+     * \tparam T  Field type requested for map values.
+     * \param ptr std::map<std::string, T>& Reference in which put the result.
+     */
+    template<typename T>
+    void as_map(std::map<std::string, T>& ptr) const;
 
     /**
      * \brief Return the converted json object as specified by the
@@ -415,10 +373,25 @@ public:
      * \return T The converted field.
      */
     template<typename T>
-    T as() const
-    {
-        return convert<T>(_value);
-    }
+    T as() const;
+
+    /**
+     * \brief Return the converted json object as a vector of the specified
+     * template type.
+     * \tparam T Field type requested for vector elements.
+     * \return std::vector<T> The converted vector.
+     */
+    template<typename T>
+    std::vector<T> as_vec() const;
+
+    /**
+     * \brief Return the converted json object as a map with values of the
+     * specified template type.
+     * \tparam T Field type requested for map values.
+     * \return std::map<std::string, T> The converted map.
+     */
+    template<typename T>
+    std::map<std::string, T> as_map() const;
 
     /**
      * \brief Overloading of equals operator.
@@ -450,54 +423,44 @@ public:
     friend std::istream& operator>>(std::istream& os, JsonItem& obj);
 
     /**
-     * \brief Overloading of string conversion cast.
-     * \return std::string The converted string of this object.
+     * \brief Overloading of integer conversion cast.
+     * Integer types allowed: int, unsigned int, long, unsigned long,
+     * long long, unsigned long long.
+     * \return The converted integer value of this object.
      */
-    operator std::string() const;
+    operator int() const { return as<int>(); }
+    operator unsigned int() const { return as<unsigned int>(); }
+    operator long() const { return as<long>(); }
+    operator unsigned long() const { return as<unsigned long>(); }
+    operator long long() const { return as<long long>(); }
+    operator unsigned long long() const { return as<unsigned long long>(); }
 
     /**
-     * \brief Overloading of int conversion cast.
-     * \return int The converted int of this object.
+     * \brief Overloading of double conversion cast.
+     * \return double The converted double of this object.
      */
-    operator int() const;
-    operator unsigned int() const;
-    operator long() const;
-    operator unsigned long() const;
+    operator double() const { return as<double>(); }
 
     /**
      * \brief Overloading of float conversion cast.
      * \return float The converted float of this object.
      */
-    operator double() const;
+    operator float() const { return as<float>(); }
 
     /**
-     * \brief Overloading of bool conversion cast.
+     * \brief Overloading of booloolean conversion cast.
      * \return bool The converted bool of this object.
      */
-    operator bool() const;
+    operator bool() const { return as<bool>(); }
 
     /**
-     * \brief Overloading of vector conversion cast.
-     * If the JsonItem is empty or is not of type json list, it throws a
-     * runtime error exception.
-     * \tparam T The type of each vector element to cast.
-     * \return std::vector<T> The JsonItem converted in the specified vector.
+     * \brief Overloading of string conversion cast.
+     * \return std::string The converted string of this object.
      */
-    template<typename T>
-    operator std::vector<T>() const;
-
-    /**
-     * \brief Overloading of map conversion cast.
-     * If the JsonItem is empty or is not of type json dict, it throws a
-     * runtime error exception.
-     * \tparam T The type of each map value to cast.
-     * \return std::map<std::string, T> The JsonItem converted in the
-     * specified map.
-     */
-    template<typename T>
-    operator std::map<std::string, T>() const;
+    operator std::string() const;
 
 private:
+
     Shared _value; ///< \brief The shared ptr of the JsonObject.
 };
 
@@ -547,7 +510,8 @@ public:
 
     /**
      * \brief Construct a JsonLeaf with an integer.
-     * \param val int An integer as a value.
+     * \param val An integer value: int, unsigned int, long,
+     * unsigned long, long long, unsigned long long.
      */
     JsonLeaf(int val)
         : JsonLeaf(std::to_string(val), Type::INT)
@@ -559,6 +523,12 @@ public:
         : JsonLeaf(std::to_string(val), Type::INT)
     { }
     JsonLeaf(unsigned long val)
+        : JsonLeaf(std::to_string(val), Type::INT)
+    { }
+    JsonLeaf(long long val)
+        : JsonLeaf(std::to_string(val), Type::INT)
+    { }
+    JsonLeaf(unsigned long long val)
         : JsonLeaf(std::to_string(val), Type::INT)
     { }
 
@@ -660,37 +630,37 @@ public:
     friend std::istream& operator>>(std::istream& os, JsonLeaf& obj);
 
     /**
-     * \brief Overloading of string conversion cast.
-     * \return std::string The converted string of this object.
-     */
-    operator std::string() const;
-
-    /**
-     * \brief Convert the value of the JsonLeaf in int.
-     * \return T The converted int value.
+     * \brief Convert the value of the JsonLeaf in integer.
+     * Integer types allowed: int, unsigned int, long, unsigned long,
+     * long long, unsigned long long.
+     * \return The converted integer value.
      */
     operator int() const { return as<int>(); }
-    operator unsigned() const { return as<unsigned>(); }
+    operator unsigned int() const { return as<unsigned int>(); }
     operator long() const { return as<long>(); }
     operator unsigned long() const { return as<unsigned long>(); }
+    operator long long() const { return as<long long>(); }
+    operator unsigned long long() const { return as<unsigned long long>(); }
 
     /**
-     * \brief Convert the value of the JsonLeaf in float.
-     * \return float The converted float value.
+     * \brief Convert the value of the JsonLeaf in floating point.
+     * Floating point types allowed: double, float.
+     * \return The converted floating point value.
      */
-    operator float() const
-    {
-        return as<float>();
-    }
+    operator double() const { return as<double>(); }
+    operator float() const { return as<float>(); }
 
     /**
-     * \brief Convert the value of the JsonLeaf in bool.
-     * \return bool The converted bool value.
+     * \brief Convert the value of the JsonLeaf in boolean.
+     * \return bool The converted value.
      */
-    operator bool() const
-    {
-        return as<bool>();
-    }
+    operator bool() const { return as<bool>(); }
+
+    /**
+     * \brief Convert the value of the JsonLeaf in string.
+     * \return std::string The converted value.
+     */
+    operator std::string() const;
 
 private:
     std::string _val;   ///< \brief Value of the JsonLeaf.
@@ -721,42 +691,60 @@ public:
     { }
 
     /**
-     * \brief Constructor of a JsonList with a vector of int.
-     * \param list std::vector<int> The vector of int.
+     * \brief Constructor of a JsonList with a vector of integer.
+     * \param val A vector of integers: int, unsigned int, long,
+     * unsigned long, long long, unsigned long long.
      */
-    JsonList(std::vector<int> list)
+    JsonList(std::vector<int> val)
         : JsonObject(JsonType::LIST)
-        , _list(_convert_vector<int>(list))
+        , _list(_convert_vec<int>(val))
     { }
-    JsonList(std::vector<unsigned int> list)
+    JsonList(std::vector<unsigned int> val)
         : JsonObject(JsonType::LIST)
-        , _list(_convert_vector<unsigned int>(list))
+        , _list(_convert_vec<unsigned int>(val))
     { }
-    JsonList(std::vector<long> list)
+    JsonList(std::vector<long> val)
         : JsonObject(JsonType::LIST)
-        , _list(_convert_vector<long>(list))
+        , _list(_convert_vec<long>(val))
     { }
-    JsonList(std::vector<unsigned long> list)
+    JsonList(std::vector<unsigned long> val)
         : JsonObject(JsonType::LIST)
-        , _list(_convert_vector<unsigned long>(list))
+        , _list(_convert_vec<unsigned long>(val))
+    { }
+    JsonList(std::vector<long long> val)
+        : JsonObject(JsonType::LIST)
+        , _list(_convert_vec<long long>(val))
+    { }
+    JsonList(std::vector<unsigned long long> val)
+        : JsonObject(JsonType::LIST)
+        , _list(_convert_vec<unsigned long long>(val))
     { }
 
     /**
-     * \brief Constructor of a JsonList with a vector of double.
-     * \param list std::vector<double> The vector of double.
+     * \brief Constructor of a JsonList with a vector of floating point.
+     * \param val std::vector<double> A vector of double.
      */
-    JsonList(std::vector<double> list)
+    JsonList(std::vector<double> val)
         : JsonObject(JsonType::LIST)
-        , _list(_convert_vector<double>(list))
+        , _list(_convert_vec<double>(val))
     { }
 
     /**
-     * \brief Constructor of a JsonList with a vector of bool.
-     * \param list std::vector<bool> The vector of bool.
+     * \brief Constructor of a JsonList with a vector of boolean.
+     * \param val std::vector<bool> A vector of boolean.
      */
-    JsonList(std::vector<bool> list)
+    JsonList(std::vector<bool> val)
         : JsonObject(JsonType::LIST)
-        , _list(_convert_vector<bool>(list))
+        , _list(_convert_vec<bool>(val))
+    { }
+
+    /**
+     * \brief Constructor of a JsonList with a vector of string.
+     * \param val std::vector<std::string> A vector of string.
+     */
+    JsonList(std::vector<std::string> val)
+        : JsonObject(JsonType::LIST)
+        , _list(_convert_vec<std::string>(val))
     { }
 
     /**
@@ -765,10 +753,10 @@ public:
     ~JsonList() = default;
 
     /**
-     * \brief Subscript operator overloading to access a JsonItem contained in
-     * the list.
-     * \param idx std::size_t The index to access.
-     * \return const JsonItem& The item accessed at the index.
+     * \brief Subscript operator overloading to access and overwrite a JsonItem
+     * contained in the list.
+     * \param idx unsigned long The index to access.
+     * \return JsonItem& The item accessed at the index.
      */
     JsonItem& operator[](std::size_t idx)
     {
@@ -781,16 +769,65 @@ public:
     }
 
     /**
-     * \brief Insert a JsonItem in the list.
-     * \param ji JsonItem The JsonItem object to append.
+     * \brief Constant read-only subscript method to access a JsonItem contained
+     * in the list.
+     * \param idx unsigned long The index to access.
+     * \return const JsonItem& The item accessed at the index.
      */
-    void append(JsonItem ji);
+    [[nodiscard]] const JsonItem& at(unsigned long idx) const
+    {
+        if (idx >= _list.size())
+        {
+            throw std::runtime_error(
+                "method at() failed: idx >= list size");
+        }
+        return _list.at(idx);
+    }
+
+    /**
+     * \brief Insert a JsonItem in the list.
+     * \param ji const JsonItem& The JsonItem object to append.
+     */
+    void append(JsonItem ji)
+    {
+        _list.push_back(ji);
+    }
+
+    /**
+     * \brief Getter of the vector of JsonItem contained in the object.
+     * \return const std::vector<JsonItem>& The contained vector of JsonItem.
+     */
+    [[nodiscard]] const std::vector<JsonItem>& value() const { return _list; }
+
+    /**
+     * \brief Convert the json object in the templated vector type and put in
+     * the ptr.
+     * \tparam T  Field type requested for vector elements.
+     * \param ptr std::vector<T>& Reference in which put the result.
+     */
+    template<typename T>
+    void as(std::vector<T>& ptr) const
+    {
+        ptr = convert_json_list<T>(std::make_shared<JsonList>(*this));
+    }
+
+    /**
+     * \brief Return the converted json object as a vector of the specified
+     * template type.
+     * \tparam T Field type requested for vector elements.
+     * \return std::vector<T> The converted vector.
+     */
+    template<typename T>
+    std::vector<T> as() const
+    {
+        return convert_json_list<T>(std::make_shared<JsonList>(*this));
+    }
 
     /**
      * \brief Return the length of the list.
-     * \return std::size_t The length of the list.
+     * \return unsigned long The length of the list.
      */
-    [[nodiscard]] std::size_t size() const { return _list.size(); }
+    [[nodiscard]] unsigned long size() const { return _list.size(); }
 
     /**
      * \brief Check if the list is empty.
@@ -835,10 +872,10 @@ public:
     template<typename T>
     operator std::vector<T>() const
     {
-        std::vector<T> ret(std::size_t(_list.size()));
-        for (std::size_t i = 0; i < _list.size(); ++i)
+        std::vector<T> ret(_list.size());
+        for (unsigned long i = 0; i < _list.size(); ++i)
         {
-            ret[i] = T(_list.at(i));
+            ret[i] = static_cast<T>(_list.at(i));
         }
         return ret;
     }
@@ -850,23 +887,14 @@ public:
     operator std::string() const;
 
 private:
-
     /**
-     * \brief Convert a vector of any type in a vector of JsonItem.
-     * \tparam T   The type of vector elements.
-     * \param list const std::vector<T>& The vector of any type.
-     * \return The vector of JsonItem.
+     * \brief Convert a vector of any type elements in a vector of JsonItem.
+     * \tparam T   The type of the input elements of the vector.
+     * \param list const std::vector<T>& Input vector.
+     * \return std::vector<JsonItem> Output JsonItem vector.
      */
     template<typename T>
-    std::vector<JsonItem> _convert_vector(const std::vector<T>& list)
-    {
-        std::vector<JsonItem> tmp(list.size());
-        for (std::size_t i = 0; i < list.size(); ++i)
-        {
-            tmp[i] = list[i];
-        }
-        return tmp;
-    }
+    std::vector<JsonItem> _convert_vec(const std::vector<T>& list);
 
     std::vector<JsonItem> _list; ///< \brief The list of items.
 };
@@ -877,7 +905,6 @@ private:
 class JsonDict : public JsonObject
 {
 public:
-
     /**
      * \brief Empty constructor.
      */
@@ -897,42 +924,60 @@ public:
     { }
 
     /**
-     * \brief Constructor of a JsonDict with a map of string,int pairs.
-     * \param map std::map<std::string, int> The map of string,int pairs.
+     * \brief Constructor of a JsonDict with a map of string-integer pairs.
+     * \param val A map of integer values: int, unsigned int, long,
+     * unsigned long, long long, unsigned long long.
      */
-    JsonDict(std::map<std::string, int> map)
+    JsonDict(std::map<std::string, int> val)
         : JsonObject(JsonType::DICT)
-        , _map(_convert_map<int>(map))
+        , _map(_convert_map<int>(val))
     { }
-    JsonDict(std::map<std::string, unsigned int> map)
+    JsonDict(std::map<std::string, unsigned int> val)
         : JsonObject(JsonType::DICT)
-        , _map(_convert_map<unsigned int>(map))
+        , _map(_convert_map<unsigned int>(val))
     { }
-    JsonDict(std::map<std::string, long> map)
+    JsonDict(std::map<std::string, long> val)
         : JsonObject(JsonType::DICT)
-        , _map(_convert_map<long>(map))
+        , _map(_convert_map<long>(val))
     { }
-    JsonDict(std::map<std::string, unsigned long> map)
+    JsonDict(std::map<std::string, unsigned long> val)
         : JsonObject(JsonType::DICT)
-        , _map(_convert_map<unsigned long>(map))
+        , _map(_convert_map<unsigned long>(val))
+    { }
+    JsonDict(std::map<std::string, long long> val)
+        : JsonObject(JsonType::DICT)
+        , _map(_convert_map<long long>(val))
+    { }
+    JsonDict(std::map<std::string, unsigned long long> val)
+        : JsonObject(JsonType::DICT)
+        , _map(_convert_map<unsigned long long>(val))
     { }
 
     /**
-     * \brief Constructor of a JsonDict with a map of string,double pairs.
-     * \param map std::map<std::string, double> The map of string,double pairs.
+     * \brief Constructor of a JsonDict with a map of string-double pairs.
+     * \param val std::map<std::string, double> A map of floating point values.
      */
-    JsonDict(std::map<std::string, double> map)
+    JsonDict(std::map<std::string, double> val)
         : JsonObject(JsonType::DICT)
-        , _map(_convert_map<double>(map))
+        , _map(_convert_map<double>(val))
     { }
 
     /**
-     * \brief Constructor of a JsonDict with a map of string,bool pairs.
-     * \param map std::map<std::string, double> The map of string,bool pairs.
+     * \brief Constructor of a JsonDict with a map of string-boolean pairs.
+     * \param val std::map<std::string, bool> A map of boolean values.
      */
-    JsonDict(std::map<std::string, bool> map)
+    JsonDict(std::map<std::string, bool> val)
         : JsonObject(JsonType::DICT)
-        , _map(_convert_map<bool>(map))
+        , _map(_convert_map<bool>(val))
+    { }
+
+    /**
+     * \brief Constructor of a JsonDict with a map of string-string pairs.
+     * \param val std::map<std::string, std::string> A map of string values.
+     */
+    JsonDict(std::map<std::string, std::string> val)
+        : JsonObject(JsonType::DICT)
+        , _map(_convert_map<std::string>(val))
     { }
 
     /**
@@ -946,7 +991,7 @@ public:
      * \param key std::string The key item to access.
      * \return const JsonItem& A read-only JsonItem in key.
      */
-    const JsonItem& at(std::string key) const
+    [[nodiscard]] const JsonItem& at(std::string key) const
     {
         if (!_map.contains(key))
         {
@@ -968,14 +1013,46 @@ public:
     }
 
     /**
-     * \brief Return the size of the dictionary.
-     * \return std::size_t The size of the map dictionary.
+     * \brief Getter of the map of JsonItem values contained in the object.
+     * \return const std::map<std::string, JsonItem>& The contained map of
+     * JsonItem values.
      */
-    [[nodiscard]] std::size_t size() const { return _map.size(); }
+    [[nodiscard]] const std::map<std::string, JsonItem>& value() const
+    { return _map; }
+
+    /**
+     * \brief Convert the json object in the templated map values type and put
+     * in the ptr.
+     * \tparam T  Field type requested for map values.
+     * \param ptr std::map<std::string, T>& Reference in which put the result.
+     */
+    template<typename T>
+    void as(std::map<std::string, T>& ptr) const
+    {
+        ptr = convert_json_dict<T>(std::make_shared<JsonDict>(*this));
+    }
+
+    /**
+     * \brief Return the converted json object as a map with values of the
+     * specified template type.
+     * \tparam T Field type requested for map values.
+     * \return std::map<std::string, T> The converted map.
+     */
+    template<typename T>
+    std::map<std::string, T> as() const
+    {
+        return convert_json_dict<T>(std::make_shared<JsonDict>(*this));
+    }
+
+    /**
+     * \brief Return the size of the dictionary.
+     * \return unsigned long The size of the map dictionary.
+     */
+    [[nodiscard]] unsigned long size() const { return _map.size(); }
 
     /**
      * \brief Check if the map is empty.
-     * \return
+     * \return bool True if empty, otherwise false.
      */
     [[nodiscard]] bool empty() const { return _map.empty(); }
 
@@ -1023,7 +1100,7 @@ public:
         std::map<std::string, T> ret;
         for (const auto& e: _map)
         {
-            ret[e.first] = T(e.second);
+            ret[e.first] = static_cast<T>(e.second);
         }
         return ret;
     }
@@ -1036,24 +1113,14 @@ public:
 
 private:
     /**
-     * \brief Convert a map with values of any type in a map of string,JsonItem
-     * pairs.
-     * \tparam T The type of values.
-     * \param map const std::map<std::string, T>& The map with values of any
-     * type and string keys.
-     * \return std::map<std::string, JsonItem> The map of string,JsonItem pairs.
+     * \brief Convert a map of any type values in a map of string-JsonItem.
+     * \tparam T   The type of the input values of the map.
+     * \param list const std::map<std::string, T>& Input map.
+     * \return std::map<std::string, JsonItem> Output string-JsonItem map.
      */
     template<typename T>
     std::map<std::string, JsonItem> _convert_map(
-        const std::map<std::string, T>& map)
-    {
-        std::map<std::string, JsonItem> tmp;
-        for (const auto& e: map)
-        {
-            tmp[e.first] = e.second;
-        }
-        return tmp;
-    }
+        const std::map<std::string, T>& map);
 
     /**
      * \brief The map with the pairs string, JsonItem.
@@ -1063,239 +1130,63 @@ private:
 
 /**
  * \brief High interface of a JSON.
- * The json type of this class acquired the json type of the contained
- * JsonObject.
  */
-class Json : public JsonObject
-{
-    friend JsonItem;
-
-public:
-    /**
-     * \brief Empty constructor. The json type is JsonType::NONE.
-     */
-    Json()
-        : JsonObject(JsonType::NONE)
-        , _obj{}
-    { }
-
-    /**
-     * \brief Construct of a Json object with a JsonItem.
-     * \param ji const JsonItem& The JsonItem object.
-     */
-    Json(const JsonItem& ji)
-        : JsonObject(ji.json_type())
-        , _obj{ji}
-    { }
-
-    /**
-     * \brief Constructor of a Json object with a JsonList.
-     * The json type is JsonType::LIST.
-     * \param jl JsonList The JsonList object.
-     */
-    Json(JsonList jl)
-        : JsonObject(JsonType::LIST)
-        , _obj{jl}
-    { }
-
-    /**
-     * \brief Constructor of a Json object with a JsonList.
-     * The json type is JsonType::LIST.
-     * \param value std::vector<JsonItem> The vector of JsonItems to wrap in a
-     * JsonList.
-     */
-    Json(std::vector<JsonItem> value)
-        : Json(JsonList(value))
-    { }
-
-    /**
-     * \brief Constructor of a Json object with a JsonDict.
-     * The json type is JsonType::DICT.
-     * \param jl JsonDict The JsonDict object.
-     */
-    Json(JsonDict jd)
-        : JsonObject(JsonType::DICT)
-        , _obj{jd}
-    { }
-
-    /**
-     * \brief Constructor of a Json object with a JsonDict.
-     * The json type is JsonType::DICT.
-     * \param value std::map<std::string, JsonItem> The (string,JsonItem) pair
-     * map to wrap in a JsonDict.
-     */
-    Json(std::map<std::string, JsonItem> value)
-        : Json(JsonDict(value))
-    { }
-
-    /**
-     * \brief Insert a JsonItem in the Json.
-     * If the json type is NONE, then the Json is initialized as a JsonList,
-     * otherwise it throws a runtime_error because the append method cannot be
-     * called in a DICT json type.
-     * \param obj JsonItem The JsonItem to append.
-     */
-    void append(JsonItem obj)
-    {
-        if (_json_type == JsonObject::JsonType::NONE)
-        {
-            _json_type = JsonObject::JsonType::LIST;
-            _obj = JsonItem(JsonList());
-        }
-        auto jl = std::dynamic_pointer_cast<JsonList>(_obj._value);
-        if (!jl) throw std::runtime_error("Json is not a list");
-        jl->append(obj);
-    }
-
-    /**
-     * \brief Subscript operator overloading to add a new (string, JsonItem)
-     * pair in the Json. If the json type is NONE, then the Json is initialized
-     * as a JsonDict, otherwise it throws a runtime_error because the subscript
-     * operator cannot be called in a LIST json type.
-     * \param key std::string The new key to insert.
-     * \return JsonItem& The JsonItem to read or write in key.
-     */
-    JsonItem& operator[](std::string key)
-    {
-        if (_json_type == JsonObject::JsonType::NONE)
-        {
-            _json_type = JsonObject::JsonType::DICT;
-            _obj = JsonItem(JsonDict());
-        }
-        auto jd = std::dynamic_pointer_cast<JsonDict>(_obj._value);
-        if (!jd) throw std::runtime_error("Json is not a dictionary");
-        return (*jd)[key];
-    }
-
-    /**
-     * \brief Subscript operator overloading to overwrite a new item in the
-     * Json. The JSON type has to be LIST.
-     * \param index int Index in the Json list.
-     * \return JsonItem& The JsonItem to read or write in key.
-     */
-    JsonItem& operator[](int index)
-    {
-        auto jd = std::dynamic_pointer_cast<JsonList>(_obj._value);
-        if (!jd) throw std::runtime_error("Json is not a list");
-        return (*jd)[index];
-    }
-
-    /**
-     * \brief Operator overloading of equals.
-     * \param rhs The object to compare with.
-     * \return bool True if the contained objects are equals, otherwise false.
-     */
-    bool operator==(const Json& rhs) const
-    {
-        return _obj == rhs._obj;
-    }
-    bool operator!=(const Json& rhs) const
-    {
-        return !(operator==(rhs));
-    }
-
-    /**
-     * \brief Output stream of a Json.
-     * \param os  std::ostream& The output stream to use.
-     * \param obj const JsonItem& The object to stream out.
-     * \return std::ostream& The updated output stream with the stream of the
-     * JsonObject.
-     */
-    friend std::ostream& operator<<(std::ostream& os, const Json& obj)
-    {
-        os << obj._obj;
-        return os;
-    }
-
-    /**
-     * \brief Input stream of a Json.
-     * \param os  std::istream& The input stream to use.
-     * \param obj Json& The object to stream in the JsonObject.
-     * \return std::istream& The updated input stream.
-     */
-    friend std::istream& operator>>(std::istream& os, Json& obj)
-    {
-        os >> obj._obj;
-        return os;
-    }
-
-    /**
-     * \brief Overloading of JsonItem conversion cast.
-     * \return std::string The converted JsonItem of this object.
-     */
-    operator JsonItem() const
-    {
-        return _obj;
-    }
-
-    /**
-     * \brief Overloading of string conversion cast.
-     * \return std::string The converted string of this object.
-     */
-    operator std::string() const
-    {
-        return std::string(_obj);
-    }
-
-private:
-    JsonItem _obj; ///< \brief The JsonItem that contains the whole JSON.
-};
-
-inline JsonItem::JsonItem(const JsonObject& value)
-    : JsonObject(value.json_type())
-    , _value(std::make_shared<JsonObject>(value))
-{ }
+using Json = JsonItem;
 
 inline JsonItem::JsonItem(const JsonLeaf& value)
-    : JsonObject(JsonType::LEAF)
+    : JsonObject(value.json_type())
     , _value(std::make_shared<JsonLeaf>(value))
 { }
 
-inline JsonItem::JsonItem(int value)
-    : JsonItem(JsonLeaf(value))
+inline JsonItem::JsonItem(std::string val)
+    : JsonItem(JsonLeaf(val))
 { }
-inline JsonItem::JsonItem(unsigned int value)
-    : JsonItem(JsonLeaf(value))
-{ }
-inline JsonItem::JsonItem(long value)
-    : JsonItem(JsonLeaf(value))
-{ }
-inline JsonItem::JsonItem(unsigned long value)
-    : JsonItem(JsonLeaf(value))
+inline JsonItem::JsonItem(const char* val)
+    : JsonItem(JsonLeaf(val))
 { }
 
-inline JsonItem::JsonItem(double value)
-    : JsonItem(JsonLeaf(value))
+inline JsonItem::JsonItem(int val)
+    : JsonItem(JsonLeaf(val))
+{ }
+inline JsonItem::JsonItem(unsigned int val)
+    : JsonItem(JsonLeaf(val))
+{ }
+inline JsonItem::JsonItem(long val)
+    : JsonItem(JsonLeaf(val))
+{ }
+inline JsonItem::JsonItem(unsigned long val)
+    : JsonItem(JsonLeaf(val))
+{ }
+inline JsonItem::JsonItem(long long val)
+    : JsonItem(JsonLeaf(val))
+{ }
+inline JsonItem::JsonItem(unsigned long long val)
+    : JsonItem(JsonLeaf(val))
 { }
 
-inline JsonItem::JsonItem(bool value)
-    : JsonItem(JsonLeaf(value))
+inline JsonItem::JsonItem(double val)
+    : JsonItem(JsonLeaf(val))
 { }
-
-inline JsonItem::JsonItem(std::string value)
-: JsonItem(JsonLeaf(value))
-{ }
-
-inline JsonItem::JsonItem(const char* value)
-    : JsonItem(JsonLeaf(value))
+inline JsonItem::JsonItem(bool val)
+    : JsonItem(JsonLeaf(val))
 { }
 
 inline JsonItem::JsonItem(const JsonList& value)
-    : JsonObject(JsonType::LIST)
+    : JsonObject(value.json_type())
     , _value(std::make_shared<JsonList>(value))
 { }
 
-inline JsonItem::JsonItem(std::vector<JsonItem> value)
-    : JsonItem(JsonList(value))
+inline JsonItem::JsonItem(std::vector<JsonItem> list)
+    : JsonItem(JsonList(list))
 { }
 
 inline JsonItem::JsonItem(const JsonDict& value)
-    : JsonObject(JsonType::DICT)
+    : JsonObject(value.json_type())
     , _value(std::make_shared<JsonDict>(value))
 { }
 
-inline JsonItem::JsonItem(std::map<std::string, JsonItem> value)
-    : JsonItem(JsonDict(value))
+inline JsonItem::JsonItem(std::map<std::string, JsonItem> dict)
+    : JsonItem(JsonDict(dict))
 { }
 
 inline JsonItem::JsonItem(const JsonItem& obj)
@@ -1331,80 +1222,12 @@ inline JsonItem::JsonItem(const JsonItem& obj)
     };
 }
 
-inline void JsonList::append(JsonItem ji)
-{
-    _list.push_back(ji);
-}
-
-inline JsonItem& JsonItem::operator=(JsonItem obj)
+inline JsonItem& JsonItem::operator=(const JsonItem& obj)
 {
     JsonItem tmp(obj);
     _value = tmp._value;
-    _json_type = tmp._json_type;
+    _json_type = tmp.json_type();
     return *this;
-}
-
-inline JsonItem& JsonItem::operator=(const JsonLeaf& obj)
-{
-    _value = std::make_shared<JsonLeaf>(obj);
-    _json_type = JsonType::LEAF;
-    return *this;
-}
-inline JsonItem& JsonItem::operator=(const int& obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const unsigned int& obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const long& obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const unsigned long& obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const double& obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const bool& obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const std::string& obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const char* obj)
-{
-    return operator=(JsonLeaf(obj));
-}
-inline JsonItem& JsonItem::operator=(const JsonList& obj)
-{
-    _value = std::make_shared<JsonList>(obj);
-    _json_type = JsonType::LIST;
-    return *this;
-}
-inline JsonItem& JsonItem::operator=(const std::vector<JsonItem>& obj)
-{
-    return operator=(JsonList(obj));
-}
-inline JsonItem& JsonItem::operator=(const JsonDict& obj)
-{
-    _value = std::make_shared<JsonDict>(obj);
-    _json_type = JsonType::DICT;
-    return *this;
-}
-inline JsonItem& JsonItem::operator=(const std::map<std::string, JsonItem>& obj)
-{
-    return operator=(JsonDict(obj));
-}
-inline JsonItem& JsonItem::operator=(Json obj)
-{
-    return operator=(obj._obj);
 }
 
 inline JsonItem& JsonItem::operator[](std::size_t idx)
@@ -1436,10 +1259,10 @@ inline JsonItem& JsonItem::operator[](std::size_t idx)
 
 inline JsonItem& JsonItem::operator[](std::string key)
 {
-    if (!_value)
+    if (!_value || _json_type == JsonObject::JsonType::NONE)
     {
-        throw std::runtime_error("Try to call a subscript operator in empty "
-                                 "JsonItem");
+        _json_type = JsonObject::JsonType::DICT;
+        _value = std::make_shared<JsonDict>();
     }
     switch(_value->json_type())
     {
@@ -1461,7 +1284,88 @@ inline JsonItem& JsonItem::operator[](std::string key)
                              "json object");
 }
 
-inline std::size_t JsonItem::size() const
+inline const JsonItem& JsonItem::at(unsigned long idx) const
+{
+    if (!_value)
+    {
+        throw std::runtime_error("Try to call method at() in empty "
+                                 "JsonItem");
+    }
+    switch(_value->json_type())
+    {
+        case JsonObject::JsonType::LIST:
+        {
+            auto jl = std::dynamic_pointer_cast<JsonList>(_value);
+            if (jl) return (*jl).at(idx);
+            break;
+        }
+        case JsonObject::JsonType::DICT:
+        case JsonObject::JsonType::LEAF:
+        case JsonObject::JsonType::NONE:
+        default:
+        {
+            break;
+        }
+    };
+    throw std::runtime_error("Try to call method at() in a non-list "
+                             "json object");
+}
+
+inline const JsonItem& JsonItem::at(std::string key) const
+{
+    if (!_value)
+    {
+        throw std::runtime_error("Try to call method at() in empty "
+                                 "JsonItem");
+    }
+    switch(_value->json_type())
+    {
+        case JsonObject::JsonType::DICT:
+        {
+            auto jd = std::dynamic_pointer_cast<JsonDict>(_value);
+            if (jd) return (*jd).at(key);
+            break;
+        }
+        case JsonObject::JsonType::LIST:
+        case JsonObject::JsonType::LEAF:
+        case JsonObject::JsonType::NONE:
+        default:
+        {
+            break;
+        }
+    };
+    throw std::runtime_error("Try to call method at() in a non-dict "
+                             "json object");
+}
+
+inline void JsonItem::append(JsonItem ji)
+{
+    if (!_value || _json_type == JsonObject::JsonType::NONE)
+    {
+        _json_type = JsonObject::JsonType::LIST;
+        _value = std::make_shared<JsonList>();
+    }
+    switch(_value->json_type())
+    {
+        case JsonObject::JsonType::LIST:
+        {
+            auto jl = std::dynamic_pointer_cast<JsonList>(_value);
+            if (jl) return (*jl).append(ji);
+            break;
+        }
+        case JsonObject::JsonType::DICT:
+        case JsonObject::JsonType::LEAF:
+        case JsonObject::JsonType::NONE:
+        default:
+        {
+            break;
+        }
+    };
+    throw std::runtime_error("Try to call method append() in a non-list "
+                             "json object");
+}
+
+inline unsigned long JsonItem::size() const
 {
     if (!_value)
     {
@@ -1489,6 +1393,46 @@ inline std::size_t JsonItem::size() const
         }
     };
     return 0;
+}
+
+template<typename T>
+inline void JsonItem::as(T* ptr) const
+{
+    *ptr = convert_json_object<T>(_value);
+}
+
+template<typename T>
+inline void JsonItem::as_vec(std::vector<T>& ptr) const
+{
+    ptr = static_cast<std::vector<T>>(
+        convert_json_object<JsonList>(_value));
+}
+
+template<typename T>
+inline void JsonItem::as_map(std::map<std::string, T>& ptr) const
+{
+    ptr = static_cast<std::map<std::string, T>>(
+        convert_json_object<JsonDict>(_value));
+}
+
+template<typename T>
+inline T JsonItem::as() const
+{
+    return convert_json_object<T>(_value);
+}
+
+template<typename T>
+inline std::vector<T> JsonItem::as_vec() const
+{
+    return static_cast<std::vector<T>>(
+        convert_json_object<JsonList>(_value));
+}
+
+template<typename T>
+inline std::map<std::string, T> JsonItem::as_map() const
+{
+    return static_cast<std::map<std::string, T>>(
+        convert_json_object<JsonDict>(_value));
 }
 
 inline std::ostream& operator<<(std::ostream& os, const JsonObject& obj)
@@ -1568,7 +1512,7 @@ inline std::istream& operator>>(std::istream &os, JsonLeaf& obj)
         {
             obj._val = obj._val.substr(0, pos);
             if (!os.eof()) os.seekg(-1, os.cur); // ','
-            os.seekg(-std::int64_t(obj_val_len - pos), os.cur);
+            os.seekg(-long(obj_val_len - pos), os.cur);
         }
         obj._type = obj._tc(obj._val);
     }
@@ -1583,7 +1527,7 @@ inline std::ostream& operator<<(std::ostream& os, const JsonList& obj)
         os << "]";
         return os;
     }
-    for (std::size_t i = 0; i < obj._list.size() - 1; ++i)
+    for (unsigned long i = 0; i < obj._list.size() - 1; ++i)
     {
         os << obj._list[i] << ",";
     }
@@ -1599,7 +1543,7 @@ inline std::istream& operator>>(std::istream &os, JsonList& obj)
     std::string more_items;
     while (true) {
         std::getline(os, more_items, ']');
-        os.seekg(-std::int64_t(more_items.size() + 1), os.cur);
+        os.seekg(-long(more_items.size() + 1), os.cur);
         JsonItem ji;
         os >> ji;
         obj._list.push_back(ji);
@@ -1625,7 +1569,7 @@ inline std::istream& operator>>(std::istream &os, JsonList& obj)
 
 inline std::ostream& operator<<(std::ostream& os, const JsonDict& obj)
 {
-    std::size_t i = 0;
+    unsigned long i = 0;
     os << "{";
     for (const auto& e: obj._map)
     {
@@ -1648,7 +1592,7 @@ inline std::istream& operator>>(std::istream& os, JsonDict& obj)
     while (true)
     {
         std::getline(os, more_items, '}');
-        os.seekg(-std::int64_t(more_items.size() + 1), os.cur);
+        os.seekg(-long(more_items.size() + 1), os.cur);
         os.read(&c, 1);
         std::string key;
         std::getline(os, key, '\"');
@@ -1695,6 +1639,7 @@ inline std::istream& operator>>(std::istream& os, JsonItem& obj)
             auto jl = std::make_shared<JsonList>();
             os >> *jl;
             obj._value = jl;
+            obj._json_type = JsonObject::JsonType::LIST;
             break;
         }
         case '{':
@@ -1702,6 +1647,7 @@ inline std::istream& operator>>(std::istream& os, JsonItem& obj)
             auto jd = std::make_shared<JsonDict>();
             os >> *jd;
             obj._value = jd;
+            obj._json_type = JsonObject::JsonType::DICT;
             break;
         }
         default:
@@ -1709,6 +1655,7 @@ inline std::istream& operator>>(std::istream& os, JsonItem& obj)
             auto jd = std::make_shared<JsonLeaf>();
             os >> *jd;
             obj._value = jd;
+            obj._json_type = JsonObject::JsonType::LEAF;
             break;
         }
     }
@@ -1757,7 +1704,7 @@ inline bool JsonLeaf::operator==(const JsonLeaf& rhs) const
 inline bool JsonList::operator==(const JsonList& rhs) const
 {
     if (_list.size() != rhs._list.size()) return false;
-    for (std::size_t i = 0; i < _list.size(); ++i)
+    for (unsigned long i = 0; i < _list.size(); ++i)
     {
         if (_list[i] != rhs._list[i]) return false;
     }
@@ -1813,19 +1760,19 @@ inline JsonItem::operator std::string() const
         case JsonObject::JsonType::LEAF:
         {
             auto jl = std::dynamic_pointer_cast<JsonLeaf>(_value);
-            if (jl) return std::string(*jl);
+            if (jl) return (*jl).value();
             break;
         }
         case JsonObject::JsonType::LIST:
         {
             auto jl = std::dynamic_pointer_cast<JsonList>(_value);
-            if (jl) return std::string(*jl);
+            if (jl) return static_cast<std::string>(*jl);
             break;
         }
         case JsonObject::JsonType::DICT:
         {
             auto jd = std::dynamic_pointer_cast<JsonDict>(_value);
-            if (jd) return std::string(*jd);
+            if (jd) return static_cast<std::string>(*jd);
             break;
         }
         case JsonObject::JsonType::NONE:
@@ -1838,13 +1785,30 @@ inline JsonItem::operator std::string() const
 }
 
 template<typename T>
-inline T convert(JsonObject::Shared jo_ptr)
+inline std::vector<JsonItem> JsonList::_convert_vec(const std::vector<T>& list)
 {
-    return T(convert<JsonLeaf>(jo_ptr));
+    std::vector<JsonItem> tmp(list.size());
+    for (unsigned long i = 0; i < list.size(); ++i)
+    {
+        tmp[i] = JsonItem(list[i]);
+    }
+    return tmp;
 }
 
-template<>
-inline JsonLeaf convert<JsonLeaf>(JsonObject::Shared jo_ptr)
+template<typename T>
+inline std::map<std::string, JsonItem> JsonDict::_convert_map(
+    const std::map<std::string, T>& map)
+{
+    std::map<std::string, JsonItem> tmp;
+    for (const auto& e: map)
+    {
+        tmp[e.first] = JsonItem(e.second);
+    }
+    return tmp;
+}
+
+template<typename T>
+inline T convert_json_object(JsonObject::Shared jo_ptr)
 {
     if (!jo_ptr)
     {
@@ -1855,7 +1819,7 @@ inline JsonLeaf convert<JsonLeaf>(JsonObject::Shared jo_ptr)
         case JsonObject::JsonType::LEAF:
         {
             auto jl = std::dynamic_pointer_cast<JsonLeaf>(jo_ptr);
-            if (jl) return *jl;
+            if (jl) return static_cast<T>(*jl);
             break;
         }
         case JsonObject::JsonType::DICT:
@@ -1870,7 +1834,7 @@ inline JsonLeaf convert<JsonLeaf>(JsonObject::Shared jo_ptr)
 }
 
 template<>
-inline JsonList convert<JsonList>(JsonObject::Shared jo_ptr)
+inline JsonList convert_json_object<JsonList>(JsonObject::Shared jo_ptr)
 {
     if (!jo_ptr)
     {
@@ -1897,7 +1861,7 @@ inline JsonList convert<JsonList>(JsonObject::Shared jo_ptr)
 }
 
 template<>
-inline JsonDict convert<JsonDict>(JsonObject::Shared jo_ptr)
+inline JsonDict convert_json_object<JsonDict>(JsonObject::Shared jo_ptr)
 {
     if (!jo_ptr)
     {
@@ -1921,49 +1885,6 @@ inline JsonDict convert<JsonDict>(JsonObject::Shared jo_ptr)
     };
     throw std::runtime_error("Try to convert a non-dict json object in a "
                              "map");
-}
-
-inline JsonItem::operator int() const
-{
-    return as<int>();
-}
-inline JsonItem::operator unsigned int() const
-{
-    return as<unsigned int>();
-}
-inline JsonItem::operator long() const
-{
-    return as<long>();
-}
-inline JsonItem::operator unsigned long() const
-{
-    return as<unsigned long>();
-}
-
-inline JsonItem::operator double() const
-{
-    return as<double>();
-}
-
-inline JsonItem::operator bool() const
-{
-    return as<bool>();
-}
-
-template<typename T>
-inline JsonItem::operator std::vector<T>() const
-{
-    JsonList jl;
-    as<JsonList>(&jl);
-    return std::vector<T>(jl);
-}
-
-template<typename T>
-inline JsonItem::operator std::map<std::string, T>() const
-{
-    JsonDict jl;
-    as<JsonDict>(&jl);
-    return std::map<std::string, T>(jl);
 }
 
 } // namespace EdgeLearning

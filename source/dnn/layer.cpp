@@ -27,6 +27,8 @@
 #include "model.hpp"
 #include "dlmath.hpp"
 
+#include <stdexcept>
+
 
 namespace EdgeLearning {
 
@@ -34,7 +36,7 @@ const std::string Layer::TYPE = "None";
 const std::map<Layer::DumpFields, std::string> Layer::dump_fields = {
     { DumpFields::TYPE,          "type"          },
     { DumpFields::NAME,          "name"          },
-    { DumpFields::INPUT_SIZE,    "input_shape"    },
+    { DumpFields::INPUT_SIZE,    "input_size"    },
     { DumpFields::OUTPUT_SIZE,   "output_size"   },
     { DumpFields::WEIGHTS,       "weights"       },
     { DumpFields::BIASES,        "biases"        },
@@ -157,25 +159,30 @@ void Layer::dump(Json& out) const
     };
     out[dump_fields.at(DumpFields::OUTPUT_SIZE)] = Json(output_size);
 
-    Json antecedent_names;
+    std::vector<std::string> antecedent_names;
     for (const auto& antecedent : _antecedents)
     {
-        antecedent_names.append(antecedent->name());
+        antecedent_names.push_back(antecedent->name());
     }
-    out[dump_fields.at(DumpFields::ANTECEDENTS)] = antecedent_names;
+    out[dump_fields.at(DumpFields::ANTECEDENTS)] = Json(antecedent_names);
 
-    Json subsequent_names;
+    std::vector<std::string> subsequent_names;
     for (const auto& subsequent : _subsequents)
     {
-        subsequent_names.append(subsequent->name());
+        subsequent_names.push_back(subsequent->name());
     }
-    out[dump_fields.at(DumpFields::SUBSEQUENTS)] = subsequent_names;
+    out[dump_fields.at(DumpFields::SUBSEQUENTS)] = Json(subsequent_names);
 }
 
 void Layer::load(Json& in)
 {
+    if (in.json_type() == JsonObject::JsonType::NONE)
+    {
+        throw std::runtime_error("No well-formed JSON");
+    }
+
     auto t = in[dump_fields.at(DumpFields::TYPE)];
-    if (t != type())
+    if (t.as<std::string>() != type())
     {
         throw std::runtime_error(
             "The current layer of type " + type() +
@@ -194,8 +201,8 @@ void Layer::load(Json& in)
         in[dump_fields.at(DumpFields::OUTPUT_SIZE)][2].as<SizeType>()
     );
 
-    auto antecedent_layer_names = std::vector<std::string>(
-        in[dump_fields.at(DumpFields::ANTECEDENTS)]);
+    auto antecedent_layer_names =
+        in.at(dump_fields.at(DumpFields::ANTECEDENTS)).as_vec<std::string>();
     for (const auto& antecedent : _antecedents)
     {
         if (std::find(antecedent_layer_names.begin(),
@@ -208,8 +215,8 @@ void Layer::load(Json& in)
         }
     }
 
-    auto subsequent_layer_names = std::vector<std::string>(
-        in[dump_fields.at(DumpFields::SUBSEQUENTS)]);
+    auto subsequent_layer_names =
+        in.at(dump_fields.at(DumpFields::SUBSEQUENTS)).as_vec<std::string>();
     for (const auto& subsequent : _subsequents)
     {
         if (std::find(subsequent_layer_names.begin(),

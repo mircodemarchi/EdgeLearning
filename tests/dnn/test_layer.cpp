@@ -32,10 +32,16 @@ using namespace EdgeLearning;
 
 class CustomLayer: public Layer {
 public:
-    CustomLayer(SizeType input_size = 0, SizeType output_size = 0)
-        : Layer(_m, input_size, output_size, "custom_layer_test")
+    CustomLayer(SizeType input_size = 0, SizeType output_size = 0,
+                std::string name = std::string(),
+                SharedPtr antecedent = nullptr, SharedPtr subsequent = nullptr)
+        : Layer(_m, input_size, output_size,
+                name.empty() ? "custom_layer_test" : name)
         , _m{"model_layer_test"}
-    { }
+    {
+        if (antecedent) _antecedents.push_back(antecedent);
+        if (subsequent) _subsequents.push_back(subsequent);
+    }
 
     void init(
         InitializationFunction init = InitializationFunction::KAIMING,
@@ -132,11 +138,30 @@ private:
     Model _m;
 };
 
+class CustomLayerType : public CustomLayer
+{
+public:
+    static const std::string TYPE;
+
+    CustomLayerType(SizeType input_size = 0, SizeType output_size = 0,
+                    std::string name = std::string(),
+                    SharedPtr antecedent = nullptr,
+                    SharedPtr subsequent = nullptr)
+        : CustomLayer(input_size, output_size, name, antecedent, subsequent)
+    { }
+
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
+};
+
+const std::string CustomLayerType::TYPE = "CustomType";
+
 
 class TestLayer {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
+        EDGE_LEARNING_TEST_CALL(test_stream());
     }
 
 private:
@@ -319,6 +344,104 @@ private:
                                   std::runtime_error);
     }
 
+    void test_stream()
+    {
+        CustomLayer l(10, 11, "layer_test_stream");
+
+        Json l_dump;
+        EDGE_LEARNING_TEST_TRY(l.dump(l_dump));
+        EDGE_LEARNING_TEST_PRINT(l_dump);
+        EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "None");
+        EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
+
+        auto input_size_arr = l_dump["input_size"].as_vec<std::size_t>();
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
+        std::size_t input_size = input_size_arr[0]
+            * input_size_arr[1] * input_size_arr[2];
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+
+        auto output_size_arr = l_dump["output_size"].as_vec<std::size_t>();
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
+        std::size_t output_size = output_size_arr[0]
+            * output_size_arr[1] * output_size_arr[2];
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+
+        EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
+
+        l = CustomLayer();
+        EDGE_LEARNING_TEST_TRY(l.load(l_dump));
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "None");
+        EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+
+        CustomLayer l_prev(12, 13, "layer_test_stream_prev");
+        CustomLayer l_next(14, 15, "layer_test_stream_next");
+        CustomLayer l_comp(16, 17, "layer_test_stream_comp",
+                           std::make_shared<CustomLayer>(l_prev),
+                           std::make_shared<CustomLayer>(l_next));
+        Json l_dump_comp;
+        EDGE_LEARNING_TEST_TRY(l_comp.dump(l_dump_comp));
+        EDGE_LEARNING_TEST_PRINT(l_dump_comp);
+        EDGE_LEARNING_TEST_EQUAL(l_dump_comp["antecedents"].size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(l_dump_comp["antecedents"][0], l_prev.name());
+        EDGE_LEARNING_TEST_EQUAL(l_dump_comp["subsequents"].size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(l_dump_comp["subsequents"][0], l_next.name());
+
+        l_comp = CustomLayer();
+        EDGE_LEARNING_TEST_TRY(l_comp.load(l_dump_comp));
+        auto l_comp1 = CustomLayer(16, 17, "layer_test_stream_comp",
+                                   std::make_shared<CustomLayer>(l_prev),
+                                   nullptr);
+        EDGE_LEARNING_TEST_TRY(l_comp.load(l_dump_comp));
+        auto l_comp2 = CustomLayer(16, 17, "layer_test_stream_comp",
+                                   nullptr,
+                                   std::make_shared<CustomLayer>(l_next));
+        EDGE_LEARNING_TEST_TRY(l_comp.load(l_dump_comp));
+        Json l_dump_comp_fail;
+        l_comp.dump(l_dump_comp_fail);
+        CustomLayerType l_comp_type;
+        EDGE_LEARNING_TEST_FAIL(l_comp_type.load(l_dump_comp_fail));
+        EDGE_LEARNING_TEST_THROWS(l_comp_type.load(l_dump_comp_fail),
+                                  std::runtime_error);
+        l_comp = CustomLayer(16, 17, "layer_test_stream_comp",
+                             std::make_shared<CustomLayer>(l_next),
+                             std::make_shared<CustomLayer>(l_next));
+        EDGE_LEARNING_TEST_FAIL(l_comp.load(l_dump_comp_fail));
+        EDGE_LEARNING_TEST_THROWS(l_comp.load(l_dump_comp_fail),
+                                  std::runtime_error);
+        l_comp = CustomLayer(16, 17, "layer_test_stream_comp",
+                             std::make_shared<CustomLayer>(l_prev),
+                             std::make_shared<CustomLayer>(l_prev));
+        EDGE_LEARNING_TEST_FAIL(l_comp.load(l_dump_comp_fail));
+        EDGE_LEARNING_TEST_THROWS(l_comp.load(l_dump_comp_fail),
+                                  std::runtime_error);
+        l_comp1.dump(l_dump_comp_fail);
+        EDGE_LEARNING_TEST_FAIL(l_comp.load(l_dump_comp_fail));
+        EDGE_LEARNING_TEST_THROWS(l_comp.load(l_dump_comp_fail),
+                                  std::runtime_error);
+        l_comp2.dump(l_dump_comp_fail);
+        EDGE_LEARNING_TEST_FAIL(l_comp.load(l_dump_comp_fail));
+        EDGE_LEARNING_TEST_THROWS(l_comp.load(l_dump_comp_fail),
+                                  std::runtime_error);
+
+        Json json_void;
+        EDGE_LEARNING_TEST_FAIL(l.load(json_void));
+        EDGE_LEARNING_TEST_THROWS(l.load(json_void), std::runtime_error);
+    }
 };
 
 int main() {

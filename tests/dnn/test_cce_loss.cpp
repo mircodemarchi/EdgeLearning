@@ -37,6 +37,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_loss_layer());
         EDGE_LEARNING_TEST_CALL(test_score());
         EDGE_LEARNING_TEST_CALL(test_cce_loss_layer());
+        EDGE_LEARNING_TEST_CALL(test_stream());
     }
 
 private:
@@ -270,6 +271,55 @@ private:
         EDGE_LEARNING_TEST_TRY(l_binary.set_target(target_wrong));
         EDGE_LEARNING_TEST_TRY(l_binary.forward(v3));
         EDGE_LEARNING_TEST_TRY(l_binary.backward(v3));
+    }
+
+    void test_stream()
+    {
+        auto l = CCELossLayer(_m, "cce_loss_layer_test", 2);
+
+        Json l_dump;
+        EDGE_LEARNING_TEST_TRY(l.dump(l_dump));
+        EDGE_LEARNING_TEST_PRINT(l_dump);
+        EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "CCELoss");
+        EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
+
+        auto input_size_arr = l_dump["input_size"].as_vec<std::size_t>();
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
+        std::size_t input_size = input_size_arr[0]
+                                 * input_size_arr[1] * input_size_arr[2];
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+
+        auto output_size_arr = l_dump["output_size"].as_vec<std::size_t>();
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
+        std::size_t output_size = output_size_arr[0]
+                                  * output_size_arr[1] * output_size_arr[2];
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+
+        EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
+
+        l = CCELossLayer(_m);
+        EDGE_LEARNING_TEST_TRY(l.load(l_dump));
+        EDGE_LEARNING_TEST_EQUAL(l.type(), "CCELoss");
+        EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels);
+        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+
+        Json json_void;
+        EDGE_LEARNING_TEST_FAIL(l.load(json_void));
+        EDGE_LEARNING_TEST_THROWS(l.load(json_void), std::runtime_error);
     }
 
     Model _m = Model("model_cce_loss_layer_test");

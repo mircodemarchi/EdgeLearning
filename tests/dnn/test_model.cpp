@@ -169,15 +169,15 @@ private:
 
         EDGE_LEARNING_TEST_TRY(m.init());
         std::ofstream ofile{
-            std::filesystem::path{"classifier.weight"},
-            std::ios::binary};
+            std::filesystem::path{"classifier_weight.json"},
+            std::ios::trunc};
         EDGE_LEARNING_TEST_TRY(m.dump(ofile));
+        ofile.close();
 
         EDGE_LEARNING_TEST_TRY(m.init());
-        std::ifstream ifile{
-            std::filesystem::path{"classifier.weight"},
-            std::ios::binary};
+        std::ifstream ifile{std::filesystem::path{"classifier_weight.json"}};
         EDGE_LEARNING_TEST_TRY(m.load(ifile));
+        ifile.close();
     }
 
     void test_classifier_model() {
@@ -224,9 +224,10 @@ private:
         m.print();
 
         std::ofstream params_file{
-            std::filesystem::path{"classifier.weight"}, 
-            std::ios::binary};
-        m.dump(params_file);
+            std::filesystem::path{"classifier_weight.json"}, 
+            std::ios::trunc};
+        EDGE_LEARNING_TEST_TRY(m.dump(params_file));
+        params_file.close();
     }
 
     void test_classifier_model_predict() {
@@ -234,9 +235,9 @@ private:
         Model m = TestModel::_create_binary_classifier_model();
 
         std::ifstream params_file{
-            std::filesystem::path{"classifier.weight"}, 
-            std::ios::binary};
-        m.load(params_file);
+            std::filesystem::path{"classifier_weight.json"}};
+        EDGE_LEARNING_TEST_TRY(m.load(params_file));
+        params_file.close();
     }
 
     void test_regressor_model() {
@@ -284,9 +285,10 @@ private:
         m.print();
 
         std::ofstream params_file{
-            std::filesystem::path{"regressor.weight"}, 
-            std::ios::binary};
-        m.dump(params_file);
+            std::filesystem::path{"regressor_weight.json"}, 
+            std::ios::trunc};
+        EDGE_LEARNING_TEST_TRY(m.dump(params_file));
+        params_file.close();
     }
 
     void test_regressor_model_predict() {
@@ -294,9 +296,9 @@ private:
         Model m = TestModel::_create_regressor_model();
 
         std::ifstream params_file{
-            std::filesystem::path{"regressor.weight"}, 
-            std::ios::binary};
-        m.load(params_file);
+            std::filesystem::path{"regressor_weight.json"}};
+        EDGE_LEARNING_TEST_TRY(m.load(params_file));
+        params_file.close();
     }
 
     void test_recurisive_model() {
