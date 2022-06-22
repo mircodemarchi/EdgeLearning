@@ -85,6 +85,11 @@ public:
     NumType& param(SizeType index) override;
     NumType& gradient(SizeType index) override;
 
+    [[nodiscard]] SharedPtr clone() const override
+    {
+        return std::make_shared<DenseLayer>(*this);
+    }
+
     void print() const override;
 
     /**

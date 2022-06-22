@@ -83,6 +83,9 @@ public:
         throw std::runtime_error("");
     }
 
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<CustomLayer>(*this); }
+
     void print() const override {}
 
 private:
@@ -132,6 +135,9 @@ public:
         throw std::runtime_error("");
     }
 
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<CustomLayerNoName>(*this); }
+
     void print() const override {}
 
 private:
@@ -152,6 +158,9 @@ public:
 
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
+
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<CustomLayerType>(*this); }
 };
 
 const std::string CustomLayerType::TYPE = "CustomType";

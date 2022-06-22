@@ -129,6 +129,11 @@ public:
         throw std::runtime_error("Dropout layers do not have gradients");
     }
 
+    [[nodiscard]] SharedPtr clone() const override
+    {
+        return std::make_shared<DropoutLayer>(*this);
+    }
+
     void print() const override;
 
     [[nodiscard]] const DLMath::Shape3d& input_shape() const override

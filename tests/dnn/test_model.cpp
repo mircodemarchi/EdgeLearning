@@ -63,6 +63,9 @@ public:
     const std::vector<NumType>& backward(
         const std::vector<NumType>&gradients) override { return gradients; }
 
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<CustomLossLayer>(*this); }
+
 private:
     std::vector<NumType> _params;
     SizeType _i;

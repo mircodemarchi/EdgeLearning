@@ -211,6 +211,12 @@ public:
     virtual NumType& gradient(SizeType index) = 0;
 
     /**
+     * \brief Clone the layer with its custom parameters.
+     * \return std::shared_prt<Layer> The pointer to the cloned layer.
+     */
+    [[nodiscard]] virtual SharedPtr clone() const = 0;
+
+    /**
      * \brief Print layer info.
      */
     virtual void print() const = 0;

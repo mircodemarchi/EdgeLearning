@@ -46,10 +46,14 @@ Model::Model(std::string name)
 
 Model::Model(const Model& obj)
     : _name{obj._name}
-    , _layers{obj._layers}
+    , _layers{}
     , _loss_layer{obj._loss_layer}
 {
-
+    _layers.resize(obj._layers.size());
+    for (std::size_t i = 0; i < obj._layers.size(); ++i)
+    {
+        _layers[i] = obj._layers[i]->clone();
+    }
 }
 
 Model& Model::operator=(Model obj)

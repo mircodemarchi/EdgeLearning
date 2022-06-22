@@ -59,6 +59,11 @@ public:
     const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients) override;
 
+    [[nodiscard]] SharedPtr clone() const override
+    {
+        return std::make_shared<MSELossLayer>(*this);
+    }
+
     /**
      * \brief Save the layer infos to disk.
      * \param out Json& out Json to write.

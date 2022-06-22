@@ -97,7 +97,7 @@ public:
      * \brief Getter of input_shape class field.
      * \return The size of the layer input.
      */
-    [[nodiscard]] virtual const DLMath::Shape3d & input_shape() const override
+    [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const override
     {
         return FeedforwardLayer::input_shape();
     }
@@ -121,6 +121,8 @@ public:
               SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<ReluLayer>(*this); }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(
@@ -136,6 +138,8 @@ public:
                  SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<SoftmaxLayer>(*this); }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(
@@ -151,6 +155,8 @@ public:
               SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<TanhLayer>(*this); }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(
@@ -166,6 +172,8 @@ public:
                 SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<LinearLayer>(*this); }
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
     const std::vector<NumType>& backward(

@@ -64,6 +64,11 @@ public:
     const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients) override;
 
+    [[nodiscard]] SharedPtr clone() const override
+    {
+        return std::make_shared<CCELossLayer>(*this);
+    }
+
 private:
     /**
      * \brief Find the argument of _target array that is active.

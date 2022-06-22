@@ -37,6 +37,9 @@ public:
         , _i{0}
     { }
 
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<CustomLossLayer>(*this); }
+
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override
     {
@@ -60,6 +63,10 @@ public:
         : LossLayer(_m)
         , _m{"model_layer_test"}
     { }
+
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<CustomLossLayerNoName>(*this); }
+
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override
     {

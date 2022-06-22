@@ -97,6 +97,11 @@ public:
     NumType& param(SizeType index) override;
     NumType& gradient(SizeType index) override;
 
+    [[nodiscard]] SharedPtr clone() const override
+    {
+        return std::make_shared<RecurrentLayer>(*this);
+    }
+
     void print() const override;
 
     void hidden_state(std::vector<NumType> hidden_state)
