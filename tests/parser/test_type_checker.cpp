@@ -106,19 +106,19 @@ private:
 
     void test_convert() {
         float f;
-        EDGE_LEARNING_TEST_ASSERT(convert("1.2", &f));
+        EDGE_LEARNING_TEST_ASSERT(convert("1.2", f));
         EDGE_LEARNING_TEST_WITHIN(f, 1.2, 0.0000001);
         bool b;
-        EDGE_LEARNING_TEST_ASSERT(convert("true", &b));
+        EDGE_LEARNING_TEST_ASSERT(convert("true", b));
         EDGE_LEARNING_TEST_EQUAL(b, true);
         int i;
-        EDGE_LEARNING_TEST_ASSERT(convert("1", &i));
+        EDGE_LEARNING_TEST_ASSERT(convert("1", i));
         EDGE_LEARNING_TEST_EQUAL(i, 1);
         std::string s;
-        EDGE_LEARNING_TEST_ASSERT(convert("1", &s));
+        EDGE_LEARNING_TEST_ASSERT(convert("1", s));
         EDGE_LEARNING_TEST_EQUAL(s, "1");
 
-        EDGE_LEARNING_TEST_ASSERT(!convert("1string", &i));
+        EDGE_LEARNING_TEST_ASSERT(!convert("1string", i));
 
         EDGE_LEARNING_TEST_EQUAL(convert<int>(1), "1");
         EDGE_LEARNING_TEST_EQUAL(convert<float>(1), "1.000000");

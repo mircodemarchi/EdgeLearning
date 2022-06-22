@@ -72,18 +72,18 @@ const std::regex _string_regex  { "^\".*\"$" };
 
 /**
  * \brief Convert a string in the templated type T and put the result in the
- * pointer.
+ * reference.
  * \tparam T  The type to convert to.
  * \param s   The string to convert.
- * \param ptr The pointer to the memory in which put the result.
- * \return true  If convertion succeedes.
- * \return false If convertion fails.
+ * \param ref The reference to the memory in which put the result.
+ * \return true  If conversion succeeds.
+ * \return false If conversion fails.
  */
 template<typename T>
-inline bool convert(const std::string &s, T *ptr)
+inline bool convert(const std::string &s, T& ref)
 {
     std::stringstream ss{s};
-    ss >> *ptr;
+    ss >> ref;
     return !ss.fail() && ss.eof();
 }
 
@@ -91,14 +91,14 @@ inline bool convert(const std::string &s, T *ptr)
  * \brief Template specialization for string of convert<T>
  * \tparam std::string
  * \param s   The string to convert.
- * \param ptr The pointer to the memory in which put the result.
- * \return true  If convertion succeedes.
- * \return false If convertion fails.
+ * \param ref The reference to the memory in which put the result.
+ * \return true  If conversion succeeds.
+ * \return false If conversion fails.
  */
 template<>
-inline bool convert<std::string>(const std::string &s, std::string *ptr)
+inline bool convert<std::string>(const std::string &s, std::string& ref)
 {
-    *ptr = s;
+    ref = s;
     return true;
 }
 
@@ -106,20 +106,20 @@ inline bool convert<std::string>(const std::string &s, std::string *ptr)
  * \brief Template specialization for boolean of convert<T>
  * \tparam bool
  * \param s   The string to convert.
- * \param ptr The pointer to the memory in which put the result.
- * \return true  If convertion succeedes.
- * \return false If convertion fails.
+ * \param ref The reference to the memory in which put the result.
+ * \return true  If conversion succeeds.
+ * \return false If conversion fails.
  */
 template<>
-inline bool convert<bool>(const std::string &s, bool *ptr)
+inline bool convert<bool>(const std::string &s, bool& ref)
 {
     if (s == "true" || s == "1")
     {
-        *ptr = true;
+        ref = true;
     }
     else 
     {
-        *ptr = false;
+        ref = false;
     }
     return true;
 }
@@ -200,17 +200,17 @@ public:
         { return parse(in) == Type::STRING; };
     
     /**
-     * \brief Operator overloading for string convertion (see convert).
+     * \brief Operator overloading for string conversion (see convert).
      * \tparam T
      * \param s   The string to convert.
-     * \param ptr The pointer to the memory in which put the result.
-     * \return true  If convertion succeedes.
-     * \return false If convertion fails.
+     * \param ref The reference to the memory in which put the result.
+     * \return true  If conversion succeeds.
+     * \return false If conversion fails.
      */
     template<typename T> 
-    bool operator()(const std::string &s, T *ptr) const 
+    bool operator()(const std::string &s, T& ref) const
     {
-        return parse<T>(s, ptr);
+        return parse<T>(s, ref);
     }
 
     /**
@@ -218,7 +218,7 @@ public:
      * \param field The string field.
      * \return Type The type of the parsed field.
      */
-    Type operator()(const std::string &field) const 
+    Type operator()(const std::string& field) const
     {
         return parse(field);
     }
@@ -241,7 +241,7 @@ public:
      * \return Type The vector types of the parsed fields.
      */
     std::vector<Type> operator()(
-        const std::vector<std::string> &fields) const 
+        const std::vector<std::string>& fields) const
     {
         return parse(fields);
     }
@@ -250,14 +250,14 @@ public:
      * \brief Convert a string in the specified template type (see convert).
      * \tparam T  The specified type.
      * \param s   The string to convert.
-     * \param ptr The pointer to the memory in which put the result.
-     * \return true  If convertion succeedes.
-     * \return false If convertion fails.
+     * \param ref The reference to the memory in which put the result.
+     * \return true  If conversion succeeds.
+     * \return false If conversion fails.
      */
     template<typename T>
-    static bool parse(const std::string &s, T *ptr)
+    static bool parse(const std::string &s, T& ref)
     {
-        return convert<T>(s, ptr);
+        return convert<T>(s, ref);
     }
     
     /**
@@ -300,7 +300,7 @@ public:
      * \return std::vector<Type> The resulting types of string fields.
      */
     static std::vector<Type> parse(
-        const std::vector<std::string> &fields)
+        const std::vector<std::string>& fields)
     {
         std::vector<Type> ret;
         ret.resize(fields.size());

@@ -103,12 +103,12 @@ public:
     /**
      * \brief Convert the field in the templated type and put in the ptr.
      * \tparam T  Field type requested.
-     * \param ptr Pointer in which put the result.
+     * \param ref Reference in which put the result.
      */
     template<typename T>
-    void as(T *ptr) const
+    void as(T& ref) const
     {
-        _tc(_field, ptr);
+        _tc(_field, ref);
     }
 
     /**
@@ -120,7 +120,7 @@ public:
     T as() const
     {
         T ret;
-        _tc(_field,& ret);
+        as(ret);
         return ret;
     }
 
@@ -380,7 +380,7 @@ public:
             std::string s;
             std::getline(ss, s, _separator);
             T t;
-            _tc.template operator()<T>(s, &t);
+            _tc.template operator()<T>(s, t);
             ret[i] = t;
         }
         return ret;

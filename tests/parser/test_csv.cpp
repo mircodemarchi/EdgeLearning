@@ -57,8 +57,8 @@ private:
         auto csv_field_float   = CSVField{"1",     csv_field_float_t, 2};
         auto csv_field_bool    = CSVField{"false", csv_field_bool_t,  3};
 
-        int i; csv_field_int.as(&i);
-        std::string s; csv_field_str.as(&s);
+        int i; csv_field_int.as(i);
+        std::string s; csv_field_str.as(s);
         EDGE_LEARNING_TEST_EQUAL(i, 123);
         EDGE_LEARNING_TEST_EQUAL(s, "\"\"");
         EDGE_LEARNING_TEST_WITHIN(csv_field_float.as<float>(), 1.0, 0.0000001);

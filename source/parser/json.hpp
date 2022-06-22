@@ -343,10 +343,10 @@ public:
     /**
      * \brief Convert the json object in the templated type and put in the ptr.
      * \tparam T  Field type requested.
-     * \param ptr T* Pointer in which put the result.
+     * \param ptr T& Reference in which put the result.
      */
     template<typename T>
-    void as(T* ptr) const;
+    void as(T& ptr) const;
 
     /**
      * \brief Convert the json object in the templated vector type and put in
@@ -574,10 +574,10 @@ public:
     /**
      * \brief Convert the field in the templated type and put in the ptr.
      * \tparam T  Field type requested.
-     * \param ptr T* Pointer in which put the result.
+     * \param ref T& Reference in which put the result.
      */
     template<typename T>
-    void as(T* ptr) const
+    void as(T& ptr) const
     {
         _tc(_val, ptr);
     }
@@ -591,7 +591,7 @@ public:
     T as() const
     {
         T ret;
-        _tc(_val, &ret);
+        as(ret);
         return ret;
     }
 
@@ -808,7 +808,7 @@ public:
     template<typename T>
     void as(std::vector<T>& ptr) const
     {
-        ptr = convert_json_list<T>(std::make_shared<JsonList>(*this));
+        ptr = static_cast<std::vector<T>>(*this);
     }
 
     /**
@@ -820,7 +820,7 @@ public:
     template<typename T>
     std::vector<T> as() const
     {
-        return convert_json_list<T>(std::make_shared<JsonList>(*this));
+        return static_cast<std::vector<T>>(*this);
     }
 
     /**
@@ -1029,7 +1029,7 @@ public:
     template<typename T>
     void as(std::map<std::string, T>& ptr) const
     {
-        ptr = convert_json_dict<T>(std::make_shared<JsonDict>(*this));
+        ptr = static_cast<std::map<std::string, T>>(*this);
     }
 
     /**
@@ -1041,7 +1041,7 @@ public:
     template<typename T>
     std::map<std::string, T> as() const
     {
-        return convert_json_dict<T>(std::make_shared<JsonDict>(*this));
+        return static_cast<std::map<std::string, T>>(*this);
     }
 
     /**
@@ -1396,9 +1396,9 @@ inline unsigned long JsonItem::size() const
 }
 
 template<typename T>
-inline void JsonItem::as(T* ptr) const
+inline void JsonItem::as(T& ptr) const
 {
-    *ptr = convert_json_object<T>(_value);
+    ptr = convert_json_object<T>(_value);
 }
 
 template<typename T>
