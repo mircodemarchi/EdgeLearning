@@ -78,6 +78,8 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY((void) l.clone());
+        EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
         EDGE_LEARNING_TEST_EXECUTE(DenseLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(DenseLayer l2_copy{l});
@@ -140,6 +142,19 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
+
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.training_forward(v));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
+        EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = DenseLayer(_m));
         EDGE_LEARNING_TEST_TRY(auto l2 = DenseLayer(_m));
@@ -228,6 +243,14 @@ private:
         input_size = 10;
         EDGE_LEARNING_TEST_CALL(l.input_shape(input_size));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->input_size(), l2_clone->input_size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->input_shape(20));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->input_size(), l2_clone->input_size());
     }
 
     void test_stream()

@@ -231,6 +231,9 @@ private:
             std::ios::trunc};
         EDGE_LEARNING_TEST_TRY(m.dump(params_file));
         params_file.close();
+
+        Model m_copy(m);
+        EDGE_LEARNING_TEST_EQUAL(m_copy.name(), m.name());
     }
 
     void test_classifier_model_predict() {
@@ -292,6 +295,9 @@ private:
             std::ios::trunc};
         EDGE_LEARNING_TEST_TRY(m.dump(params_file));
         params_file.close();
+
+        Model m_copy(m);
+        EDGE_LEARNING_TEST_EQUAL(m_copy.name(), m.name());
     }
 
     void test_regressor_model_predict() {
@@ -366,6 +372,9 @@ private:
         m.print();
 
         output_layer->reset_hidden_state();
+        
+        Model m_copy(m);
+        EDGE_LEARNING_TEST_EQUAL(m_copy.name(), m.name());
     }
 
     Model _create_binary_classifier_model()

@@ -67,6 +67,8 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY((void) l.clone());
+        EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
         EDGE_LEARNING_TEST_EXECUTE(AvgPoolingLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(AvgPoolingLayer l2_copy{l});
@@ -103,6 +105,19 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
+
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.training_forward(v));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
+        EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = AvgPoolingLayer(_m));
         EDGE_LEARNING_TEST_TRY(auto l2 = AvgPoolingLayer(_m));
@@ -217,6 +232,26 @@ private:
         DLMath::Shape3d new_in_shape{5,5,3};
         EDGE_LEARNING_TEST_CALL(l.input_shape(new_in_shape));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), new_in_shape.size());
+
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l2_clone->input_size(), l1_clone->input_size());
+        EDGE_LEARNING_TEST_EQUAL(
+            l2_clone->input_shape().height, l1_clone->input_shape().height);
+        EDGE_LEARNING_TEST_EQUAL(
+            l2_clone->input_shape().width, l1_clone->input_shape().width);
+        EDGE_LEARNING_TEST_EQUAL(
+            l2_clone->input_shape().channels, l1_clone->input_shape().channels);
+        EDGE_LEARNING_TEST_CALL(l2_clone->input_shape({10,10,10}));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l2_clone->input_size(), l1_clone->input_size());
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l2_clone->input_shape().height, l1_clone->input_shape().height);
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l2_clone->input_shape().width, l1_clone->input_shape().width);
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l2_clone->input_shape().channels, l1_clone->input_shape().channels);
     }
 
     void test_stream()

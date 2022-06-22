@@ -69,12 +69,21 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_FAIL(l.training_forward(v_diff_size));
         EDGE_LEARNING_TEST_THROWS(l.training_forward(v_diff_size),
                                   std::runtime_error);
+        EDGE_LEARNING_TEST_TRY((void) l.clone());
+        EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
         EDGE_LEARNING_TEST_EXECUTE(DropoutLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(DropoutLayer l2_copy{l});

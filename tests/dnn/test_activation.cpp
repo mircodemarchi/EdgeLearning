@@ -67,6 +67,8 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY((void) l.clone());
+        EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
         EDGE_LEARNING_TEST_EXECUTE(ReluLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(ReluLayer l2_copy{l});
@@ -104,6 +106,13 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
 
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
@@ -167,6 +176,8 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY((void) l.clone());
+        EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
         EDGE_LEARNING_TEST_EXECUTE(SoftmaxLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(SoftmaxLayer l2_copy{l});
@@ -204,6 +215,13 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
 
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
@@ -267,6 +285,8 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY((void) l.clone());
+        EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
         EDGE_LEARNING_TEST_EXECUTE(TanhLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(TanhLayer l2_copy{l});
@@ -304,6 +324,13 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
 
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
@@ -367,6 +394,8 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_TRY((void) l.clone());
+        EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
         EDGE_LEARNING_TEST_EXECUTE(LinearLayer l1_copy{l});
         EDGE_LEARNING_TEST_TRY(LinearLayer l2_copy{l});
@@ -404,6 +433,13 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
 
+        auto l1_clone = l.clone();
+        auto l2_clone = l.clone();
+        EDGE_LEARNING_TEST_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_NOT_EQUAL(
+            l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
