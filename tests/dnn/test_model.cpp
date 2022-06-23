@@ -372,7 +372,7 @@ private:
         m.print();
 
         output_layer->reset_hidden_state();
-        
+
         Model m_copy(m);
         EDGE_LEARNING_TEST_EQUAL(m_copy.name(), m.name());
     }

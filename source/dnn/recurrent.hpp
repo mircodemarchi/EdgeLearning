@@ -161,22 +161,22 @@ private:
      * \brief Weights input to hidden of the layer. 
      * Size: _hidden_size * _input_size.
      */
-    std::vector<NumType> _weights_i_to_h;
+    SharedParams _weights_i_to_h;
     /**
      * \brief Weights hidden to hidden of the layer. 
      * Size: _hidden_size * _hidden_size.
      */
-    std::vector<NumType> _weights_h_to_h;
+    SharedParams _weights_h_to_h;
     /**
      * \brief Weights hidden to output of the layer. 
      * Size: _output_size * _hidden_size.
      */
-    std::vector<NumType> _weights_h_to_o;
+    SharedParams _weights_h_to_o;
 
     /// \brief Biases to hidden of the layer. Size: _hidden_size. 
-    std::vector<NumType> _biases_to_h;
+    SharedParams _biases_to_h;
     /// \brief Biases to output of the layer. Size: output_size(). 
-    std::vector<NumType> _biases_to_o;
+    SharedParams _biases_to_o;
 
     /// \brief Activations of the layer. Size: output_size().
     std::vector<NumType> _output_activations;
@@ -185,22 +185,22 @@ private:
      * \brief Weights gradients input to hidden of the layer. 
      * Size: _hidden_size * input_size().
      */
-    std::vector<NumType> _weights_i_to_h_gradients;
+    Params _weights_i_to_h_gradients;
     /**
      * \brief Weights gradients hidden to hidden of the layer. 
      * Size: _hidden_size * _hidden_size.
      */
-    std::vector<NumType> _weights_h_to_h_gradients;
+    Params _weights_h_to_h_gradients;
     /**
      * \brief Weights gradients hidden to output of the layer. 
      * Size: output_size() * _hidden_size.
      */
-    std::vector<NumType> _weights_h_to_o_gradients;
+    Params _weights_h_to_o_gradients;
 
     /// \brief Biases gradients to hidden of the layer. Size: _hidden_size. 
-    std::vector<NumType> _biases_to_h_gradients;
+    Params _biases_to_h_gradients;
     /// \brief Biases gradients to output of the layer. Size: output_size(). 
-    std::vector<NumType> _biases_to_o_gradients;
+    Params _biases_to_o_gradients;
 
     /**
      * \brief Input gradients of the layer. Size: input_size().

@@ -46,6 +46,55 @@ namespace EdgeLearning {
 class Model;
 
 /**
+ * \brief Learning parameters of a layer that can't be shared and will be
+ * copied.
+ */
+using Params = std::vector<NumType>;
+
+/**
+ * \brief Learning parameters of a layer that can be shared.
+ */
+class SharedParams {
+public:
+    struct Iterator
+    {
+        using pointer   = NumType*;
+        using reference = NumType&;
+
+        Iterator(Params::iterator ptr) : _iter(ptr) {}
+
+        reference operator*() const { return _iter.operator*(); }
+        pointer operator->() { return _iter.operator->(); }
+        Iterator& operator++() { _iter++; return *this; }
+        Iterator operator++(int)
+        { Iterator tmp = *this; ++(*this); return tmp; }
+        friend bool operator== (const Iterator& a, const Iterator& b)
+        { return a._iter == b._iter; };
+        friend bool operator!= (const Iterator& a, const Iterator& b)
+        { return a._iter != b._iter; };
+
+    private:
+        Params::iterator _iter;
+    };
+
+    SharedParams()
+        : _p(std::make_shared<Params>())
+    { }
+
+    void resize(std::size_t length) const { (*_p).resize(length); }
+    NumType& operator[](std::size_t i) const { return (*_p)[i]; }
+    [[nodiscard]] const NumType& at(std::size_t i) const { return (*_p).at(i); }
+    NumType* data() { return (*_p).data(); }
+    std::size_t size() { return (*_p).size(); }
+
+    Iterator begin() { return Iterator((*_p).begin()); }
+    Iterator end()   { return Iterator((*_p).end());   }
+
+private:
+    std::shared_ptr<Params> _p;
+};
+
+/**
  * \brief Base class of computational layers in a model.
  */
 class Layer 

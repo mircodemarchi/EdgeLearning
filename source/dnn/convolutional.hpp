@@ -169,16 +169,16 @@ private:
     // == Layer parameters ==
     /// \brief Kernels of the layer.
     /// Size: height_k * width_k * channels * n_filters.
-    std::vector<NumType> _weights;
+    SharedParams _weights;
     /// \brief Biases of the layer. Size: n_filters.
-    std::vector<NumType> _biases;
+    SharedParams _biases;
 
     // == Loss Gradients ==
     /// \brief Weight gradients.
     /// Size: height_k * width_k * channels * n_filters.
-    std::vector<NumType> _weight_gradients;
+    Params _weight_gradients;
     /// \brief Biase gradients. Size: n_filters.
-    std::vector<NumType> _bias_gradients;
+    Params _bias_gradients;
 };
 
 } // namespace EdgeLearning

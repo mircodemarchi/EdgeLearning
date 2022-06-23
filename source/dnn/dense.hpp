@@ -125,15 +125,15 @@ private:
 
     // == Layer parameters ==
     /// \brief Weights of the layer. Size: _output_size * _input_size.
-    std::vector<NumType> _weights;
+    SharedParams _weights;
     /// \brief Biases of the layer. Size: _output_size. 
-    std::vector<NumType> _biases;
+    SharedParams _biases;
 
     // == Loss Gradients ==
     /// \brief Weight gradients of the layer. Size: _output_size * _input_size.
-    std::vector<NumType> _weight_gradients;
+    Params _weight_gradients;
     /// \brief Biase gradients of the layer. Size: _output_size. 
-    std::vector<NumType> _bias_gradients;
+    Params _bias_gradients;
 };
 
 } // namespace EdgeLearning
