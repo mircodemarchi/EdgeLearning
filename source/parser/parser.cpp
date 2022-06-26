@@ -26,6 +26,7 @@
 #include "type_checker.hpp"
 #include "csv.hpp"
 #include "mnist.hpp"
+#include "cifar.hpp"
 #include "json.hpp"
 
 namespace EdgeLearning {

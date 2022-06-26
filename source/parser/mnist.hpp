@@ -130,32 +130,19 @@ public:
      */
     operator std::string() const
     {
-        std::string ret;
-        for (size_t i = 0; i != IMAGE_SIDE; ++i)
+        // const char map[] = "@#%xo;:,. ";
+        const char map[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+        std::string ret = "\n";
+        for (size_t i = 0; i < IMAGE_SIDE; ++i)
         {
             size_t offset = i * IMAGE_SIDE;
-            for (size_t j = 0; j != IMAGE_SIDE; ++j)
+            for (size_t j = 0; j < IMAGE_SIDE; ++j)
             {
-                if (_image[offset + j] > static_cast<uint8_t>(0.5 * 255))
-                {
-                    if (_image[offset + j] > static_cast<uint8_t>(0.9 * 255))
-                    {
-                        ret += "##";
-                    }
-                    else if (
-                        _image[offset + j] > static_cast<uint8_t>(0.7 * 255))
-                    {
-                        ret += "**";
-                    }
-                    else
-                    {
-                        ret += "..";
-                    }
-                }
-                else
-                {
-                    ret += "  ";
-                }
+                auto grayscale = _image[offset + j];
+                auto c = map[static_cast<std::size_t>(
+                    grayscale * ((sizeof(map) - 1) / 256.0))];
+                ret += c;
+                ret += c;
             }
             ret += "\n";
         }

@@ -49,18 +49,17 @@ private:
         "first10-t10k-images-idx3-ubyte";
     const std::string FIRST10_TESTING_LABELS_FN =
         "first10-t10k-labels-idx1-ubyte";
+
+    const std::filesystem::path MNIST_RESOURCE_ROOT =
+        std::filesystem::path(__FILE__).parent_path() / "resource" / "mnist";
     const std::filesystem::path FIRST10_TRAINING_IMAGES_FP =
-        std::filesystem::path(__FILE__).parent_path() 
-            / "resource" / FIRST10_TRAINING_IMAGES_FN;
+        MNIST_RESOURCE_ROOT / FIRST10_TRAINING_IMAGES_FN;
     const std::filesystem::path FIRST10_TRAINING_LABELS_FP =
-        std::filesystem::path(__FILE__).parent_path()
-            / "resource" / FIRST10_TRAINING_LABELS_FN;
+        MNIST_RESOURCE_ROOT / FIRST10_TRAINING_LABELS_FN;
     const std::filesystem::path FIRST10_TESTING_IMAGES_FP =
-        std::filesystem::path(__FILE__).parent_path()
-        / "resource" / FIRST10_TESTING_IMAGES_FN;
+        MNIST_RESOURCE_ROOT / FIRST10_TESTING_IMAGES_FN;
     const std::filesystem::path FIRST10_TESTING_LABELS_FP =
-        std::filesystem::path(__FILE__).parent_path()
-        / "resource" / FIRST10_TESTING_LABELS_FN;
+        MNIST_RESOURCE_ROOT / FIRST10_TESTING_LABELS_FN;
 
     void test_uint32_endian_order()
     {

@@ -3,6 +3,7 @@ set(UNIT_TESTS
     test_parser
     test_csv
     test_mnist
+    test_cifar
     test_json
 )
 
