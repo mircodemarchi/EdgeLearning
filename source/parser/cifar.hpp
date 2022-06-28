@@ -68,7 +68,7 @@ enum class CifarShapeOrder
 static std::uint8_t perception_brightness(
     std::uint8_t r, std::uint8_t g, std::uint8_t b)
 {
-    return static_cast<std::uint8_t>(r * 0.299 + g * 0.587 * b * 0.114);
+    return static_cast<std::uint8_t>(r * 0.21 + g * 0.72 * b * 0.07);
 }
 
 /**
