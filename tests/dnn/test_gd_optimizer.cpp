@@ -77,7 +77,9 @@ private:
         for (std::size_t i = 0; i < eta_to_test.size(); ++i)
         {
             std::cout << "GDOptimizer(" << eta_to_test[i] << ") iterations = ";
-            std::cout << num_iterations[i] << std::endl;
+            std::cout << (num_iterations[i] == 0
+                          ? std::to_string(num_iterations[i])
+                          : "inf") << std::endl;
         }
     }
 
@@ -121,11 +123,23 @@ private:
             }
             std::cout << std::endl;
             if (convergence) break;
+            if (t >= 10000) break;
         }
 
-        for (std::size_t i = 0; i < l.param_count(); ++i)
+        if (t < 10000) //< convergence reached.
         {
-            EDGE_LEARNING_TEST_EQUAL(old_params[i], l.param(i));
+            for (std::size_t i = 0; i < l.param_count(); ++i)
+            {
+                EDGE_LEARNING_TEST_EQUAL(old_params[i], l.param(i));
+            }
+        }
+        else
+        {
+            for (std::size_t i = 0; i < l.param_count(); ++i)
+            {
+                EDGE_LEARNING_TEST_NOT_EQUAL(old_params[i], l.param(i));
+            }
+            t = 0;
         }
 
         return t;

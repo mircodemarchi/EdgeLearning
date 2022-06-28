@@ -12,6 +12,10 @@ set(UNIT_TESTS
     test_avg_pooling
     test_dropout
     test_model
+
+    test_optimizer
+    test_gd_optimizer
+    test_adam_optimizer
 )
 
 foreach(TEST ${UNIT_TESTS})

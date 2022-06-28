@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dnn/test_optimizer.cpp
+ *            dnn/test_adam_optimizer.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -23,37 +23,16 @@
  */
 
 #include "test.hpp"
-#include "dnn/optimizer.hpp"
+#include "dnn/adam_optimizer.hpp"
 
 #include "dnn/model.hpp"
 #include "dnn/dense.hpp"
 
+#include <limits>
+
 
 using namespace std;
 using namespace EdgeLearning;
-
-class CustomOptimizer : public Optimizer
-{
-public:
-    CustomOptimizer()
-        : Optimizer()
-    {}
-
-    void train(Layer& layer) override
-    {
-        SizeType param_count = layer.param_count();
-        for (SizeType i = 0; i < param_count; ++i)
-        {
-            NumType& param    = layer.param(i);
-            NumType& gradient = layer.gradient(i);
-
-            param -= 0.03 * gradient;
-
-            // Reset the gradient accumulated again in the next training epoch.
-            gradient = NumType{0.0};
-        }
-    }
-};
 
 
 template<typename T>
@@ -69,19 +48,70 @@ T dummy_loss_gradient(T v)
 }
 
 
-class TestOptimizer {
+class TestAdamOptimizer {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_optimizer());
     }
 
 private:
-    void test_optimizer() {
-        std::size_t input_size = 1;
-        std::size_t output_size = 1;
+    std::size_t input_size = 1;
+    std::size_t output_size = 1;
 
-        EDGE_LEARNING_TEST_TRY(auto o = CustomOptimizer());
-        auto o = CustomOptimizer();
+    void test_optimizer() {
+        std::vector<std::tuple<NumType, NumType, NumType, NumType>>
+            params_to_test({
+                {0.3,       0.9,    0.999,  1e-8},
+                {0.1,       0.9,    0.999,  1e-8},
+                {0.03,      0.9,    0.999,  1e-8},
+                {0.01,      0.9,    0.999,  1e-8},
+                {0.003,     0.9,    0.999,  1e-8},
+                {0.001,     0.9,    0.999,  1e-8},
+                {0.1,       0.9,    0.999,  std::numeric_limits<NumType>::epsilon()},
+                {0.03,      0.9,    0.999,  std::numeric_limits<NumType>::epsilon()},
+                {0.01,      0.9,    0.999,  std::numeric_limits<NumType>::epsilon()},
+                {0.003,     0.9,    0.999,  std::numeric_limits<NumType>::epsilon()},
+                {0.001,     0.9,    0.999,  std::numeric_limits<NumType>::epsilon()},
+            });
+
+        std::vector<SizeType> num_iterations;
+        for (const auto& e: params_to_test)
+        {
+            auto num_iter = _test_optimize(e);
+            num_iterations.push_back(num_iter);
+        }
+
+        std::cout << "Iterations report: " << std::endl;
+        for (std::size_t i = 0; i < params_to_test.size(); ++i)
+        {
+            auto eta = std::get<0>(params_to_test[i]);
+            auto b_1 = std::get<1>(params_to_test[i]);
+            auto b_2 = std::get<2>(params_to_test[i]);
+            auto eps = std::get<3>(params_to_test[i]);
+            std::cout << "AdamOptimizer("
+                << eta << "," << b_1 << "," << b_2 << "," << eps
+                << ") iterations = ";
+            std::cout << (num_iterations[i] == 0
+                          ? std::to_string(num_iterations[i])
+                          : "inf") << std::endl;
+        }
+    }
+
+    SizeType _test_optimize(
+        std::tuple<NumType, NumType, NumType, NumType> params)
+    {
+        auto eta = std::get<0>(params);
+        auto b_1 = std::get<1>(params);
+        auto b_2 = std::get<2>(params);
+        auto eps = std::get<3>(params);
+        EDGE_LEARNING_TEST_PRINT(
+            "AdamOptimizer("
+            + std::to_string(eta) + ","
+            + std::to_string(b_1) + ","
+            + std::to_string(b_2) + ","
+            + std::to_string(eps) + ")");
+        EDGE_LEARNING_TEST_TRY(auto o = AdamOptimizer(eta, b_1, b_2, eps));
+        auto o = AdamOptimizer(eta, b_1, b_2, eps);
         EDGE_LEARNING_TEST_TRY(o.reset());
 
         auto l = DenseLayer(m, "dense_optimizer", input_size, output_size);
@@ -133,13 +163,16 @@ private:
             {
                 EDGE_LEARNING_TEST_NOT_EQUAL(old_params[i], l.param(i));
             }
+            t = 0;
         }
+
+        return t;
     }
 
     Model m;
 };
 
 int main() {
-    TestOptimizer().test();
+    TestAdamOptimizer().test();
     return EDGE_LEARNING_TEST_FAILURES;
 }

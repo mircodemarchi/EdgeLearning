@@ -9,13 +9,15 @@ add_library(${LIBRARY_NAME} OBJECT
     loss.cpp
     cce_loss.cpp
     mse_loss.cpp
-    gd_optimizer.cpp
     recurrent.cpp
     convolutional.cpp
     pooling.cpp
     max_pooling.cpp
     avg_pooling.cpp
     dropout.cpp
+
+    gd_optimizer.cpp
+    adam_optimizer.cpp
 )
 
 if(COVERAGE)
