@@ -27,7 +27,8 @@
 namespace EdgeLearning {
 
 GDOptimizer::GDOptimizer(NumType eta)
-    : _eta{eta}
+    : Optimizer()
+    , _eta{eta}
 { }
 
 void GDOptimizer::train(Layer& layer) 

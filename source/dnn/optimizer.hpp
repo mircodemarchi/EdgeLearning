@@ -42,6 +42,10 @@ class Optimizer
 public:
     virtual ~Optimizer() = default;
     virtual void train(Layer& layer) = 0;
+    /**
+     * \brief Reset optimizer internal state.
+     */
+    virtual void reset() {};
 };
 
 } // namespace EdgeLearning
