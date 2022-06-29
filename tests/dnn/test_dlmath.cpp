@@ -53,16 +53,20 @@ public:
         EDGE_LEARNING_TEST_CALL(test_arr_mul());
         EDGE_LEARNING_TEST_CALL(test_matarr_mul());
         EDGE_LEARNING_TEST_CALL(test_relu());
-        EDGE_LEARNING_TEST_CALL(test_softmax());
         EDGE_LEARNING_TEST_CALL(test_relu_1());
+        EDGE_LEARNING_TEST_CALL(test_elu());
+        EDGE_LEARNING_TEST_CALL(test_elu_1());
+        EDGE_LEARNING_TEST_CALL(test_tanh());
+        EDGE_LEARNING_TEST_CALL(test_tanh_1());
+        EDGE_LEARNING_TEST_CALL(test_sigmoid());
+        EDGE_LEARNING_TEST_CALL(test_sigmoid_1());
+        EDGE_LEARNING_TEST_CALL(test_softmax());
         EDGE_LEARNING_TEST_CALL(test_softmax_1());
         EDGE_LEARNING_TEST_CALL(test_cross_entropy());
         EDGE_LEARNING_TEST_CALL(test_cross_entropy_1());
         EDGE_LEARNING_TEST_CALL(test_mean_squared_error());
         EDGE_LEARNING_TEST_CALL(test_mean_squared_error_1());
         EDGE_LEARNING_TEST_CALL(test_max_argmax());
-        EDGE_LEARNING_TEST_CALL(test_tanh());
-        EDGE_LEARNING_TEST_CALL(test_tanh_1());
         EDGE_LEARNING_TEST_CALL(test_cross_correlation_without_channels());
         EDGE_LEARNING_TEST_CALL(test_cross_correlation_with_channels());
         EDGE_LEARNING_TEST_CALL(
@@ -431,6 +435,160 @@ private:
         }
     }
 
+    void test_relu_1() {
+        std::vector<TestNumType> test_vec{-2,-1,0,1,2};
+        std::vector<TestNumType> truth_vec{0,0,0,1,1};
+        DLMath::relu_1<TestNumType>(test_vec.data(), test_vec.data(),
+                                    test_vec.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+        }
+    }
+
+    void test_elu() {
+        std::vector<TestNumType> test_vec{-2,-1,0,1,2};
+        std::vector<TestNumType> truth_vec{-0.8646647167633873,
+                                           -0.6321205588285577, 0.0, 1.0, 2.0};
+        DLMath::elu<TestNumType>(test_vec.data(), test_vec.data(),
+                                 test_vec.size(), 1.0);
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+        }
+    }
+
+    void test_elu_1() {
+        std::vector<TestNumType> test_vec{-2,-1,0,1,2};
+        std::vector<TestNumType> truth_vec{0.1353352832366127,
+                                           0.36787944117144233, 1.0, 1.0, 1.0};
+
+        std::vector<TestNumType> test_non_opt_vec{test_vec};
+        DLMath::elu_1<TestNumType>(test_non_opt_vec.data(),
+                                   test_non_opt_vec.data(),
+                                   test_non_opt_vec.size(), 1.0);
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_non_opt_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_non_opt_vec[i], truth_vec[i],
+                                      0.00000000001);
+        }
+
+        std::vector<TestNumType> test_opt_vec(test_vec.size());
+        DLMath::elu<TestNumType>(test_opt_vec.data(), test_vec.data(),
+                                 test_vec.size(), 1.0);
+        DLMath::elu_1_opt<TestNumType>(test_opt_vec.data(), test_opt_vec.data(),
+                                       test_opt_vec.size(), 1.0);
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_opt_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_opt_vec[i], truth_vec[i],
+                                      0.00000000001);
+        }
+    }
+
+    void test_tanh() {
+        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<TestNumType> truth_vec{-1.0, 0.0, 0.76159416,
+                                           0.99999834, 1.0};
+        DLMath::tanh<TestNumType>(test_vec.data(), test_vec.data(),
+                                  test_vec.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
+        }
+    }
+
+    void test_tanh_1() {
+        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<TestNumType> truth_vec{8.24461455e-09, 1.00000000e+00,
+                                           4.19974342e-01, 3.32610934e-06,
+                                           0.00000000e+00};
+
+        std::vector<TestNumType> test_non_opt_vec{test_vec};
+        DLMath::tanh_1<TestNumType>(test_non_opt_vec.data(),
+                                    test_non_opt_vec.data(),
+                                    test_non_opt_vec.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_non_opt_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_non_opt_vec[i], truth_vec[i],
+                                      0.00000001);
+        }
+
+        std::vector<TestNumType> test_opt_vec(test_vec.size());
+        DLMath::tanh<TestNumType>(test_opt_vec.data(),
+                                  test_vec.data(),
+                                  test_vec.size());
+        DLMath::tanh_1_opt<TestNumType>(test_opt_vec.data(),
+                                        test_opt_vec.data(),
+                                        test_opt_vec.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_opt_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_opt_vec[i], truth_vec[i],
+                                      0.00000001);
+        }
+    }
+
+    void test_sigmoid() {
+        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<TestNumType> truth_vec{4.5397868702434395e-05, 0.5,
+                                           0.7310585786300049,
+                                           0.9990889488055994, 1.0};
+        DLMath::sigmoid<TestNumType>(test_vec.data(), test_vec.data(),
+                                     test_vec.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
+        }
+    }
+
+    void test_sigmoid_1() {
+        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
+        std::vector<TestNumType> truth_vec{4.5395807735951673e-05, 0.25,
+                                           0.19661193324148185,
+                                           0.000910221180121784, 0.0};
+
+        std::vector<TestNumType> test_non_opt_vec{test_vec};
+        DLMath::sigmoid_1<TestNumType>(test_non_opt_vec.data(),
+                                       test_non_opt_vec.data(),
+                                       test_non_opt_vec.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_non_opt_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_non_opt_vec[i], truth_vec[i],
+                                      0.00000000001);
+        }
+
+        std::vector<TestNumType> test_opt_vec(test_vec.size());
+        DLMath::sigmoid<TestNumType>(test_opt_vec.data(), test_vec.data(),
+                                     test_vec.size());
+        DLMath::sigmoid_1_opt<TestNumType>(test_opt_vec.data(),
+                                           test_opt_vec.data(),
+                                           test_opt_vec.size());
+        for (std::size_t i = 0; i < truth_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
+                                     + std::to_string(test_opt_vec[i]));
+            EDGE_LEARNING_TEST_WITHIN(test_opt_vec[i], truth_vec[i],
+                                      0.00000000001);
+        }
+    }
+
     void test_softmax() 
     {
         std::vector<TestNumType> test_vec{-2,-1,0,1,2};
@@ -438,19 +596,6 @@ private:
             0.01165623095604, 0.031684920796124, 0.086128544436269,
             0.23412165725274, 0.63640864655883};
         DLMath::softmax<TestNumType>(test_vec.data(), test_vec.data(), 
-            test_vec.size());
-        for (std::size_t i = 0; i < truth_vec.size(); ++i)
-        {
-            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
-                + std::to_string(test_vec[i]));
-            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
-        }
-    }
-
-    void test_relu_1() {
-        std::vector<TestNumType> test_vec{-2,-1,0,1,2};
-        std::vector<TestNumType> truth_vec{0,0,0,1,1};
-        DLMath::relu_1<TestNumType>(test_vec.data(), test_vec.data(), 
             test_vec.size());
         for (std::size_t i = 0; i < truth_vec.size(); ++i)
         {
@@ -572,33 +717,6 @@ private:
             test_vec.size());
         EDGE_LEARNING_TEST_EQUAL(std::get<0>(ret_tuple), truth_max);
         EDGE_LEARNING_TEST_EQUAL(std::get<1>(ret_tuple), truth_argmax);
-    }
-
-    void test_tanh() {
-        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
-        std::vector<TestNumType> truth_vec{-1.0, 0.0, 0.76159416, 0.99999834, 1.0};
-        DLMath::tanh<TestNumType>(test_vec.data(), test_vec.data(), 
-            test_vec.size());
-        for (std::size_t i = 0; i < truth_vec.size(); ++i)
-        {
-            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
-                + std::to_string(test_vec[i]));
-            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
-        }
-    }
-
-    void test_tanh_1() {
-        std::vector<TestNumType> test_vec{-10.0, 0.0, 1.0, 7.0, 10000.0};
-        std::vector<TestNumType> truth_vec{8.24461455e-09, 1.00000000e+00, 
-            4.19974342e-01, 3.32610934e-06, 0.00000000e+00};
-        DLMath::tanh_1<TestNumType>(test_vec.data(), test_vec.data(), 
-            test_vec.size());
-        for (std::size_t i = 0; i < truth_vec.size(); ++i)
-        {
-            EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": " 
-                + std::to_string(test_vec[i]));
-            EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000001);
-        }
     }
 
     void test_cross_correlation_without_channels() {
