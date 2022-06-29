@@ -91,7 +91,7 @@ private:
             std::cout << "AdamOptimizer("
                 << eta << "," << b_1 << "," << b_2 << "," << eps
                 << ") iterations = ";
-            std::cout << (num_iterations[i] == 0
+            std::cout << (num_iterations[i] != 0
                           ? std::to_string(num_iterations[i])
                           : "inf") << std::endl;
         }

@@ -77,7 +77,7 @@ private:
         for (std::size_t i = 0; i < eta_to_test.size(); ++i)
         {
             std::cout << "GDOptimizer(" << eta_to_test[i] << ") iterations = ";
-            std::cout << (num_iterations[i] == 0
+            std::cout << (num_iterations[i] != 0
                           ? std::to_string(num_iterations[i])
                           : "inf") << std::endl;
         }
@@ -123,10 +123,10 @@ private:
             }
             std::cout << std::endl;
             if (convergence) break;
-            if (t >= 10000) break;
+            if (t >= 20000) break;
         }
 
-        if (t < 10000) //< convergence reached.
+        if (t < 20000) //< convergence reached.
         {
             for (std::size_t i = 0; i < l.param_count(); ++i)
             {
