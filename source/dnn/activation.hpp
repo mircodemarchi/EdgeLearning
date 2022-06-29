@@ -130,6 +130,31 @@ public:
 private:
 };
 
+class EluLayer : public ActivationLayer
+{
+public:
+    static const std::string TYPE;
+    /**
+     * \brief Exponential Linear Unit (ELU) Layer.
+     * \param model Model& Layer model.
+     * \param name  std::string The name of the layer.
+     * \param size  SizeType The size of the layer input and output.
+     * \param alpha NumType Saturation value (default 1.0).
+     */
+    EluLayer(Model& model, std::string name = std::string(),
+             SizeType size = 0, NumType alpha = 1.0);
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<EluLayer>(*this); }
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
+private:
+    NumType _alpha;
+};
+
 class SoftmaxLayer : public ActivationLayer
 {
 public:

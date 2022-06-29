@@ -91,6 +91,37 @@ const std::vector<NumType>& ReluLayer::backward(
 }
 // =============================================================================
 
+// ================================= ELU ======================================
+const std::string EluLayer::TYPE = "Elu";
+
+EluLayer::EluLayer(Model& model, std::string name, SizeType size, NumType alpha)
+    : ActivationLayer(model, size, std::move(name), "elu_layer_")
+    , _alpha{alpha}
+{ }
+
+const std::vector<NumType>& EluLayer::forward(
+    const std::vector<NumType>& inputs)
+{
+    _last_input = inputs.data();
+    DLMath::elu<NumType>(_output_activations.data(), inputs.data(),
+                         _output_shape.size(), _alpha);
+    return ActivationLayer::forward(_output_activations);
+}
+
+const std::vector<NumType>& EluLayer::backward(
+    const std::vector<NumType>& gradients)
+{
+    // Calculate dg(z)/dz and put in _activation_gradients.
+    DLMath::elu_1_opt<NumType>(_input_gradients.data(),
+                               _output_activations.data(),
+                               _output_shape.size(), _alpha);
+    // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
+    DLMath::arr_mul(_input_gradients.data(), _input_gradients.data(),
+                    gradients.data(), _output_shape.size());
+    return ActivationLayer::backward(_input_gradients);
+}
+// =============================================================================
+
 // ================================ Softmax ====================================
 const std::string SoftmaxLayer::TYPE = "Softmax";
 

@@ -468,6 +468,99 @@ public:
     }
 
     /**
+     * \brief Derivative of ReLU Function.
+     * relu'[z]_i = 1 if z_i > 0 else 0
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* relu_1(T* dst, const T* src, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = (src[i] > T{0}) ? T{1} : T{0};
+        }
+        return dst;
+    }
+
+    /**
+     * \brief ELU Function.
+     * elu(x) = x if x > 0 else alpha * (e^x - 1)
+     * \tparam T    Type of the input and return type.
+     * \param x     Input value.
+     * \param alpha Saturation value (in general 1.0).
+     * \return T The ELU value of x.
+     */
+    template <typename T>
+    static T elu(T x, T alpha)
+    {
+        return x > 0 ? x : alpha * (std::exp(x) - 1);
+    }
+
+    /**
+     * \brief ELU Function applied to a vector.
+     * elu(x)_i = x_i if x_i > 0 else alpha * (e^x_i - 1)
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \param alpha  Saturation value (in general 1.0).
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* elu(T* dst, const T* src, SizeType length, T alpha)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = elu(src[i], alpha);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Derivative of ELU Function.
+     * elu'[z]_i = 1 if z_i > 0 else 0
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \param alpha  Saturation value (in general 1.0).
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* elu_1(T* dst, const T* src, SizeType length, T alpha)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = (src[i] > T{0}) ? T{1} : alpha * std::exp(src[i]);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Derivative of ELU Function optimized version that consider to
+     * have the ELU result function in the src array.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \param alpha  Saturation value (in general 1.0).
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* elu_1_opt(T* dst, const T* src, SizeType length, T alpha)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = (src[i] > T{0}) ? T{1} : src[i] + alpha;
+        }
+        return dst;
+    }
+
+    /**
      * \brief Softmax Function.
      * softmax(z)_i = exp(z_i) / \sum_j(exp(z_j))
      * \tparam T     Type of each source and destination elements.
@@ -494,25 +587,6 @@ public:
         for (SizeType i = 0; i < length; ++i)
         {
             dst[i] *= inv_sum_exp_z;
-        }
-        return dst;
-    }
-
-    /**
-     * \brief Derivative of ReLU Function.
-     * relu'[z]_i = 1 if z_i > 0 else 0
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    Array to write the result.
-     * \param src    Array of read elements.
-     * \param length Length of the arrays.
-     * \return T* The destination array pointer.
-     */
-    template <typename T>
-    static T* relu_1(T* dst, const T* src, SizeType length)
-    {
-        for (SizeType i = 0; i < length; ++i)
-        {
-            dst[i] = (src[i] > T{0}) ? T{1} : T{0};
         }
         return dst;
     }
