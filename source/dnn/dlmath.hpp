@@ -440,7 +440,7 @@ public:
      * relu(x) = max(0, x)
      * \tparam T Type of the input and return type.
      * \param x  Input value.
-     * \return T
+     * \return T The ReLU result.
      */
     template <typename T>
     static T relu(T x)
@@ -469,6 +469,19 @@ public:
 
     /**
      * \brief Derivative of ReLU Function.
+     * relu'[z] = 1 if z > 0 else 0
+     * \tparam T Type of the input and return type.
+     * \param x  Input value.
+     * \return T The ReLU derivative result.
+     */
+    template <typename T>
+    static T relu_1(T x)
+    {
+        return x > T{0} ? T{1} : T{0};
+    }
+
+    /**
+     * \brief Derivative of ReLU Function.
      * relu'[z]_i = 1 if z_i > 0 else 0
      * \tparam T     Type of each source and destination elements.
      * \param dst    Array to write the result.
@@ -481,7 +494,7 @@ public:
     {
         for (SizeType i = 0; i < length; ++i)
         {
-            dst[i] = (src[i] > T{0}) ? T{1} : T{0};
+            dst[i] = relu_1(src[i]);
         }
         return dst;
     }
@@ -521,23 +534,17 @@ public:
     }
 
     /**
-     * \brief Derivative of ELU Function.
-     * elu'[z]_i = 1 if z_i > 0 else 0
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    Array to write the result.
-     * \param src    Array of read elements.
-     * \param length Length of the arrays.
-     * \param alpha  Saturation value (in general 1.0).
-     * \return T* The destination array pointer.
+     * \brief Derivative of ELU Function optimized version that consider to
+     * have the ELU result function in the input value.
+     * \tparam T    Type of the input and return type.
+     * \param x     Input value.
+     * \param alpha Saturation value (in general 1.0).
+     * \return T The ELU derivative value of x.
      */
     template <typename T>
-    static T* elu_1(T* dst, const T* src, SizeType length, T alpha)
+    static T elu_1_opt(T x, T alpha)
     {
-        for (SizeType i = 0; i < length; ++i)
-        {
-            dst[i] = (src[i] > T{0}) ? T{1} : alpha * std::exp(src[i]);
-        }
-        return dst;
+        return x > T{0} ? T{1} : x + alpha;
     }
 
     /**
@@ -555,7 +562,227 @@ public:
     {
         for (SizeType i = 0; i < length; ++i)
         {
-            dst[i] = (src[i] > T{0}) ? T{1} : src[i] + alpha;
+            dst[i] = elu_1_opt(src[i], alpha);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Derivative of ELU Function.
+     * elu(x) = x if x > 0 else alpha * (e^x - 1)
+     * \tparam T    Type of the input and return type.
+     * \param x     Input value.
+     * \param alpha Saturation value (in general 1.0).
+     * \return T The ELU derivative value of x.
+     */
+    template <typename T>
+    static T elu_1(T x, T alpha)
+    {
+        return x > T{0} ? T{1} : alpha * std::exp(x);
+    }
+
+    /**
+     * \brief Derivative of ELU Function.
+     * elu'[z]_i = 1 if z_i > 0 else 0
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \param alpha  Saturation value (in general 1.0).
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* elu_1(T* dst, const T* src, SizeType length, T alpha)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = elu_1(src[i], alpha);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Hyperbolic Tangent Function.
+     * \tparam T Type of the input and return type.
+     * \param x  Input value.
+     * \return T The tanh value of x.
+     */
+    template <typename T>
+    static T tanh(T x)
+    {
+        return std::tanh(x);
+    }
+
+    /**
+     * \brief Hyperbolic Tangent Function applied to a vector.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* tanh(T* dst, const T* src, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = tanh(src[i]);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Derivative of Hyperbolic Tangent Function optimized version that
+     * consider to have the TanH result function in the input value.
+     * \tparam T    Type of the input and return type.
+     * \param x     Input value.
+     * \return T The TanH derivative value of x.
+     */
+    template <typename T>
+    static T tanh_1_opt(T x)
+    {
+        return T{1} - x * x;
+    }
+
+    /**
+     * \brief Derivative of Hyperbolic Tangent Function optimized version that
+     * consider to have the TanH result function in the input value.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* tanh_1_opt(T* dst, const T* src, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = tanh_1_opt(src[i]);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Hyperbolic Tangent Function first derivative.
+     * \tparam T Type of the input and return type.
+     * \param x  Input value.
+     * \return T The tanh derivative value of x.
+     */
+    template <typename T>
+    static T tanh_1(T x)
+    {
+        T t = std::tanh(x);
+        return tanh_1_opt(t);
+    }
+
+    /**
+     * \brief Hyperbolic Tangent Function first derivative applied to a vector.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* tanh_1(T* dst, const T* src, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = tanh_1(src[i]);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Sigmoid Function.
+     * \tparam T Type of the input and return type.
+     * \param x  Input value.
+     * \return T The sigmoid value of x.
+     */
+    template <typename T>
+    static T sigmoid(T x)
+    {
+        return 1 / (1 + std::exp(-x));
+    }
+
+    /**
+     * \brief Sigmoid Function applied to a vector.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* sigmoid(T* dst, const T* src, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = sigmoid(src[i]);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Derivative of Sigmoid Function optimized version that
+     * consider to have the sigmoid result function in the input value.
+     * \tparam T    Type of the input and return type.
+     * \param x     Input value.
+     * \return T The TanH derivative value of x.
+     */
+    template <typename T>
+    static T sigmoid_1_opt(T x)
+    {
+        return T{1} - x * x;
+    }
+
+    /**
+     * \brief Derivative of Sigmoid Function optimized version that
+     * consider to have the sigmoid result function in the input value.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* sigmoid_1_opt(T* dst, const T* src, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = sigmoid_1_opt(src[i]);
+        }
+        return dst;
+    }
+
+    /**
+     * \brief Sigmoid Function first derivative.
+     * \tparam T Type of the input and return type.
+     * \param x  Input value.
+     * \return T The sigmoid derivative value of x.
+     */
+    template <typename T>
+    static T sigmoid_1(T x)
+    {
+        T s = sigmoid(x);
+        return sigmoid_1_opt(s);
+    }
+
+    /**
+     * \brief Sigmoid Function first derivative applied to a vector.
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* sigmoid_1(T* dst, const T* src, SizeType length)
+    {
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = sigmoid_1(src[i]);
         }
         return dst;
     }
@@ -867,67 +1094,6 @@ public:
         auto max_iter = std::max_element(src, src + length);
         auto dist = static_cast<SizeType>(std::distance(src, max_iter));
         return {*max_iter, dist};
-    }
-
-    /**
-     * \brief Hyperbolic Tangent Function.
-     * \tparam T Type of the input and return type.
-     * \param x  Input value.
-     * \return T
-     */
-    template <typename T>
-    static T tanh(T x)
-    {
-        return std::tanh(x);
-    }
-
-    /**
-     * \brief Hyperbolic Tangent Function applied to a vector.
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    Array to write the result.
-     * \param src    Array of read elements.
-     * \param length Length of the arrays.
-     * \return T* The destination array pointer.
-     */
-    template <typename T>
-    static T* tanh(T* dst, const T* src, SizeType length)
-    {
-        for (SizeType i = 0; i < length; ++i)
-        {
-            dst[i] = tanh(src[i]);
-        }
-        return dst;
-    }
-
-    /**
-     * \brief Hyperbolic Tangent Function first derivative.
-     * \tparam T Type of the input and return type.
-     * \param x  Input value.
-     * \return T
-     */
-    template <typename T>
-    static T tanh_1(T x)
-    {
-        T t = std::tanh(x);
-        return T{1} - t * t;
-    }
-
-    /**
-     * \brief Hyperbolic Tangent Function first derivative applied to a vector.
-     * \tparam T     Type of each source and destination elements.
-     * \param dst    Array to write the result.
-     * \param src    Array of read elements.
-     * \param length Length of the arrays.
-     * \return T* The destination array pointer.
-     */
-    template <typename T>
-    static T* tanh_1(T* dst, const T* src, SizeType length)
-    {
-        for (SizeType i = 0; i < length; ++i)
-        {
-            dst[i] = tanh_1(src[i]);
-        }
-        return dst;
     }
 
     /**

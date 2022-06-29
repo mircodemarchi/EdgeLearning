@@ -111,7 +111,15 @@ const std::vector<NumType>& EluLayer::forward(
 const std::vector<NumType>& EluLayer::backward(
     const std::vector<NumType>& gradients)
 {
-    // Calculate dg(z)/dz and put in _activation_gradients.
+    /*
+     * Calculate dg(z)/dz and put in _activation_gradients.
+     * The input for ELU derivation is the _activations vector, that
+     * is filled with the ELU of vector z, and not directly the vector
+     * z. Considering that the input of ReLU derivation is used only
+     * to check if it is > 0, and that if z > 0 then ELU(z) > 0 and
+     * viceversa, using ELU of vector z or using directly the vector z
+     * there is no differences.
+     */
     DLMath::elu_1_opt<NumType>(_input_gradients.data(),
                                _output_activations.data(),
                                _output_shape.size(), _alpha);
@@ -174,8 +182,39 @@ const std::vector<NumType>& TanhLayer::backward(
     const std::vector<NumType>& gradients)
 {
     // Calculate dg(z)/dz and put in _activation_gradients.
-    DLMath::tanh_1<NumType>(_input_gradients.data(), _output_activations.data(),
-                            _output_shape.size());
+    DLMath::tanh_1_opt<NumType>(_input_gradients.data(),
+                                _output_activations.data(),
+                                _output_shape.size());
+    // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
+    DLMath::arr_mul(_input_gradients.data(), _input_gradients.data(),
+                    gradients.data(), _output_shape.size());
+    return ActivationLayer::backward(_input_gradients);
+}
+// =============================================================================
+
+// ================================= Sigmoid ===================================
+const std::string SigmoidLayer::TYPE = "Sigmoid";
+
+SigmoidLayer::SigmoidLayer(Model& model, std::string name, SizeType size)
+    : ActivationLayer(model, size, std::move(name), "sigmoid_layer_")
+{ }
+
+const std::vector<NumType>& SigmoidLayer::forward(
+    const std::vector<NumType>& inputs)
+{
+    _last_input = inputs.data();
+    DLMath::sigmoid<NumType>(_output_activations.data(), inputs.data(),
+                             _output_shape.size());
+    return ActivationLayer::forward(_output_activations);
+}
+
+const std::vector<NumType>& SigmoidLayer::backward(
+    const std::vector<NumType>& gradients)
+{
+    // Calculate dg(z)/dz and put in _activation_gradients.
+    DLMath::sigmoid_1_opt<NumType>(_input_gradients.data(),
+                                   _output_activations.data(),
+                                   _output_shape.size());
     // Calculate dJ/dz = dJ/dg(z) * dg(z)/dz.
     DLMath::arr_mul(_input_gradients.data(), _input_gradients.data(),
                     gradients.data(), _output_shape.size());

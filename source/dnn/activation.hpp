@@ -189,6 +189,23 @@ public:
 private:
 };
 
+class SigmoidLayer : public ActivationLayer
+{
+public:
+    static const std::string TYPE;
+    SigmoidLayer(Model& model, std::string name = std::string(),
+                 SizeType size = 0);
+    [[nodiscard]] inline const std::string& type() const override
+    { return TYPE; }
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<SigmoidLayer>(*this); }
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override;
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override;
+private:
+};
+
 class LinearLayer : public ActivationLayer
 {
 public:
