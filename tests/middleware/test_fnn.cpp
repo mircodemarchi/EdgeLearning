@@ -81,8 +81,10 @@ private:
         LayerDescriptorVector layers_descriptor(
             {{"input_layer",            4UL, ActivationType::Linear   },
              {"hidden_layer_relu",      8UL, ActivationType::ReLU     },
+             {"hidden_layer_elu",       8UL, ActivationType::ELU      },
              {"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
              {"hidden_layer_tanh",      8UL, ActivationType::TanH     },
+             {"hidden_layer_sigmoid",   8UL, ActivationType::Sigmoid  },
              {"hidden_layer_linear",    8UL, ActivationType::Linear   },
              {"output_layer",   OUTPUT_SIZE, ActivationType::Linear   }}
         );

@@ -49,6 +49,11 @@ struct MapActivation<Framework::MLPACK, ActivationType::ReLU> {
 };
 
 template <>
+struct MapActivation<Framework::MLPACK, ActivationType::ELU> {
+    using type = mlpack::ann::ReLULayer<>;
+};
+
+template <>
 struct MapActivation<Framework::MLPACK, ActivationType::Softmax> {
 #if __unix__
     using type = mlpack::ann::LogSoftMax<>;
@@ -60,6 +65,11 @@ struct MapActivation<Framework::MLPACK, ActivationType::Softmax> {
 template <>
 struct MapActivation<Framework::MLPACK, ActivationType::TanH> {
     using type = mlpack::ann::TanHLayer<>;
+};
+
+template <>
+struct MapActivation<Framework::MLPACK, ActivationType::Sigmoid> {
+    using type = mlpack::ann::SigmoidLayer<>;
 };
 
 template <>
@@ -82,6 +92,11 @@ struct MapLoss<Framework::MLPACK, LossType::MSE> {
 template <>
 struct MapOptimizer<Framework::MLPACK, OptimizerType::GRADIENT_DESCENT> {
     using type = ens::GradientDescent;
+};
+
+template <>
+struct MapOptimizer<Framework::MLPACK, OptimizerType::ADAM> {
+    using type = ens::Adam;
 };
 
 template <>

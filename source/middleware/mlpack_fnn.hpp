@@ -101,6 +101,11 @@ public:
                     _m.template Add<mlpack::ann::ReLULayer<>>();
                     break;
                 }
+                case ActivationType::ELU:
+                {
+                    _m.template Add<mlpack::ann::ReLULayer<>>();
+                    break;
+                }
                 case ActivationType::Softmax:
                 {
 #if __unix__
@@ -113,6 +118,11 @@ public:
                 case ActivationType::TanH:
                 {
                     _m.template Add<mlpack::ann::TanHLayer<>>();
+                    break;
+                }
+                case ActivationType::Sigmoid:
+                {
+                    _m.template Add<mlpack::ann::SigmoidLayer<>>();
                     break;
                 }
                 case ActivationType::Linear:

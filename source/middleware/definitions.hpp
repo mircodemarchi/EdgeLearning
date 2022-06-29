@@ -50,6 +50,11 @@ struct MapActivation<Framework::EDGE_LEARNING, ActivationType::ReLU> {
 };
 
 template <>
+struct MapActivation<Framework::EDGE_LEARNING, ActivationType::ELU> {
+    using type = EluLayer;
+};
+
+template <>
 struct MapActivation<Framework::EDGE_LEARNING, ActivationType::Softmax> {
     using type = SoftmaxLayer;
 };
@@ -57,6 +62,11 @@ struct MapActivation<Framework::EDGE_LEARNING, ActivationType::Softmax> {
 template <>
 struct MapActivation<Framework::EDGE_LEARNING, ActivationType::TanH> {
     using type = TanhLayer;
+};
+
+template <>
+struct MapActivation<Framework::EDGE_LEARNING, ActivationType::Sigmoid> {
+    using type = SigmoidLayer;
 };
 
 template <>
@@ -79,6 +89,11 @@ struct MapLoss<Framework::EDGE_LEARNING, LossType::MSE> {
 template <>
 struct MapOptimizer<Framework::EDGE_LEARNING, OptimizerType::GRADIENT_DESCENT> {
     using type = GDOptimizer;
+};
+
+template <>
+struct MapOptimizer<Framework::EDGE_LEARNING, OptimizerType::ADAM> {
+    using type = AdamOptimizer;
 };
 
 template <>

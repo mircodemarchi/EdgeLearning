@@ -34,6 +34,7 @@
 #include "dnn/mse_loss.hpp"
 #include "dnn/cce_loss.hpp"
 #include "dnn/gd_optimizer.hpp"
+#include "dnn/adam_optimizer.hpp"
 #include "data/dataset.hpp"
 
 #include <utility>
@@ -53,9 +54,10 @@ enum class Framework
 enum class ActivationType
 {
     ReLU,
+    ELU,
     Softmax,
     TanH,
-    // Sigmoid, // TODO: Implement sigmoid activation function.
+    Sigmoid,
     Linear,
     None
 };
@@ -69,6 +71,7 @@ enum class LossType
 enum class OptimizerType
 {
     GRADIENT_DESCENT,
+    ADAM
 };
 
 enum class InitType

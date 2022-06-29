@@ -84,16 +84,30 @@ public:
                     _m.create_edge(layer, activation_layer);
                     break;
                 }
+                case ActivationType::ELU:
+                {
+                    auto activation_layer = _m.template add_layer<EluLayer>(
+                        layer_name, layer_size);
+                    _m.create_edge(layer, activation_layer);
+                    break;
+                }
                 case ActivationType::Softmax:
                 {
-                    auto activation_layer = _m.template add_layer<ReluLayer>(
+                    auto activation_layer = _m.template add_layer<SoftmaxLayer>(
                         layer_name, layer_size);
                     _m.create_edge(layer, activation_layer);
                     break;
                 }
                 case ActivationType::TanH:
                 {
-                    auto activation_layer = _m.template add_layer<ReluLayer>(
+                    auto activation_layer = _m.template add_layer<TanhLayer>(
+                        layer_name, layer_size);
+                    _m.create_edge(layer, activation_layer);
+                    break;
+                }
+                case ActivationType::Sigmoid:
+                {
+                    auto activation_layer = _m.template add_layer<SigmoidLayer>(
                         layer_name, layer_size);
                     _m.create_edge(layer, activation_layer);
                     break;
@@ -101,7 +115,7 @@ public:
                 case ActivationType::Linear:
                 default:
                 {
-                    auto activation_layer = _m.template add_layer<ReluLayer>(
+                    auto activation_layer = _m.template add_layer<LinearLayer>(
                         layer_name, layer_size);
                     _m.create_edge(layer, activation_layer);
                     break;
@@ -182,7 +196,7 @@ struct MapModel<Framework::EDGE_LEARNING, LT, OT, IT, T> {
 template<
     Framework F = Framework::EDGE_LEARNING,
     LossType LT = LossType::MSE,
-    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
+    OptimizerType OT = OptimizerType::ADAM,
     InitType IT = InitType::AUTO,
     typename T = NumType>
 class FNN {
