@@ -734,7 +734,7 @@ public:
     template <typename T>
     static T sigmoid_1_opt(T x)
     {
-        return T{1} - x * x;
+        return x * (1 - x);
     }
 
     /**
