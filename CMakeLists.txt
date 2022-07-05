@@ -8,8 +8,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
         message(FATAL_ERROR "MSVC version must be at least 19.20!")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-        message(FATAL_ERROR "GCC version must be at least 9.0!")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.2)
+        message(FATAL_ERROR "GCC version must be at least 10.2!")
     endif()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
@@ -98,6 +98,7 @@ add_library(edgelearning ${LIBRARY_KIND}
 )
 target_link_libraries(edgelearning
     conclog
+    concmanager
 )
 
 if(ENABLE_MLPACK)
