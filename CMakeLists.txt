@@ -87,6 +87,7 @@ if(ENABLE_MLPACK)
 endif()
 
 add_subdirectory(source)
+add_subdirectory(submodules)
 add_subdirectory(tests)
 add_subdirectory(profile)
 
@@ -94,6 +95,9 @@ add_library(edgelearning ${LIBRARY_KIND}
     $<TARGET_OBJECTS:edgelearning-dnn>
     $<TARGET_OBJECTS:edgelearning-middleware>
     $<TARGET_OBJECTS:edgelearning-parser>
+)
+target_link_libraries(edgelearning
+    conclog
 )
 
 if(ENABLE_MLPACK)
