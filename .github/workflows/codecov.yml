@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: recursive
 
     - name: Get Concurrency
       run: echo NPROC="nproc" >> $GITHUB_ENV

@@ -27,11 +27,11 @@ jobs:
             c: "clang"
           }
           - {
-            name: "macOS 10.15 GCC 9 [NO MLPACK]",
+            name: "macOS 10.15 GCC 10 [NO MLPACK]",
             mlpack: false,
             os: macos-10.15,
-            cxx: "g++-9",
-            c: "gcc-9"
+            cxx: "g++-10",
+            c: "gcc-10"
           }
           - {
             name: "Ubuntu 20.04 Clang 11 [NO MLPACK]",
@@ -79,6 +79,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: recursive
 
     - name: Get macOS Concurrency
       if: runner.os == 'macOS'
@@ -95,7 +97,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install gcc@9
+        brew install gcc@10
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
