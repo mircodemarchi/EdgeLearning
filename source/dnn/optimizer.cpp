@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dnn/gd_optimizer.cpp
+ *            dnn/optimizer.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -22,28 +22,29 @@
  *  along with EdgeLearning.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gd_optimizer.hpp"
+#include "optimizer.hpp"
+
+#include <stdexcept>
 
 namespace EdgeLearning {
 
-GDOptimizer::GDOptimizer(NumType eta)
-    : Optimizer()
-    , _eta{eta}
-{ }
-
-void GDOptimizer::_train(Layer& layer_from, Layer& layer_to)
+void Optimizer::train(Layer& layer_from, Layer& layer_to)
 {
-    SizeType param_count = layer_to.param_count();
-    for (SizeType i = 0; i < param_count; ++i)
+    _train(layer_from, layer_to);
+}
+
+void Optimizer::train(Layer& layer)
+{
+    train(layer, layer);
+}
+
+void Optimizer::train_check(Layer& layer_from, Layer& layer_to)
+{
+    if (layer_from.param_count() != layer_to.param_count())
     {
-        NumType& param    = layer_to.param(i);
-        NumType& gradient = layer_from.gradient(i);
-
-        param -= _eta * gradient;
-
-        // Reset the gradient accumulated again in the next training epoch.
-        gradient = NumType{0.0};
+        throw std::runtime_error("Layers have different amount of params");
     }
+    train(layer_from, layer_to);
 }
 
 } // namespace EdgeLearning

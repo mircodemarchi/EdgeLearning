@@ -39,13 +39,14 @@ public:
         : Optimizer()
     {}
 
-    void train(Layer& layer) override
+private:
+    void _train(Layer& layer_from, Layer& layer_to) override
     {
-        SizeType param_count = layer.param_count();
+        SizeType param_count = layer_to.param_count();
         for (SizeType i = 0; i < param_count; ++i)
         {
-            NumType& param    = layer.param(i);
-            NumType& gradient = layer.gradient(i);
+            NumType& param    = layer_to.param(i);
+            NumType& gradient = layer_from.gradient(i);
 
             param -= 0.03 * gradient;
 
@@ -73,6 +74,7 @@ class TestOptimizer {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_optimizer());
+        EDGE_LEARNING_TEST_CALL(test_train_check());
     }
 
 private:
@@ -80,7 +82,7 @@ private:
         std::size_t input_size = 1;
         std::size_t output_size = 1;
 
-        EDGE_LEARNING_TEST_TRY(auto o = CustomOptimizer());
+        EDGE_LEARNING_TEST_TRY(auto o = CustomOptimizer(); (void) o);
         auto o = CustomOptimizer();
         EDGE_LEARNING_TEST_TRY(o.reset());
 
@@ -134,6 +136,19 @@ private:
                 EDGE_LEARNING_TEST_NOT_EQUAL(old_params[i], l.param(i));
             }
         }
+    }
+
+    void test_train_check()
+    {
+        auto o = CustomOptimizer();
+        auto l1 = DenseLayer(m, "dense_optimizer1", 10, 10);
+        auto l2 = DenseLayer(m, "dense_optimizer2", 20, 20);
+        auto l3 = DenseLayer(m, "dense_optimizer3", 10, 10);
+
+        EDGE_LEARNING_TEST_FAIL(o.train_check(l1, l2));
+        EDGE_LEARNING_TEST_THROWS(o.train_check(l1, l2), std::runtime_error);
+        EDGE_LEARNING_TEST_TRY(o.train_check(l1, l3));
+        EDGE_LEARNING_TEST_TRY(o.train(l2, l1));
     }
 
     Model m;

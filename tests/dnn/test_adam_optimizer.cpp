@@ -110,7 +110,8 @@ private:
             + std::to_string(b_1) + ","
             + std::to_string(b_2) + ","
             + std::to_string(eps) + ")");
-        EDGE_LEARNING_TEST_TRY(auto o = AdamOptimizer(eta, b_1, b_2, eps));
+        EDGE_LEARNING_TEST_TRY(
+            auto o = AdamOptimizer(eta, b_1, b_2, eps); (void) o);
         auto o = AdamOptimizer(eta, b_1, b_2, eps);
         EDGE_LEARNING_TEST_TRY(o.reset());
 

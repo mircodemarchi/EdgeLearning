@@ -16,6 +16,7 @@ add_library(${LIBRARY_NAME} OBJECT
     avg_pooling.cpp
     dropout.cpp
 
+    optimizer.cpp
     gd_optimizer.cpp
     adam_optimizer.cpp
 )

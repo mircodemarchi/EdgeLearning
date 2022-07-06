@@ -86,7 +86,7 @@ private:
     SizeType _test_optimize(NumType eta)
     {
         EDGE_LEARNING_TEST_PRINT("GDOptimizer(" + std::to_string(eta) + ")");
-        EDGE_LEARNING_TEST_TRY(auto o = GDOptimizer(eta));
+        EDGE_LEARNING_TEST_TRY(auto o = GDOptimizer(eta); (void) o);
         auto o = GDOptimizer(eta);
         EDGE_LEARNING_TEST_TRY(o.reset());
 

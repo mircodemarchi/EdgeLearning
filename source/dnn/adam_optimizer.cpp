@@ -40,13 +40,13 @@ AdamOptimizer::AdamOptimizer(
     , _t{1}
 { }
 
-void AdamOptimizer::train(Layer& layer)
+void AdamOptimizer::_train(Layer& layer_from, Layer& layer_to)
 {
-    SizeType param_count = layer.param_count();
+    SizeType param_count = layer_to.param_count();
     for (SizeType i = 0; i < param_count; ++i)
     {
-        NumType& param    = layer.param(i);
-        NumType& gradient = layer.gradient(i);
+        NumType& param    = layer_to.param(i);
+        NumType& gradient = layer_from.gradient(i);
 
         // beta 1 - Momentum optimizer.
         _m = _beta_1 * _m + (1 - _beta_1) * gradient;

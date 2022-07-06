@@ -40,12 +40,46 @@ namespace EdgeLearning {
 class Optimizer
 {
 public:
-    virtual ~Optimizer() = default;
-    virtual void train(Layer& layer) = 0;
+    Optimizer() {}
+
+    /**
+     * \brief Wrapper of private train method:
+     * run the optimization process taking the gradients from a layer
+     * and apply the optimization to another layer.
+     * \param layer_from Layer from taking the gradients.
+     * \param layer_to   Layer to apply the optimization.
+     */
+    virtual void train(Layer& layer_from, Layer& layer_to);
+
+    /**
+     * \brief Run the optimization process to layer.
+     * \param layer The layer to optimize.
+     */
+    virtual void train(Layer& layer);
+
+    /**
+     * \brief Run the optimization process as the \a train method but it
+     * throws a runtime_error if layers have a different amount of training
+     * parameters.
+     * \param layer_from Layer from taking the gradients.
+     * \param layer_to   Layer to apply the optimization.
+     */
+    virtual void train_check(Layer& layer_from, Layer& layer_to);
+
     /**
      * \brief Reset optimizer internal state.
      */
     virtual void reset() {};
+
+protected:
+    /**
+     * \brief Run the optimization process taking the gradients from a layer
+     * and apply the optimization to another layer.
+     * \param layer_from Layer from taking the gradients.
+     * \param layer_to   Layer to apply the optimization.
+     */
+    virtual void _train(Layer& layer_from, Layer& layer_to) = 0;
+
 };
 
 } // namespace EdgeLearning

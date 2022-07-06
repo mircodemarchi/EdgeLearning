@@ -65,17 +65,18 @@ public:
                   NumType epsilon = 1e-8);
 
     /**
-     * \brief Optimization invoked at the end of each batch's evaluation.
-     * \param layer Layer& Layer to train.
-     */
-    void train(Layer& layer) override;
-
-    /**
      * \brief Reset timestamp, first and second moment.
      */
     void reset() override;
 
 private:
+    /**
+     * \brief Optimization invoked at the end of each batch's evaluation.
+     * \param layer_from Layer from taking the gradients.
+     * \param layer_to   Layer to apply the optimization.
+     */
+    void _train(Layer& layer_from, Layer& layer_to) override;
+
     NumType _eta;     ///< \brief Learning rate.
     NumType _beta_1;  ///< \brief Exponential decay for the first moment.
     NumType _beta_2;  ///< \brief Exponential decay for the second moment.

@@ -50,15 +50,16 @@ public:
      */
     GDOptimizer(NumType eta);
 
+private:
     /**
      * \brief Invoked at the end of each batch's evaluation.
      * The interface technically permits the use of different optimizers for
      * different segments of the computational graph.
-     * \param layer
+     * \param layer_from Layer from taking the gradients.
+     * \param layer_to   Layer to apply the optimization.
      */
-    void train(Layer& layer) override;
+    void _train(Layer& layer_from, Layer& layer_to) override;
 
-private:
     NumType _eta; ///< Learning rate.
 };
 
