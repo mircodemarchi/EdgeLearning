@@ -62,6 +62,12 @@ private:
     const fs::path DATA_TRAINING_FP = fs::path(__FILE__).parent_path()
                                       / ".." / "data" / DATA_TRAINING_FN;
 
+    using ProfileCompileFNN = CompileFNN<
+        LossType::MSE,
+        OptimizerType::GRADIENT_DESCENT,
+        InitType::AUTO,
+        ParallelizationLevel::THREAD_PARALLELISM>;
+
     /**
      * \brief Profile the training and the prediction phase of a FNN model to
      * solve a regression problem on epochs incrementation.
@@ -97,18 +103,13 @@ private:
             profile("training epochs amount: " + std::to_string(e),
                     [&](SizeType i){
                         (void) i;
-                        CompileFNN<LossType::MSE,
-                            OptimizerType::GRADIENT_DESCENT,
-                            InitType::AUTO>
-                            m(layers_descriptor, "regressor_model");
+                        ProfileCompileFNN m(
+                            layers_descriptor, "regressor_model");
                         m.fit(data, e, BATCH_SIZE, LEARNING_RATE);
                     }, 100, "training_on_epochs_amount" + std::to_string(e));
         }
 
-        CompileFNN<LossType::MSE,
-            OptimizerType::GRADIENT_DESCENT,
-            InitType::AUTO>
-            m(layers_descriptor, "regressor_model");
+        ProfileCompileFNN m(layers_descriptor, "regressor_model");
         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
         profile("prediction after training with epochs amount: "
                     + std::to_string(EPOCHS),
@@ -162,10 +163,8 @@ private:
                         + std::to_string(curr_size),
                     [&](SizeType i) {
                         (void) i;
-                        CompileFNN<LossType::MSE,
-                            OptimizerType::GRADIENT_DESCENT,
-                            InitType::AUTO>
-                            m(layers_descriptor, "regressor_model");
+                        ProfileCompileFNN m(
+                            layers_descriptor, "regressor_model");
                         auto subset = data.subdata(0, curr_size);
                         m.fit(subset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
                     }, 100,
@@ -173,10 +172,7 @@ private:
             if (curr_size == training_set_size) break;
         }
 
-        CompileFNN<LossType::MSE,
-            OptimizerType::GRADIENT_DESCENT,
-            InitType::AUTO>
-            m(layers_descriptor, "regressor_model");
+        ProfileCompileFNN m(layers_descriptor, "regressor_model");
         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
         for (const auto& size: training_set_sizes)
         {
@@ -234,18 +230,13 @@ private:
                         + std::to_string(amount),
                     [&](SizeType i){
                         (void) i;
-                        CompileFNN<LossType::MSE,
-                            OptimizerType::GRADIENT_DESCENT,
-                            InitType::AUTO>
-                            m(layers_descriptor, "regressor_model");
+                        ProfileCompileFNN m(
+                            layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
                     }, 100,
                     "training_on_hidden_layers_amount"
                         + std::to_string(amount));
-            CompileFNN<LossType::MSE,
-                OptimizerType::GRADIENT_DESCENT,
-                InitType::AUTO>
-                m(layers_descriptor, "regressor_model");
+            ProfileCompileFNN m(layers_descriptor, "regressor_model");
             m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
             profile("prediction with hidden layers amount: "
                         + std::to_string(amount),
@@ -296,17 +287,12 @@ private:
                         + std::to_string(shape),
                     [&](SizeType i){
                         (void) i;
-                        CompileFNN<LossType::MSE,
-                            OptimizerType::GRADIENT_DESCENT,
-                            InitType::AUTO>
-                            m(layers_descriptor, "regressor_model");
+                        ProfileCompileFNN m(
+                            layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
                     }, 100,
                     "training_on_hidden_layers_shape" + std::to_string(shape));
-            CompileFNN<LossType::MSE,
-                OptimizerType::GRADIENT_DESCENT,
-                InitType::AUTO>
-                m(layers_descriptor, "regressor_model");
+            ProfileCompileFNN m(layers_descriptor, "regressor_model");
             m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
             profile("prediction with hidden layers shape: "
                         + std::to_string(shape),

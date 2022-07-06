@@ -43,6 +43,7 @@ template<
     LossType LT = LossType::MSE,
     OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
     InitType IT = InitType::AUTO,
+    ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
 class MlpackFNN : public NN<T> {
 public:
@@ -144,13 +145,18 @@ private:
     std::vector<std::string> _layers_name;
 };
 
-template <LossType LT, OptimizerType OT, InitType IT, typename T>
-struct MapModel<Framework::MLPACK, LT, OT, IT, T> {
+template <
+    LossType LT,
+    OptimizerType OT,
+    InitType IT,
+    ParallelizationLevel PL,
+    typename T>
+struct MapModel<Framework::MLPACK, LT, OT, IT, PL, T> {
     using loss_type = typename MapLoss<Framework::MLPACK, LT>::type;
     using optimizer_type = typename MapOptimizer<Framework::MLPACK, OT>::type;
     using init_type = typename MapInit<Framework::MLPACK, IT>::type;
     using type = mlpack::ann::FFN<loss_type, init_type>;
-    using fnn = MlpackFNN<LT, OT, IT, T>;
+    using fnn = MlpackFNN<LT, OT, IT, PL, T>;
 };
 
 } // namespace EdgeLearning

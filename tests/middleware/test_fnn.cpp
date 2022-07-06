@@ -66,6 +66,14 @@ private:
         EDGE_LEARNING_TEST_THROWS(
             m_runtime_err.fit(dataset, EPOCHS, BATCH_SIZE, 0.03),
             std::runtime_error);
+
+        auto m_thread_parallelism = CompileFNN<
+            LossType::MSE,
+            OptimizerType::GRADIENT_DESCENT,
+            InitType::AUTO,
+            ParallelizationLevel::THREAD_PARALLELISM
+            >(layers_descriptor, "regressor_model");
+        EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
     }
 
     void test_predict() {

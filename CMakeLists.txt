@@ -62,9 +62,6 @@ if(COVERAGE)
     endif()
 endif()
 
-enable_testing()
-include(CTest)
-
 # Find MLPACK and dependencies
 message(STATUS "MLPACK enabled: ${ENABLE_MLPACK}")
 find_package(Armadillo 8.400.0 QUIET)
@@ -80,15 +77,19 @@ if(ENABLE_MLPACK AND MLPACK_FOUND)
     endif()
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/source)
+include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules)
 if(ENABLE_MLPACK)
     include_directories(${ARMADILLO_INCLUDE_DIRS})
     include_directories(${MLPACK_INCLUDE_DIRS})
 endif()
 
 add_subdirectory(source)
-add_subdirectory(submodules)
+
+enable_testing()
+include(CTest)
 add_subdirectory(tests)
+
+add_subdirectory(submodules)
 add_subdirectory(profile)
 
 add_library(edgelearning ${LIBRARY_KIND}

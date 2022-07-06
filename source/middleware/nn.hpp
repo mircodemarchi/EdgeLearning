@@ -51,6 +51,12 @@ enum class Framework
 #endif
 };
 
+enum class ParallelizationLevel
+{
+    SEQUENTIAL,
+    THREAD_PARALLELISM
+};
+
 enum class ActivationType
 {
     ReLU,
@@ -81,13 +87,6 @@ enum class InitType
     AUTO,
 };
 
-struct LayerShape
-{
-
-
-};
-
-
 using LayerDescriptor = std::tuple<std::string, SizeType, ActivationType>;
 using LayerDescriptorVector = std::vector<LayerDescriptor>;
 
@@ -101,7 +100,13 @@ template <Framework F, OptimizerType OT> struct MapOptimizer;
 
 template <Framework F, InitType IT> struct MapInit;
 
-template <Framework F, LossType LT, OptimizerType OT, InitType IT, typename T>
+template <
+    Framework F,
+    LossType LT,
+    OptimizerType OT,
+    InitType IT,
+    ParallelizationLevel PL,
+    typename T>
 struct MapModel;
 
 template<typename T = NumType>
