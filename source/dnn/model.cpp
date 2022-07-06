@@ -148,12 +148,17 @@ RneType::result_type Model::init(InitializationFunction init,
 
 void Model::train(Optimizer& optimizer)
 {
-    for (const auto& layer: _layers)
+    train(optimizer, *this);
+}
+
+void Model::train(Optimizer& optimizer, Model& model_from)
+{
+    for (const auto& layer: model_from._layers)
     {
         optimizer.train(*layer);
     }
-    optimizer.train(*_loss_layer);
-    _loss_layer->reset_score();
+    optimizer.train(*model_from._loss_layer);
+    model_from._loss_layer->reset_score();
 }
 
 void Model::step(const std::vector<NumType>& input,
