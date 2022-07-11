@@ -91,7 +91,7 @@ public:
                                      && i < data.size(); ++b, ++i)
                 {
                     model_copies.push_back(model);
-                    futures.push_back(tm.template enqueue(
+                    futures.push_back(tm.enqueue(
                         [&]{
                             model_copies[b].step(
                                 data.trainset(i), data.labels(i));

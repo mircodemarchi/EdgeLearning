@@ -211,6 +211,10 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_FAIL(l.last_output());
         EDGE_LEARNING_TEST_THROWS(l.last_output(), std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(
+                l.antecedent_layers().size(), l.input_layers());
+        EDGE_LEARNING_TEST_EQUAL(
+                l.subsequent_layers().size(), l.output_layers());
         auto l1_clone = l.clone();
         auto l2_clone = l.clone();
         EDGE_LEARNING_TEST_EQUAL(
@@ -274,6 +278,10 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_copy.training_forward(v_diff_size));
         EDGE_LEARNING_TEST_THROWS(l_copy.training_forward(v_diff_size),
                                   std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(
+                l_copy.antecedent_layers().size(), l_copy.input_layers());
+        EDGE_LEARNING_TEST_EQUAL(
+                l_copy.subsequent_layers().size(), l_copy.output_layers());
 
         EDGE_LEARNING_TEST_EXECUTE(CustomLayer l_assign; l_assign = l);
         EDGE_LEARNING_TEST_TRY(CustomLayer l_assign; l_assign = l);
@@ -324,6 +332,10 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_assign.training_forward(v_diff_size));
         EDGE_LEARNING_TEST_THROWS(l_assign.training_forward(v_diff_size),
                                   std::runtime_error);
+        EDGE_LEARNING_TEST_EQUAL(
+                l_assign.antecedent_layers().size(), l_assign.input_layers());
+        EDGE_LEARNING_TEST_EQUAL(
+                l_assign.subsequent_layers().size(), l_assign.output_layers());
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = CustomLayerNoName());
         EDGE_LEARNING_TEST_TRY(auto l2 = CustomLayerNoName());

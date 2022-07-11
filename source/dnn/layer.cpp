@@ -142,6 +142,26 @@ SizeType Layer::output_size() const
     return _output_shape.size();
 }
 
+std::vector<Layer::SharedPtr> Layer::subsequent_layers()
+{
+    return _subsequents;
+}
+
+std::vector<Layer::SharedPtr> Layer::antecedent_layers()
+{
+    return _antecedents;
+}
+
+SizeType Layer::input_layers()
+{
+    return _antecedents.size();
+}
+
+SizeType Layer::output_layers()
+{
+    return _subsequents.size();
+}
+
 void Layer::dump(Json& out) const
 {
     out[dump_fields.at(DumpFields::TYPE)] = type();

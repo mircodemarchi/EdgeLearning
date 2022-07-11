@@ -310,6 +310,12 @@ public:
      */
     [[nodiscard]] SizeType output_size() const;
 
+    [[nodiscard]] std::vector<SharedPtr> subsequent_layers();
+    [[nodiscard]] std::vector<SharedPtr> antecedent_layers();
+
+    [[nodiscard]] SizeType input_layers();
+    [[nodiscard]] SizeType output_layers();
+
     /**
      * \brief Save the layer infos to disk.
      * \param out Json& out Json to write.
