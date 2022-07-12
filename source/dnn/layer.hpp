@@ -310,10 +310,30 @@ public:
      */
     [[nodiscard]] SizeType output_size() const;
 
+    /**
+     * \brief Getter of the list of subsequent layers.
+     * \return std::vector<SharedPtr> The vector copy of subsequent layers
+     * pointer.
+     */
     [[nodiscard]] std::vector<SharedPtr> subsequent_layers();
+
+    /**
+     * \brief Getter of the list of antecedent layers.
+     * \return std::vector<SharedPtr> The vector copy of antecedent layers
+     * pointer.
+     */
     [[nodiscard]] std::vector<SharedPtr> antecedent_layers();
 
+    /**
+     * \brief Getter of the input layers amount.
+     * \return SizeType The input layers amount.
+     */
     [[nodiscard]] SizeType input_layers();
+
+    /**
+     * \brief Getter of the output layers amount.
+     * \return SizeType The output layers amount.
+     */
     [[nodiscard]] SizeType output_layers();
 
     /**

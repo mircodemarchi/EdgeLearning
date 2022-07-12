@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <vector>
 
 #include <iostream>
 
@@ -78,6 +79,8 @@ public:
 
         [[nodiscard]] SizeType size() const { return height * width; }
 
+        operator std::vector<SizeType>() { return {height, width}; }
+
         SizeType height;
         SizeType width;
     };
@@ -96,6 +99,8 @@ public:
         {}
 
         SizeType size() const { return height * width * channels; }
+
+        operator std::vector<SizeType>() { return {height, width, channels}; }
 
         SizeType height;
         SizeType width;
@@ -1308,6 +1313,68 @@ public:
                     src, src_shape, k, k_shape, n_filters, row, col);
             }
         }
+        return dst;
+    }
+
+    template <typename T>
+    static T* concatenate(T* dst,
+                          T* src1, Shape3d src1_shape,
+                          T* src2, Shape3d src2_shape, SizeType axis = 0)
+    {
+        const SizeType NUM_MAX_AXIS = 3;
+
+        // Check valid params.
+        if (axis >= NUM_MAX_AXIS)
+        {
+            throw std::runtime_error(
+                    "concat error: axis param greater than 2.");
+        }
+
+        /*
+         * Check valid sources shape.
+         * Calculate number of iterations, src1 offset and src2 offset.
+         */
+        auto shape1 = static_cast<std::vector<SizeType>>(src1_shape);
+        auto shape2 = static_cast<std::vector<SizeType>>(src2_shape);
+        SizeType iteration_amount = 1;
+        SizeType src1_offset = 1;
+        SizeType src2_offset = 1;
+        for (SizeType i = 0; i < NUM_MAX_AXIS; ++i)
+        {
+            if (i != axis && shape1[i] != shape2[i])
+            {
+                throw std::runtime_error("concat error: shape invalid.");
+            }
+
+            if (i < axis)
+            {
+                iteration_amount *= shape1[i];
+            }
+            else
+            {
+                src1_offset *= shape1[i];
+                src2_offset *= shape2[i];
+            }
+        }
+
+        auto dst_offset = src1_offset + src2_offset;
+        for (SizeType i = 0; i < iteration_amount; ++i)
+        {
+            // Copy src1.
+            for (SizeType src1_idx = 0; src1_idx < src1_offset; ++src1_idx)
+            {
+                dst[i * dst_offset + src1_idx] = src1[
+                        i * src1_offset + src1_idx];
+            }
+
+            // Copy src2.
+            for (SizeType src2_idx = 0; src2_idx < src2_offset; ++src2_idx)
+            {
+                dst[i * dst_offset + src1_offset + src2_idx] = src2[
+                        i * src2_offset + src2_idx];
+            }
+        }
+
         return dst;
     }
 
