@@ -35,6 +35,8 @@
 #include <iterator>
 #include <limits>
 #include <vector>
+#include <numeric>
+#include <string>
 
 #include <iostream>
 
@@ -67,6 +69,8 @@ public:
     };
 
     struct Shape2d {
+        static inline SizeType SIZE = 2;
+
         Shape2d(SizeType h, SizeType w)
             : height{h}
             , width{w}
@@ -81,11 +85,24 @@ public:
 
         operator std::vector<SizeType>() { return {height, width}; }
 
+        SizeType& operator[](SizeType idx)
+        {
+            switch (idx) {
+                case 0: return height;
+                case 1: return width;
+                default:
+                    throw std::runtime_error(
+                            "Shape2d: bad index " + std::to_string(idx));
+            }
+        }
+
         SizeType height;
         SizeType width;
     };
 
     struct Shape3d {
+        static inline SizeType SIZE = 3;
+
         Shape3d(Shape2d s2d)
             : height{s2d.height}
             , width{s2d.width}
@@ -101,6 +118,18 @@ public:
         SizeType size() const { return height * width * channels; }
 
         operator std::vector<SizeType>() { return {height, width, channels}; }
+
+        SizeType& operator[](SizeType idx)
+        {
+            switch (idx) {
+                case 0: return height;
+                case 1: return width;
+                case 2: return channels;
+                default:
+                    throw std::runtime_error(
+                            "Shape3d: bad index " + std::to_string(idx));
+            }
+        }
 
         SizeType height;
         SizeType width;
@@ -1316,63 +1345,328 @@ public:
         return dst;
     }
 
+    /**
+     * \brief Append a n-dimensional matrix to a destination address on an axis.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst               The destination n-dimensional matrix.
+     * \param dst_shape         The shape of the destination matrix.
+     * \param src               The source n-dimensional matrix.
+     * \param src_shape_axis    The shape of the axis in which perform the
+     *                          append of the source matrix.
+     * \param axis              The axis in which perform the append.
+     * \param dst_axis_offset   The offset of the axis in which perform the
+     *                          append of the destination matrix.
+     * \return T* The destination address.
+     */
     template <typename T>
-    static T* concatenate(T* dst,
-                          T* src1, Shape3d src1_shape,
-                          T* src2, Shape3d src2_shape, SizeType axis = 0)
+    static T* append(T* dst, std::vector<SizeType> dst_shape,
+                     const T* src, SizeType src_shape_axis,
+                     SizeType axis, SizeType dst_axis_offset)
     {
-        const SizeType NUM_MAX_AXIS = 3;
-
-        // Check valid params.
-        if (axis >= NUM_MAX_AXIS)
-        {
-            throw std::runtime_error(
-                    "concat error: axis param greater than 2.");
-        }
-
-        /*
-         * Check valid sources shape.
-         * Calculate number of iterations, src1 offset and src2 offset.
-         */
-        auto shape1 = static_cast<std::vector<SizeType>>(src1_shape);
-        auto shape2 = static_cast<std::vector<SizeType>>(src2_shape);
+        // Calculate number of iterations and src offset.
         SizeType iteration_amount = 1;
-        SizeType src1_offset = 1;
-        SizeType src2_offset = 1;
-        for (SizeType i = 0; i < NUM_MAX_AXIS; ++i)
+        SizeType tmp_offset = 1;
+        for (SizeType i = 0; i < dst_shape.size(); ++i)
         {
-            if (i != axis && shape1[i] != shape2[i])
-            {
-                throw std::runtime_error("concat error: shape invalid.");
-            }
-
             if (i < axis)
             {
-                iteration_amount *= shape1[i];
+                iteration_amount *= dst_shape[i];
             }
-            else
+            else if (i > axis)
             {
-                src1_offset *= shape1[i];
-                src2_offset *= shape2[i];
+                tmp_offset *= dst_shape[i];
             }
         }
 
-        auto dst_offset = src1_offset + src2_offset;
+        SizeType dst_offset = tmp_offset * dst_shape[axis];
+        SizeType src_offset = tmp_offset * src_shape_axis;
+        SizeType offset     = tmp_offset * dst_axis_offset;
         for (SizeType i = 0; i < iteration_amount; ++i)
         {
-            // Copy src1.
-            for (SizeType src1_idx = 0; src1_idx < src1_offset; ++src1_idx)
+            for (SizeType src_idx = 0; src_idx < src_offset; ++src_idx)
             {
-                dst[i * dst_offset + src1_idx] = src1[
-                        i * src1_offset + src1_idx];
+                dst[i * dst_offset + offset + src_idx] = src[
+                        i * src_offset + src_idx];
             }
+        }
 
-            // Copy src2.
-            for (SizeType src2_idx = 0; src2_idx < src2_offset; ++src2_idx)
+        return dst;
+    }
+
+    /**
+     * \brief Extract a n-dimensional sub-matrix from a source address on an
+     * axis.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst               The destination n-dimensional matrix.
+     * \param dst_shape         The shape of the destination matrix.
+     * \param src               The source n-dimensional matrix.
+     * \param src_shape_axis    The shape of the axis in which perform the
+     *                          extract of the source matrix.
+     * \param axis              The axis in which perform the extract.
+     * \param src_axis_offset   The offset of the axis in which perform the
+     *                          extract of the source matrix.
+     * \return T* The destination address.
+     */
+    template <typename T>
+    static T* extract(T* dst, const std::vector<SizeType>& dst_shape,
+                      const T* src, SizeType src_shape_axis,
+                      SizeType axis, SizeType src_axis_offset)
+    {
+        // Calculate number of iterations and src offset.
+        SizeType iteration_amount = 1;
+        SizeType tmp_offset = 1;
+        for (SizeType i = 0; i < dst_shape.size(); ++i)
+        {
+            if (i < axis)
             {
-                dst[i * dst_offset + src1_offset + src2_idx] = src2[
-                        i * src2_offset + src2_idx];
+                iteration_amount *= dst_shape[i];
             }
+            else if (i > axis)
+            {
+                tmp_offset *= dst_shape[i];
+            }
+        }
+
+        SizeType dst_offset = tmp_offset * dst_shape[axis];
+        SizeType src_offset = tmp_offset * src_shape_axis;
+        SizeType offset     = tmp_offset * src_axis_offset;
+        for (SizeType i = 0; i < iteration_amount; ++i)
+        {
+            for (SizeType dst_idx = 0; dst_idx < dst_offset; ++dst_idx)
+            {
+                dst[i * dst_offset + dst_idx] = src[
+                        i * src_offset + offset + dst_idx];
+            }
+        }
+
+        return dst;
+    }
+
+    /**
+     * \brief Append a n-dimensional matrix to a destination address on an axis.
+     * It also check if the axis in input is a valid value in relation with the
+     * destination shape.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst               The destination n-dimensional matrix.
+     * \param dst_shape         The shape of the destination matrix.
+     * \param src               The source n-dimensional matrix.
+     * \param src_shape_axis    The shape of the axis in which perform the
+     *                          append of the source matrix.
+     * \param axis              The axis in which perform the append.
+     * \param dst_axis_offset   The offset of the axis in which perform the
+     *                          append of the destination matrix.
+     * \return T* The destination address.
+     */
+    template <typename T>
+    static T* append_check(T* dst, std::vector<SizeType> dst_shape,
+                           const T* src, SizeType src_shape_axis,
+                           SizeType axis, SizeType dst_axis_offset)
+    {
+        if (axis >= dst_shape.size())
+        {
+            throw std::runtime_error("concatenate error: axis param overload.");
+        }
+        return append(dst, dst_shape, src, src_shape_axis,
+                      axis, dst_axis_offset);
+    }
+
+    /**
+     * \brief Extract a n-dimensional sub-matrix from a source address on an
+     * axis. It also check if the axis in input is a valid value in relation
+     * with the destination shape.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst               The destination n-dimensional matrix.
+     * \param dst_shape         The shape of the destination matrix.
+     * \param src               The source n-dimensional matrix.
+     * \param src_shape_axis    The shape of the axis in which perform the
+     *                          extract of the source matrix.
+     * \param axis              The axis in which perform the extract.
+     * \param src_axis_offset   The offset of the axis in which perform the
+     *                          extract of the source matrix.
+     * \return T* The destination address.
+     */
+    template <typename T>
+    static T* extract_check(T* dst, const std::vector<SizeType>& dst_shape,
+                            const T* src, SizeType src_shape_axis,
+                            SizeType axis, SizeType src_axis_offset)
+    {
+        if (axis >= dst_shape.size())
+        {
+            throw std::runtime_error("extract error: axis param overload.");
+        }
+        return extract(dst, dst_shape, src, src_shape_axis,
+                       axis, src_axis_offset);
+    }
+
+    /**
+     * \brief Concatenate two cubes on the specified axis.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst        The destination cube pointer.
+     * \param src1       The first source cube to concatenate.
+     * \param src1_shape The shape of the first cube.
+     * \param src2       The second source cube to concatenate.
+     * \param src2_shape The shape of the second cube.
+     * \param axis       The axis in which perform the concatenation of the
+     *                   two cubes.
+     * \return T* The destination address.
+     */
+    template <typename T>
+    static T* concatenate(T* dst,
+                          const T* src1, Shape3d src1_shape,
+                          const T* src2, Shape3d src2_shape, SizeType axis)
+    {
+        // Check valid params.
+        if (axis >= Shape3d::SIZE)
+        {
+            throw std::runtime_error("concatenate error: axis param overload.");
+        }
+        for (SizeType i = 0; i < Shape3d::SIZE; ++i)
+        {
+            if (i != axis && src1_shape[i] != src2_shape[i])
+            {
+                throw std::runtime_error("concatenate error: shape invalid.");
+            }
+        }
+        Shape3d dst_shape(src1_shape);
+        dst_shape[axis] += src2_shape[axis];
+        append(dst, dst_shape, src1, src1_shape[axis], axis,0);
+        return append(dst, dst_shape, src2, src2_shape[axis],
+                      axis, src1_shape[axis]);
+    }
+
+    /**
+     * \brief Separate two cubes on the specified axis.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst1       The first destination cube pointer.
+     * \param dst1_shape The shape of the first destination cube.
+     * \param dst2       The second destination cube pointer.
+     * \param dst2_shape The shape of the second destination cube.
+     * \param src        The source cube pointer to separate.
+     * \param axis       The axis in which perform the separation.
+     * \return T* The destination address.
+     */
+    template <typename T>
+    static T* separate(T* dst1, Shape3d dst1_shape,
+                       T* dst2, Shape3d dst2_shape,
+                       const T* src, SizeType axis)
+    {
+        // Check valid params.
+        if (axis >= Shape3d::SIZE)
+        {
+            throw std::runtime_error("separate error: axis param overload.");
+        }
+        for (SizeType i = 0; i < Shape3d::SIZE; ++i)
+        {
+            if (i != axis && dst1_shape[i] != dst2_shape[i])
+            {
+                throw std::runtime_error("separate error: shape invalid.");
+            }
+        }
+
+        auto src_shape_axis = dst1_shape[axis] + dst2_shape[axis];
+        extract(dst1, dst1_shape, src, src_shape_axis, axis, 0);
+        return extract(dst2, dst2_shape, src, src_shape_axis,
+                      axis, dst1_shape[axis]);
+    }
+
+    /**
+     * \brief Concatenation of N cubes contained in the src address.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst        The destination cube pointer.
+     * \param src        The source pointer of the cubes to concatenate.
+     * \param src_shapes The vector of shapes of the cubes contained in src.
+     * \param axis       The axis in which perform the concatenation.
+     * \return T* The destination address.
+     */
+    template <typename T>
+    static T* concatenate(T* dst, const T* src,
+                          std::vector<Shape3d> src_shapes, SizeType axis)
+    {
+        // Check valid params.
+        if (axis >= Shape3d::SIZE)
+        {
+            throw std::runtime_error("separate error: axis param overload.");
+        }
+        for (SizeType shape_idx = 1; shape_idx < src_shapes.size(); ++shape_idx)
+        {
+            for (SizeType i = 0; i < DLMath::Shape3d::SIZE; ++i)
+            {
+                if (i != axis
+                    && src_shapes[shape_idx - 1][i] != src_shapes[shape_idx][i])
+                {
+                    throw std::runtime_error("separate layer error: "
+                                             "shapes invalid.");
+                }
+            }
+        }
+
+        // Calculate dst_shape.
+        Shape3d dst_shape(src_shapes[0]);
+        for (SizeType i = 1; i < src_shapes.size(); ++i)
+        {
+            dst_shape[axis] += src_shapes[i][axis];
+        }
+
+        SizeType dst_axis_offset = 0;
+        SizeType src_offset = 0;
+        for (auto& src_shape: src_shapes)
+        {
+            append(dst, dst_shape, src + src_offset, src_shape[axis],
+                   axis, dst_axis_offset);
+            dst_axis_offset += src_shape[axis];
+            src_offset += src_shape.size();
+        }
+
+        return dst;
+    }
+
+    /**
+     * \brief Separation in N cubes from a cube contained in the src address.
+     * \tparam T Type of source and destination matrix elements.
+     * \param dst        The destination address in which place the divided
+     *                   N cubes.
+     * \param dst_shapes The vector of shapes of the cubes divides in dst.
+     * \param src        The source cube to divide in N cubes.
+     * \param axis       The axis in which perform the concatenation.
+     * \return T* The destination address.
+     */
+    template <typename T>
+    static T* separate(T* dst, std::vector<Shape3d> dst_shapes,
+                       const T* src, SizeType axis)
+    {
+        // Check valid params.
+        if (axis >= Shape3d::SIZE)
+        {
+            throw std::runtime_error("separate error: axis param overload.");
+        }
+        for (SizeType shape_idx = 1; shape_idx < dst_shapes.size(); ++shape_idx)
+        {
+            for (SizeType i = 0; i < DLMath::Shape3d::SIZE; ++i)
+            {
+                if (i != axis
+                    && dst_shapes[shape_idx - 1][i] != dst_shapes[shape_idx][i])
+                {
+                    throw std::runtime_error("separate layer error: "
+                                             "shapes invalid.");
+                }
+            }
+        }
+
+        // Calculate src_shape[axis].
+        SizeType src_shape_axis = 0;
+        for (SizeType i = 0; i < dst_shapes.size(); ++i)
+        {
+            src_shape_axis += dst_shapes[i][axis];
+        }
+
+        SizeType src_axis_offset = 0;
+        SizeType dst_offset = 0;
+        for (auto& dst_shape: dst_shapes)
+        {
+            extract(dst + dst_offset, dst_shape, src, src_shape_axis,
+                    axis, src_axis_offset);
+            src_axis_offset += dst_shape[axis];
+            dst_offset += dst_shape.size();
         }
 
         return dst;

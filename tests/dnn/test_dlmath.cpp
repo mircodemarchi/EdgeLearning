@@ -41,6 +41,7 @@ public:
     using TestNumType = double;
 
     void test() {
+        EDGE_LEARNING_TEST_CALL(test_shape());
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
         EDGE_LEARNING_TEST_CALL(test_uniform_pdf());
         EDGE_LEARNING_TEST_CALL(test_pdf());
@@ -73,12 +74,54 @@ public:
             test_cross_correlation_with_channels_with_filters());
         EDGE_LEARNING_TEST_CALL(test_max_pool());
         EDGE_LEARNING_TEST_CALL(test_avg_pool());
+        EDGE_LEARNING_TEST_CALL(test_append());
+        EDGE_LEARNING_TEST_CALL(test_extract());
         EDGE_LEARNING_TEST_CALL(test_concatenate());
+        EDGE_LEARNING_TEST_CALL(test_separate());
     }
 
 private:
     const RneType::result_type SEED = 1;
     const std::size_t PRINT_TIMES = 10;
+
+    void test_shape() {
+        SizeType h = 10;
+        SizeType w = 11;
+        DLMath::Shape2d shape_2d(h, w);
+        EDGE_LEARNING_TEST_EQUAL(shape_2d.height, h);
+        EDGE_LEARNING_TEST_EQUAL(shape_2d.width, w);
+        EDGE_LEARNING_TEST_EQUAL(
+                static_cast<std::vector<SizeType>>(shape_2d).size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(
+                static_cast<std::vector<SizeType>>(shape_2d)[0], h);
+        EDGE_LEARNING_TEST_EQUAL(
+                static_cast<std::vector<SizeType>>(shape_2d)[1], w);
+        EDGE_LEARNING_TEST_EQUAL(shape_2d[0], h);
+        EDGE_LEARNING_TEST_EQUAL(shape_2d[1], w);
+        EDGE_LEARNING_TEST_FAIL(shape_2d[2]);
+        EDGE_LEARNING_TEST_THROWS(shape_2d[2], std::runtime_error);
+
+        h = 12;
+        w = 13;
+        SizeType c = 3;
+        DLMath::Shape3d shape_3d(h, w, c);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d.height, h);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d.width, w);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d.channels, c);
+        EDGE_LEARNING_TEST_EQUAL(
+                static_cast<std::vector<SizeType>>(shape_3d).size(), 3);
+        EDGE_LEARNING_TEST_EQUAL(
+                static_cast<std::vector<SizeType>>(shape_3d)[0], h);
+        EDGE_LEARNING_TEST_EQUAL(
+                static_cast<std::vector<SizeType>>(shape_3d)[1], w);
+        EDGE_LEARNING_TEST_EQUAL(
+                static_cast<std::vector<SizeType>>(shape_3d)[2], c);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d[0], h);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d[1], w);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d[2], c);
+        EDGE_LEARNING_TEST_FAIL(shape_3d[3]);
+        EDGE_LEARNING_TEST_THROWS(shape_3d[3], std::runtime_error);
+    }
 
     void test_normal_pdf() {
         std::random_device rd;
@@ -1546,6 +1589,203 @@ private:
         }
     }
 
+    void test_append() {
+        SizeType cols = 3;
+        SizeType rows = 5;
+        std::vector<TestNumType> result = {
+                1, 2, 3,
+                4, 5, 6,
+                7, 8, 9,
+                0, 0, 0,
+                0, 0, 0,
+        };
+        std::vector<TestNumType> test_vec = {
+                10, 11, 12,
+                13, 14, 15,
+        };
+        std::vector<TestNumType> truth_vec = {
+                1, 2, 3,
+                4, 5, 6,
+                7, 8, 9,
+                10, 11, 12,
+                13, 14, 15,
+        };
+        DLMath::append_check(result.data(), {rows, cols},
+                             test_vec.data(), 2, 0, 3);
+        for (SizeType r = 0; r < rows; ++r) {
+            for (SizeType c = 0; c < cols; ++c) {
+                EDGE_LEARNING_TEST_PRINT(result[r * cols + c]);
+                EDGE_LEARNING_TEST_EQUAL(result[r * cols + c],
+                                         truth_vec[r * cols + c]);
+            }
+        }
+
+        cols = 5;
+        rows = 3;
+        result = {
+                1,  2,  3,  0, 0,
+                6,  7,  8,  0, 0,
+                11, 12, 13, 0, 0,
+        };
+        test_vec = {
+                4,  5,
+                9,  10,
+                14, 15,
+        };
+        result.resize(result.size() + test_vec.size());
+        truth_vec = {
+                1,  2,  3,  4,  5,
+                6,  7,  8,  9,  10,
+                11, 12, 13, 14, 15,
+        };
+        DLMath::append_check(result.data(), {rows, cols},
+                             test_vec.data(), 2, 1, 3);
+        for (SizeType r = 0; r < rows; ++r)
+        {
+            for (SizeType c = 0; c < cols; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(result[r * cols + c]);
+                EDGE_LEARNING_TEST_EQUAL(result[r * cols + c], truth_vec[r * cols + c]);
+            }
+        }
+
+        cols = 3;
+        rows = 3;
+        SizeType channels = 5;
+        result = {
+                1,1,1,0,0, 2,2,2,0,0, 3,3,3,0,0,
+                1,2,3,0,0, 1,2,3,0,0, 1,2,3,0,0,
+                0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0,
+        };
+        test_vec = {
+                1,1, 2,2, 3,3,
+                4,5, 4,5, 4,5,
+                1,1, 1,1, 1,1,
+        };
+        result.resize(result.size() + test_vec.size());
+        truth_vec = {
+                1,1,1,1,1, 2,2,2,2,2, 3,3,3,3,3,
+                1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5,
+                0,0,0,1,1, 0,0,0,1,1, 0,0,0,1,1,
+        };
+        DLMath::append_check(result.data(), {rows, cols, channels},
+                             test_vec.data(), 2, 2, 3);
+        for (SizeType r = 0; r < rows; ++r)
+        {
+            for (SizeType c = 0; c < cols; ++c)
+            {
+                for (SizeType ch = 0; ch < channels; ++ch)
+                {
+                    EDGE_LEARNING_TEST_PRINT(
+                            result[r * (cols + channels) + c * channels + ch]);
+                    EDGE_LEARNING_TEST_EQUAL(
+                            result[r * (cols + channels) + c * channels + ch],
+                            truth_vec[r * (cols + channels) + c * channels + ch]);
+                }
+            }
+        }
+
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::append_check(result.data(), {rows, cols, channels},
+                                     test_vec.data(), 2, 3, 3));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::append_check(result.data(), {rows, cols, channels},
+                                     test_vec.data(), 2, 3, 3),
+                std::runtime_error);
+    }
+
+    void test_extract() {
+        SizeType cols = 3;
+        SizeType rows = 2;
+        std::vector<TestNumType> result;
+        result.resize(cols * rows);
+        std::vector<TestNumType> test_vec = {
+                1, 2, 3,
+                4, 5, 6,
+                7, 8, 9,
+                10, 11, 12,
+                13, 14, 15,
+        };
+        std::vector<TestNumType> truth_vec = {
+                10, 11, 12,
+                13, 14, 15,
+        };
+        DLMath::extract_check(result.data(), {rows, cols},
+                              test_vec.data(), 5, 0, 3);
+        for (SizeType r = 0; r < rows; ++r) {
+            for (SizeType c = 0; c < cols; ++c) {
+                EDGE_LEARNING_TEST_PRINT(result[r * cols + c]);
+                EDGE_LEARNING_TEST_EQUAL(result[r * cols + c],
+                                         truth_vec[r * cols + c]);
+            }
+        }
+
+        cols = 2;
+        rows = 3;
+        result.clear();
+        result.resize(cols * rows);
+        test_vec = {
+                1,  2,  3,  4,  5,
+                6,  7,  8,  9,  10,
+                11, 12, 13, 14, 15,
+        };
+        truth_vec = {
+                4,  5,
+                9,  10,
+                14, 15,
+        };
+        DLMath::extract_check(result.data(), {rows, cols},
+                              test_vec.data(), 5, 1, 3);
+        for (SizeType r = 0; r < rows; ++r)
+        {
+            for (SizeType c = 0; c < cols; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(result[r * cols + c]);
+                EDGE_LEARNING_TEST_EQUAL(result[r * cols + c], truth_vec[r * cols + c]);
+            }
+        }
+
+        cols = 3;
+        rows = 3;
+        SizeType channels = 2;
+        result.clear();
+        result.resize(cols * rows * channels);
+        test_vec = {
+                1,1,1,1,1, 2,2,2,2,2, 3,3,3,3,3,
+                1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5,
+                0,0,0,1,1, 0,0,0,1,1, 0,0,0,1,1,
+        };
+        truth_vec = {
+                1,1, 2,2, 3,3,
+                4,5, 4,5, 4,5,
+                1,1, 1,1, 1,1,
+        };
+        DLMath::extract_check(result.data(), {rows, cols, channels},
+                              test_vec.data(), 5, 2, 3);
+        for (SizeType r = 0; r < rows; ++r)
+        {
+            for (SizeType c = 0; c < cols; ++c)
+            {
+                for (SizeType ch = 0; ch < channels; ++ch)
+                {
+                    EDGE_LEARNING_TEST_PRINT(
+                            result[r * (cols + channels) + c * channels + ch]);
+                    EDGE_LEARNING_TEST_EQUAL(
+                            result[r * (cols + channels) + c * channels + ch],
+                            truth_vec[r * (cols + channels) + c * channels + ch]);
+                }
+            }
+        }
+
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::extract_check(result.data(), {rows, cols, channels},
+                                      test_vec.data(), 5, 3, 3));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::extract_check(result.data(), {rows, cols, channels},
+                                      test_vec.data(), 5, 3, 3),
+                std::runtime_error);
+    }
+
     void test_concatenate()
     {
         SizeType cols = 3;
@@ -1711,7 +1951,350 @@ private:
                                     test_vec1.data(), {3,3,3},
                                     test_vec2.data(), {3,3,2}, 3),
                 std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::concatenate(result.data(),
+                                test_vec1.data(), {3,3,3},
+                                test_vec2.data(), {3,0,2}, 2));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::concatenate(result.data(),
+                                test_vec1.data(), {3,3,3},
+                                test_vec2.data(), {3,0,2}, 2),
+            std::runtime_error);
+
+        std::vector<TestNumType> test_vec = {
+                1, 2, 3,
+                1, 1, 1,
+                0, 0, 0,
+
+                1,1, 2,2, 3,3,
+                2,3, 2,3, 2,3,
+                0,0, 0,0, 0,0,
+
+                1,1, 2,2, 3,3,
+                4,5, 4,5, 4,5,
+                1,1, 1,1, 1,1,
+        };
+        truth_vec = {
+                1,1,1,1,1, 2,2,2,2,2, 3,3,3,3,3,
+                1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5,
+                0,0,0,1,1, 0,0,0,1,1, 0,0,0,1,1,
+        };
+        result.clear();
+        result.resize(truth_vec.size());
+        std::vector<DLMath::Shape3d> test_shape = {{3,3,1}, {3,3,2}, {3,3,2}};
+        DLMath::concatenate(result.data(),
+                            test_vec.data(), test_shape, 2);
+        for (SizeType r = 0; r < rows; ++r)
+        {
+            for (SizeType c = 0; c < cols; ++c)
+            {
+                for (SizeType ch = 0; ch < channels; ++ch)
+                {
+                    EDGE_LEARNING_TEST_PRINT(
+                            result[r * (cols + channels) + c * channels + ch]);
+                    EDGE_LEARNING_TEST_EQUAL(
+                            result[r * (cols + channels) + c * channels + ch],
+                            truth_vec[r * (cols + channels) + c * channels + ch]);
+                }
+            }
+        }
+
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::concatenate(result.data(),
+                                test_vec.data(), test_shape, 3));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::concatenate(result.data(),
+                                test_vec.data(), test_shape, 3),
+            std::runtime_error);
+
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::concatenate(result.data(),
+                                test_vec.data(), {{3,3,1}, {3,3,2}, {3,0,2}}, 2));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::concatenate(result.data(),
+                                test_vec.data(), {{3,3,1}, {3,3,2}, {3,0,2}}, 2),
+            std::runtime_error);
     }
+
+    void test_separate()
+    {
+        SizeType cols1 = 3;
+        SizeType rows1 = 3;
+        SizeType cols2 = 2;
+        SizeType rows2 = 3;
+        std::vector<TestNumType> test_vec = {
+                1,  2,  3,
+                4,  5,  6,
+                7,  8,  9,
+                10, 11, 12,
+                13, 14, 15,
+        };
+        std::vector<TestNumType> truth_vec1 = {
+                1, 2, 3,
+                4, 5, 6,
+                7, 8, 9,
+        };
+        std::vector<TestNumType> truth_vec2 = {
+                10, 11, 12,
+                13, 14, 15,
+        };
+        std::vector<TestNumType> result1(truth_vec1.size());
+        std::vector<TestNumType> result2(truth_vec2.size());
+        DLMath::separate(result1.data(), {3,3},
+                         result2.data(), {2,3},
+                         test_vec.data(), 0);
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {2,3},
+                                 test_vec.data(), 2));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {2,3},
+                                 test_vec.data(), 1),
+                std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {2,3},
+                                 test_vec.data(), 2));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {2,3},
+                                 test_vec.data(), 2),
+                std::runtime_error);
+        for (SizeType r = 0; r < rows1; ++r)
+        {
+            for (SizeType c = 0; c < cols1; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(result1[r * cols1 + c]);
+                EDGE_LEARNING_TEST_EQUAL(result1[r * cols1 + c],
+                                         truth_vec1[r * cols1 + c]);
+            }
+        }
+        for (SizeType r = 0; r < rows2; ++r)
+        {
+            for (SizeType c = 0; c < cols2; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(result1[r * cols2 + c]);
+                EDGE_LEARNING_TEST_EQUAL(result1[r * cols2 + c],
+                                         truth_vec1[r * cols2 + c]);
+            }
+        }
+
+        cols1 = 3;
+        rows1 = 3;
+        cols2 = 3;
+        rows2 = 2;
+        test_vec = {
+                1,  2,  3,  4,  5,
+                6,  7,  8,  9,  10,
+                11, 12, 13, 14, 15,
+        };
+        truth_vec1 = {
+                1,  2,  3,
+                6,  7,  8,
+                11, 12, 13,
+        };
+        truth_vec2 = {
+                4,  5,
+                9,  10,
+                14, 15,
+        };
+        result1.clear();
+        result1.resize(truth_vec1.size());
+        result2.clear();
+        result2.resize(truth_vec2.size());
+        DLMath::separate(result1.data(), {3,3},
+                         result2.data(), {3,2},
+                         test_vec.data(), 1);
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {3,2},
+                                 test_vec.data(), 0));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {3,2},
+                                 test_vec.data(), 0),
+                std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {3,2},
+                                 test_vec.data(), 2));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::separate(result1.data(), {3,3},
+                                 result2.data(), {3,2},
+                                 test_vec.data(), 2),
+                std::runtime_error);
+        for (SizeType r = 0; r < rows1; ++r)
+        {
+            for (SizeType c = 0; c < cols1; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(result1[r * cols1 + c]);
+                EDGE_LEARNING_TEST_EQUAL(result1[r * cols1 + c],
+                                         truth_vec1[r * cols1 + c]);
+            }
+        }
+        for (SizeType r = 0; r < rows2; ++r)
+        {
+            for (SizeType c = 0; c < cols2; ++c)
+            {
+                EDGE_LEARNING_TEST_PRINT(result1[r * cols2 + c]);
+                EDGE_LEARNING_TEST_EQUAL(result1[r * cols2 + c],
+                                         truth_vec1[r * cols2 + c]);
+            }
+        }
+
+        cols1 = 3;
+        rows1 = 3;
+        SizeType channels1 = 3;
+        cols2 = 3;
+        rows2 = 3;
+        SizeType channels2 = 2;
+        test_vec = {
+                1,1,1,1,1, 2,2,2,2,2, 3,3,3,3,3,
+                1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5,
+                0,0,0,1,1, 0,0,0,1,1, 0,0,0,1,1,
+        };
+        truth_vec1 = {
+                1,1,1, 2,2,2, 3,3,3,
+                1,2,3, 1,2,3, 1,2,3,
+                0,0,0, 0,0,0, 0,0,0,
+        };
+        truth_vec2 = {
+                1,1, 2,2, 3,3,
+                4,5, 4,5, 4,5,
+                1,1, 1,1, 1,1,
+        };
+        result1.clear();
+        result1.resize(truth_vec1.size());
+        result2.clear();
+        result2.resize(truth_vec2.size());
+        DLMath::separate(result1.data(), {3,3,3},
+                         result2.data(), {3,3,2},
+                         test_vec.data(), 2);
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::separate(result1.data(), {3,3,3},
+                                 result2.data(), {3,3,2},
+                                 test_vec.data(), 0));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::separate(result1.data(), {3,3,3},
+                                 result2.data(), {3,3,2},
+                                 test_vec.data(), 0),
+                std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::separate(result1.data(), {3,3,3},
+                                 result2.data(), {3,3,2},
+                                 test_vec.data(), 1));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::separate(result1.data(), {3,3,3},
+                                 result2.data(), {3,3,2},
+                                 test_vec.data(), 1),
+                std::runtime_error);
+        for (SizeType r = 0; r < rows1; ++r)
+        {
+            for (SizeType c = 0; c < cols1; ++c)
+            {
+                for (SizeType ch = 0; ch < channels1; ++ch)
+                {
+                    EDGE_LEARNING_TEST_PRINT(
+                            result1[r * (cols1 + channels1) + c * channels1 + ch]);
+                    EDGE_LEARNING_TEST_EQUAL(
+                            result1[r * (cols1 + channels1) + c * channels1 + ch],
+                            truth_vec1[r * (cols1 + channels1) + c * channels1 + ch]);
+                }
+            }
+        }
+        for (SizeType r = 0; r < rows2; ++r)
+        {
+            for (SizeType c = 0; c < cols2; ++c)
+            {
+                for (SizeType ch = 0; ch < channels2; ++ch)
+                {
+                    EDGE_LEARNING_TEST_PRINT(
+                            result2[r * (cols2 + channels2) + c * channels2 + ch]);
+                    EDGE_LEARNING_TEST_EQUAL(
+                            result2[r * (cols2 + channels2) + c * channels2 + ch],
+                            truth_vec2[r * (cols2 + channels2) + c * channels2 + ch]);
+                }
+            }
+        }
+
+        EDGE_LEARNING_TEST_FAIL(
+                DLMath::separate(result1.data(), {3,3,3},
+                                 result1.data(), {3,3,2},
+                                 test_vec.data(), 3));
+        EDGE_LEARNING_TEST_THROWS(
+                DLMath::separate(result1.data(), {3,3,3},
+                                 result2.data(), {3,3,2},
+                                 test_vec.data(), 3),
+                std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::separate(result1.data(), {3,3,3},
+                             result1.data(), {3,0,2},
+                             test_vec.data(), 2));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::separate(result1.data(), {3,3,3},
+                             result2.data(), {3,0,2},
+                             test_vec.data(), 2),
+            std::runtime_error);
+
+        test_vec = {
+                1,1,1,1,1, 2,2,2,2,2, 3,3,3,3,3,
+                1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5,
+                0,0,0,1,1, 0,0,0,1,1, 0,0,0,1,1,
+        };
+        std::vector<TestNumType> truth_vec = {
+                1, 2, 3,
+                1, 1, 1,
+                0, 0, 0,
+
+                1,1, 2,2, 3,3,
+                2,3, 2,3, 2,3,
+                0,0, 0,0, 0,0,
+
+                1,1, 2,2, 3,3,
+                4,5, 4,5, 4,5,
+                1,1, 1,1, 1,1,
+        };
+        std::vector<TestNumType> result(truth_vec.size());
+        std::vector<DLMath::Shape3d> result_shape = {{3,3,1}, {3,3,2}, {3,3,2}};
+        DLMath::separate(result.data(), result_shape,
+                         test_vec.data(), 2);
+        SizeType offset = 0;
+        for (const auto& shape: result_shape)
+        {
+            for (SizeType r = 0; r < shape.height; ++r)
+            {
+                for (SizeType c = 0; c < shape.width; ++c)
+                {
+                    for (SizeType ch = 0; ch < shape.channels; ++ch)
+                    {
+                        EDGE_LEARNING_TEST_PRINT(
+                                result[offset + r * (shape.width + shape.channels) + c * shape.channels + ch]);
+                        EDGE_LEARNING_TEST_EQUAL(
+                                result[offset + r * (shape.width + shape.channels) + c * shape.channels + ch],
+                                truth_vec[offset + r * (shape.width + shape.channels) + c * shape.channels + ch]);
+                    }
+                }
+            }
+            offset += shape.size();
+        }
+
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::separate(result.data(), result_shape,
+                             test_vec.data(), 3));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::separate(result.data(), result_shape,
+                             test_vec.data(), 3),
+            std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::separate(result.data(), {{3,3,1}, {3,3,2}, {3,0,2}},
+                             test_vec.data(), 2));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::separate(result.data(), {{3,3,1}, {3,3,2}, {3,0,2}},
+                             test_vec.data(), 2),
+            std::runtime_error);
+    }
+
 };
 
 int main() {

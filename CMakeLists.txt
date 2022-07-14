@@ -90,6 +90,7 @@ include(CTest)
 add_subdirectory(tests)
 
 add_subdirectory(submodules)
+
 add_subdirectory(profile)
 
 add_library(edgelearning ${LIBRARY_KIND}
