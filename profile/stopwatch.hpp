@@ -29,12 +29,13 @@
 #ifndef EDGE_LEARNING_STOPWATCH_HPP
 #define EDGE_LEARNING_STOPWATCH_HPP
 
+#include "data/path.hpp"
+
 #include <chrono>
 #include <vector>
 #include <cmath>
 #include <algorithm>
 #include <numeric>
-#include <experimental/filesystem>
 #include <fstream>
 
 namespace EdgeLearning {
@@ -129,10 +130,10 @@ public:
         return ret;
     }
 
-    void dump(std::experimental::filesystem::path path, std::string header = "data")
+    void dump(std::filesystem::path path, std::string header = "data")
     {
         std::ofstream f;
-        if (!std::experimental::filesystem::exists(path)) {
+        if (!std::filesystem::exists(path)) {
             f.open(path);
             f << header << std::endl;
             f.close();

@@ -30,6 +30,7 @@
 #define EDGE_LEARNING_PARSER_JSON_HPP
 
 #include "parser.hpp"
+#include "data/path.hpp"
 
 #include <cstddef>
 #include <string>
@@ -41,14 +42,13 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
-#include <experimental/filesystem>
 #include <tuple>
 #include <memory>
 #include <algorithm>
 
 namespace EdgeLearning {
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 class JsonLeaf;
 class JsonList;

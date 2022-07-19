@@ -24,8 +24,8 @@
 
 #include "test.hpp"
 #include "parser/mnist.hpp"
+#include "data/path.hpp"
 
-#include <experimental/filesystem>
 #include <vector>
 #include <stdexcept>
 
@@ -50,15 +50,15 @@ private:
     const std::string FIRST10_TESTING_LABELS_FN =
         "first10-t10k-labels-idx1-ubyte";
 
-    const std::experimental::filesystem::path MNIST_RESOURCE_ROOT =
-        std::experimental::filesystem::path(__FILE__).parent_path() / "resource" / "mnist";
-    const std::experimental::filesystem::path FIRST10_TRAINING_IMAGES_FP =
+    const std::filesystem::path MNIST_RESOURCE_ROOT =
+        std::filesystem::path(__FILE__).parent_path() / "resource" / "mnist";
+    const std::filesystem::path FIRST10_TRAINING_IMAGES_FP =
         MNIST_RESOURCE_ROOT / FIRST10_TRAINING_IMAGES_FN;
-    const std::experimental::filesystem::path FIRST10_TRAINING_LABELS_FP =
+    const std::filesystem::path FIRST10_TRAINING_LABELS_FP =
         MNIST_RESOURCE_ROOT / FIRST10_TRAINING_LABELS_FN;
-    const std::experimental::filesystem::path FIRST10_TESTING_IMAGES_FP =
+    const std::filesystem::path FIRST10_TESTING_IMAGES_FP =
         MNIST_RESOURCE_ROOT / FIRST10_TESTING_IMAGES_FN;
-    const std::experimental::filesystem::path FIRST10_TESTING_LABELS_FP =
+    const std::filesystem::path FIRST10_TESTING_LABELS_FP =
         MNIST_RESOURCE_ROOT / FIRST10_TESTING_LABELS_FN;
 
     void test_uint32_endian_order()

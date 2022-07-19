@@ -30,6 +30,7 @@
 #define EDGE_LEARNING_PARSER_CIFAR_HPP
 
 #include "parser.hpp"
+#include "data/path.hpp"
 
 #include <cstddef>
 #include <string>
@@ -39,12 +40,11 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
-#include <experimental/filesystem>
 #include <tuple>
 
 namespace EdgeLearning {
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 enum class CifarDataset
 {

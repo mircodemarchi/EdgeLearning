@@ -26,13 +26,12 @@
 
 #include "parser/csv.hpp"
 #include "data/dataset.hpp"
+#include "data/path.hpp"
 #include "middleware/fnn.hpp"
-
-#include <experimental/filesystem>
 
 
 using namespace EdgeLearning;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 struct ProfileRegressionFNN : Profiler
 {
@@ -59,7 +58,7 @@ struct ProfileRegressionFNN : Profiler
 
 private:
     const std::string DATA_TRAINING_FN = "execution-time.csv";
-    const std::experimental::filesystem::path DATA_TRAINING_FP = std::experimental::filesystem::path(__FILE__).parent_path()
+    const std::filesystem::path DATA_TRAINING_FP = std::filesystem::path(__FILE__).parent_path()
                                       / ".." / "data" / DATA_TRAINING_FN;
 
     using ProfileCompileFNN = CompileFNN<

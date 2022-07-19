@@ -31,6 +31,7 @@
 
 #include "stopwatch.hpp"
 #include "type.hpp"
+#include "data/path.hpp"
 
 #include <functional>
 #include <iostream>
@@ -38,7 +39,6 @@
 #include <utility>
 #include <algorithm>
 #include <numeric>
-#include <experimental/filesystem>
 
 using namespace EdgeLearning;
 
@@ -85,17 +85,17 @@ public:
         : _num_tries(num_tries)
         , _name(name.empty() ? "profiler" : name)
     {
-        std::experimental::filesystem::path path(_name);
-        if (std::experimental::filesystem::exists(path))
+        std::filesystem::path path(_name);
+        if (std::filesystem::exists(path))
         {
-            if (!std::experimental::filesystem::is_directory(path))
+            if (!std::filesystem::is_directory(path))
             {
                 throw std::runtime_error("path is not a directory");
             }
         }
         else
         {
-            std::experimental::filesystem::create_directories(path);
+            std::filesystem::create_directories(path);
         }
     }
 
@@ -122,7 +122,7 @@ public:
         profile(std::move(function), num_tries);
         std::cout << "completed " << _pretty_print() << std::endl;
         std::string fn(profile_name + ".csv");
-        _sw.dump(std::experimental::filesystem::path(_name) / fn, "time");
+        _sw.dump(std::filesystem::path(_name) / fn, "time");
         _sw.reset();
     }
 

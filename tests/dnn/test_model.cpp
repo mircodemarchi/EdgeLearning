@@ -31,8 +31,7 @@
 #include "dnn/cce_loss.hpp"
 #include "dnn/mse_loss.hpp"
 #include "dnn/gd_optimizer.hpp"
-
-#include <experimental/filesystem>
+#include "data/path.hpp"
 
 using namespace std;
 using namespace EdgeLearning;
@@ -172,13 +171,13 @@ private:
 
         EDGE_LEARNING_TEST_TRY(m.init());
         std::ofstream ofile{
-            std::experimental::filesystem::path{"classifier_weight.json"},
+            std::filesystem::path{"classifier_weight.json"},
             std::ios::trunc};
         EDGE_LEARNING_TEST_TRY(m.dump(ofile));
         ofile.close();
 
         EDGE_LEARNING_TEST_TRY(m.init());
-        std::ifstream ifile{std::experimental::filesystem::path{"classifier_weight.json"}};
+        std::ifstream ifile{std::filesystem::path{"classifier_weight.json"}};
         EDGE_LEARNING_TEST_TRY(m.load(ifile));
         ifile.close();
     }
@@ -227,7 +226,7 @@ private:
         m.print();
 
         std::ofstream params_file{
-            std::experimental::filesystem::path{"classifier_weight.json"}, 
+            std::filesystem::path{"classifier_weight.json"}, 
             std::ios::trunc};
         EDGE_LEARNING_TEST_TRY(m.dump(params_file));
         params_file.close();
@@ -241,7 +240,7 @@ private:
         Model m = TestModel::_create_binary_classifier_model();
 
         std::ifstream params_file{
-            std::experimental::filesystem::path{"classifier_weight.json"}};
+            std::filesystem::path{"classifier_weight.json"}};
         EDGE_LEARNING_TEST_TRY(m.load(params_file));
         params_file.close();
     }
@@ -291,7 +290,7 @@ private:
         m.print();
 
         std::ofstream params_file{
-            std::experimental::filesystem::path{"regressor_weight.json"}, 
+            std::filesystem::path{"regressor_weight.json"}, 
             std::ios::trunc};
         EDGE_LEARNING_TEST_TRY(m.dump(params_file));
         params_file.close();
@@ -305,7 +304,7 @@ private:
         Model m = TestModel::_create_regressor_model();
 
         std::ifstream params_file{
-            std::experimental::filesystem::path{"regressor_weight.json"}};
+            std::filesystem::path{"regressor_weight.json"}};
         EDGE_LEARNING_TEST_TRY(m.load(params_file));
         params_file.close();
     }

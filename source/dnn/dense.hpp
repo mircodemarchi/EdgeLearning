@@ -57,7 +57,7 @@ public:
 
     /**
      * \brief The input data should have size _input_size.
-     * \param inputs
+     * \param inputs const std::vector<NumType>& Layer input in forward.
      */
     const std::vector<NumType>& forward(
         const std::vector<NumType>& inputs) override;
@@ -68,14 +68,14 @@ public:
      * where dJ/dg(z) is the input gradients, dg(z)/dz is the activation_grad 
      * computed in the function and dJ/dz will be the result saved in 
      * _activation_gradients.
-     * \param gradients
+     * \param gradients const std::vector<NumType>& Layer gradients in backward.
      */
     const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients) override;
 
     /**
      * \brief Weight matrix entries + bias entries.
-     * \return SizeType
+     * \return SizeType input_size*output_size + bias_size(1)*output_size.
      */
     [[nodiscard]] SizeType param_count() const noexcept override
     {
@@ -94,7 +94,7 @@ public:
 
     /**
      * \brief Getter of input_shape class field.
-     * \return The size of the layer input.
+     * \return const DLMath::Shape3d& The size of the layer input.
      */
     [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const override
     {
