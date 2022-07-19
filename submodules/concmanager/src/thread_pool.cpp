@@ -42,7 +42,7 @@ VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
             Bool got_task = false;
             {
                 UniqueLock<Mutex> lock(_task_availability_mutex);
-                _task_availability_condition.wait(lock, [=, this] {
+                _task_availability_condition.wait(lock, [this] {
                     return _finish_all_and_stop or (_num_active_threads > _num_threads_to_use) or not _tasks.empty();
                 });
                 if (_finish_all_and_stop and _tasks.empty()) return;
@@ -65,7 +65,7 @@ VoidFunction ThreadPool::_task_wrapper_function(SizeType i) {
 
 Void ThreadPool::_append_thread_range(SizeType lower, SizeType upper) {
     for (SizeType i=lower; i<upper; ++i) {
-        _threads.push_back(make_shared<Thread>(ThreadPool::_task_wrapper_function(i), construct_thread_name(_name,i,upper)));
+        _threads.push_back(std::make_shared<Thread>(ThreadPool::_task_wrapper_function(i), construct_thread_name(_name,i,upper)));
     }
 }
 

@@ -30,7 +30,7 @@ namespace ConcManager {
 Thread::Thread(VoidFunction task, String name)
     : _name(name), _got_id_future(_got_id_promise.get_future()), _exception(nullptr)
 {
-    _thread = std::thread([=,this]() {
+    _thread = std::thread([this, task]() {
         _id = std::this_thread::get_id();
         _got_id_promise.set_value();
         try { task(); }
