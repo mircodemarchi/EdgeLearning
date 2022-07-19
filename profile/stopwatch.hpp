@@ -34,12 +34,10 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <fstream>
 
 namespace EdgeLearning {
-
-namespace fs = std::filesystem;
 
 using Seconds = std::chrono::seconds;
 using Milliseconds = std::chrono::milliseconds;
@@ -127,14 +125,14 @@ public:
             });
         R sqsum = std::inner_product(
             diff.begin(), diff.end(), diff.begin(), R(0.0));
-        R std = std::sqrt(sqsum / diff.size());
-        return std;
+        R ret = std::sqrt(sqsum / diff.size());
+        return ret;
     }
 
-    void dump(fs::path path, std::string header = "data")
+    void dump(std::experimental::filesystem::path path, std::string header = "data")
     {
         std::ofstream f;
-        if (!fs::exists(path)) {
+        if (!std::experimental::filesystem::exists(path)) {
             f.open(path);
             f << header << std::endl;
             f.close();

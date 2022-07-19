@@ -28,11 +28,11 @@
 #include "data/dataset.hpp"
 #include "middleware/fnn.hpp"
 
-#include <filesystem>
+#include <experimental/filesystem>
 
 
 using namespace EdgeLearning;
-namespace fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
 
 struct ProfileRegressionFNN : Profiler
 {
@@ -59,7 +59,7 @@ struct ProfileRegressionFNN : Profiler
 
 private:
     const std::string DATA_TRAINING_FN = "execution-time.csv";
-    const fs::path DATA_TRAINING_FP = fs::path(__FILE__).parent_path()
+    const std::experimental::filesystem::path DATA_TRAINING_FP = std::experimental::filesystem::path(__FILE__).parent_path()
                                       / ".." / "data" / DATA_TRAINING_FN;
 
     using ProfileCompileFNN = CompileFNN<

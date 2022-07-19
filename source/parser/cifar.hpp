@@ -39,12 +39,12 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <tuple>
 
 namespace EdgeLearning {
 
-namespace fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
 
 enum class CifarDataset
 {

@@ -25,7 +25,7 @@
 #include "test.hpp"
 #include "parser/cifar.hpp"
 
-#include <filesystem>
+#include <experimental/filesystem>
 #include <vector>
 #include <stdexcept>
 
@@ -49,17 +49,17 @@ private:
     const std::string CIFAR100_COARSE_META_FN = "coarse_label_names.txt";
     const std::string CIFAR100_FINE_META_FN = "fine_label_names.txt";
 
-    const std::filesystem::path CIFAR_RESOURCE_ROOT =
-        std::filesystem::path(__FILE__).parent_path() / "resource" / "cifar";
-    const std::filesystem::path FIRST10_CIFAR10_BATCH1_FP =
+    const std::experimental::filesystem::path CIFAR_RESOURCE_ROOT =
+        std::experimental::filesystem::path(__FILE__).parent_path() / "resource" / "cifar";
+    const std::experimental::filesystem::path FIRST10_CIFAR10_BATCH1_FP =
         CIFAR_RESOURCE_ROOT / FIRST10_CIFAR10_BATCH1_FN;
-    const std::filesystem::path CIFAR10_META_FP =
+    const std::experimental::filesystem::path CIFAR10_META_FP =
         CIFAR_RESOURCE_ROOT / CIFAR10_META_FN;
-    const std::filesystem::path FIRST10_CIFAR100_TRAIN_FP =
+    const std::experimental::filesystem::path FIRST10_CIFAR100_TRAIN_FP =
         CIFAR_RESOURCE_ROOT / FIRST10_CIFAR100_TRAIN_FN;
-    const std::filesystem::path CIFAR100_COARSE_META_FP =
+    const std::experimental::filesystem::path CIFAR100_COARSE_META_FP =
         CIFAR_RESOURCE_ROOT / CIFAR100_COARSE_META_FN;
-    const std::filesystem::path CIFAR100_FINE_META_FP =
+    const std::experimental::filesystem::path CIFAR100_FINE_META_FP =
         CIFAR_RESOURCE_ROOT / CIFAR100_FINE_META_FN;
 
 

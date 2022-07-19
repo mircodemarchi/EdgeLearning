@@ -39,12 +39,12 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <tuple>
 
 namespace EdgeLearning {
 
-namespace fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
 
 /**
  * \brief Calculate an uint32 value in the right endian order according to

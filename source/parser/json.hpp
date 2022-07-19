@@ -41,14 +41,14 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <tuple>
 #include <memory>
 #include <algorithm>
 
 namespace EdgeLearning {
 
-namespace fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
 
 class JsonLeaf;
 class JsonList;
@@ -993,7 +993,7 @@ public:
      */
     [[nodiscard]] const JsonItem& at(std::string key) const
     {
-        if (!_map.contains(key))
+        if (!(_map.count(key) > 0))
         {
             throw std::runtime_error(
                 "operator[] failed: idx not contained in dict");
