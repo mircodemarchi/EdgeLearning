@@ -15,3 +15,5 @@ foreach(TEST ${UNIT_TESTS})
     add_test(${TEST} ${TEST})
     target_link_libraries(${TEST} edgelearning)
 endforeach()
+
+add_dependencies(tests ${UNIT_TESTS})
