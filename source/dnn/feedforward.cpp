@@ -28,9 +28,9 @@
 namespace EdgeLearning {
 
 FeedforwardLayer::FeedforwardLayer(
-    Model& model, DLMath::Shape3d input_shape, DLMath::Shape3d output_shape,
+    DLMath::Shape3d input_shape, DLMath::Shape3d output_shape,
     std::string name, std::string prefix_name)
-    : Layer(model, input_shape, output_shape, std::move(name),
+    : Layer(input_shape, output_shape, std::move(name),
             prefix_name.empty() ? "feedforward_layer_" : prefix_name)
     , _output_activations{}
     , _input_gradients{}

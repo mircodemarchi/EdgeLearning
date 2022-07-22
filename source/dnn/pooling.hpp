@@ -53,8 +53,7 @@ namespace EdgeLearning {
 class PoolingLayer : public FeedforwardLayer
 {
 public:
-    PoolingLayer(Model& model,
-                 DLMath::Shape3d input_shape = {0, 0, 1},
+    PoolingLayer(DLMath::Shape3d input_shape = {0, 0, 1},
                  DLMath::Shape2d kernel_shape = {0},
                  DLMath::Shape2d stride = {1},
                  std::string name = std::string(),

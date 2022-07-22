@@ -42,12 +42,11 @@ public:
 
     /**
      * \brief Construct a new CCELossLayer object.
-     * \param model
      * \param name
      * \param input_size
      * \param batch_size
      */
-    CCELossLayer(Model& model, std::string name = std::string(), 
+    CCELossLayer(std::string name = std::string(),
         SizeType input_size = 0, SizeType batch_size = 1);
 
     [[nodiscard]] inline const std::string& type() const override

@@ -85,21 +85,23 @@ public:
         {
             for (SizeType i = 0; i < data.size();)
             {
-                std::vector<Model> model_copies;
-                std::vector<ConcManager::Future<void>> futures;
+                std::vector<ConcManager::Future<Model>> futures;
                 for (SizeType b = 0; b < batch_size
                                      && i < data.size(); ++b, ++i)
                 {
-                    model_copies.push_back(model);
                     futures.push_back(tm.enqueue(
-                        [&]{
-                            model_copies[b].step(
-                                data.trainset(i), data.labels(i));
-                            model.train(o, model_copies[b]);
-                        }));
+                        [](Model m,
+                              std::vector<NumType> train_entry,
+                              std::vector<NumType> label_entry) {
+                            m.step(train_entry, label_entry);
+                            return m;
+                        }, model, data.trainset(i), data.labels(i)));
                 }
 
-                for (auto& f: futures) f.get();
+                for (auto& f: futures) {
+                    Model m = f.get();
+                    model.train(o, m);
+                }
             }
         }
     }

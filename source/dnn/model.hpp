@@ -98,7 +98,7 @@ public:
     std::shared_ptr<Layer_t> add_layer(T&&... args)
     {
         _layers.push_back(
-            std::make_shared<Layer_t>(*this, std::forward<T>(args)...)
+            std::make_shared<Layer_t>(std::forward<T>(args)...)
         );
         return std::dynamic_pointer_cast<Layer_t>(_layers.back());
     }
@@ -117,7 +117,7 @@ public:
     std::shared_ptr<LossLayer_t> add_loss(T&&... args)
     {
         _loss_layer = std::make_shared<LossLayer_t>(
-            *this, std::forward<T>(args)...);
+            std::forward<T>(args)...);
         return std::dynamic_pointer_cast<LossLayer_t>(_loss_layer);
     }
 
@@ -249,9 +249,11 @@ public:
 private:
     friend class Layer;
 
+    std::int64_t _index_of(Layer::SharedPtr l);
+
     std::string _name;                           ///< Model name;
-    std::vector<Layer::SharedPtr> _layers; ///< List of layers pointers;
-    std::shared_ptr<LossLayer> _loss_layer;      ///< Loss of the model; 
+    std::vector<Layer::SharedPtr> _layers;       ///< List of layers pointers;
+    std::shared_ptr<LossLayer> _loss_layer;      ///< Loss of the model;
 };
 
 } // namespace EdgeLearning

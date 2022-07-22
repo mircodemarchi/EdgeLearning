@@ -46,10 +46,10 @@ private:
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
-                auto l = ConvolutionalLayer(_m, "convolutional_layer_test"));
+                auto l = ConvolutionalLayer("convolutional_layer_test"));
         EDGE_LEARNING_TEST_TRY(
-                auto l = ConvolutionalLayer(_m, "convolutional_layer_test"));
-        auto l = ConvolutionalLayer(_m, "convolutional_layer_test");
+                auto l = ConvolutionalLayer("convolutional_layer_test"));
+        auto l = ConvolutionalLayer("convolutional_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Conv");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Conv");
         EDGE_LEARNING_TEST_TRY(
@@ -110,9 +110,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
 
-        EDGE_LEARNING_TEST_EXECUTE(ConvolutionalLayer l_assign(_m); l_assign = l);
-        EDGE_LEARNING_TEST_TRY(ConvolutionalLayer l_assign(_m); l_assign = l);
-        ConvolutionalLayer l_assign(_m); l_assign = l;
+        EDGE_LEARNING_TEST_EXECUTE(ConvolutionalLayer l_assign; l_assign = l);
+        EDGE_LEARNING_TEST_TRY(ConvolutionalLayer l_assign; l_assign = l);
+        ConvolutionalLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_TRY(
             l_assign.init(
                 Layer::InitializationFunction::KAIMING,
@@ -156,16 +156,16 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
-        EDGE_LEARNING_TEST_EXECUTE(auto l2 = ConvolutionalLayer(_m));
-        EDGE_LEARNING_TEST_TRY(auto l2 = ConvolutionalLayer(_m));
-        auto l_noname = ConvolutionalLayer(_m);
+        EDGE_LEARNING_TEST_EXECUTE(auto l2 = ConvolutionalLayer());
+        EDGE_LEARNING_TEST_TRY(auto l2 = ConvolutionalLayer());
+        auto l_noname = ConvolutionalLayer();
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
 
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         SizeType filters = 16;
-        auto l_shape = ConvolutionalLayer(_m, "convolutional_layer_test",
+        auto l_shape = ConvolutionalLayer("convolutional_layer_test",
                                           in_shape, k_shape, filters);
         auto truth_output_size = ((in_shape.width - k_shape.width) + 1)
             * ((in_shape.height - k_shape.height) + 1) * filters;
@@ -182,7 +182,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l_shape_copy.last_output().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
                                  l_shape_copy.output_size());
-        ConvolutionalLayer l_shape_assign(_m); l_shape_assign = l_shape;
+        ConvolutionalLayer l_shape_assign; l_shape_assign = l_shape;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), in_shape.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(),
                                  truth_output_size);
@@ -200,7 +200,7 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         SizeType filters = 16;
-        auto l = ConvolutionalLayer(_m, "convolutional_layer_test",
+        auto l = ConvolutionalLayer("convolutional_layer_test",
                                     in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l.init());
         EDGE_LEARNING_TEST_TRY(l.forward(v1));
@@ -227,7 +227,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
 
-        ConvolutionalLayer l_assign(_m); l_assign = l;
+        ConvolutionalLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v1.size());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input()[0], v1[0]);
@@ -246,7 +246,7 @@ private:
                                 1,2,3, 4,5,6, 7,8,9};
         DLMath::Shape2d stride{1,1};
         DLMath::Shape2d padding{1,1};
-        auto l_complex = ConvolutionalLayer(_m, "convolutional_layer_test",
+        auto l_complex = ConvolutionalLayer("convolutional_layer_test",
                                             in_shape, k_shape, filters,
                                             stride, padding);
         EDGE_LEARNING_TEST_TRY(l_complex.init());
@@ -282,7 +282,7 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         SizeType filters = 16;
-        auto l = ConvolutionalLayer(_m, "convolutional_layer_test",
+        auto l = ConvolutionalLayer("convolutional_layer_test",
                                     in_shape, k_shape, filters);
 
         EDGE_LEARNING_TEST_EQUAL(l.input_shape().height, in_shape.height);
@@ -306,7 +306,7 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         SizeType filters = 16;
-        auto l = ConvolutionalLayer(_m, "convolutional_layer_test",
+        auto l = ConvolutionalLayer("convolutional_layer_test",
                                     in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), in_shape.size());
         DLMath::Shape3d new_in_shape{5,5,3};
@@ -339,7 +339,7 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         SizeType filters = 16;
-        auto l = ConvolutionalLayer(_m, "convolutional_layer_test",
+        auto l = ConvolutionalLayer("convolutional_layer_test",
                                     in_shape, k_shape, filters);
 
         Json l_dump;
@@ -369,7 +369,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
 
-        l = ConvolutionalLayer(_m);
+        l = ConvolutionalLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Conv");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
@@ -431,8 +431,6 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             l_dump["others"]["n_filters"].as<SizeType>(), l.n_filters());
     }
-
-    Model _m = Model("model_convolutional_layer_test");
 };
 
 int main() {

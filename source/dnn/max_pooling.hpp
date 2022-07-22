@@ -44,8 +44,7 @@ class MaxPoolingLayer : public PoolingLayer
 public:
     static const std::string TYPE;
 
-    MaxPoolingLayer(Model& model,
-                    std::string name = std::string(),
+    MaxPoolingLayer(std::string name = std::string(),
                     DLMath::Shape3d input_shape = {0, 0, 1},
                     DLMath::Shape2d kernel_shape = {0},
                     DLMath::Shape2d stride = {1});

@@ -31,10 +31,10 @@ namespace EdgeLearning {
 const std::string AvgPoolingLayer::TYPE = "AveragePool";
 
 AvgPoolingLayer::AvgPoolingLayer(
-    Model& model, std::string name,
+    std::string name,
     DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
     DLMath::Shape2d stride)
-    : PoolingLayer(model, input_shape, kernel_shape, stride,
+    : PoolingLayer(input_shape, kernel_shape, stride,
                    std::move(name), "avg_pooling_layer_")
 {}
 

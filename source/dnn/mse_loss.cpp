@@ -30,9 +30,9 @@ namespace EdgeLearning {
 
 const std::string MSELossLayer::TYPE = "MSELoss";
 
-MSELossLayer::MSELossLayer(Model& model, std::string name, 
+MSELossLayer::MSELossLayer(std::string name,
     SizeType input_size, SizeType batch_size, NumType loss_tolerance)
-    : LossLayer(model, input_size, batch_size,
+    : LossLayer(input_size, batch_size,
                 std::move(name), "mse_loss_layer_")
     , _loss_tolerance{loss_tolerance}
 { 

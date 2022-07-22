@@ -35,9 +35,8 @@ public:
     CustomLayer(SizeType input_size = 0, SizeType output_size = 0,
                 std::string name = std::string(),
                 SharedPtr antecedent = nullptr, SharedPtr subsequent = nullptr)
-        : Layer(_m, input_size, output_size,
+        : Layer(input_size, output_size,
                 name.empty() ? "custom_layer_test" : name)
-        , _m{"model_layer_test"}
     {
         if (antecedent) _antecedents.push_back(antecedent);
         if (subsequent) _subsequents.push_back(subsequent);
@@ -89,14 +88,12 @@ public:
     void print() const override {}
 
 private:
-    Model _m;
 };
 
 class CustomLayerNoName: public Layer {
 public:
-    CustomLayerNoName() 
-        : Layer(_m)
-        , _m{"model_layer_test"}
+    CustomLayerNoName()
+        : Layer()
     { }
 
     void init(
@@ -141,7 +138,6 @@ public:
     void print() const override {}
 
 private:
-    Model _m;
 };
 
 class CustomLayerType : public CustomLayer

@@ -86,7 +86,7 @@ private:
         auto o = CustomOptimizer();
         EDGE_LEARNING_TEST_TRY(o.reset());
 
-        auto l = DenseLayer(m, "dense_optimizer", input_size, output_size);
+        auto l = DenseLayer("dense_optimizer", input_size, output_size);
         for (std::size_t i = 0; i < l.param_count(); ++i)
         {
             l.param(i) = 0.0;
@@ -141,9 +141,9 @@ private:
     void test_train_check()
     {
         auto o = CustomOptimizer();
-        auto l1 = DenseLayer(m, "dense_optimizer1", 10, 10);
-        auto l2 = DenseLayer(m, "dense_optimizer2", 20, 20);
-        auto l3 = DenseLayer(m, "dense_optimizer3", 10, 10);
+        auto l1 = DenseLayer("dense_optimizer1", 10, 10);
+        auto l2 = DenseLayer("dense_optimizer2", 20, 20);
+        auto l3 = DenseLayer("dense_optimizer3", 10, 10);
 
         EDGE_LEARNING_TEST_FAIL(o.train_check(l1, l2));
         EDGE_LEARNING_TEST_THROWS(o.train_check(l1, l2), std::runtime_error);

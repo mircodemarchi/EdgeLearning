@@ -46,10 +46,10 @@ private:
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
-                auto l = RecurrentLayer(_m, "recurrent_layer_test"));
+                auto l = RecurrentLayer("recurrent_layer_test"));
         EDGE_LEARNING_TEST_TRY(
-                auto l = RecurrentLayer(_m, "recurrent_layer_test"));
-        auto l = RecurrentLayer(_m, "recurrent_layer_test");
+                auto l = RecurrentLayer("recurrent_layer_test"));
+        auto l = RecurrentLayer("recurrent_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Recurrent");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Recurrent");
         EDGE_LEARNING_TEST_TRY(
@@ -111,10 +111,10 @@ private:
                                  l_copy.output_size());
 
         EDGE_LEARNING_TEST_EXECUTE(
-                RecurrentLayer l_assign(_m); l_assign = l);
+                RecurrentLayer l_assign; l_assign = l);
         EDGE_LEARNING_TEST_TRY(
-                RecurrentLayer l_assign(_m); l_assign = l);
-        RecurrentLayer l_assign(_m); l_assign = l;
+                RecurrentLayer l_assign; l_assign = l);
+        RecurrentLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_TRY(
             l_assign.init(
                 Layer::InitializationFunction::KAIMING,
@@ -158,9 +158,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
-        EDGE_LEARNING_TEST_EXECUTE(auto l2 = RecurrentLayer(_m));
-        EDGE_LEARNING_TEST_TRY(auto l2 = RecurrentLayer(_m));
-        auto l_noname = RecurrentLayer(_m);
+        EDGE_LEARNING_TEST_EXECUTE(auto l2 = RecurrentLayer());
+        EDGE_LEARNING_TEST_TRY(auto l2 = RecurrentLayer());
+        auto l_noname = RecurrentLayer();
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
     }
@@ -168,12 +168,12 @@ private:
     void test_recurrent_layer()
     {
         std::vector<NumType> v_empty;
-        auto l_fail = RecurrentLayer(_m, "recurrent_layer_test");
+        auto l_fail = RecurrentLayer("recurrent_layer_test");
         EDGE_LEARNING_TEST_FAIL(l_fail.hidden_state({0.0}));
         EDGE_LEARNING_TEST_THROWS(l_fail.hidden_state({0.0}),
                                   std::runtime_error);
         EDGE_LEARNING_TEST_TRY(l_fail.hidden_state({}));
-        auto l = RecurrentLayer(_m, "recurrent_layer_test",
+        auto l = RecurrentLayer("recurrent_layer_test",
                                 10, 20, 5);
         EDGE_LEARNING_TEST_TRY(l.hidden_state({0.0}));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
@@ -192,7 +192,7 @@ private:
                                  v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
                                  2*l_shape_copy.output_size());
-        RecurrentLayer l_shape_assign(_m); l_shape_assign = l;
+        RecurrentLayer l_shape_assign; l_shape_assign = l;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 20);
         EDGE_LEARNING_TEST_ASSERT(l_shape_assign.last_input().empty());
@@ -207,7 +207,7 @@ private:
         SizeType input_size = 10;
         SizeType output_size = 20;
         SizeType hidden_size = 5;
-        auto l = RecurrentLayer(_m, "recurrent_layer_test",
+        auto l = RecurrentLayer("recurrent_layer_test",
                                 input_size, output_size, hidden_size);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), output_size);
@@ -218,7 +218,7 @@ private:
         SizeType input_size = 1;
         SizeType output_size = 20;
         SizeType hidden_size = 5;
-        auto l = RecurrentLayer(_m, "recurrent_layer_test",
+        auto l = RecurrentLayer("recurrent_layer_test",
                                 input_size, output_size, hidden_size);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         input_size = 10;
@@ -240,7 +240,7 @@ private:
     {
         SizeType hidden_size = 5;
         SizeType time_steps = 5;
-        auto l = RecurrentLayer(_m, "recurrent_layer_test",
+        auto l = RecurrentLayer("recurrent_layer_test",
                                 10, 20, hidden_size, time_steps);
 
         Json l_dump;
@@ -270,7 +270,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
 
-        l = RecurrentLayer(_m);
+        l = RecurrentLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Recurrent");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
@@ -314,8 +314,6 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["others"]["time_steps"].as<SizeType>(),
                                  time_steps);
     }
-
-    Model _m = Model("model_recurrent_layer_test");
 };
 
 int main() {

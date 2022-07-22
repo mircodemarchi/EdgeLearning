@@ -40,7 +40,7 @@ namespace EdgeLearning {
 class ActivationLayer : public FeedforwardLayer
 {
 public:
-    ActivationLayer(Model& model, SizeType size = 0,
+    ActivationLayer(SizeType size = 0,
                     std::string name = std::string(),
                     std::string prefix_name = std::string());
 
@@ -117,7 +117,7 @@ class ReluLayer : public ActivationLayer
 {
 public:
     static const std::string TYPE;
-    ReluLayer(Model& model, std::string name = std::string(),
+    ReluLayer(std::string name = std::string(),
               SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -141,7 +141,7 @@ public:
      * \param size  SizeType The size of the layer input and output.
      * \param alpha NumType Saturation value (default 1.0).
      */
-    EluLayer(Model& model, std::string name = std::string(),
+    EluLayer(std::string name = std::string(),
              SizeType size = 0, NumType alpha = 1.0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -159,7 +159,7 @@ class SoftmaxLayer : public ActivationLayer
 {
 public:
     static const std::string TYPE;
-    SoftmaxLayer(Model& model, std::string name = std::string(),
+    SoftmaxLayer(std::string name = std::string(),
                  SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -176,7 +176,7 @@ class TanhLayer : public ActivationLayer
 {
 public:
     static const std::string TYPE;
-    TanhLayer(Model& model, std::string name = std::string(),
+    TanhLayer(std::string name = std::string(),
               SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -193,7 +193,7 @@ class SigmoidLayer : public ActivationLayer
 {
 public:
     static const std::string TYPE;
-    SigmoidLayer(Model& model, std::string name = std::string(),
+    SigmoidLayer(std::string name = std::string(),
                  SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -210,7 +210,7 @@ class LinearLayer : public ActivationLayer
 {
 public:
     static const std::string TYPE;
-    LinearLayer(Model& model, std::string name = std::string(),
+    LinearLayer(std::string name = std::string(),
                 SizeType size = 0);
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }

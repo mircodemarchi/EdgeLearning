@@ -49,10 +49,9 @@ static inline DLMath::Shape3d pooling_output_shape(
 }
 
 PoolingLayer::PoolingLayer(
-    Model& model, DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
+    DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
     DLMath::Shape2d stride, std::string name, std::string prefix_name)
-    : FeedforwardLayer(
-        model, input_shape,
+    : FeedforwardLayer(input_shape,
         pooling_output_shape(input_shape, kernel_shape, stride), std::move(name),
         prefix_name.empty() ? "pooling_layer_" : prefix_name)
     , _kernel_shape(kernel_shape)

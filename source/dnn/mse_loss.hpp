@@ -41,7 +41,7 @@ class MSELossLayer : public LossLayer {
 public:
     static const std::string TYPE;
 
-    MSELossLayer(Model& model, std::string name = std::string(),
+    MSELossLayer(std::string name = std::string(),
                  SizeType input_size = 0, SizeType batch_size = 1,
                  NumType loss_tolerance=0.1);
 

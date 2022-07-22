@@ -122,15 +122,13 @@ public:
 
     /**
      * \brief Construct a new Layer object.
-     * \param model        The model in which the layer takes part.
      * \param input_shape  The shape of inputs of the layer.
      * \param output_shape The shape of outputs of the layer.
      * \param name         The name of the layer.
      * If empty, a default generated one is chosen.
      * \param prefix_name The prefix name of the default generated name.
      */
-    Layer(Model& model,
-          DLMath::Shape3d input_shape = 0, DLMath::Shape3d output_shape = 0,
+    Layer(DLMath::Shape3d input_shape = 0, DLMath::Shape3d output_shape = 0,
           std::string name = std::string(),
           std::string prefix_name = std::string());
 
@@ -357,7 +355,6 @@ protected:
 
     friend class Model;
 
-    Model& _model;                         ///< Model reference.
     std::string _name;                     ///< Layer name (for debug).
     std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
     std::vector<SharedPtr> _subsequents;   ///< List of followers layers.

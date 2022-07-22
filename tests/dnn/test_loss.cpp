@@ -32,8 +32,7 @@ using namespace EdgeLearning;
 class CustomLossLayer: public LossLayer {
 public:
     CustomLossLayer(SizeType input_size = 0, SizeType batch_size = 1)
-        : LossLayer(_m, input_size, batch_size, "custom_loss_layer_test")
-        , _m{"model_loss_layer_test"}
+        : LossLayer(input_size, batch_size, "custom_loss_layer_test")
         , _i{0}
     { }
 
@@ -53,15 +52,13 @@ public:
         const std::vector<NumType>& gradients) override { return gradients; }
 
 private:
-    Model _m;
     SizeType _i;
 };
 
 class CustomLossLayerNoName: public LossLayer {
 public:
     CustomLossLayerNoName()
-        : LossLayer(_m)
-        , _m{"model_layer_test"}
+        : LossLayer()
     { }
 
     [[nodiscard]] SharedPtr clone() const override
@@ -81,7 +78,6 @@ public:
     }
 
 private:
-    Model _m;
 };
 
 class TestLossLayer {

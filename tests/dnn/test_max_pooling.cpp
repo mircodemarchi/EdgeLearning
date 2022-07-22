@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dnn/test_max_pooling.cpp
+ *            dnn/testax_pooling.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -34,7 +34,7 @@ class TestMaxPoolingLayer {
 public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_layer());
-        EDGE_LEARNING_TEST_CALL(test_max_pooling_layer());
+        EDGE_LEARNING_TEST_CALL(testax_pooling_layer());
         EDGE_LEARNING_TEST_CALL(test_getter());
         EDGE_LEARNING_TEST_CALL(test_setter());
         EDGE_LEARNING_TEST_CALL(test_stream());
@@ -46,10 +46,10 @@ private:
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
-                auto l = MaxPoolingLayer(_m, "max_pooling_layer_test"));
+                auto l = MaxPoolingLayer("max_pooling_layer_test"));
         EDGE_LEARNING_TEST_TRY(
-                auto l = MaxPoolingLayer(_m, "max_pooling_layer_test"));
-        auto l = MaxPoolingLayer(_m, "max_pooling_layer_test");
+                auto l = MaxPoolingLayer("max_pooling_layer_test"));
+        auto l = MaxPoolingLayer("max_pooling_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "MaxPool");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "MaxPool");
         EDGE_LEARNING_TEST_TRY(l.init());
@@ -88,9 +88,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
 
-        EDGE_LEARNING_TEST_EXECUTE(MaxPoolingLayer l_assign(_m); l_assign = l);
-        EDGE_LEARNING_TEST_TRY(MaxPoolingLayer l_assign(_m); l_assign = l);
-        MaxPoolingLayer l_assign(_m); l_assign = l;
+        EDGE_LEARNING_TEST_EXECUTE(MaxPoolingLayer l_assign; l_assign = l);
+        EDGE_LEARNING_TEST_TRY(MaxPoolingLayer l_assign; l_assign = l);
+        MaxPoolingLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_TRY(l_assign.init());
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
@@ -119,15 +119,15 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
-        EDGE_LEARNING_TEST_EXECUTE(auto l2 = MaxPoolingLayer(_m));
-        EDGE_LEARNING_TEST_TRY(auto l2 = MaxPoolingLayer(_m));
-        auto l_noname = MaxPoolingLayer(_m);
+        EDGE_LEARNING_TEST_EXECUTE(auto l2 = MaxPoolingLayer());
+        EDGE_LEARNING_TEST_TRY(auto l2 = MaxPoolingLayer());
+        auto l_noname = MaxPoolingLayer();
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
 
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l_shape = MaxPoolingLayer(_m, "max_pooling_layer_test",
+        auto l_shape = MaxPoolingLayer("max_pooling_layer_test",
                                        in_shape, k_shape);
         auto truth_output_size = ((in_shape.width - k_shape.width) + 1)
             * ((in_shape.height - k_shape.height) + 1) * in_shape.channels;
@@ -144,7 +144,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l_shape_copy.last_output().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
                                  l_shape_copy.output_size());
-        MaxPoolingLayer l_shape_assign(_m); l_shape_assign = l_shape;
+        MaxPoolingLayer l_shape_assign; l_shape_assign = l_shape;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), in_shape.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(),
                                  truth_output_size);
@@ -154,14 +154,14 @@ private:
                                  l_shape_assign.output_size());
     }
 
-    void test_max_pooling_layer()
+    void testax_pooling_layer()
     {
         std::vector<NumType> v1{1,1,1, 1,1,1, 1,1,1,
                                 1,1,1, 1,1,1, 1,1,1,
                                 1,1,1, 1,1,1, 1,1,1};
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = MaxPoolingLayer(_m, "max_pooling_layer_test",
+        auto l = MaxPoolingLayer("max_pooling_layer_test",
                                  in_shape, k_shape);
         EDGE_LEARNING_TEST_TRY(l.forward(v1));
         EDGE_LEARNING_TEST_TRY(l.backward(v1));
@@ -187,7 +187,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
 
-        MaxPoolingLayer l_assign(_m); l_assign = l;
+        MaxPoolingLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v1.size());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input()[0], v1[0]);
@@ -206,7 +206,7 @@ private:
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = MaxPoolingLayer(_m, "max_pooling_layer_test",
+        auto l = MaxPoolingLayer("max_pooling_layer_test",
                                  in_shape, k_shape);
 
         EDGE_LEARNING_TEST_EQUAL(l.input_shape().height, in_shape.height);
@@ -226,7 +226,7 @@ private:
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = MaxPoolingLayer(_m, "max_pooling_layer_test",
+        auto l = MaxPoolingLayer("max_pooling_layer_test",
                                  in_shape, k_shape);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), in_shape.size());
         DLMath::Shape3d new_in_shape{5,5,3};
@@ -258,7 +258,7 @@ private:
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = MaxPoolingLayer(_m, "max_pooling_layer_test",
+        auto l = MaxPoolingLayer("max_pooling_layer_test",
                                  in_shape, k_shape);
 
         Json l_dump;
@@ -288,7 +288,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
 
-        l = MaxPoolingLayer(_m);
+        l = MaxPoolingLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "MaxPool");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
@@ -320,8 +320,6 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             l_dump["others"]["stride"][1].as<SizeType>(), 1);
     }
-
-    Model _m = Model("model_max_pooling_layer_test");
 };
 
 int main() {

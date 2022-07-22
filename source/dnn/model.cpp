@@ -28,8 +28,7 @@
 #include "activation.hpp"
 #include "parser/json.hpp"
 
-#include <cstdio>
-#include <cassert>
+#include <algorithm>
 
 namespace EdgeLearning {
 
@@ -46,10 +45,14 @@ Model::Model(std::string name)
 
 Model::Model(const Model& obj)
     : _name{obj._name}
-    , _layers{}
-    , _loss_layer{obj._loss_layer}
+    , _layers{obj._layers.size()}
+    , _loss_layer{}
 {
-    _layers.resize(obj._layers.size());
+    if (obj._loss_layer)
+    {
+        _loss_layer = std::dynamic_pointer_cast<LossLayer>(
+            obj._loss_layer->clone());
+    }
     for (std::size_t i = 0; i < obj._layers.size(); ++i)
     {
         _layers[i] = obj._layers[i]->clone();
@@ -252,6 +255,19 @@ void Model::load(std::ifstream& in)
 
     auto loss_layer_json = Json(model["loss_layer"][0]);
     _loss_layer->load(loss_layer_json);
+}
+
+std::int64_t Model::_index_of(Layer::SharedPtr l)
+{
+    auto itr = std::find(_layers.begin(), _layers.end(), l);
+    if (itr != _layers.cend())
+    {
+        return std::distance(_layers.begin(), itr);
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 } // namespace EdgeLearning

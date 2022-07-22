@@ -44,13 +44,12 @@ public:
 
     /**
      * \brief Construct a new LossLayer object.
-     * \param model
      * \param input_size
      * \param batch_size
      * \param name
      * \param prefix_name
      */
-    LossLayer(Model& model,
+    LossLayer(
         SizeType input_size = 0, SizeType batch_size = 1,
         std::string name = std::string(),
         std::string prefix_name = std::string());

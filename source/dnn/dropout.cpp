@@ -33,9 +33,9 @@ namespace EdgeLearning {
 
 const std::string DropoutLayer::TYPE = "Dropout";
 
-DropoutLayer::DropoutLayer(Model& model, std::string name, SizeType size,
+DropoutLayer::DropoutLayer(std::string name, SizeType size,
                            NumType drop_probability, RneType random_generator)
-    : FeedforwardLayer(model, size, size, std::move(name), "dropout_layer_")
+    : FeedforwardLayer(size, size, std::move(name), "dropout_layer_")
     , _drop_probability{drop_probability}
     , _scale{(_drop_probability == 1.0) ? 1.0 : 1.0 / (1.0 - drop_probability)}
     , _random_generator{random_generator}

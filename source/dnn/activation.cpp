@@ -31,9 +31,9 @@
 
 namespace EdgeLearning {
 
-ActivationLayer::ActivationLayer(Model& model, SizeType size,
+ActivationLayer::ActivationLayer(SizeType size,
                                  std::string name, std::string prefix_name)
-    : FeedforwardLayer(model, size, size, std::move(name),
+    : FeedforwardLayer(size, size, std::move(name),
                        prefix_name.empty() ? "activation_layer_" : prefix_name)
 { }
 
@@ -57,8 +57,8 @@ void ActivationLayer::input_shape(DLMath::Shape3d input_shape)
 // ================================= ReLU ======================================
 const std::string ReluLayer::TYPE = "Relu";
 
-ReluLayer::ReluLayer(Model& model, std::string name, SizeType size)
-    : ActivationLayer(model, size, std::move(name), "relu_layer_")
+ReluLayer::ReluLayer(std::string name, SizeType size)
+    : ActivationLayer(size, std::move(name), "relu_layer_")
 { }
 
 const std::vector<NumType>& ReluLayer::forward(
@@ -94,8 +94,8 @@ const std::vector<NumType>& ReluLayer::backward(
 // ================================= ELU ======================================
 const std::string EluLayer::TYPE = "Elu";
 
-EluLayer::EluLayer(Model& model, std::string name, SizeType size, NumType alpha)
-    : ActivationLayer(model, size, std::move(name), "elu_layer_")
+EluLayer::EluLayer(std::string name, SizeType size, NumType alpha)
+    : ActivationLayer(size, std::move(name), "elu_layer_")
     , _alpha{alpha}
 { }
 
@@ -133,8 +133,8 @@ const std::vector<NumType>& EluLayer::backward(
 // ================================ Softmax ====================================
 const std::string SoftmaxLayer::TYPE = "Softmax";
 
-SoftmaxLayer::SoftmaxLayer(Model& model, std::string name, SizeType size)
-    : ActivationLayer(model, size, std::move(name), "softmax_layer_")
+SoftmaxLayer::SoftmaxLayer(std::string name, SizeType size)
+    : ActivationLayer(size, std::move(name), "softmax_layer_")
 { }
 
 const std::vector<NumType>& SoftmaxLayer::forward(
@@ -165,8 +165,8 @@ const std::vector<NumType>& SoftmaxLayer::backward(
 // ================================= TanH ======================================
 const std::string TanhLayer::TYPE = "Tanh";
 
-TanhLayer::TanhLayer(Model& model, std::string name, SizeType size)
-    : ActivationLayer(model, size, std::move(name), "tanh_layer_")
+TanhLayer::TanhLayer(std::string name, SizeType size)
+    : ActivationLayer(size, std::move(name), "tanh_layer_")
 { }
 
 const std::vector<NumType>& TanhLayer::forward(
@@ -195,8 +195,8 @@ const std::vector<NumType>& TanhLayer::backward(
 // ================================= Sigmoid ===================================
 const std::string SigmoidLayer::TYPE = "Sigmoid";
 
-SigmoidLayer::SigmoidLayer(Model& model, std::string name, SizeType size)
-    : ActivationLayer(model, size, std::move(name), "sigmoid_layer_")
+SigmoidLayer::SigmoidLayer(std::string name, SizeType size)
+    : ActivationLayer(size, std::move(name), "sigmoid_layer_")
 { }
 
 const std::vector<NumType>& SigmoidLayer::forward(
@@ -225,8 +225,8 @@ const std::vector<NumType>& SigmoidLayer::backward(
 // ================================ Linear =====================================
 const std::string LinearLayer::TYPE = "Linear";
 
-LinearLayer::LinearLayer(Model& model, std::string name, SizeType size)
-    : ActivationLayer(model, size, std::move(name), "linear_layer_")
+LinearLayer::LinearLayer(std::string name, SizeType size)
+    : ActivationLayer(size, std::move(name), "linear_layer_")
 { }
 
 const std::vector<NumType>& LinearLayer::forward(

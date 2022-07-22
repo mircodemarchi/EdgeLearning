@@ -54,12 +54,10 @@ static inline DLMath::Shape3d convolutional_output_shape(
 
 const std::string ConvolutionalLayer::TYPE = "Conv";
 
-ConvolutionalLayer::ConvolutionalLayer(
-    Model& model, std::string name,
+ConvolutionalLayer::ConvolutionalLayer(std::string name,
     DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
     SizeType n_filters, DLMath::Shape2d stride, DLMath::Shape2d padding)
-    : FeedforwardLayer(
-        model, input_shape,
+    : FeedforwardLayer(input_shape,
         convolutional_output_shape(input_shape, kernel_shape,
                                   stride, padding, n_filters),
         std::move(name), "convolutional_layer_")

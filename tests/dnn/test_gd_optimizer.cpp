@@ -90,7 +90,7 @@ private:
         auto o = GDOptimizer(eta);
         EDGE_LEARNING_TEST_TRY(o.reset());
 
-        auto l = DenseLayer(m, "dense_optimizer", input_size, output_size);
+        auto l = DenseLayer("dense_optimizer", input_size, output_size);
         for (std::size_t i = 0; i < l.param_count(); ++i)
         {
             l.param(i) = 0.0;

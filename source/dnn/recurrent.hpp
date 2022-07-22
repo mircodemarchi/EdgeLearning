@@ -53,7 +53,7 @@ public:
     // TODO: test softmax output activation.
     // TODO: test relu and linear hidden activation.
 
-    RecurrentLayer(Model& model, std::string name = std::string(),
+    RecurrentLayer(std::string name = std::string(),
         SizeType input_size = 0, SizeType output_size = 0,
         SizeType hidden_size = 0, SizeType time_steps = 0,
         HiddenActivation hidden_activation = HiddenActivation::TanH);

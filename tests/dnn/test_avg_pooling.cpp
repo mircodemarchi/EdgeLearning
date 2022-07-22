@@ -46,10 +46,10 @@ private:
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
         EDGE_LEARNING_TEST_EXECUTE(
-                auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test"));
+                auto l = AvgPoolingLayer("avg_pooling_layer_test"));
         EDGE_LEARNING_TEST_TRY(
-                auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test"));
-        auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test");
+                auto l = AvgPoolingLayer("avg_pooling_layer_test"));
+        auto l = AvgPoolingLayer("avg_pooling_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "AveragePool");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "AveragePool");
         EDGE_LEARNING_TEST_TRY(l.init());
@@ -88,9 +88,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
 
-        EDGE_LEARNING_TEST_EXECUTE(AvgPoolingLayer l_assign(_m); l_assign = l);
-        EDGE_LEARNING_TEST_TRY(AvgPoolingLayer l_assign(_m); l_assign = l);
-        AvgPoolingLayer l_assign(_m); l_assign = l;
+        EDGE_LEARNING_TEST_EXECUTE(AvgPoolingLayer l_assign; l_assign = l);
+        EDGE_LEARNING_TEST_TRY(AvgPoolingLayer l_assign; l_assign = l);
+        AvgPoolingLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_TRY(l_assign.init());
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
@@ -119,15 +119,15 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
 
-        EDGE_LEARNING_TEST_EXECUTE(auto l2 = AvgPoolingLayer(_m));
-        EDGE_LEARNING_TEST_TRY(auto l2 = AvgPoolingLayer(_m));
-        auto l_noname = AvgPoolingLayer(_m);
+        EDGE_LEARNING_TEST_EXECUTE(auto l2 = AvgPoolingLayer());
+        EDGE_LEARNING_TEST_TRY(auto l2 = AvgPoolingLayer());
+        auto l_noname = AvgPoolingLayer();
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
 
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l_shape = AvgPoolingLayer(_m, "avg_pooling_layer_test",
+        auto l_shape = AvgPoolingLayer("avg_pooling_layer_test",
                                        in_shape, k_shape);
         auto truth_output_size = ((in_shape.width - k_shape.width) + 1)
             * ((in_shape.height - k_shape.height) + 1) * in_shape.channels;
@@ -144,7 +144,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l_shape_copy.last_output().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
                                  l_shape_copy.output_size());
-        AvgPoolingLayer l_shape_assign(_m); l_shape_assign = l_shape;
+        AvgPoolingLayer l_shape_assign; l_shape_assign = l_shape;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), in_shape.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(),
                                  truth_output_size);
@@ -161,7 +161,7 @@ private:
                                 1,1,1, 1,1,1, 1,1,1};
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test",
+        auto l = AvgPoolingLayer("avg_pooling_layer_test",
                                  in_shape, k_shape);
         EDGE_LEARNING_TEST_TRY(l.forward(v1));
         EDGE_LEARNING_TEST_TRY(l.backward(v1));
@@ -187,7 +187,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
 
-        AvgPoolingLayer l_assign(_m); l_assign = l;
+        AvgPoolingLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v1.size());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input()[0], v1[0]);
@@ -206,7 +206,7 @@ private:
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test",
+        auto l = AvgPoolingLayer("avg_pooling_layer_test",
                                  in_shape, k_shape);
 
         EDGE_LEARNING_TEST_EQUAL(l.input_shape().height, in_shape.height);
@@ -226,7 +226,7 @@ private:
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test",
+        auto l = AvgPoolingLayer("avg_pooling_layer_test",
                                  in_shape, k_shape);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), in_shape.size());
         DLMath::Shape3d new_in_shape{5,5,3};
@@ -258,7 +258,7 @@ private:
     {
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
-        auto l = AvgPoolingLayer(_m, "avg_pooling_layer_test",
+        auto l = AvgPoolingLayer("avg_pooling_layer_test",
                                  in_shape, k_shape);
 
         Json l_dump;
@@ -288,7 +288,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
         EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
 
-        l = AvgPoolingLayer(_m);
+        l = AvgPoolingLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "AveragePool");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
@@ -320,8 +320,6 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             l_dump["others"]["stride"][1].as<SizeType>(), 1);
     }
-
-    Model _m = Model("model_avg_pooling_layer_test");
 };
 
 int main() {

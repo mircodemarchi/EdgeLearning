@@ -45,11 +45,9 @@ const std::map<Layer::DumpFields, std::string> Layer::dump_fields = {
     { DumpFields::OTHERS,        "others"        }
 };
 
-Layer::Layer(Model& model,
-             DLMath::Shape3d input_shape, DLMath::Shape3d output_shape,
+Layer::Layer(DLMath::Shape3d input_shape, DLMath::Shape3d output_shape,
              std::string name, std::string prefix_name)
-    : _model(model)
-    , _name{std::move(name)}
+    : _name{std::move(name)}
     , _antecedents{}
     , _subsequents{}
     , _input_shape{input_shape}
@@ -64,8 +62,7 @@ Layer::Layer(Model& model,
 }
 
 Layer::Layer(const Layer& obj)
-    : _model{obj._model}
-    , _name{obj._name}
+    : _name{obj._name}
     , _antecedents{obj._antecedents}
     , _subsequents{obj._subsequents}
     , _input_shape{obj._input_shape}
@@ -78,7 +75,6 @@ Layer::Layer(const Layer& obj)
 Layer& Layer::operator=(const Layer& obj)
 {
     if (this == &obj) return *this;
-    _model = obj._model;
     _name = obj._name;
     _antecedents = obj._antecedents;
     _subsequents = obj._subsequents;

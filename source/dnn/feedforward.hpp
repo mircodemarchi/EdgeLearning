@@ -39,15 +39,13 @@ class FeedforwardLayer : public Layer
 public:
     /**
      * \brief Construct a new Layer object.
-     * \param model        The model in which the layer takes part.
      * \param input_shape  The shape of inputs of the layer.
      * \param output_shape The shape of outputs of the layer.
      * \param name         The name of the layer.
      * If empty, a default generated one is chosen.
      * \param prefix_name The prefix name of the default generated name.
      */
-    FeedforwardLayer(Model& model,
-                     DLMath::Shape3d input_shape = {0, 0, 0},
+    FeedforwardLayer(DLMath::Shape3d input_shape = {0, 0, 0},
                      DLMath::Shape3d output_shape = {0, 0, 0},
                      std::string name = std::string(),
                      std::string prefix_name = std::string());

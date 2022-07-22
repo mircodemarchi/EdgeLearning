@@ -38,8 +38,8 @@ using namespace EdgeLearning;
 
 class CustomLossLayer: public LossLayer {
 public:
-    CustomLossLayer(Model& m, SizeType input_size = 0, SizeType batch_size = 1)
-        : LossLayer(m, input_size, batch_size, "custom_loss_layer_test")
+    CustomLossLayer(SizeType input_size = 0, SizeType batch_size = 1)
+        : LossLayer(input_size, batch_size, "custom_loss_layer_test")
         , _i{0}
     {
         _params.resize(input_size);
