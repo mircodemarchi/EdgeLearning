@@ -88,8 +88,8 @@ private:
         SizeType h = 10;
         SizeType w = 11;
         DLMath::Shape2d shape_2d(h, w);
-        EDGE_LEARNING_TEST_EQUAL(shape_2d.height, h);
-        EDGE_LEARNING_TEST_EQUAL(shape_2d.width, w);
+        EDGE_LEARNING_TEST_EQUAL(shape_2d.height(), h);
+        EDGE_LEARNING_TEST_EQUAL(shape_2d.width(), w);
         EDGE_LEARNING_TEST_EQUAL(
                 static_cast<std::vector<SizeType>>(shape_2d).size(), 2);
         EDGE_LEARNING_TEST_EQUAL(
@@ -98,16 +98,16 @@ private:
                 static_cast<std::vector<SizeType>>(shape_2d)[1], w);
         EDGE_LEARNING_TEST_EQUAL(shape_2d[0], h);
         EDGE_LEARNING_TEST_EQUAL(shape_2d[1], w);
-        EDGE_LEARNING_TEST_FAIL(shape_2d[2]);
-        EDGE_LEARNING_TEST_THROWS(shape_2d[2], std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL((void) shape_2d.at(2));
+        EDGE_LEARNING_TEST_THROWS((void) shape_2d.at(2), std::runtime_error);
 
         h = 12;
         w = 13;
         SizeType c = 3;
         DLMath::Shape3d shape_3d(h, w, c);
-        EDGE_LEARNING_TEST_EQUAL(shape_3d.height, h);
-        EDGE_LEARNING_TEST_EQUAL(shape_3d.width, w);
-        EDGE_LEARNING_TEST_EQUAL(shape_3d.channels, c);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d.height(), h);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d.width(), w);
+        EDGE_LEARNING_TEST_EQUAL(shape_3d.channels(), c);
         EDGE_LEARNING_TEST_EQUAL(
                 static_cast<std::vector<SizeType>>(shape_3d).size(), 3);
         EDGE_LEARNING_TEST_EQUAL(
@@ -119,8 +119,8 @@ private:
         EDGE_LEARNING_TEST_EQUAL(shape_3d[0], h);
         EDGE_LEARNING_TEST_EQUAL(shape_3d[1], w);
         EDGE_LEARNING_TEST_EQUAL(shape_3d[2], c);
-        EDGE_LEARNING_TEST_FAIL(shape_3d[3]);
-        EDGE_LEARNING_TEST_THROWS(shape_3d[3], std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL((void) shape_3d.at(3));
+        EDGE_LEARNING_TEST_THROWS((void) shape_3d.at(3), std::runtime_error);
     }
 
     void test_normal_pdf() {
@@ -2262,17 +2262,17 @@ private:
         SizeType offset = 0;
         for (const auto& shape: result_shape)
         {
-            for (SizeType r = 0; r < shape.height; ++r)
+            for (SizeType r = 0; r < shape.height(); ++r)
             {
-                for (SizeType c = 0; c < shape.width; ++c)
+                for (SizeType c = 0; c < shape.width(); ++c)
                 {
-                    for (SizeType ch = 0; ch < shape.channels; ++ch)
+                    for (SizeType ch = 0; ch < shape.channels(); ++ch)
                     {
                         EDGE_LEARNING_TEST_PRINT(
-                                result[offset + r * (shape.width + shape.channels) + c * shape.channels + ch]);
+                                result[offset + r * (shape.width() + shape.channels()) + c * shape.channels() + ch]);
                         EDGE_LEARNING_TEST_EQUAL(
-                                result[offset + r * (shape.width + shape.channels) + c * shape.channels + ch],
-                                truth_vec[offset + r * (shape.width + shape.channels) + c * shape.channels + ch]);
+                                result[offset + r * (shape.width() + shape.channels()) + c * shape.channels() + ch],
+                                truth_vec[offset + r * (shape.width() + shape.channels()) + c * shape.channels() + ch]);
                     }
                 }
             }

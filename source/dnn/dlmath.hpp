@@ -68,72 +68,83 @@ public:
         SizeType channel;
     };
 
-    struct Shape2d {
+    struct Shape {
+    public:
+        Shape(std::vector<SizeType> values)
+            : _shape{values}
+        {}
+
+        [[nodiscard]] SizeType size() const
+        {
+            return std::accumulate(_shape.begin(), _shape.end(),
+                                   SizeType(1),
+                                   std::multiplies<SizeType>());
+        }
+
+        operator std::vector<SizeType>() const { return _shape; }
+
+        SizeType& operator[](SizeType idx) { return _shape[idx]; }
+        [[nodiscard]] const SizeType& at(SizeType idx) const
+        { return _shape[idx]; }
+
+    protected:
+        std::vector<SizeType> _shape;
+    };
+
+    struct Shape2d : public Shape {
+    public:
         static inline SizeType SIZE = 2;
+        static inline SizeType HEIGHT_IDX = 0;
+        static inline SizeType WIDTH_IDX = 1;
 
         Shape2d(SizeType h, SizeType w)
-            : height{h}
-            , width{w}
+            : Shape{{h,w}}
         {}
 
         Shape2d(SizeType s)
-            : height{s}
-            , width{s}
+            : Shape{{s,s}}
         {}
 
-        [[nodiscard]] SizeType size() const { return height * width; }
+        [[nodiscard]] const SizeType& height() const
+        { return _shape[HEIGHT_IDX]; }
+        [[nodiscard]]       SizeType& height()
+        { return _shape[HEIGHT_IDX]; }
 
-        operator std::vector<SizeType>() { return {height, width}; }
-
-        SizeType& operator[](SizeType idx)
-        {
-            switch (idx) {
-                case 0: return height;
-                case 1: return width;
-                default:
-                    throw std::runtime_error(
-                            "Shape2d: bad index " + std::to_string(idx));
-            }
-        }
-
-        SizeType height;
-        SizeType width;
+        [[nodiscard]] const SizeType& width() const
+        { return _shape[WIDTH_IDX]; }
+        [[nodiscard]]       SizeType& width()
+        { return _shape[WIDTH_IDX]; }
     };
 
-    struct Shape3d {
+    struct Shape3d : public Shape {
+    public:
         static inline SizeType SIZE = 3;
+        static inline SizeType HEIGHT_IDX = 0;
+        static inline SizeType WIDTH_IDX = 1;
+        static inline SizeType CHANNEL_IDX = 2;
 
         Shape3d(Shape2d s2d)
-            : height{s2d.height}
-            , width{s2d.width}
-            , channels{1}
+            : Shape({s2d.height(),s2d.width(),1})
         {}
 
         Shape3d(SizeType h, SizeType w=1, SizeType c=1)
-            : height{h}
-            , width{w}
-            , channels{c}
+            : Shape({h,w,c})
         {}
 
-        SizeType size() const { return height * width * channels; }
+        [[nodiscard]] const SizeType& height() const
+        { return _shape[HEIGHT_IDX]; }
+        [[nodiscard]]       SizeType& height()
+        { return _shape[HEIGHT_IDX]; }
 
-        operator std::vector<SizeType>() { return {height, width, channels}; }
+        [[nodiscard]] const SizeType& width() const
+        { return _shape[WIDTH_IDX]; }
+        [[nodiscard]]       SizeType& width()
+        { return _shape[WIDTH_IDX]; }
 
-        SizeType& operator[](SizeType idx)
-        {
-            switch (idx) {
-                case 0: return height;
-                case 1: return width;
-                case 2: return channels;
-                default:
-                    throw std::runtime_error(
-                            "Shape3d: bad index " + std::to_string(idx));
-            }
-        }
-
-        SizeType height;
-        SizeType width;
-        SizeType channels;
+        [[nodiscard]] const SizeType& channels() const
+        { return _shape[CHANNEL_IDX]; }
+        [[nodiscard]]       SizeType& channels()
+        { return _shape[CHANNEL_IDX]; }
     };
 
     /**
@@ -1322,21 +1333,21 @@ public:
         const T* k, Shape2d k_shape, SizeType n_filters = 1,
         Shape2d s = {1, 1}, Shape2d p = {0, 0})
     {
-        s.width = std::max(s.width, SizeType(1));
-        s.height = std::max(s.height, SizeType(1));
-        auto width_dst = src_shape.width == 0 ? 0 :
-            ((src_shape.width - k_shape.width + 2 * p.width) / s.width) + 1;
-        auto height_dst = src_shape.height == 0 ? 0 :
-            ((src_shape.height - k_shape.height + 2 * p.height) / s.height) + 1;
+        s.width() = std::max(s.width(), SizeType(1));
+        s.height() = std::max(s.height(), SizeType(1));
+        auto width_dst = src_shape.width() == 0 ? 0 :
+            ((src_shape.width() - k_shape.width() + 2 * p.width()) / s.width()) + 1;
+        auto height_dst = src_shape.height() == 0 ? 0 :
+            ((src_shape.height() - k_shape.height() + 2 * p.height()) / s.height()) + 1;
         for (SizeType row_dst = 0; row_dst < height_dst; ++row_dst)
         {
             for (SizeType col_dst = 0; col_dst < width_dst; ++col_dst)
             {
-                auto col = (static_cast<int64_t>(col_dst * s.width)
-                    - static_cast<int64_t>(p.width))
-                    * static_cast<int64_t>(src_shape.channels);
-                auto row = static_cast<int64_t>(row_dst * s.height)
-                    - static_cast<int64_t>(p.height);
+                auto col = (static_cast<int64_t>(col_dst * s.width())
+                    - static_cast<int64_t>(p.width()))
+                    * static_cast<int64_t>(src_shape.channels());
+                auto row = static_cast<int64_t>(row_dst * s.height())
+                    - static_cast<int64_t>(p.height());
                 k_to_src_operation(
                     dst, {height_dst, width_dst}, {row_dst, col_dst},
                     src, src_shape, k, k_shape, n_filters, row, col);
@@ -1697,9 +1708,9 @@ private:
                            const T* k, Shape2d k_shape, SizeType n_filters,
                            int64_t row, int64_t col)
     {
-        auto k_size = k_shape.size() * src_shape.channels;
-        auto k_step = k_shape.width * src_shape.channels;
-        auto src_step = src_shape.width * src_shape.channels;
+        auto k_size = k_shape.size() * src_shape.channels();
+        auto k_step = k_shape.width() * src_shape.channels();
+        auto src_step = src_shape.width() * src_shape.channels();
         for (SizeType f = 0; f < n_filters; ++f)
         {
             T sum = 0;
@@ -1711,14 +1722,14 @@ private:
                 auto col_src = col + static_cast<int64_t>(col_k);
                 if (col_src < 0 || row_src < 0 ||
                     col_src >= static_cast<int64_t>(src_step) ||
-                    row_src >= static_cast<int64_t>(src_shape.height))
+                    row_src >= static_cast<int64_t>(src_shape.height()))
                 {
                     continue; //< zero-padding.
                 }
                 sum += src[row_src * static_cast<int64_t>(src_step)
                            + col_src] * k[k_i * n_filters + f];
             }
-            dst[dst_coord.row * dst_shape.width * n_filters
+            dst[dst_coord.row * dst_shape.width() * n_filters
                 + dst_coord.col * n_filters
                 + f] = sum;
         }
@@ -1749,27 +1760,27 @@ private:
     {
         (void) k;
         (void) n_filters;
-        auto src_step = src_shape.width * src_shape.channels;
-        auto dst_step = dst_shape.width * src_shape.channels;
-        for (SizeType c = 0; c < src_shape.channels; ++c)
+        auto src_step = src_shape.width() * src_shape.channels();
+        auto dst_step = dst_shape.width() * src_shape.channels();
+        for (SizeType c = 0; c < src_shape.channels(); ++c)
         {
             T max = src[
                 row * static_cast<int64_t>(src_step)
                 + col + static_cast<int64_t>(c)];
-            for (SizeType k_i = 1; k_i < k_shape.height * k_shape.width; ++k_i)
+            for (SizeType k_i = 1; k_i < k_shape.height() * k_shape.width(); ++k_i)
             {
-                auto row_k = k_i / k_shape.width;
-                auto col_k = k_i % k_shape.width;
+                auto row_k = k_i / k_shape.width();
+                auto col_k = k_i % k_shape.width();
                 auto row_src = (row + static_cast<int64_t>(row_k))
                     * static_cast<int64_t>(src_step);
                 auto col_src = col
-                    + static_cast<int64_t>(col_k * src_shape.channels)
+                    + static_cast<int64_t>(col_k * src_shape.channels())
                     + static_cast<int64_t>(c);
                 auto curr_val = src[row_src + col_src];
                 if (curr_val > max) max = curr_val;
             }
             dst[dst_coord.row * dst_step
-                + dst_coord.col * src_shape.channels + c] = max;
+                + dst_coord.col * src_shape.channels() + c] = max;
         }
 
     }
@@ -1800,25 +1811,25 @@ private:
     {
         (void) k;
         (void) n_filters;
-        auto src_step = src_shape.width * src_shape.channels;
-        auto dst_step = dst_shape.width * src_shape.channels;
-        for (SizeType c = 0; c < src_shape.channels; ++c)
+        auto src_step = src_shape.width() * src_shape.channels();
+        auto dst_step = dst_shape.width() * src_shape.channels();
+        for (SizeType c = 0; c < src_shape.channels(); ++c)
         {
             T sum = 0;
-            for (SizeType k_i = 0; k_i < k_shape.height * k_shape.width; ++k_i)
+            for (SizeType k_i = 0; k_i < k_shape.height() * k_shape.width(); ++k_i)
             {
-                auto row_k = k_i / k_shape.width;
-                auto col_k = k_i % k_shape.width;
+                auto row_k = k_i / k_shape.width();
+                auto col_k = k_i % k_shape.width();
                 auto row_src = (row + static_cast<int64_t>(row_k))
                     * static_cast<int64_t>(src_step);
                 auto col_src = col
-                    + static_cast<int64_t>(col_k * src_shape.channels)
+                    + static_cast<int64_t>(col_k * src_shape.channels())
                     + static_cast<int64_t>(c);
                 sum += src[row_src + col_src];
             }
             dst[dst_coord.row * dst_step
-                + dst_coord.col * src_shape.channels + c]
-                = sum / (k_shape.height * k_shape.width);
+                + dst_coord.col * src_shape.channels() + c]
+                = sum / (k_shape.height() * k_shape.width());
         }
     }
 
