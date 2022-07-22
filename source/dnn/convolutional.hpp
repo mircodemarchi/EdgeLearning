@@ -98,7 +98,7 @@ public:
      */
     SizeType param_count() const noexcept override
     {
-        return (_kernel_shape.size() * _input_shape.channels * _n_filters)
+        return (_kernel_shape.size() * _input_shape.channels() * _n_filters)
             + _n_filters;
     }
 
@@ -111,25 +111,6 @@ public:
     }
 
     void print() const override;
-
-    /**
-     * \brief Input shape getter of Convolution layer.
-     * \return DLMath::Shape3d the input shape 3D.
-     */
-    [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const override
-    {
-        return FeedforwardLayer::input_shape();
-    }
-
-    /**
-     * \brief Input shape setter. In this layer, all the 3 fields contained in
-     * DLMath::Shape3d are used to calculate the layer input size.
-     * \param input_shape 3D object with input matrix shape.
-     * The operation also performs a resize of the weights and its gradients.
-     * Since input_shape == output_size in activation layer, it overrides also
-     * the output_size.
-     */
-    void input_shape(DLMath::Shape3d input_shape) override;
 
     /**
      * \brief Kernel shape getter of Convolution layer.
@@ -156,6 +137,17 @@ public:
      * \param in const Json& Json to read.
      */
     void load(Json& in) override;
+
+protected:
+    /**
+     * \brief Input shape setter. In this layer, all the 3 fields contained in
+     * DLMath::Shape3d are used to calculate the layer input size.
+     * \param input_shape 3D object with input matrix shape.
+     * The operation also performs a resize of the weights and its gradients.
+     * Since input_shape == output_size in activation layer, it overrides also
+     * the output_size.
+     */
+    void _set_input_shape(LayerShape input_shape) override;
 
 private:
     /// \brief Kernel shape. Size: height_kernel * width_kernel.

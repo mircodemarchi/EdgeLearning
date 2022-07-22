@@ -44,7 +44,7 @@ const std::vector<NumType>& MaxPoolingLayer::forward(
     _last_input = inputs.data();
 
     DLMath::max_pool<NumType>(_output_activations.data(), inputs.data(),
-                              _input_shape, _kernel_shape, _stride);
+                              _input_shape.shape(), _kernel_shape, _stride);
 
     return PoolingLayer::forward(_output_activations);
 }
@@ -63,26 +63,26 @@ const std::vector<NumType>& MaxPoolingLayer::backward(
         (void) dst;
         (void) k;
         (void) n_filters;
-        auto src_step = src_shape.width * src_shape.channels;
-        auto dst_step = dst_shape.width * src_shape.channels;
-        for (SizeType c = 0; c < src_shape.channels; ++c)
+        auto src_step = src_shape.width() * src_shape.channels();
+        auto dst_step = dst_shape.width() * src_shape.channels();
+        for (SizeType c = 0; c < src_shape.channels(); ++c)
         {
             auto output_gradient = gradients[
                 dst_coord.row * dst_step
-                + dst_coord.col * src_shape.channels
+                + dst_coord.col * src_shape.channels()
                 + c];
 
             NumType max = src[row * static_cast<int64_t>(src_step)
                               + col + static_cast<int64_t>(c)];
             int64_t max_row = 0, max_col = 0;
-            for (SizeType k_i = 1; k_i < k_shape.height * k_shape.width; ++k_i)
+            for (SizeType k_i = 1; k_i < k_shape.height() * k_shape.width(); ++k_i)
             {
-                auto row_k = k_i / k_shape.width;
-                auto col_k = k_i % k_shape.width;
+                auto row_k = k_i / k_shape.width();
+                auto col_k = k_i % k_shape.width();
                 auto row_src = (row + static_cast<int64_t>(row_k))
                     * static_cast<int64_t>(src_step);
                 auto col_src = col
-                    + static_cast<int64_t>(col_k * src_shape.channels)
+                    + static_cast<int64_t>(col_k * src_shape.channels())
                     + static_cast<int64_t>(c);
                 auto curr_val = src[row_src + col_src];
                 if (curr_val > max)
@@ -97,7 +97,7 @@ const std::vector<NumType>& MaxPoolingLayer::backward(
         }
     };
     DLMath::kernel_slide<NumType>(
-        gradients_op, nullptr, _last_input, _input_shape,
+        gradients_op, nullptr, _last_input, _input_shape.shape(),
         nullptr, _kernel_shape,
         1, _stride, {0, 0});
 

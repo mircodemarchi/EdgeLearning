@@ -110,22 +110,6 @@ public:
     void print() const override;
 
     /**
-     * \brief Input shape getter of Pooling layer.
-     * \return DLMath::Shape3d the input shape 3D.
-     */
-    [[nodiscard]] const DLMath::Shape3d& input_shape() const override
-    {
-        return FeedforwardLayer::input_shape();
-    }
-
-    /**
-     * \brief Input shape setter. In this layer, all the 3 fields contained in
-     * DLMath::Shape3d are used to calculate the layer input size.
-     * \param input_shape 3D object with input matrix shape.
-     */
-    void input_shape(DLMath::Shape3d input_shape) override;
-
-    /**
      * \brief Kernel shape getter of Pooling layer.
      * \return DLMath::Shape2d the kernel shape 2D.
      */
@@ -145,6 +129,13 @@ public:
     void load(Json& in) override;
 
 protected:
+    /**
+     * \brief Input shape setter. In this layer, all the 3 fields contained in
+     * DLMath::Shape3d are used to calculate the layer input size.
+     * \param input_shape 3D object with input matrix shape.
+     */
+    void _set_input_shape(LayerShape input_shape) override;
+
     /// \brief Kernel shape. Size: height_kernel * width_kernel.
     DLMath::Shape2d _kernel_shape;
 

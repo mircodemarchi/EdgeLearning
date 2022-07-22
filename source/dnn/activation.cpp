@@ -44,7 +44,7 @@ void ActivationLayer::print() const
     std::cout << std::endl;
 }
 
-void ActivationLayer::input_shape(DLMath::Shape3d input_shape)
+void ActivationLayer::_set_input_shape(LayerShape input_shape)
 {
     FeedforwardLayer::input_shape(input_shape);
 

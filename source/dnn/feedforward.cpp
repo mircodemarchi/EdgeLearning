@@ -30,18 +30,12 @@ namespace EdgeLearning {
 FeedforwardLayer::FeedforwardLayer(
     DLMath::Shape3d input_shape, DLMath::Shape3d output_shape,
     std::string name, std::string prefix_name)
-    : Layer(input_shape, output_shape, std::move(name),
+    : Layer(std::move(name), input_shape, output_shape,
             prefix_name.empty() ? "feedforward_layer_" : prefix_name)
     , _output_activations{}
     , _input_gradients{}
 {
     _output_activations.resize(output_shape.size());
-    _input_gradients.resize(input_shape.size());
-}
-
-void FeedforwardLayer::input_shape(DLMath::Shape3d input_shape)
-{
-    Layer::input_shape(input_shape);
     _input_gradients.resize(input_shape.size());
 }
 
@@ -55,6 +49,12 @@ void FeedforwardLayer::load(Json& in)
     Layer::load(in);
     _output_activations.resize(output_size());
     _input_gradients.resize(input_size());
+}
+
+void FeedforwardLayer::_set_input_shape(LayerShape input_shape)
+{
+    Layer::input_shape(input_shape);
+    _input_gradients.resize(input_shape.size());
 }
 
 } // namespace EdgeLearning

@@ -92,23 +92,6 @@ public:
     void print() const override;
 
     /**
-     * \brief Getter of input_shape class field.
-     * \return const DLMath::Shape3d& The size of the layer input.
-     */
-    [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const override
-    {
-        return FeedforwardLayer::input_shape();
-    }
-
-    /**
-     * \brief Setter of input_shape class field.
-     * \param input_shape DLMath::Shape3d Shape param used to take the size and
-     * assign it to input_shape.
-     * The operation also performs a resize of the weights and its gradients.
-     */
-    void input_shape(DLMath::Shape3d input_shape) override;
-
-    /**
      * \brief Save the layer infos and weights to disk.
      * \param out Json& out Json to write.
      */
@@ -119,6 +102,15 @@ public:
      * \param in const Json& Json to read.
      */
     void load(Json& in) override;
+
+protected:
+    /**
+     * \brief Setter of input_shape class field.
+     * \param input_shape DLMath::Shape3d Shape param used to take the size and
+     * assign it to input_shape.
+     * The operation also performs a resize of the weights and its gradients.
+     */
+    void _set_input_shape(LayerShape input_shape) override;
 
 private:
 

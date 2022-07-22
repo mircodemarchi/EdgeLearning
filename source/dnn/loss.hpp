@@ -148,13 +148,6 @@ public:
         throw std::runtime_error("Loss layers do not have output");
     }
 
-
-    [[nodiscard]] const DLMath::Shape3d & input_shape() const override
-    {
-        return Layer::input_shape();
-    }
-    void input_shape(DLMath::Shape3d input_shape) override;
-
     /**
      * \brief Save the layer infos to disk.
      * \param out Json& out Json to write.
@@ -168,6 +161,9 @@ public:
     void load(Json& in) override;
 
 protected:
+
+    void _set_input_shape(LayerShape input_shape) override;
+
     NumType _loss;
     const NumType* _target;
 

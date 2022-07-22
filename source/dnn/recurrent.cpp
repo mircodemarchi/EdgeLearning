@@ -36,7 +36,7 @@ const std::string RecurrentLayer::TYPE = "Recurrent";
 RecurrentLayer::RecurrentLayer(std::string name,
     SizeType input_size, SizeType output_size, SizeType hidden_size,
     SizeType time_steps, HiddenActivation hidden_activation)
-    : Layer(input_size, output_size, std::move(name), "recurrent_layer_")
+    : Layer(std::move(name), input_size, output_size, "recurrent_layer_")
     , _hidden_activation{hidden_activation}
     , _hidden_size{hidden_size}
     , _time_steps{time_steps}
@@ -471,12 +471,12 @@ void RecurrentLayer::print() const
     std::cout << std::endl;
 }
 
-void RecurrentLayer::input_shape(DLMath::Shape3d input_shape) {
+void RecurrentLayer::_set_input_shape(LayerShape input_shape) {
     Layer::input_shape(input_shape);
-    auto ih_size = input_shape.height * _hidden_size;
+    auto ih_size = input_shape.size() * _hidden_size;
     _weights_i_to_h.resize(ih_size);
     _weights_i_to_h_gradients.resize(ih_size);
-    _input_gradients.resize(input_shape.height * _time_steps);
+    _input_gradients.resize(input_shape.size() * _time_steps);
 }
 
 void RecurrentLayer::dump(Json& out) const

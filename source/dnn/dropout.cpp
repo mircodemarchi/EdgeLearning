@@ -93,13 +93,6 @@ void DropoutLayer::print() const
     std::cout << std::endl;
 }
 
-void DropoutLayer::input_shape(DLMath::Shape3d input_shape)
-{
-    FeedforwardLayer::input_shape(input_shape);
-    _output_shape = input_shape;
-    _output_activations.resize(output_size());
-}
-
 void DropoutLayer::dump(Json& out) const
 {
     FeedforwardLayer::dump(out);
@@ -116,6 +109,13 @@ void DropoutLayer::load(Json& in)
     _drop_probability = in[dump_fields.at(DumpFields::OTHERS)]
         ["drop_probability"].as<NumType>();
     _scale = (_drop_probability == 1.0) ? 1.0 : 1.0 / (1.0 - _drop_probability);
+}
+
+void DropoutLayer::_set_input_shape(LayerShape input_shape)
+{
+    FeedforwardLayer::input_shape(input_shape);
+    _output_shape = input_shape;
+    _output_activations.resize(output_size());
 }
 
 } // namespace EdgeLearning

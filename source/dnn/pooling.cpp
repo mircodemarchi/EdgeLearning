@@ -41,11 +41,13 @@ static inline DLMath::Shape3d pooling_output_shape(
 )
 {
     return {
-        pooling_output_side(input_shape.height, kernel_shape.height,
-                            stride.height),
-        pooling_output_side(input_shape.width, kernel_shape.width,
-                            stride.width),
-        input_shape.channels};
+        pooling_output_side(input_shape.height(),
+                            kernel_shape.height(),
+                            stride.height()),
+        pooling_output_side(input_shape.width(),
+                            kernel_shape.width(),
+                            stride.width()),
+        input_shape.channels()};
 }
 
 PoolingLayer::PoolingLayer(
@@ -65,28 +67,16 @@ void PoolingLayer::print() const
     std::cout << std::endl;
 }
 
-void PoolingLayer::input_shape(DLMath::Shape3d input_shape)
-{
-    FeedforwardLayer::input_shape(input_shape);
-
-    // Update input and output shape accordingly (see this constructor).
-    _input_shape = input_shape;
-    _output_shape = pooling_output_shape(input_shape, _kernel_shape, _stride);
-
-    // Update output size accordingly (see Layer and FeedforwardLayer constr.).
-    _output_activations.resize(output_size());
-}
-
 void PoolingLayer::dump(Json& out) const
 {
     FeedforwardLayer::dump(out);
 
     Json others;
     std::vector<std::size_t> kernel_size = {
-        _kernel_shape.height, _kernel_shape.width
+        _kernel_shape.height(), _kernel_shape.width()
     };
     others["kernel_size"] = Json(kernel_size);
-    std::vector<std::size_t> stride = { _stride.height, _stride.width };
+    std::vector<std::size_t> stride = { _stride.height(), _stride.width() };
     others["stride"] = Json(stride);
 
     out[dump_fields.at(DumpFields::OTHERS)] = others;
@@ -102,6 +92,19 @@ void PoolingLayer::load(Json& in)
     auto stride = in[dump_fields.at(DumpFields::OTHERS)]["stride"]
         .as_vec<std::size_t>();
     _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
+}
+
+void PoolingLayer::_set_input_shape(LayerShape input_shape)
+{
+    FeedforwardLayer::input_shape(input_shape);
+
+    // Update input and output shape accordingly (see this constructor).
+    _input_shape = input_shape;
+    _output_shape = pooling_output_shape(
+        input_shape.shape(), _kernel_shape, _stride);
+
+    // Update output size accordingly (see Layer and FeedforwardLayer constr.).
+    _output_activations.resize(output_size());
 }
 
 } // namespace EdgeLearning

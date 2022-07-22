@@ -203,13 +203,6 @@ void DenseLayer::print() const
     std::cout << std::endl;
 }
 
-void DenseLayer::input_shape(DLMath::Shape3d input_shape)
-{
-    FeedforwardLayer::input_shape(input_shape);
-    _weights.resize(output_size() * input_shape.size());
-    _weight_gradients.resize(output_size() * input_shape.size());
-}
-
 void DenseLayer::dump(Json& out) const
 {
     FeedforwardLayer::dump(out);
@@ -259,6 +252,13 @@ void DenseLayer::load(Json& in)
     {
         _biases[i] = in[dump_fields.at(DumpFields::BIASES)][i];
     }
+}
+
+void DenseLayer::_set_input_shape(LayerShape input_shape)
+{
+    FeedforwardLayer::input_shape(input_shape);
+    _weights.resize(output_size() * input_shape.size());
+    _weight_gradients.resize(output_size() * input_shape.size());
 }
 
 } // namespace EdgeLearning

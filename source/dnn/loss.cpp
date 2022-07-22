@@ -34,7 +34,7 @@ const std::string LossLayer::TYPE = "Loss";
 LossLayer::LossLayer(
     SizeType input_size, SizeType batch_size,
     std::string name, std::string prefix_name)
-    : Layer(input_size, 0, std::move(name),
+    : Layer(std::move(name), input_size, 0,
             prefix_name.empty() ? "loss_layer_" : prefix_name)
     , _loss{}
     , _target{}
@@ -78,11 +78,6 @@ void LossLayer::print() const
         << "\t" << (accuracy() * 100.0) << "%% correct" << std::endl;
 }
 
-void LossLayer::input_shape(DLMath::Shape3d input_shape) {
-    Layer::input_shape(input_shape);
-    _gradients.resize(input_shape.height);
-}
-
 void LossLayer::dump(Json& out) const
 {
     Layer::dump(out);
@@ -92,6 +87,11 @@ void LossLayer::load(Json& in)
 {
     Layer::load(in);
     _gradients.resize(input_size());
+}
+
+void LossLayer::_set_input_shape(LayerShape input_shape) {
+    Layer::input_shape(input_shape);
+    _gradients.resize(input_shape.size());
 }
 
 } // namespace EdgeLearning

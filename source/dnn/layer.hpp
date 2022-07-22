@@ -35,63 +35,33 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 #include <algorithm>
-#include <memory>
 #include <map>
 
 
 namespace EdgeLearning {
 
-class Model;
-
-/**
- * \brief Learning parameters of a layer that can't be shared and will be
- * copied.
- */
-using Params = std::vector<NumType>;
-
-/**
- * \brief Learning parameters of a layer that can be shared.
- */
-class SharedParams {
+class LayerShape {
 public:
-    struct Iterator
-    {
-        using pointer   = NumType*;
-        using reference = NumType&;
+    LayerShape(std::vector<DLMath::Shape3d> shape_vec);
+    LayerShape(DLMath::Shape3d shape);
+    LayerShape(SizeType size);
+    LayerShape();
 
-        Iterator(Params::iterator ptr) : _iter(ptr) {}
+    [[nodiscard]] const std::vector<DLMath::Shape3d>& shapes() const;
 
-        reference operator*() const { return _iter.operator*(); }
-        pointer operator->() { return _iter.operator->(); }
-        Iterator& operator++() { _iter++; return *this; }
-        Iterator operator++(int)
-        { Iterator tmp = *this; ++(*this); return tmp; }
-        friend bool operator== (const Iterator& a, const Iterator& b)
-        { return a._iter == b._iter; };
-        friend bool operator!= (const Iterator& a, const Iterator& b)
-        { return a._iter != b._iter; };
+    [[nodiscard]] const DLMath::Shape3d& shape(SizeType idx = 0) const;
+    [[nodiscard]] SizeType size(SizeType idx = 0) const;
+    [[nodiscard]] SizeType width(SizeType idx = 0) const;
+    [[nodiscard]] SizeType height(SizeType idx = 0) const;
+    [[nodiscard]] SizeType channels(SizeType idx = 0) const;
 
-    private:
-        Params::iterator _iter;
-    };
-
-    SharedParams()
-        : _p(std::make_shared<Params>())
-    { }
-
-    void resize(std::size_t length) const { (*_p).resize(length); }
-    NumType& operator[](std::size_t i) const { return (*_p)[i]; }
-    [[nodiscard]] const NumType& at(std::size_t i) const { return (*_p).at(i); }
-    NumType* data() { return (*_p).data(); }
-    std::size_t size() { return (*_p).size(); }
-
-    Iterator begin() { return Iterator((*_p).begin()); }
-    Iterator end()   { return Iterator((*_p).end());   }
+    [[nodiscard]] SizeType amount_shapes() const;
 
 private:
-    std::shared_ptr<Params> _p;
+    std::vector<DLMath::Shape3d> _shape_vec;
 };
 
 /**
@@ -122,15 +92,14 @@ public:
 
     /**
      * \brief Construct a new Layer object.
-     * \param input_shape  The shape of inputs of the layer.
-     * \param output_shape The shape of outputs of the layer.
      * \param name         The name of the layer.
      * If empty, a default generated one is chosen.
+     * \param input_shape  The shape of inputs of the layer.
+     * \param output_shape The shape of outputs of the layer.
      * \param prefix_name The prefix name of the default generated name.
      */
-    Layer(DLMath::Shape3d input_shape = 0, DLMath::Shape3d output_shape = 0,
-          std::string name = std::string(),
-          std::string prefix_name = std::string());
+    Layer(std::string name = std::string(), LayerShape input_shape = 0,
+          LayerShape output_shape = 0, std::string prefix_name = std::string());
 
     /**
      * \brief Copy constructor of a new Layer object.
@@ -220,13 +189,7 @@ public:
      * \brief Return the last input of the layer.
      * \return const NumType* The last input of the layer of input size.
      */
-    std::vector<NumType> last_input()
-    {
-        return _last_input
-            ? std::vector<NumType>{
-                _last_input, _last_input + _input_shape.size()}
-            : std::vector<NumType>{};
-    };
+    std::vector<NumType> last_input();
 
     /**
      * \brief Return the last output of the layer.
@@ -272,29 +235,38 @@ public:
      * \brief Virtual method information dump for debugging purposes.
      * \return std::string const& The layer name.
      */
-    [[nodiscard]] std::string const& name() const noexcept 
-    { 
-        return _name; 
-    }
+    [[nodiscard]] std::string const& name() const noexcept { return _name; }
 
     /**
      * \brief Getter of input_shape class field.
      * \return The size of the layer input.
      */
-    [[nodiscard]] virtual const DLMath::Shape3d& input_shape() const;
+    [[nodiscard]] const LayerShape& input_shape() const;
 
     /**
-     * \brief Setter of input_shape class field.
-     * \param input_shape DLMath::Shape3d Shape param used to take the size and
-     * assign it to input_shape.
+     * \brief Setter of input_shape class field. Wrapper of protected virtual
+     * method used in inheritance layers to override this setter.
+     * \param input_shape LayerShape Shape of the layer input tensor.
      */
-    virtual void input_shape(DLMath::Shape3d input_shape);
+    void input_shape(LayerShape input_shape);
 
     /**
      * \brief Getter of output_shape class field.
      * \return The size of the layer output.
      */
-    [[nodiscard]] virtual const DLMath::Shape3d& output_shape() const;
+    [[nodiscard]] virtual const LayerShape& output_shape() const;
+
+    /**
+     * \brief Getter of the list of input shapes of the layer.
+     * \return const std::vector<DLMath::Shape3d>& The vector of shapes.
+     */
+    [[nodiscard]] const std::vector<DLMath::Shape3d>& input_shapes() const;
+
+    /**
+     * \brief Getter of the list of output shapes of the layer.
+     * \return const std::vector<DLMath::Shape3d>& The vector of shapes.
+     */
+    [[nodiscard]] const std::vector<DLMath::Shape3d>& output_shapes() const;
 
     /**
      * \brief Getter of input_shape class field.
@@ -307,20 +279,6 @@ public:
      * \return The size of the layer output.
      */
     [[nodiscard]] SizeType output_size() const;
-
-    /**
-     * \brief Getter of the list of subsequent layers.
-     * \return std::vector<SharedPtr> The vector copy of subsequent layers
-     * pointer.
-     */
-    [[nodiscard]] std::vector<SharedPtr> subsequent_layers();
-
-    /**
-     * \brief Getter of the list of antecedent layers.
-     * \return std::vector<SharedPtr> The vector copy of antecedent layers
-     * pointer.
-     */
-    [[nodiscard]] std::vector<SharedPtr> antecedent_layers();
 
     /**
      * \brief Getter of the input layers amount.
@@ -353,19 +311,25 @@ protected:
      */
     void _check_training_input(const std::vector<NumType>& inputs);
 
+    /**
+     * \brief Setter of input_shape class field.
+     * \param input_shape LayerShape Shape param used to take the size and
+     * assign it to input_shape.
+     */
+    virtual void _set_input_shape(LayerShape input_shape);
+
     friend class Model;
 
-    std::string _name;                     ///< Layer name (for debug).
-    std::vector<SharedPtr> _antecedents;   ///< List of previous layers.
-    std::vector<SharedPtr> _subsequents;   ///< List of followers layers.
-    DLMath::Shape3d _input_shape;          ///< Layer input shape.
-    DLMath::Shape3d _output_shape;         ///< Layer output shape.
+    std::string _name;                ///< Layer name (for debug).
+    LayerShape _input_shape;          ///< Layer input shape.
+    LayerShape _output_shape;         ///< Layer output shape.
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss
      * gradients with respect to the weights during backpropagation.
      */
     const NumType* _last_input;
+    SizeType _last_input_size;
 };
 
 } // namespace EdgeLearning

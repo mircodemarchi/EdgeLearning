@@ -76,13 +76,17 @@ void swap(Model& lop, Model& rop)
 void Model::create_back_arc(
     const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
 {
-    dst->_antecedents.push_back(src);
+    (void) src;
+    (void) dst;
+    // dst->_antecedents.push_back(src);
 }
 
 void Model::create_front_arc(
     const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
 {
-    src->_subsequents.push_back(dst);
+    (void) src;
+    (void) dst;
+    // src->_subsequents.push_back(dst);
 }
 
 void Model::create_edge(
@@ -123,7 +127,7 @@ RneType::result_type Model::init(InitializationFunction init,
             case InitializationFunction::AUTO:
             default:
             {
-                bool init_done = false;
+                bool init_done = false;/*
                 for (auto const& next_layer: layer->_subsequents)
                 {
                     if (next_layer->is_type<ReluLayer>())
@@ -133,7 +137,7 @@ RneType::result_type Model::init(InitializationFunction init,
                         init_done = true;
                         break;
                     }
-                }
+                }*/
                 if (!init_done)
                 {
                     layer->init(Layer::InitializationFunction::XAVIER,
@@ -171,10 +175,11 @@ void Model::step(const std::vector<NumType>& input,
     // TODO: how many input layers there are?
     // TODO: manage multiple input layers.
     _layers.front()->training_forward(input);
+    /*
     for(const auto& l: _loss_layer->_antecedents)
     {
         _loss_layer->training_forward(l->last_output());
-    }
+    }*/
     const std::vector<NumType> not_used;
     _loss_layer->backward(not_used);
 }

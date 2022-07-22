@@ -45,10 +45,10 @@ static inline DLMath::Shape3d convolutional_output_shape(
 )
 {
     return {
-        convolutional_output_side(input_shape.height, kernel_shape.height,
-                                  stride.height, padding.height),
-        convolutional_output_side(input_shape.width, kernel_shape.width,
-                                  stride.width, padding.width),
+        convolutional_output_side(input_shape.height(), kernel_shape.height(),
+                                  stride.height(), padding.height()),
+        convolutional_output_side(input_shape.width(), kernel_shape.width(),
+                                  stride.width(), padding.width()),
         n_filters};
 }
 
@@ -67,12 +67,12 @@ ConvolutionalLayer::ConvolutionalLayer(std::string name,
     , _padding(padding)
 {
     // The weight parameters are composed by n_filters of kernel size.
-    _weights.resize(_kernel_shape.size() * input_shape.channels * n_filters);
+    _weights.resize(_kernel_shape.size() * input_shape.channels() * n_filters);
 
     // The bias is incremented to the result of each filter.
     _biases.resize(n_filters);
 
-    _weight_gradients.resize(_kernel_shape.size() * input_shape.channels
+    _weight_gradients.resize(_kernel_shape.size() * input_shape.channels()
                              * n_filters);
     _bias_gradients.resize(n_filters);
 }
@@ -105,7 +105,7 @@ const std::vector<NumType>& ConvolutionalLayer::forward(
      * _weights vector on the input 3D matrix.
      */
     DLMath::cross_correlation<NumType>(
-        _output_activations.data(), inputs.data(), _input_shape,
+        _output_activations.data(), inputs.data(), _input_shape.shape(),
         _weights.data(), _kernel_shape, _n_filters, _stride, _padding);
 
     return FeedforwardLayer::forward(_output_activations);
@@ -123,10 +123,10 @@ const std::vector<NumType>& ConvolutionalLayer::backward(
     for (SizeType f = 0; f < _n_filters; ++f)
     {
         NumType sum = 0;
-        for (SizeType r = 0; r < _output_shape.height; ++r)
+        for (SizeType r = 0; r < _output_shape.height(); ++r)
         {
-            auto step = _output_shape.width * _n_filters;
-            for (SizeType c = 0; c < _output_shape.width; ++c)
+            auto step = _output_shape.width() * _n_filters;
+            for (SizeType c = 0; c < _output_shape.width(); ++c)
             {
                 sum += gradients[r * step + c * _n_filters + f];
             }
@@ -153,13 +153,13 @@ const std::vector<NumType>& ConvolutionalLayer::backward(
         int64_t row, int64_t col)
     {
         (void) dst;
-        auto k_size = k_shape.size() * src_shape.channels;
-        auto k_step = k_shape.width * src_shape.channels;
-        auto src_step = src_shape.width * src_shape.channels;
+        auto k_size = k_shape.size() * src_shape.channels();
+        auto k_step = k_shape.width() * src_shape.channels();
+        auto src_step = src_shape.width() * src_shape.channels();
         for (SizeType f = 0; f < n_filters; ++f)
         {
             auto output_gradient = gradients[
-                dst_coord.row * dst_shape.width * n_filters
+                dst_coord.row * dst_shape.width() * n_filters
                 + dst_coord.col * n_filters + f];
             for (SizeType k_i = 0; k_i < k_size; ++k_i)
             {
@@ -169,7 +169,7 @@ const std::vector<NumType>& ConvolutionalLayer::backward(
                 auto col_src = col + static_cast<int64_t>(col_k);
                 if (col_src < 0 || row_src < 0 ||
                     col_src >= static_cast<int64_t>(src_step) ||
-                    row_src >= static_cast<int64_t>(src_shape.height))
+                    row_src >= static_cast<int64_t>(src_shape.height()))
                 {
                     continue; //< zero-padding.
                 }
@@ -183,7 +183,7 @@ const std::vector<NumType>& ConvolutionalLayer::backward(
         }
     };
     DLMath::kernel_slide<NumType>(
-        gradients_op, nullptr, _last_input, _input_shape,
+        gradients_op, nullptr, _last_input, _input_shape.shape(),
         _weights.data(), _kernel_shape,
         _n_filters, _stride, _padding);
 
@@ -220,19 +220,19 @@ void ConvolutionalLayer::print() const
 {
     std::cout << _name << std::endl;
     std::cout << "Weights ("
-        << _kernel_shape.height << " x "
-        << _kernel_shape.width  << " x "
-        << _input_shape.channels  << " x "
+        << _kernel_shape.height() << " x "
+        << _kernel_shape.width()  << " x "
+        << _input_shape.channels()  << " x "
         << _n_filters << ")" << std::endl;
 
-    for (SizeType r = 0; r < _kernel_shape.height; ++r)
+    for (SizeType r = 0; r < _kernel_shape.height(); ++r)
     {
-        SizeType r_offset = r * _kernel_shape.width * _input_shape.channels
+        SizeType r_offset = r * _kernel_shape.width() * _input_shape.channels()
                             * _n_filters;
-        for (SizeType c = 0; c < _kernel_shape.width; ++c)
+        for (SizeType c = 0; c < _kernel_shape.width(); ++c)
         {
-            SizeType c_offset = c * _input_shape.channels * _n_filters;
-            for (SizeType ch = 0; ch < _input_shape.channels; ++ch)
+            SizeType c_offset = c * _input_shape.channels() * _n_filters;
+            for (SizeType ch = 0; ch < _input_shape.channels(); ++ch)
             {
                 SizeType ch_offset = ch * _n_filters;
                 std::cout << "\t[" << r << "," << c << "," << ch << ",0:"
@@ -255,37 +255,21 @@ void ConvolutionalLayer::print() const
     std::cout << std::endl;
 }
 
-void ConvolutionalLayer::input_shape(DLMath::Shape3d input_shape)
-{
-    FeedforwardLayer::input_shape(input_shape);
-    _weights.resize(_kernel_shape.size() * input_shape.channels * _n_filters);
-    _weight_gradients.resize(_kernel_shape.size() * input_shape.channels
-                             * _n_filters);
-
-    // Update input and output shape accordingly (see this constructor).
-    _input_shape = input_shape;
-    _output_shape = convolutional_output_shape(input_shape, _kernel_shape,
-                                               _stride, _padding, _n_filters);
-
-    // Update output size accordingly (see Layer and FeedforwardLayer constr.).
-    _output_activations.resize(output_size());
-}
-
 void ConvolutionalLayer::dump(Json& out) const
 {
     FeedforwardLayer::dump(out);
 
     Json weights;
-    for (SizeType r = 0; r < _kernel_shape.height; ++r)
+    for (SizeType r = 0; r < _kernel_shape.height(); ++r)
     {
-        SizeType r_offset = r * _kernel_shape.width * _input_shape.channels
+        SizeType r_offset = r * _kernel_shape.width() * _input_shape.channels()
                             * _n_filters;
         Json weights_row;
-        for (SizeType c = 0; c < _kernel_shape.width; ++c)
+        for (SizeType c = 0; c < _kernel_shape.width(); ++c)
         {
-            SizeType c_offset = c * _input_shape.channels * _n_filters;
+            SizeType c_offset = c * _input_shape.channels() * _n_filters;
             Json weights_col;
-            for (SizeType ch = 0; ch < _input_shape.channels; ++ch)
+            for (SizeType ch = 0; ch < _input_shape.channels(); ++ch)
             {
                 SizeType ch_offset = ch * _n_filters;
                 Json weights_channel;
@@ -309,13 +293,13 @@ void ConvolutionalLayer::dump(Json& out) const
 
     Json others;
     std::vector<std::size_t> kernel_size = {
-        _kernel_shape.height, _kernel_shape.width
+        _kernel_shape.height(), _kernel_shape.width()
     };
     others["kernel_size"] = Json(kernel_size);
     others["n_filters"] = _n_filters;
-    std::vector<std::size_t> stride = { _stride.height, _stride.width };
+    std::vector<std::size_t> stride = { _stride.height(), _stride.width() };
     others["stride"] = Json(stride);
-    std::vector<std::size_t> padding = { _padding.height, _padding.width };
+    std::vector<std::size_t> padding = { _padding.height(), _padding.width() };
     others["padding"] = Json(padding);
 
     out[dump_fields.at(DumpFields::WEIGHTS)] = weights;
@@ -339,20 +323,20 @@ void ConvolutionalLayer::load(Json& in)
         .as_vec<std::size_t>();
     _padding = DLMath::Shape2d(padding.at(0), padding.at(1));
 
-    _weights.resize(_kernel_shape.size() * _input_shape.channels * _n_filters);
+    _weights.resize(_kernel_shape.size() * _input_shape.channels() * _n_filters);
     _biases.resize(_n_filters);
-    _weight_gradients.resize(_kernel_shape.size() * _input_shape.channels
+    _weight_gradients.resize(_kernel_shape.size() * _input_shape.channels()
                              * _n_filters);
     _bias_gradients.resize(_n_filters);
 
-    for (SizeType r = 0; r < _kernel_shape.height; ++r)
+    for (SizeType r = 0; r < _kernel_shape.height(); ++r)
     {
-        SizeType r_offset = r * _kernel_shape.width * _input_shape.channels
+        SizeType r_offset = r * _kernel_shape.width() * _input_shape.channels()
                             * _n_filters;
-        for (SizeType c = 0; c < _kernel_shape.width; ++c)
+        for (SizeType c = 0; c < _kernel_shape.width(); ++c)
         {
-            SizeType c_offset = c * _input_shape.channels * _n_filters;
-            for (SizeType ch = 0; ch < _input_shape.channels; ++ch)
+            SizeType c_offset = c * _input_shape.channels() * _n_filters;
+            for (SizeType ch = 0; ch < _input_shape.channels(); ++ch)
             {
                 SizeType ch_offset = ch * _n_filters;
                 for (SizeType f = 0; f < _n_filters; ++f)
@@ -368,6 +352,22 @@ void ConvolutionalLayer::load(Json& in)
     {
         _biases[i] = in[dump_fields.at(DumpFields::BIASES)][i];
     }
+}
+
+void ConvolutionalLayer::_set_input_shape(LayerShape input_shape)
+{
+    FeedforwardLayer::input_shape(input_shape);
+    _weights.resize(_kernel_shape.size() * input_shape.shape().channels() * _n_filters);
+    _weight_gradients.resize(_kernel_shape.size() * input_shape.shape().channels()
+                             * _n_filters);
+
+    // Update input and output shape accordingly (see this constructor).
+    _input_shape = input_shape;
+    _output_shape = convolutional_output_shape(input_shape.shape(), _kernel_shape,
+                                               _stride, _padding, _n_filters);
+
+    // Update output size accordingly (see Layer and FeedforwardLayer constr.).
+    _output_activations.resize(output_size());
 }
 
 } // namespace EdgeLearning

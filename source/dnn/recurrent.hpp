@@ -131,12 +131,6 @@ public:
         }
     }
 
-    [[nodiscard]] const DLMath::Shape3d & input_shape() const override
-    {
-        return Layer::input_shape();
-    }
-    void input_shape(DLMath::Shape3d input_shape) override;
-
     /**
      * \brief Save the layer infos to disk.
      * \param out Json& out Json to write.
@@ -148,6 +142,10 @@ public:
      * \param in const Json& Json to read.
      */
     void load(Json& in) override;
+
+protected:
+
+    void _set_input_shape(LayerShape input_shape) override;
 
 private:
     HiddenActivation _hidden_activation;
