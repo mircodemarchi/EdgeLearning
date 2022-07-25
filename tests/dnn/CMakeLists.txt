@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_dlmath
+    test_dlgraph
     test_layer
     test_loss
     test_cce_loss

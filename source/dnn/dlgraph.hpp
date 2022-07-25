@@ -29,6 +29,8 @@
 #ifndef EDGE_LEARNING_DNN_GRAPH_HPP
 #define EDGE_LEARNING_DNN_GRAPH_HPP
 
+#include "layer.hpp"
+
 #include <vector>
 #include <string>
 #include <map>
@@ -36,14 +38,29 @@
 
 namespace EdgeLearning {
 
+class DlGraph;
+
 template<typename T>
 class Graph
 {
 public:
     Graph(std::vector<T>& nodes_init)
         : _edges{}
-        , _nodes(nodes_init)
+        , _nodes{nodes_init}
     { }
+
+    Graph(const Graph<T>& obj)
+        : _edges{obj._edges}
+        , _nodes{obj._nodes}
+    { }
+
+    Graph& operator=(const Graph& obj)
+    {
+        if (this == &obj) return *this;
+        _edges = obj._edges;
+        _nodes = obj._nodes;
+        return *this;
+    }
 
     void add_edge(const T& from, const T& to)
     {
@@ -58,7 +75,7 @@ public:
             static_cast<std::size_t>(to_idx));
     }
 
-    std::vector<std::size_t> successors(std::size_t idx)
+    const std::vector<std::size_t>& successors(std::size_t idx)
     {
         return _edges[idx];
     }
@@ -101,6 +118,7 @@ public:
     }
 
 private:
+    friend class DLGraph;
 
     std::int64_t _index_of(const T& n)
     {
@@ -117,6 +135,43 @@ private:
 
     std::map<std::size_t, std::vector<std::size_t>> _edges;
     std::vector<T>& _nodes;
+};
+
+class DLGraph
+{
+public:
+    DLGraph();
+    DLGraph(const DLGraph& obj);
+
+    DLGraph& operator=(const DLGraph& obj);
+
+    void add_node(Layer::SharedPtr layer);
+
+    void add_edge(Layer::SharedPtr from, Layer::SharedPtr to);
+
+    void add_edge(std::vector<Layer::SharedPtr> froms, Layer::SharedPtr to);
+    void add_front_arc(std::vector<Layer::SharedPtr> froms, Layer::SharedPtr to);
+    void add_back_arc(std::vector<Layer::SharedPtr> froms, Layer::SharedPtr to);
+
+    void add_edge(Layer::SharedPtr from, std::vector<Layer::SharedPtr> tos);
+    void add_front_arc(Layer::SharedPtr from, std::vector<Layer::SharedPtr> tos);
+    void add_back_arc(Layer::SharedPtr from, std::vector<Layer::SharedPtr> tos);
+
+    const std::vector<std::size_t>& forward(std::size_t layer_idx);
+    std::vector<std::size_t> forward_predecessors(std::size_t layer_idx);
+    const std::vector<std::size_t>& backward(std::size_t layer_idx);
+    std::vector<std::size_t> backward_predecessors(std::size_t layer_idx);
+
+    std::vector<std::int64_t> forward_adjacent_matrix();
+    std::vector<std::int64_t> backward_adjacent_matrix();
+
+    [[nodiscard]] const std::vector<Layer::SharedPtr>& layers()
+    { return _layers; }
+
+private:
+    std::vector<Layer::SharedPtr> _layers;
+    Graph<Layer::SharedPtr> _forward_graph;
+    Graph<Layer::SharedPtr> _backward_graph;
 };
 
 } // namespace EdgeLearning
