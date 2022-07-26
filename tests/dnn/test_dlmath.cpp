@@ -42,6 +42,7 @@ public:
 
     void test() {
         EDGE_LEARNING_TEST_CALL(test_shape());
+        EDGE_LEARNING_TEST_CALL(test_index_of());
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
         EDGE_LEARNING_TEST_CALL(test_uniform_pdf());
         EDGE_LEARNING_TEST_CALL(test_pdf());
@@ -83,6 +84,17 @@ public:
 private:
     const RneType::result_type SEED = 1;
     const std::size_t PRINT_TIMES = 10;
+
+    void test_index_of() {
+        std::vector<TestNumType> test_vec = {1,2,3,4,5};
+        TestNumType test_e = 3;
+        std::int64_t truth_val = 2;
+        EDGE_LEARNING_TEST_EQUAL(DLMath::index_of(test_vec, test_e), truth_val);
+
+        test_e = 6;
+        truth_val = -1;
+        EDGE_LEARNING_TEST_EQUAL(DLMath::index_of(test_vec, test_e), truth_val);
+    }
 
     void test_shape() {
         SizeType h = 10;

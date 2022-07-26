@@ -23,7 +23,7 @@
  */
 
 /*! \file  dnn/dlmath.hpp
- *  \brief Simply replace me.
+ *  \brief Deep Learning Math functionalities.
  */
 
 #include <cmath>
@@ -164,6 +164,20 @@ public:
         XAVIER, ///< \brief sqrt( 2 / n_in )
         KAIMING ///< \brief sqrt( 1 / n_in )
     };
+
+    /**
+     * \brief Calculate the index of the element in the vector.
+     * \tparam T The type of the elements.
+     * \param vec   const std::vector<T>& The vector of elements.
+     * \param n     const T& The element to find.
+     * \return std::int64_t Index of the element or -1 if not found.
+     */
+    template <typename T>
+    static std::int64_t index_of(const std::vector<T>& vec, const T& e)
+    {
+        auto itr = std::find(vec.begin(), vec.end(), e);
+        return itr != vec.cend() ? std::distance(vec.begin(), itr) : -1;
+    }
 
 
     /**
