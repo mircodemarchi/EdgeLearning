@@ -47,14 +47,16 @@ CCELossLayer::CCELossLayer(std::string name,
 const std::vector<NumType>& CCELossLayer::forward(
     const std::vector<NumType>& inputs)
 {
+    SizeType in_size = inputs.size();
+
     if (_target == nullptr)
     {
         throw std::runtime_error("_target is null, set_target not called");
     }
-    _loss = DLMath::cross_entropy(_target, inputs.data(), input_size());
+    _loss = DLMath::cross_entropy(_target, inputs.data(), in_size);
     _cumulative_loss += _loss;
     
-    auto max = DLMath::max_and_argmax(inputs.data(), input_size());
+    auto max = DLMath::max_and_argmax(inputs.data(), in_size);
     // NumType max_value = std::get<0>(max);
     SizeType max_index = std::get<1>(max);
 
@@ -68,8 +70,6 @@ const std::vector<NumType>& CCELossLayer::forward(
         ++_incorrect;
     }
 
-    // Store the data pointer to compute gradients later.
-    _last_input = inputs.data();
     // No more forward.
     return inputs;
 }
@@ -81,7 +81,7 @@ const std::vector<NumType>& CCELossLayer::backward(
     (void) gradients;
 
     DLMath::cross_entropy_1(_gradients.data(), _target, _last_input,
-        _inv_batch_size, input_size());
+        _inv_batch_size, _gradients.size());
 
     return LossLayer::backward(_gradients);
 }

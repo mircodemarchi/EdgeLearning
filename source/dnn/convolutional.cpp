@@ -97,9 +97,6 @@ void ConvolutionalLayer::init(InitializationFunction init,
 const std::vector<NumType>& ConvolutionalLayer::forward(
     const std::vector<NumType>& inputs)
 {
-    // Remember the last input data for backpropagation.
-    _last_input = inputs.data();
-
     /*
      * Perform convolution with n_filters of kernel size contained in
      * _weights vector on the input 3D matrix.
@@ -356,7 +353,7 @@ void ConvolutionalLayer::load(Json& in)
 
 void ConvolutionalLayer::_set_input_shape(LayerShape input_shape)
 {
-    FeedforwardLayer::input_shape(input_shape);
+    FeedforwardLayer::_set_input_shape(input_shape);
     _weights.resize(_kernel_shape.size() * input_shape.shape().channels() * _n_filters);
     _weight_gradients.resize(_kernel_shape.size() * input_shape.shape().channels()
                              * _n_filters);

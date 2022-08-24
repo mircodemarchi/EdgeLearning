@@ -53,7 +53,7 @@ void FeedforwardLayer::load(Json& in)
 
 void FeedforwardLayer::_set_input_shape(LayerShape input_shape)
 {
-    Layer::input_shape(input_shape);
+    Layer::_set_input_shape(input_shape);
     _input_gradients.resize(input_shape.size());
 }
 

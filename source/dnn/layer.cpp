@@ -24,8 +24,8 @@
 
 #include "layer.hpp"
 
-#include "model.hpp"
 #include "dlmath.hpp"
+#include "dlgraph.hpp"
 
 #include <stdexcept>
 
@@ -100,7 +100,9 @@ Layer::Layer(std::string name, LayerShape input_shape, LayerShape output_shape,
              std::string prefix_name)
     : _name{std::move(name)}
     , _input_shape{input_shape}
+    , _input_size{input_shape.size()}
     , _output_shape{output_shape}
+    , _output_size{output_shape.size()}
     , _last_input{}
     , _last_input_size{0}
 { 
@@ -109,25 +111,6 @@ Layer::Layer(std::string name, LayerShape input_shape, LayerShape output_shape,
         if (prefix_name.empty()) prefix_name = "layer_";
         _name = prefix_name + std::to_string(DLMath::unique());
     }
-}
-
-Layer::Layer(const Layer& obj)
-    : _name{obj._name}
-    , _input_shape{obj._input_shape}
-    , _output_shape{obj._output_shape}
-    , _last_input{obj._last_input}
-{
-
-}
-
-Layer& Layer::operator=(const Layer& obj)
-{
-    if (this == &obj) return *this;
-    _name = obj._name;
-    _input_shape = obj._input_shape;
-    _output_shape = obj._output_shape;
-    _last_input = obj._last_input;
-    return *this;
 }
 
 const std::vector<NumType>& Layer::forward(
@@ -141,6 +124,7 @@ const std::vector<NumType>& Layer::training_forward(
 {
     _check_training_input(inputs);
     _last_input = inputs.data();
+    _last_input_size = inputs.size();
     return forward(inputs);
 }
 
@@ -183,14 +167,14 @@ const std::vector<DLMath::Shape3d>& Layer::output_shapes() const
     return _output_shape.shapes();
 }
 
-SizeType Layer::input_size() const
+SizeType Layer::input_size(SizeType input_idx) const
 {
-    return _input_shape.size();
+    return _input_shape.size(input_idx);
 }
 
-SizeType Layer::output_size() const
+SizeType Layer::output_size(SizeType output_idx) const
 {
-    return _output_shape.size();
+    return _output_shape.size(output_idx);
 }
 
 SizeType Layer::input_layers()
@@ -256,7 +240,7 @@ void Layer::load(Json& in)
     _input_shape = LayerShape(input_shapes);
 
     std::vector<DLMath::Shape3d> output_shapes;
-    auto output_shapes_json = in[dump_fields.at(DumpFields::INPUT_SIZE)];
+    auto output_shapes_json = in[dump_fields.at(DumpFields::OUTPUT_SIZE)];
     for (SizeType i = 0; i < output_shapes_json.size(); ++i)
     {
         auto shape = output_shapes_json[i];

@@ -260,39 +260,68 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "Dropout");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
 
-        auto input_size_arr = l_dump["input_size"].as_vec<std::size_t>();
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
-        std::size_t input_size = input_size_arr[0]
-                                 * input_size_arr[1] * input_size_arr[2];
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+        for (SizeType i = 0; i < l_dump["input_shape"].size(); ++i)
+        {
+            auto input_size_arr = l_dump["input_shape"][i]
+                .as_vec<std::size_t>();
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
+            std::size_t input_size = input_size_arr[0]
+                                     * input_size_arr[1] * input_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[0],
+                                     l.input_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[1],
+                                     l.input_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[2],
+                                     l.input_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size, l.input_shape().size(i));
+        }
 
-        auto output_size_arr = l_dump["output_size"].as_vec<std::size_t>();
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
-        std::size_t output_size = output_size_arr[0]
-                                  * output_size_arr[1] * output_size_arr[2];
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
-
-        EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
+        for (SizeType i = 0; i < l_dump["output_shape"].size(); ++i) {
+            auto output_size_arr = l_dump["output_shape"][i]
+                .as_vec<std::size_t>();
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
+            std::size_t output_size = output_size_arr[0]
+                                      * output_size_arr[1] * output_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[0],
+                                     l.output_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[1],
+                                     l.output_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[2],
+                                     l.output_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size, l.output_shape().size(i));
+        }
 
         l = DropoutLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Dropout");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+        for (SizeType i = 0; i < l_dump["input_shape"].size(); ++i)
+        {
+            auto input_size_arr = l_dump["input_shape"][i]
+                .as_vec<std::size_t>();
+            std::size_t input_size = input_size_arr[0]
+                                     * input_size_arr[1] * input_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[0],
+                                     l.input_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[1],
+                                     l.input_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[2],
+                                     l.input_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size, l.input_shape().size(i));
+        }
+        for (SizeType i = 0; i < l_dump["output_shape"].size(); ++i) {
+            auto output_size_arr = l_dump["output_shape"][i]
+                .as_vec<std::size_t>();
+            std::size_t output_size = output_size_arr[0]
+                                      * output_size_arr[1] * output_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[0],
+                                     l.output_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[1],
+                                     l.output_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[2],
+                                     l.output_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size, l.output_shape().size(i));
+        }
 
         Json json_void;
         EDGE_LEARNING_TEST_FAIL(l.load(json_void));

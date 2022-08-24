@@ -43,6 +43,8 @@
 
 namespace EdgeLearning {
 
+class DLGraph;
+
 class LayerShape {
 public:
     LayerShape(std::vector<DLMath::Shape3d> shape_vec);
@@ -102,22 +104,9 @@ public:
           LayerShape output_shape = 0, std::string prefix_name = std::string());
 
     /**
-     * \brief Copy constructor of a new Layer object.
-     * \param obj Layer object to copy.
-     */
-    Layer(const Layer& obj);
-
-    /**
      * \brief Destroy the Layer object.
      */
-    virtual ~Layer() {};
-
-    /**
-     * \brief Assignment operator of a Layer object.
-     * \param obj       Layer object to copy.
-     * \return Layer&   The assigned Layer object.
-     */
-    Layer& operator=(const Layer& obj);
+    virtual ~Layer() = default;
 
     /**
      * \brief Virtual method used to describe how a layer should be 
@@ -190,6 +179,7 @@ public:
      * \return const NumType* The last input of the layer of input size.
      */
     std::vector<NumType> last_input();
+    virtual const std::vector<NumType>& last_input_gradient() = 0;
 
     /**
      * \brief Return the last output of the layer.
@@ -270,15 +260,17 @@ public:
 
     /**
      * \brief Getter of input_shape class field.
+     * \param input_idx SizeType The index of the input to obtain the size.
      * \return The size of the layer input.
      */
-    [[nodiscard]] SizeType input_size() const;
+    [[nodiscard]] SizeType input_size(SizeType input_idx = 0) const;
 
     /**
      * \brief Getter of output_shape class field.
+     * \param output_idx SizeType The index of the output to obtain the size.
      * \return The size of the layer output.
      */
-    [[nodiscard]] SizeType output_size() const;
+    [[nodiscard]] SizeType output_size(SizeType output_idx = 0) const;
 
     /**
      * \brief Getter of the input layers amount.
@@ -305,6 +297,8 @@ public:
     virtual void load(Json& in);
 
 protected:
+    friend class Model;
+
     /**
      * \brief Check the input of the forward pass during layer training.
      * \param inputs The input of the layer.
@@ -318,11 +312,11 @@ protected:
      */
     virtual void _set_input_shape(LayerShape input_shape);
 
-    friend class Model;
-
     std::string _name;                ///< Layer name (for debug).
     LayerShape _input_shape;          ///< Layer input shape.
+    SizeType   _input_size;
     LayerShape _output_shape;         ///< Layer output shape.
+    SizeType   _output_size;
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss

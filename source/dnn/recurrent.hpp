@@ -81,6 +81,7 @@ public:
     const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients) override;
 
+    const std::vector<NumType>& last_input_gradient() override;
     const std::vector<NumType>& last_output() override;
 
     /**
@@ -90,8 +91,8 @@ public:
      */
     [[nodiscard]] SizeType param_count() const noexcept override
     {
-        return (input_size() + _hidden_size + 1UL) * _hidden_size
-             + (_hidden_size + 1UL) * output_size();
+        return (_input_size + _hidden_size + 1UL) * _hidden_size
+             + (_hidden_size + 1UL) * _output_size;
     }
 
     NumType& param(SizeType index) override;
@@ -117,10 +118,12 @@ public:
     void time_steps(SizeType time_steps)
     {
         _time_steps = time_steps;
+        _input_shape = _input_size * _time_steps;
+        _output_shape = _output_size * _time_steps;
         _hidden_state.resize(
-                _hidden_size * std::max(_time_steps, SizeType(1U)));
-        _output_activations.resize(output_size() * _time_steps);
-        _input_gradients.resize(input_size() * _time_steps);
+            _hidden_size * std::max(_time_steps, SizeType(1U)));
+        _output_activations.resize(_output_size * _time_steps);
+        _input_gradients.resize(_input_size * _time_steps);
     }
 
     void reset_hidden_state()
@@ -152,6 +155,8 @@ private:
     SizeType _hidden_size;
 
     std::vector<NumType> _hidden_state;
+    SizeType _input_size;
+    SizeType _output_size;
     SizeType _time_steps;
 
     // == Layer parameters ==

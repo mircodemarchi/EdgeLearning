@@ -78,7 +78,7 @@ public:
      */
     [[nodiscard]] SizeType param_count() const noexcept override
     {
-        return (input_size() + 1UL) * output_size();
+        return (_input_size + 1UL) * _output_size;
     }
 
     NumType& param(SizeType index) override;

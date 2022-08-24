@@ -53,8 +53,8 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "CCELoss");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "CCELoss");
         EDGE_LEARNING_TEST_TRY(l.init());
-        EDGE_LEARNING_TEST_FAIL(l.forward(v_empty));
-        EDGE_LEARNING_TEST_THROWS(l.forward(v_empty), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l.training_forward(v_empty));
+        EDGE_LEARNING_TEST_THROWS(l.training_forward(v_empty), std::runtime_error);
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
@@ -79,8 +79,8 @@ private:
         EDGE_LEARNING_TEST_TRY(CCELossLayer l2_copy{l});
         CCELossLayer l_copy{l};
         EDGE_LEARNING_TEST_TRY(l_copy.init());
-        EDGE_LEARNING_TEST_FAIL(l_copy.forward(v_empty));
-        EDGE_LEARNING_TEST_THROWS(l_copy.forward(v_empty), std::runtime_error);
+        EDGE_LEARNING_TEST_FAIL(l_copy.training_forward(v_empty));
+        EDGE_LEARNING_TEST_THROWS(l_copy.training_forward(v_empty), std::runtime_error);
         EDGE_LEARNING_TEST_TRY(l_copy.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_copy.print());
         EDGE_LEARNING_TEST_EQUAL(l_copy.param_count(), 0);
@@ -103,9 +103,9 @@ private:
         EDGE_LEARNING_TEST_TRY(CCELossLayer l_assign; l_assign = l);
         CCELossLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_TRY(l_assign.init());
-        EDGE_LEARNING_TEST_FAIL(l_assign.forward(v_empty));
+        EDGE_LEARNING_TEST_FAIL(l_assign.training_forward(v_empty));
         EDGE_LEARNING_TEST_THROWS(
-            l_assign.forward(v_empty), std::runtime_error);
+            l_assign.training_forward(v_empty), std::runtime_error);
         EDGE_LEARNING_TEST_TRY(l_assign.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l_assign.print());
         EDGE_LEARNING_TEST_EQUAL(l_assign.param_count(), 0);
@@ -191,7 +191,7 @@ private:
         EDGE_LEARNING_TEST_EXECUTE(l.set_target(t2));
         for (SizeType i = 0; i < 10; ++i)
         {
-            l.forward(v);
+            l.training_forward(v);
         }
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
@@ -251,7 +251,7 @@ private:
         EDGE_LEARNING_TEST_THROWS(l.last_output(), std::runtime_error);
 
         EDGE_LEARNING_TEST_TRY(l.set_target(target_active));
-        EDGE_LEARNING_TEST_TRY(l.forward(v1));
+        EDGE_LEARNING_TEST_TRY(l.training_forward(v1));
         EDGE_LEARNING_TEST_TRY(l.backward(v1));
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v1.size());
@@ -266,7 +266,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input()[0], v1[0]);
         EDGE_LEARNING_TEST_FAIL(l_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_copy.last_output(), std::runtime_error);
-        EDGE_LEARNING_TEST_TRY(l_copy.forward(v2));
+        EDGE_LEARNING_TEST_TRY(l_copy.training_forward(v2));
         EDGE_LEARNING_TEST_TRY(l_copy.backward(v2));
         EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v2.size());
@@ -280,7 +280,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input()[0], v1[0]);
         EDGE_LEARNING_TEST_FAIL(l_assign.last_output());
         EDGE_LEARNING_TEST_THROWS(l_assign.last_output(), std::runtime_error);
-        EDGE_LEARNING_TEST_TRY(l_assign.forward(v2));
+        EDGE_LEARNING_TEST_TRY(l_assign.training_forward(v2));
         EDGE_LEARNING_TEST_TRY(l_assign.backward(v2));
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v2.size());
@@ -294,10 +294,10 @@ private:
         std::vector<NumType> target_right{1, 0};
         std::vector<NumType> target_wrong{0, 1};
         EDGE_LEARNING_TEST_TRY(l_binary.set_target(target_right));
-        EDGE_LEARNING_TEST_TRY(l_binary.forward(v3));
+        EDGE_LEARNING_TEST_TRY(l_binary.training_forward(v3));
         EDGE_LEARNING_TEST_TRY(l_binary.backward(v3));
         EDGE_LEARNING_TEST_TRY(l_binary.set_target(target_wrong));
-        EDGE_LEARNING_TEST_TRY(l_binary.forward(v3));
+        EDGE_LEARNING_TEST_TRY(l_binary.training_forward(v3));
         EDGE_LEARNING_TEST_TRY(l_binary.backward(v3));
     }
 
@@ -311,39 +311,68 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "CCELoss");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
 
-        auto input_size_arr = l_dump["input_size"].as_vec<std::size_t>();
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
-        std::size_t input_size = input_size_arr[0]
-                                 * input_size_arr[1] * input_size_arr[2];
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+        for (SizeType i = 0; i < l_dump["input_shape"].size(); ++i)
+        {
+            auto input_size_arr = l_dump["input_shape"][i]
+                .as_vec<std::size_t>();
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
+            std::size_t input_size = input_size_arr[0]
+                                     * input_size_arr[1] * input_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[0],
+                                     l.input_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[1],
+                                     l.input_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[2],
+                                     l.input_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size, l.input_shape().size(i));
+        }
 
-        auto output_size_arr = l_dump["output_size"].as_vec<std::size_t>();
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
-        std::size_t output_size = output_size_arr[0]
-                                  * output_size_arr[1] * output_size_arr[2];
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
-
-        EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
+        for (SizeType i = 0; i < l_dump["output_shape"].size(); ++i) {
+            auto output_size_arr = l_dump["output_shape"][i]
+                .as_vec<std::size_t>();
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
+            std::size_t output_size = output_size_arr[0]
+                                      * output_size_arr[1] * output_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[0],
+                                     l.output_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[1],
+                                     l.output_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[2],
+                                     l.output_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size, l.output_shape().size(i));
+        }
 
         l = CCELossLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "CCELoss");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+        for (SizeType i = 0; i < l_dump["input_shape"].size(); ++i)
+        {
+            auto input_size_arr = l_dump["input_shape"][i]
+                .as_vec<std::size_t>();
+            std::size_t input_size = input_size_arr[0]
+                                     * input_size_arr[1] * input_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[0],
+                                     l.input_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[1],
+                                     l.input_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[2],
+                                     l.input_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size, l.input_shape().size(i));
+        }
+        for (SizeType i = 0; i < l_dump["output_shape"].size(); ++i) {
+            auto output_size_arr = l_dump["output_shape"][i]
+                .as_vec<std::size_t>();
+            std::size_t output_size = output_size_arr[0]
+                                      * output_size_arr[1] * output_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[0],
+                                     l.output_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[1],
+                                     l.output_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[2],
+                                     l.output_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size, l.output_shape().size(i));
+        }
 
         Json json_void;
         EDGE_LEARNING_TEST_FAIL(l.load(json_void));

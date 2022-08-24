@@ -85,7 +85,7 @@ public:
 
         SizeType& operator[](SizeType idx) { return _shape[idx]; }
         [[nodiscard]] const SizeType& at(SizeType idx) const
-        { return _shape[idx]; }
+        { return _shape.at(idx); }
 
     protected:
         std::vector<SizeType> _shape;

@@ -83,8 +83,10 @@ void DenseLayer::init(InitializationFunction init,
 const std::vector<NumType>& DenseLayer::forward(
     const std::vector<NumType>& inputs)
 {
-    // Remember the last input data for backpropagation.
-    _last_input = inputs.data();
+    SizeType in_size = inputs.size();
+    SizeType out_size = _output_activations.size();
+
+    // std::cout << "[" << _name << "] forward" << std::endl;
 
     /* 
      * Compute the product of the input data with the weight add the bias.
@@ -92,16 +94,19 @@ const std::vector<NumType>& DenseLayer::forward(
      */
     DLMath::matarr_mul_no_check<NumType>(
         _output_activations.data(), _weights.data(), inputs.data(),
-        output_size(), input_size());
+        out_size, in_size);
     DLMath::arr_sum<NumType>(_output_activations.data(),
                              _output_activations.data(),
-                             _biases.data(), output_size());
+                             _biases.data(), out_size);
     return FeedforwardLayer::forward(_output_activations);
 }
 
 const std::vector<NumType>& DenseLayer::backward(
     const std::vector<NumType>& gradients)
 {
+    SizeType out_size = gradients.size();
+    SizeType in_size = _last_input_size;
+
     /*
      * Bias gradient.
      * Calculate dJ/db = dJ/dg(z) * dg(z)/db
@@ -112,7 +117,7 @@ const std::vector<NumType>& DenseLayer::backward(
      *                 = dJ/dz
      */
     DLMath::arr_sum(_bias_gradients.data(), _bias_gradients.data(),
-                    gradients.data(), output_size());
+                    gradients.data(), out_size);
 
     /*
      * Weight gradient.
@@ -123,11 +128,11 @@ const std::vector<NumType>& DenseLayer::backward(
      *                     = dJ/dg(z) * dg(z)/dz * x_j
      *                     = dJ/dz * x_j
      */
-    for (SizeType i = 0; i < output_size(); ++i)
+    for (SizeType i = 0; i < out_size; ++i)
     {
-        for (SizeType j = 0; j < input_size(); ++j)
+        for (SizeType j = 0; j < in_size; ++j)
         {
-            _weight_gradients[(i * input_size()) + j] +=
+            _weight_gradients[(i * in_size) + j] +=
                 gradients[i] * _last_input[j];
         }
     }
@@ -142,12 +147,12 @@ const std::vector<NumType>& DenseLayer::backward(
      *                 = dJ/dz * W
      */
     std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
-    for (SizeType i = 0; i < output_size(); ++i)
+    for (SizeType i = 0; i < out_size; ++i)
     {
-        for (SizeType j = 0; j < input_size(); ++j)
+        for (SizeType j = 0; j < in_size; ++j)
         {
             _input_gradients[j] +=
-                gradients[i] * _weights[(i * input_size()) + j];
+                gradients[i] * _weights[(i * in_size) + j];
         }
     }
 
@@ -256,7 +261,7 @@ void DenseLayer::load(Json& in)
 
 void DenseLayer::_set_input_shape(LayerShape input_shape)
 {
-    FeedforwardLayer::input_shape(input_shape);
+    FeedforwardLayer::_set_input_shape(input_shape);
     _weights.resize(output_size() * input_shape.size());
     _weight_gradients.resize(output_size() * input_shape.size());
 }

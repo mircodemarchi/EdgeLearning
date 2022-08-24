@@ -64,7 +64,7 @@ private:
         EDGE_LEARNING_TEST_TRY(
             l.init(Layer::InitializationFunction::XAVIER,
                    Layer::ProbabilityDensityFunction::UNIFORM, RneType()));
-        EDGE_LEARNING_TEST_TRY(l.forward(v_empty));
+        EDGE_LEARNING_TEST_TRY(l.training_forward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
@@ -153,7 +153,7 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
@@ -176,30 +176,34 @@ private:
         auto l = RecurrentLayer("recurrent_layer_test",
                                 10, 20, 5);
         EDGE_LEARNING_TEST_TRY(l.hidden_state({0.0}));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
-        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_TRY(l.time_steps(1));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
         EDGE_LEARNING_TEST_TRY(l.time_steps(2));
-        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), 2*l.output_size());
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 20);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 40);
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
         RecurrentLayer l_shape_copy{l};
-        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 10);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 20);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 20);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 40);
         EDGE_LEARNING_TEST_ASSERT(l_shape_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_input().size(),
                                  v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
-                                 2*l_shape_copy.output_size());
+                                 l_shape_copy.output_size());
         RecurrentLayer l_shape_assign; l_shape_assign = l;
-        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 10);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 20);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 20);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 40);
         EDGE_LEARNING_TEST_ASSERT(l_shape_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_input().size(),
                                  v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_output().size(),
-                                 2*l_shape_assign.output_size());
+                                 l_shape_assign.output_size());
     }
 
     void test_getter()
@@ -209,8 +213,14 @@ private:
         SizeType hidden_size = 5;
         auto l = RecurrentLayer("recurrent_layer_test",
                                 input_size, output_size, hidden_size);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
+        EDGE_LEARNING_TEST_TRY(l.time_steps(1));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), output_size);
+        EDGE_LEARNING_TEST_TRY(l.time_steps(2));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 2*input_size);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 2*output_size);
     }
 
     void test_setter()
@@ -219,11 +229,14 @@ private:
         SizeType output_size = 20;
         SizeType hidden_size = 5;
         auto l = RecurrentLayer("recurrent_layer_test",
-                                input_size, output_size, hidden_size);
+                                input_size, output_size, hidden_size, 1);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         input_size = 10;
         EDGE_LEARNING_TEST_CALL(l.input_shape(input_size));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+
+        EDGE_LEARNING_TEST_TRY(l.time_steps(2));
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 2*input_size);
 
         auto l1_clone = l.clone();
         auto l2_clone = l.clone();
@@ -240,8 +253,10 @@ private:
     {
         SizeType hidden_size = 5;
         SizeType time_steps = 5;
+        SizeType input_size = 10;
+        SizeType output_size = 20;
         auto l = RecurrentLayer("recurrent_layer_test",
-                                10, 20, hidden_size, time_steps);
+                                input_size, output_size, hidden_size, time_steps);
 
         Json l_dump;
         EDGE_LEARNING_TEST_TRY(l.dump(l_dump));
@@ -249,39 +264,66 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "Recurrent");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
 
-        auto input_size_arr = l_dump["input_size"].as_vec<std::size_t>();
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
-        std::size_t input_size = input_size_arr[0]
-                                 * input_size_arr[1] * input_size_arr[2];
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
+        for (SizeType i = 0; i < l_dump["input_shape"].size(); ++i)
+        {
+            auto input_size_arr = l_dump["input_shape"][i]
+                .as_vec<std::size_t>();
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr.size(), 3);
+            std::size_t i_size =
+                input_size_arr[0] * input_size_arr[1] * input_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[0],
+                                     l.input_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[1],
+                                     l.input_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[2],
+                                     l.input_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(i_size, l.input_shape().size(i));
+        }
 
-        auto output_size_arr = l_dump["output_size"].as_vec<std::size_t>();
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
-        std::size_t output_size = output_size_arr[0]
-                                  * output_size_arr[1] * output_size_arr[2];
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
-
-        EDGE_LEARNING_TEST_EQUAL(l_dump["antecedents"].size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_dump["subsequents"].size(), 0);
+        for (SizeType i = 0; i < l_dump["output_shape"].size(); ++i) {
+            auto output_size_arr = l_dump["output_shape"][i]
+                .as_vec<std::size_t>();
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr.size(), 3);
+            std::size_t o_size = output_size_arr[0] * output_size_arr[1] * output_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[0],
+                                     l.output_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[1],
+                                     l.output_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[2],
+                                     l.output_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(o_size, l.output_shape().size(i));
+        }
 
         l = RecurrentLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Recurrent");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[0], l.input_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[1], l.input_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(input_size_arr[2], l.input_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(input_size, l.input_size());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[0], l.output_shape().height());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[1], l.output_shape().width());
-        EDGE_LEARNING_TEST_EQUAL(output_size_arr[2], l.output_shape().channels());
-        EDGE_LEARNING_TEST_EQUAL(output_size, l.output_size());
+        for (SizeType i = 0; i < l_dump["input_shape"].size(); ++i)
+        {
+            auto input_size_arr = l_dump["input_shape"][i]
+                .as_vec<std::size_t>();
+            std::size_t i_size = input_size_arr[0] * input_size_arr[1] * input_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[0],
+                                     l.input_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[1],
+                                     l.input_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(input_size_arr[2],
+                                     l.input_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(i_size, l.input_shape().size(i));
+        }
+        for (SizeType i = 0; i < l_dump["output_shape"].size(); ++i) {
+            auto output_size_arr = l_dump["output_shape"][i]
+                .as_vec<std::size_t>();
+            std::size_t o_size =
+                output_size_arr[0] * output_size_arr[1] * output_size_arr[2];
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[0],
+                                     l.output_shape().height(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[1],
+                                     l.output_shape().width(i));
+            EDGE_LEARNING_TEST_EQUAL(output_size_arr[2],
+                                     l.output_shape().channels(i));
+            EDGE_LEARNING_TEST_EQUAL(o_size, l.output_shape().size(i));
+        }
 
         Json json_void;
         EDGE_LEARNING_TEST_FAIL(l.load(json_void));
@@ -290,22 +332,22 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"].size(), 3);
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][0].size(), hidden_size);
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][0][0].size(),
-                                 l.input_size());
+                                 input_size);
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][0][hidden_size - 1].size(),
-                                 l.input_size());
+                                 input_size);
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][1].size(), hidden_size);
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][1][0].size(),
                                  hidden_size);
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][1][hidden_size - 1].size(),
                                  hidden_size);
-        EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][2].size(), l.output_size());
+        EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][2].size(), output_size);
         EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][2][0].size(),
                                  hidden_size);
-        EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][2][l.output_size() - 1].size(),
+        EDGE_LEARNING_TEST_EQUAL(l_dump["weights"][2][output_size - 1].size(),
                                  hidden_size);
         EDGE_LEARNING_TEST_EQUAL(l_dump["biases"].size(), 2);
         EDGE_LEARNING_TEST_EQUAL(l_dump["biases"][0].size(), hidden_size);
-        EDGE_LEARNING_TEST_EQUAL(l_dump["biases"][1].size(), l.output_size());
+        EDGE_LEARNING_TEST_EQUAL(l_dump["biases"][1].size(), output_size);
         EDGE_LEARNING_TEST_EQUAL(
             l_dump["others"]["hidden_activation"].as<int>(),
             static_cast<int>(RecurrentLayer::HiddenActivation::TanH));

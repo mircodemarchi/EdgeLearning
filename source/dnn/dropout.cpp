@@ -50,6 +50,7 @@ const std::vector<NumType>& DropoutLayer::training_forward(
     Layer::_check_training_input(inputs);
     // Last input not used for backpropagation.
     _last_input = inputs.data();
+    _last_input_size = inputs.size();
 
     auto dist = DLMath::uniform_pdf<NumType>(0.5, 1.0);
 
@@ -113,7 +114,7 @@ void DropoutLayer::load(Json& in)
 
 void DropoutLayer::_set_input_shape(LayerShape input_shape)
 {
-    FeedforwardLayer::input_shape(input_shape);
+    FeedforwardLayer::_set_input_shape(input_shape);
     _output_shape = input_shape;
     _output_activations.resize(output_size());
 }

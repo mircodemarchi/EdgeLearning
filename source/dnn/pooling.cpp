@@ -96,7 +96,7 @@ void PoolingLayer::load(Json& in)
 
 void PoolingLayer::_set_input_shape(LayerShape input_shape)
 {
-    FeedforwardLayer::input_shape(input_shape);
+    FeedforwardLayer::_set_input_shape(input_shape);
 
     // Update input and output shape accordingly (see this constructor).
     _input_shape = input_shape;

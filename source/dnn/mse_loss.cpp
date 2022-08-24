@@ -42,11 +42,15 @@ MSELossLayer::MSELossLayer(std::string name,
 const std::vector<NumType>& MSELossLayer::forward(
     const std::vector<NumType>& inputs)
 {
+    SizeType in_size = inputs.size();
+
+    // std::cout << "[" << _name << "] forward" << std::endl;
+
     if (_target == nullptr)
     {
         throw std::runtime_error("_target is null, set_target not called");
     }
-    _loss = DLMath::mean_squared_error(_target, inputs.data(), input_size());
+    _loss = DLMath::mean_squared_error(_target, inputs.data(), in_size);
     _cumulative_loss += _loss;
 
     if (-_loss_tolerance <= _loss && _loss <= _loss_tolerance)
@@ -58,8 +62,6 @@ const std::vector<NumType>& MSELossLayer::forward(
         _incorrect++;
     }
 
-    // Store the data pointer to compute gradients later.
-    _last_input = inputs.data();
     // No more forward.
     return inputs;
 }
@@ -70,8 +72,10 @@ const std::vector<NumType>& MSELossLayer::backward(
     // Parameter ignored because it is a loss layer.
     (void) gradients;
 
+    std::cout << "[" << _name << "] backward" << std::endl;
+
     DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input,
-        _inv_batch_size, input_size());
+        _inv_batch_size, _gradients.size());
 
     return LossLayer::backward(_gradients);
 }

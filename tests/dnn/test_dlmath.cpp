@@ -111,7 +111,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(shape_2d[0], h);
         EDGE_LEARNING_TEST_EQUAL(shape_2d[1], w);
         EDGE_LEARNING_TEST_FAIL((void) shape_2d.at(2));
-        EDGE_LEARNING_TEST_THROWS((void) shape_2d.at(2), std::runtime_error);
+        EDGE_LEARNING_TEST_THROWS((void) shape_2d.at(2), std::out_of_range);
 
         h = 12;
         w = 13;
@@ -132,7 +132,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(shape_3d[1], w);
         EDGE_LEARNING_TEST_EQUAL(shape_3d[2], c);
         EDGE_LEARNING_TEST_FAIL((void) shape_3d.at(3));
-        EDGE_LEARNING_TEST_THROWS((void) shape_3d.at(3), std::runtime_error);
+        EDGE_LEARNING_TEST_THROWS((void) shape_3d.at(3), std::out_of_range);
     }
 
     void test_normal_pdf() {

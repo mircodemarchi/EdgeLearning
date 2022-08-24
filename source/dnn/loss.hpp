@@ -139,6 +139,11 @@ public:
      */
     virtual void print() const override;
 
+    const std::vector<NumType>& last_input_gradient() override
+    {
+        return _gradients;
+    }
+
     /**
      * \brief Loss layers do not have output.
      * \return No return, always throw a std::runtime_error.
