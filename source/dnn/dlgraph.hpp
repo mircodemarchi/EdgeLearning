@@ -30,15 +30,16 @@
 #define EDGE_LEARNING_DNN_GRAPH_HPP
 
 #include "layer.hpp"
+#include "loss.hpp"
+#include "dlmath.hpp"
 
 #include <vector>
+#include <set>
 #include <string>
 #include <map>
 
 
 namespace EdgeLearning {
-
-class DlGraph;
 
 template<typename T>
 class Graph
@@ -62,27 +63,45 @@ public:
         return *this;
     }
 
-    void add_edge(const T& from, const T& to)
+    void add_arc(const T& from, const T& to)
     {
-        auto from_idx = _index_of(from);
-        auto to_idx = _index_of(to);
+        auto from_idx = DLMath::index_of(_nodes, from);
+        auto to_idx = DLMath::index_of(_nodes, to);
         if (from_idx == -1 || to_idx == -1)
         {
             throw std::runtime_error(
-                "add_edge error: params are not included in nodes");
+                "add_arc error: params are not included in nodes");
         }
-        _edges[static_cast<std::size_t>(from_idx)].push_back(
+        _edges[static_cast<std::size_t>(from_idx)].insert(
             static_cast<std::size_t>(to_idx));
     }
 
-    const std::vector<std::size_t>& successors(std::size_t idx)
+    [[nodiscard]] bool has_successors(std::size_t idx) const
     {
-        return _edges[idx];
+        return _edges.count(idx) > 0 && !_edges.at(idx).empty();
     }
 
-    std::vector<std::size_t> predecessors(std::size_t idx)
+    [[nodiscard]] std::set<std::size_t> successors(std::size_t idx) const
     {
-        std::vector<std::size_t> ret;
+        return _edges.count(idx) > 0 ? _edges.at(idx) : std::set<std::size_t>();
+    }
+
+    [[nodiscard]] bool has_predecessors(std::size_t idx) const
+    {
+        for (const auto& edge: _edges)
+        {
+            if (std::find(edge.second.begin(), edge.second.end(), idx)
+                != edge.second.cend())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    [[nodiscard]] std::set<std::size_t> predecessors(std::size_t idx) const
+    {
+        std::set<std::size_t> ret;
         for (const auto& edge: _edges)
         {
             const auto& node = edge.first;
@@ -90,17 +109,17 @@ public:
             if (std::find(successors.begin(), successors.end(), idx)
                 != successors.cend())
             {
-                ret.push_back(node);
+                ret.insert(node);
             }
         }
         return ret;
     }
 
     [[nodiscard]] const std::vector<T>& nodes() const { return _nodes; }
-    [[nodiscard]] const std::map<std::size_t, std::vector<std::size_t>>& edges() const
+    [[nodiscard]] const std::map<std::size_t, std::set<std::size_t>>& edges() const
     { return _edges; }
 
-    std::vector<std::int64_t> adjacent_matrix()
+    [[nodiscard]] std::vector<std::int64_t> adjacent_matrix() const
     {
         std::vector<std::int64_t> ret(_nodes.size() * _nodes.size(),
                                       std::int64_t(0));
@@ -120,58 +139,105 @@ public:
 private:
     friend class DLGraph;
 
-    std::int64_t _index_of(const T& n)
-    {
-        auto itr = std::find(_nodes.begin(), _nodes.end(), n);
-        if (itr != _nodes.cend())
-        {
-            return std::distance(_nodes.begin(), itr);
-        }
-        else
-        {
-            return -1;
-        }
-    }
-
-    std::map<std::size_t, std::vector<std::size_t>> _edges;
+    std::map<std::size_t, std::set<std::size_t>> _edges;
     std::vector<T>& _nodes;
 };
 
 class DLGraph
 {
 public:
+    using SharedPtr = std::shared_ptr<DLGraph>;
+
+    struct Arc {
+        std::shared_ptr<Layer> from;
+        std::shared_ptr<Layer> to;
+    };
+
     DLGraph();
     DLGraph(const DLGraph& obj);
 
     DLGraph& operator=(const DLGraph& obj);
 
-    void add_node(Layer::SharedPtr layer);
+    void add_node(std::shared_ptr<Layer> layer);
 
-    void add_edge(Layer::SharedPtr from, Layer::SharedPtr to);
+    void add_edge(std::shared_ptr<Layer> from, std::shared_ptr<Layer> to);
+    void add_edge(std::shared_ptr<Layer> from, std::shared_ptr<LossLayer> to);
+    void add_arc_forward(std::shared_ptr<Layer> from, std::shared_ptr<Layer> to);
+    void add_arc_forward(std::shared_ptr<Layer> from, std::shared_ptr<LossLayer> to);
+    void add_arc_backward(std::shared_ptr<Layer> from, std::shared_ptr<Layer> to);
 
-    void add_edge(std::vector<Layer::SharedPtr> froms, Layer::SharedPtr to);
-    void add_front_arc(std::vector<Layer::SharedPtr> froms, Layer::SharedPtr to);
-    void add_back_arc(std::vector<Layer::SharedPtr> froms, Layer::SharedPtr to);
+    void add_edge(std::vector<std::shared_ptr<Layer>> froms, std::shared_ptr<Layer> to);
+    void add_edge(std::vector<std::shared_ptr<Layer>> froms, std::shared_ptr<LossLayer> to);
+    void add_arc_forward(std::vector<std::shared_ptr<Layer>> froms, std::shared_ptr<Layer> to);
+    void add_arc_forward(std::vector<std::shared_ptr<Layer>> froms, std::shared_ptr<LossLayer> to);
+    void add_arc_backward(std::vector<std::shared_ptr<Layer>> froms, std::shared_ptr<Layer> to);
 
-    void add_edge(Layer::SharedPtr from, std::vector<Layer::SharedPtr> tos);
-    void add_front_arc(Layer::SharedPtr from, std::vector<Layer::SharedPtr> tos);
-    void add_back_arc(Layer::SharedPtr from, std::vector<Layer::SharedPtr> tos);
+    void add_edge(std::shared_ptr<Layer> from, std::vector<std::shared_ptr<Layer>> tos);
+    void add_arc_forward(std::shared_ptr<Layer> from, std::vector<std::shared_ptr<Layer>> tos);
+    void add_arc_backward(std::shared_ptr<Layer> from, std::vector<std::shared_ptr<Layer>> tos);
 
-    const std::vector<std::size_t>& forward(std::size_t layer_idx);
-    std::vector<std::size_t> forward_predecessors(std::size_t layer_idx);
-    const std::vector<std::size_t>& backward(std::size_t layer_idx);
-    std::vector<std::size_t> backward_predecessors(std::size_t layer_idx);
+    void add_loss(std::shared_ptr<LossLayer> layer);
 
-    std::vector<std::int64_t> forward_adjacent_matrix();
-    std::vector<std::int64_t> backward_adjacent_matrix();
+    [[nodiscard]] bool has_training_forward(std::size_t layer_idx) const;
+    [[nodiscard]] bool has_training_forward_predecessors(std::size_t layer_idx) const;
+    [[nodiscard]] bool has_forward(std::size_t layer_idx) const;
+    [[nodiscard]] bool has_forward_predecessors(std::size_t layer_idx) const;
+    [[nodiscard]] bool has_backward(std::size_t layer_idx) const;
+    [[nodiscard]] bool has_backward_predecessors(std::size_t layer_idx) const;
+    [[nodiscard]] std::set<std::size_t> training_forward(std::size_t layer_idx) const;
+    [[nodiscard]] std::set<std::size_t> training_forward_predecessors(std::size_t layer_idx) const;
+    [[nodiscard]] std::set<std::size_t> forward(std::size_t layer_idx) const;
+    [[nodiscard]] std::set<std::size_t> forward_predecessors(std::size_t layer_idx) const;
+    [[nodiscard]] std::set<std::size_t> backward(std::size_t layer_idx) const;
+    [[nodiscard]] std::set<std::size_t> backward_predecessors(std::size_t layer_idx) const;
 
-    [[nodiscard]] const std::vector<Layer::SharedPtr>& layers()
-    { return _layers; }
+    [[nodiscard]] std::vector<std::int64_t> training_forward_adjacent_matrix() const;
+    [[nodiscard]] std::vector<std::int64_t> forward_adjacent_matrix() const;
+    [[nodiscard]] std::vector<std::int64_t> backward_adjacent_matrix() const;
+
+    [[nodiscard]] const std::vector<std::shared_ptr<Layer>>& layers() const;
+    [[nodiscard]] std::vector<SizeType> layers_idx() const;
+    [[nodiscard]] std::vector<std::shared_ptr<Layer>> training_forward_layers() const;
+    [[nodiscard]] std::vector<SizeType> training_forward_layers_idx() const;
+    [[nodiscard]] std::vector<std::shared_ptr<Layer>> forward_layers() const;
+    [[nodiscard]] std::vector<SizeType> forward_layers_idx() const;
+    [[nodiscard]] std::vector<std::shared_ptr<Layer>> backward_layers() const;
+    [[nodiscard]] std::vector<SizeType> backward_layers_idx() const;
+    [[nodiscard]] std::vector<std::shared_ptr<Layer>> input_layers() const;
+    [[nodiscard]] const std::vector<SizeType>& input_layers_idx() const;
+    [[nodiscard]] std::vector<std::shared_ptr<Layer>> output_layers() const;
+    [[nodiscard]] const std::vector<SizeType>& output_layers_idx() const;
+    [[nodiscard]] std::vector<std::shared_ptr<LossLayer>> loss_layers() const;
+    [[nodiscard]] std::vector<SizeType> loss_layers_idx() const;
+
+    [[nodiscard]] std::vector<Arc> training_forward_run() const;
+    [[nodiscard]] std::vector<Arc> forward_run() const;
+    [[nodiscard]] std::vector<Arc> backward_run() const;
+
+    [[nodiscard]] SizeType size() const;
+    std::shared_ptr<Layer> layer(SizeType idx);
+    std::shared_ptr<Layer> operator[](SizeType idx);
+
+    template <typename Layer_T>
+    std::shared_ptr<Layer_T> as(SizeType idx)
+    {
+        return std::dynamic_pointer_cast<Layer_T>(_layers[idx]);
+    }
+
+    std::int64_t index_of(const Layer& l);
 
 private:
-    std::vector<Layer::SharedPtr> _layers;
-    Graph<Layer::SharedPtr> _forward_graph;
-    Graph<Layer::SharedPtr> _backward_graph;
+    void _compute_input_layers();
+    void _compute_output_layers();
+
+    std::vector<std::shared_ptr<Layer>> _layers;
+    Graph<std::shared_ptr<Layer>> _forward_graph;
+    Graph<std::shared_ptr<Layer>> _training_forward_graph;
+    Graph<std::shared_ptr<Layer>> _backward_graph;
+    std::vector<SizeType> _loss_layers_idx;
+
+    std::vector<SizeType> _input_layers_idx;
+    std::vector<SizeType> _output_layers_idx;
 };
 
 } // namespace EdgeLearning
