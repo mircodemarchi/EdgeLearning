@@ -205,12 +205,13 @@ public:
         auto loss_layer = _m.template add_loss<
             typename MapLoss<Framework::EDGE_LEARNING, LT>::type>(
                 loss_layer_name, prev_layer->output_size(), batch_size);
-        _m.create_back_arc(prev_layer, loss_layer);
+        _m.create_loss_edge(prev_layer, loss_layer);
 
         // Train.
         using optimizer_type = typename MapOptimizer<
             Framework::EDGE_LEARNING, OT>::type;
         auto o = optimizer_type(learning_rate);
+        _m.init();
         Training<PL, T>::run(_m, data, o, epochs, batch_size);
     }
 

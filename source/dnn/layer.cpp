@@ -140,7 +140,7 @@ std::vector<NumType> Layer::last_input()
            ? std::vector<NumType>{
             _last_input, _last_input + _last_input_size}
            : std::vector<NumType>{};
-};
+}
 
 const LayerShape& Layer::input_shape() const
 {

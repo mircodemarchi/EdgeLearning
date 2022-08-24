@@ -495,7 +495,7 @@ std::shared_ptr<Layer> DLGraph::operator[](SizeType idx)
     return layer(idx);
 }
 
-std::int64_t DLGraph::index_of(const Layer& l)
+std::int64_t DLGraph::index_of(const Layer& l) const
 {
     std::vector<const Layer*> layer_pointers;
     for (const auto& l_graph: _layers)

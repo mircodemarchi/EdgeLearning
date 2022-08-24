@@ -80,7 +80,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_classifier_model_predict());
         EDGE_LEARNING_TEST_CALL(test_regressor_model());
         EDGE_LEARNING_TEST_CALL(test_regressor_model_predict());
-        EDGE_LEARNING_TEST_CALL(test_recurisive_model());
+        EDGE_LEARNING_TEST_CALL(test_recursive_model());
     }
 
 private:
@@ -125,7 +125,7 @@ private:
         auto loss = m.add_loss<CustomLossLayer>(
             output_size, BATCH_SIZE);
         EDGE_LEARNING_TEST_TRY(m.create_edge(l1, l1_relu));
-        EDGE_LEARNING_TEST_TRY(m.create_back_arc(l1_relu, loss));
+        EDGE_LEARNING_TEST_TRY(m.create_edge(l1_relu, loss));
         EDGE_LEARNING_TEST_TRY(m.init());
         EDGE_LEARNING_TEST_TRY(m.init(Model::InitializationFunction::KAIMING));
         EDGE_LEARNING_TEST_TRY(m.init(Model::InitializationFunction::XAVIER));
@@ -141,10 +141,10 @@ private:
         auto loss = m.add_loss<CustomLossLayer>(
             output_size, BATCH_SIZE);
         m.create_edge(l1, l1_relu);
-        m.create_back_arc(l1_relu, loss);
+        m.create_loss_edge(l1_relu, loss);
         EDGE_LEARNING_TEST_EQUAL(m.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(m.output_size(), output_size);
-        EDGE_LEARNING_TEST_EQUAL(m.layers().size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(m.layers().size(), 3);
         EDGE_LEARNING_TEST_EQUAL(m.layers()[0], l1);
 
         std::vector<NumType> input{1,2,3,4};
@@ -167,7 +167,7 @@ private:
         m.create_edge(first_layer, first_relu);
         m.create_edge(first_relu, output_layer);
         m.create_edge(output_layer, output_linear);
-        m.create_back_arc(output_linear, loss_layer);
+        m.create_loss_edge(output_linear, loss_layer);
 
         EDGE_LEARNING_TEST_TRY(m.init());
         std::ofstream ofile{
@@ -233,6 +233,12 @@ private:
 
         Model m_copy(m);
         EDGE_LEARNING_TEST_EQUAL(m_copy.name(), m.name());
+        EDGE_LEARNING_TEST_EQUAL(m_copy.layers().size(), m.layers().size());
+        for (std::size_t i = 0; i < m.layers().size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(m_copy.layers()[i]->name(),
+                                     m.layers()[i]->name());
+        }
     }
 
     void test_classifier_model_predict() {
@@ -297,6 +303,12 @@ private:
 
         Model m_copy(m);
         EDGE_LEARNING_TEST_EQUAL(m_copy.name(), m.name());
+        EDGE_LEARNING_TEST_EQUAL(m_copy.layers().size(), m.layers().size());
+        for (std::size_t i = 0; i < m.layers().size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(m_copy.layers()[i]->name(),
+                                     m.layers()[i]->name());
+        }
     }
 
     void test_regressor_model_predict() {
@@ -309,7 +321,7 @@ private:
         params_file.close();
     }
 
-    void test_recurisive_model() {
+    void test_recursive_model() {
         // Input definition.
         std::size_t time_steps = 2;
 
@@ -345,7 +357,7 @@ private:
         GDOptimizer o{NumType{0.01}};
         m.create_edge(first_layer, first_layer_relu);
         m.create_edge(first_layer_relu, output_layer);
-        m.create_back_arc(output_layer, loss_layer);
+        m.create_loss_edge(output_layer, loss_layer);
         m.init();
         m.print();
 
@@ -374,6 +386,12 @@ private:
 
         Model m_copy(m);
         EDGE_LEARNING_TEST_EQUAL(m_copy.name(), m.name());
+        EDGE_LEARNING_TEST_EQUAL(m_copy.layers().size(), m.layers().size());
+        for (std::size_t i = 0; i < m.layers().size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(m_copy.layers()[i]->name(),
+                                     m.layers()[i]->name());
+        }
     }
 
     Model _create_binary_classifier_model()
@@ -392,7 +410,7 @@ private:
         m.create_edge(first_layer, first_layer_relu);
         m.create_edge(first_layer_relu, output_layer);
         m.create_edge(output_layer, output_layer_softmax);
-        m.create_back_arc(output_layer_softmax, loss_layer);
+        m.create_loss_edge(output_layer_softmax, loss_layer);
         return m;
     }
 
@@ -412,7 +430,7 @@ private:
         m.create_edge(first_layer, first_layer_relu);
         m.create_edge(first_layer_relu, output_layer);
         m.create_edge(output_layer, output_layer_linear);
-        m.create_back_arc(output_layer_linear, loss_layer);
+        m.create_loss_edge(output_layer_linear, loss_layer);
         return m;
     }
 };

@@ -73,7 +73,7 @@ private:
             InitType::AUTO,
             ParallelizationLevel::THREAD_PARALLELISM
             >(layers_descriptor, "regressor_model");
-        EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
+        // EDGE_LEARNING_TEST_TRY(m_thread_parallelism.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
     }
 
     void test_predict() {

@@ -33,6 +33,7 @@
 #include "loss.hpp"
 #include "optimizer.hpp"
 #include "type.hpp"
+#include "dlgraph.hpp"
 
 #include <cstdint>
 #include <fstream>
@@ -49,38 +50,77 @@ namespace EdgeLearning {
 class Model
 {
 public:
+    /**
+     * \brief Enumeration class for Model initialization function.
+     */
     enum class InitializationFunction
     {
-        XAVIER,
-        KAIMING,
-        AUTO
+        XAVIER,  ///< \brief Xavier initialization: sqrt( 2 / n_in )
+        KAIMING, ///< \brief Kaiming initialization: sqrt( 1 / n_in )
+        AUTO     ///< \brief Automatic initialization: in relation to layers.
     };
 
+    /**
+     * \brief Enumeration class for Model PDF.
+     */
     using ProbabilityDensityFunction = Layer::ProbabilityDensityFunction;
+
+    struct State {
+        State()
+            : graph{}
+            , layers(graph.layers())
+            , input_layers(graph.input_layers())
+            , output_layers(graph.output_layers())
+            , loss_layers(graph.loss_layers())
+            , training_forward_run(graph.training_forward_run())
+            , forward_run(graph.forward_run())
+            , backward_run(graph.backward_run())
+        { }
+
+        void update()
+        {
+            layers = graph.layers();
+            input_layers = graph.input_layers();
+            output_layers = graph.output_layers();
+            loss_layers = graph.loss_layers();
+            training_forward_run = graph.training_forward_run();
+            forward_run = graph.forward_run();
+            backward_run = graph.backward_run();
+        }
+
+        DLGraph graph;
+        std::vector<Layer::SharedPtr> layers;
+        std::vector<Layer::SharedPtr> input_layers;
+        std::vector<Layer::SharedPtr> output_layers;
+        std::vector<std::shared_ptr<LossLayer>> loss_layers;
+        std::vector<DLGraph::Arc> training_forward_run;
+        std::vector<DLGraph::Arc> forward_run;
+        std::vector<DLGraph::Arc> backward_run;
+    };
 
     /**
      * \brief Construct a new Model object.
-     * \param name
+     * \param name The model name.
      */
     Model(std::string name = std::string());
 
     /**
      * \brief Copy constructor of a new Model object.
-     * \param obj
+     * \param obj The Model object to copy.
      */
     Model(const Model& obj);
 
     /**
      * \brief Assignment operator of a Model object.
-     * \param obj
-     * \return Model&
+     * \param obj The Model object to assign.
+     * \return Model& The Model assigned.
      */
     Model& operator=(Model obj);
 
     /**
      * \brief Swap method of Model object.
-     * \param lop
-     * \param rop
+     * \param lop Left operand Model object.
+     * \param rop Right operand Model object.
      */
     friend void swap(Model& lop, Model& rop);
 
@@ -97,10 +137,11 @@ public:
     template <class Layer_t, typename... T>
     std::shared_ptr<Layer_t> add_layer(T&&... args)
     {
-        _layers.push_back(
+        _state.graph.add_node(
             std::make_shared<Layer_t>(std::forward<T>(args)...)
         );
-        return std::dynamic_pointer_cast<Layer_t>(_layers.back());
+        _state.update();
+        return std::dynamic_pointer_cast<Layer_t>(_state.layers.back());
     }
 
     /**
@@ -116,9 +157,11 @@ public:
     template <class LossLayer_t, typename... T>
     std::shared_ptr<LossLayer_t> add_loss(T&&... args)
     {
-        _loss_layer = std::make_shared<LossLayer_t>(
-            std::forward<T>(args)...);
-        return std::dynamic_pointer_cast<LossLayer_t>(_loss_layer);
+        _state.graph.add_loss(
+            std::make_shared<LossLayer_t>(std::forward<T>(args)...)
+        );
+        _state.update();
+        return std::dynamic_pointer_cast<LossLayer_t>(_state.layers.back());
     }
 
     /**
@@ -142,6 +185,8 @@ public:
      */
     void create_front_arc(
         const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
+    void create_front_arc(
+        const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst);
 
     /**
      * \brief Create a dependency between two constituent layers.
@@ -150,6 +195,7 @@ public:
      * \param dst Destination layer.
      */
     void create_edge(const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
+    void create_loss_edge(const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst);
 
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 
@@ -193,15 +239,17 @@ public:
 
     /**
      * \brief Getter for model input size.
+     * \param input_layer_idx The input layer index.
      * \return SizeType The input size of the model.
      */
-    [[nodiscard]] SizeType input_size();
+    [[nodiscard]] SizeType input_size(SizeType input_layer_idx = 0);
 
     /**
      * \brief Getter for model output size.
+     * \param output_layer_idx The output layer index.
      * \return SizeType The output size of the model.
      */
-    [[nodiscard]] SizeType output_size();
+    [[nodiscard]] SizeType output_size(SizeType output_layer_idx = 0);
 
     /**
      * \brief  Layers getter.
@@ -249,11 +297,8 @@ public:
 private:
     friend class Layer;
 
-    std::int64_t _index_of(Layer::SharedPtr l);
-
     std::string _name;                           ///< Model name;
-    std::vector<Layer::SharedPtr> _layers;       ///< List of layers pointers;
-    std::shared_ptr<LossLayer> _loss_layer;      ///< Loss of the model;
+    State _state;
 };
 
 } // namespace EdgeLearning

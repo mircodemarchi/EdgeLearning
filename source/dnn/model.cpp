@@ -34,8 +34,6 @@ namespace EdgeLearning {
 
 Model::Model(std::string name)
     : _name{std::move(name)}
-    , _layers{}
-    , _loss_layer{}
 { 
     if (_name.empty())
     {
@@ -45,19 +43,8 @@ Model::Model(std::string name)
 
 Model::Model(const Model& obj)
     : _name{obj._name}
-    , _layers{obj._layers.size()}
-    , _loss_layer{}
-{
-    if (obj._loss_layer)
-    {
-        _loss_layer = std::dynamic_pointer_cast<LossLayer>(
-            obj._loss_layer->clone());
-    }
-    for (std::size_t i = 0; i < obj._layers.size(); ++i)
-    {
-        _layers[i] = obj._layers[i]->clone();
-    }
-}
+    , _state(obj._state)
+{}
 
 Model& Model::operator=(Model obj)
 {
@@ -69,28 +56,40 @@ void swap(Model& lop, Model& rop)
 {
     using std::swap;
     swap(lop._name, rop._name);
-    swap(lop._layers, rop._layers);
-    swap(lop._loss_layer, rop._loss_layer);
+    swap(lop._state, rop._state);
 }
 
 void Model::create_back_arc(
     const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
 {
-    (void) src;
-    (void) dst;
-    // dst->_antecedents.push_back(src);
+    _state.graph.add_arc_backward(dst, src);
+    _state.update();
 }
 
 void Model::create_front_arc(
     const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
 {
-    (void) src;
-    (void) dst;
-    // src->_subsequents.push_back(dst);
+    _state.graph.add_arc_forward(src, dst);
+    _state.update();
+}
+
+void Model::create_front_arc(
+    const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst)
+{
+    _state.graph.add_arc_forward(src, dst);
+    _state.update();
 }
 
 void Model::create_edge(
     const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
+{
+    // NOTE: No validation is done to ensure the edge doesn't already exist
+    create_back_arc(src, dst);
+    create_front_arc(src, dst);
+}
+
+void Model::create_loss_edge(
+    const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst)
 {
     // NOTE: No validation is done to ensure the edge doesn't already exist
     create_back_arc(src, dst);
@@ -107,11 +106,12 @@ RneType::result_type Model::init(InitializationFunction init,
         std::random_device rd{};
         seed = rd();
     }
-    std::cout << "Initializing model parameters with seed: " << seed << "\n";
+    // std::cout << "Initializing model parameters with seed: " << seed << "\n";
 
-    RneType rne{seed};  
-    for (auto& layer: _layers)
+    RneType rne{seed};
+    for (const auto& layer_idx: _state.graph.forward_layers_idx())
     {
+        auto layer = _state.layers[layer_idx];
         switch (init)
         {
             case InitializationFunction::KAIMING:
@@ -127,17 +127,18 @@ RneType::result_type Model::init(InitializationFunction init,
             case InitializationFunction::AUTO:
             default:
             {
-                bool init_done = false;/*
-                for (auto const& next_layer: layer->_subsequents)
+                bool init_done = false;
+                for (const auto& next_layer_idx: _state.graph.forward(layer_idx))
                 {
-                    if (next_layer->is_type<ReluLayer>())
+                    if (_state.layers[next_layer_idx]->is_type<ReluLayer>())
                     {
                         layer->init(Layer::InitializationFunction::KAIMING,
                                     pdf, rne);
                         init_done = true;
                         break;
                     }
-                }*/
+                }
+
                 if (!init_done)
                 {
                     layer->init(Layer::InitializationFunction::XAVIER,
@@ -148,7 +149,6 @@ RneType::result_type Model::init(InitializationFunction init,
 
         }
     }
-    _loss_layer->init(Layer::InitializationFunction::XAVIER, pdf, rne);
 
     return seed;
 }
@@ -160,68 +160,110 @@ void Model::train(Optimizer& optimizer)
 
 void Model::train(Optimizer& optimizer, Model& model_from)
 {
-    for (const auto& layer: model_from._layers)
+    for (const auto& layer: model_from._state.layers)
     {
         optimizer.train(*layer);
     }
-    optimizer.train(*model_from._loss_layer);
-    model_from._loss_layer->reset_score();
+    for (const auto& loss_layer: _state.loss_layers)
+    {
+        loss_layer->reset_score();
+    }
 }
 
 void Model::step(const std::vector<NumType>& input,
                  const std::vector<NumType>& target)
 {
-    _loss_layer->set_target(target);
-    // TODO: how many input layers there are?
-    // TODO: manage multiple input layers.
-    _layers.front()->training_forward(input);
-    /*
-    for(const auto& l: _loss_layer->_antecedents)
-    {
-        _loss_layer->training_forward(l->last_output());
-    }*/
     const std::vector<NumType> not_used;
-    _loss_layer->backward(not_used);
+
+    // Set target.
+    for (const auto& loss_layer: _state.loss_layers)
+    {
+        loss_layer->set_target(target);
+    }
+
+    // Forward.
+    for (const auto& input_layer: _state.input_layers)
+    {
+        input_layer->training_forward(input);
+    }
+    for (const auto& forward_arc: _state.training_forward_run)
+    {
+        forward_arc.to->training_forward(forward_arc.from->last_output());
+    }
+
+    // Backward.
+    for (const auto& backward_arc: _state.backward_run)
+    {
+        backward_arc.to->backward(backward_arc.from->last_input_gradient());
+    }
 }
 
 const std::vector<NumType>& Model::predict(const std::vector<NumType>& input)
 {
-    _layers.front()->forward(input);
-    return _layers.back()->last_output();
+    if (_state.output_layers.empty())
+    {
+        throw std::runtime_error("No output layers in model");
+    }
+    for (const auto& input_layer: _state.input_layers)
+    {
+        input_layer->forward(input);
+    }
+    for (const auto& forward_arc: _state.forward_run)
+    {
+        forward_arc.to->forward(forward_arc.from->last_output());
+    }
+    return _state.output_layers.front()->last_output();
 }
 
-SizeType Model::input_size()
+SizeType Model::input_size(SizeType input_layer_idx)
 {
-    return _layers.front()->input_size();
+    if (input_layer_idx >= _state.input_layers.size()
+        || !_state.input_layers[input_layer_idx])
+    {
+        return 0;
+    }
+    return _state.input_layers[input_layer_idx]->input_size();
 }
 
-SizeType Model::output_size()
+SizeType Model::output_size(SizeType output_layer_idx)
 {
-    return _layers.back()->output_size();
+    if (output_layer_idx >= _state.output_layers.size()
+        || !_state.output_layers[output_layer_idx])
+    {
+        return 0;
+    }
+    return _state.output_layers[output_layer_idx]->output_size();
 }
 
 const std::vector<Layer::SharedPtr>& Model::layers() const
 {
-    return _layers;
+    return _state.layers;
 }
 
 void Model::print() const
 {
-    for (auto& layer: _layers)
+    for (auto& layer: _state.layers)
     {
         layer->print();
     }
-    _loss_layer->print();
 }
 
 NumType Model::accuracy() const
 {
-    return _loss_layer->accuracy();
+    NumType sum = 0.0;
+    for (const auto& loss_layer: _state.loss_layers) {
+        sum += loss_layer->accuracy();
+    }
+    return sum / _state.loss_layers.size();
 }
 
 NumType Model::avg_loss() const
 {
-    return _loss_layer->avg_loss();
+    NumType sum = 0.0;
+    for (const auto& loss_layer: _state.loss_layers) {
+        sum += loss_layer->avg_loss();
+    }
+    return sum / _state.loss_layers.size();
 }
 
 void Model::dump(std::ofstream& out)
@@ -230,19 +272,13 @@ void Model::dump(std::ofstream& out)
     model["name"] = _name;
 
     Json layers_json;
-    for (auto& layer: _layers)
+    for (auto& layer: _state.layers)
     {
         Json layer_json;
         layer->dump(layer_json);
         layers_json.append(layer_json);
     }
     model["layer"] = layers_json;
-
-    Json loss_layers_json;
-    Json loss_layer_json;
-    _loss_layer->dump(loss_layer_json);
-    loss_layers_json.append(loss_layer_json);
-    model["loss_layer"] = loss_layers_json;
     out << model;
 }
 
@@ -252,26 +288,10 @@ void Model::load(std::ifstream& in)
     in >> model;
 
     _name = model["name"].as<std::string>();
-    for (std::size_t l_i = 0; l_i < _layers.size(); ++l_i)
+    for (std::size_t l_i = 0; l_i < _state.layers.size(); ++l_i)
     {
         auto layer_json = Json(model["layer"][l_i]);
-        _layers[l_i]->load(layer_json);
-    }
-
-    auto loss_layer_json = Json(model["loss_layer"][0]);
-    _loss_layer->load(loss_layer_json);
-}
-
-std::int64_t Model::_index_of(Layer::SharedPtr l)
-{
-    auto itr = std::find(_layers.begin(), _layers.end(), l);
-    if (itr != _layers.cend())
-    {
-        return std::distance(_layers.begin(), itr);
-    }
-    else
-    {
-        return -1;
+        _state.layers[l_i]->load(layer_json);
     }
 }
 

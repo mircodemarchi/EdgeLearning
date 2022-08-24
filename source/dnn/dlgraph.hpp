@@ -219,12 +219,12 @@ public:
     std::shared_ptr<Layer> operator[](SizeType idx);
 
     template <typename Layer_T>
-    std::shared_ptr<Layer_T> as(SizeType idx)
+    std::shared_ptr<Layer_T> as(SizeType idx) const
     {
         return std::dynamic_pointer_cast<Layer_T>(_layers[idx]);
     }
 
-    std::int64_t index_of(const Layer& l);
+    std::int64_t index_of(const Layer& l) const;
 
 private:
     void _compute_input_layers();
