@@ -50,6 +50,11 @@ public:
                      std::string name = std::string(),
                      std::string prefix_name = std::string());
 
+    const std::vector<NumType>& last_input_gradient() override
+    {
+        return _input_gradients;
+    }
+
     /**
      * \brief The last output of a feedforward layer will be the activation
      * vector.
