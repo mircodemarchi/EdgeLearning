@@ -67,13 +67,21 @@ private:
             m_runtime_err.fit(dataset, EPOCHS, BATCH_SIZE, 0.03),
             std::runtime_error);
 
-        auto m_thread_parallelism = CompileFNN<
+        auto m_thread_parallelism_on_data_entry = CompileFNN<
             LossType::MSE,
             OptimizerType::GRADIENT_DESCENT,
             InitType::AUTO,
-            ParallelizationLevel::THREAD_PARALLELISM
+            ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_ENTRY
             >(layers_descriptor, "regressor_model");
-        EDGE_LEARNING_TEST_TRY(m_thread_parallelism.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
+        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_entry.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
+
+        auto m_thread_parallelism_on_data_batch = CompileFNN<
+            LossType::MSE,
+            OptimizerType::GRADIENT_DESCENT,
+            InitType::AUTO,
+            ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_BATCH
+        >(layers_descriptor, "regressor_model");
+        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_batch.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
     }
 
     void test_predict() {

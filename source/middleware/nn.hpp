@@ -54,7 +54,8 @@ enum class Framework
 enum class ParallelizationLevel
 {
     SEQUENTIAL,
-    THREAD_PARALLELISM
+    THREAD_PARALLELISM_ON_DATA_ENTRY,
+    THREAD_PARALLELISM_ON_DATA_BATCH,
 };
 
 enum class ActivationType

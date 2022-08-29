@@ -73,7 +73,7 @@ public:
 };
 
 template<typename T>
-struct Training<ParallelizationLevel::THREAD_PARALLELISM, T>
+struct Training<ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_ENTRY, T>
 {
 public:
     static void run(Model& model, Dataset<T> &data, Optimizer& o,
@@ -102,6 +102,45 @@ public:
                     Model m = f.get();
                     model.train(o, m);
                 }
+            }
+        }
+    }
+};
+
+template<typename T>
+struct Training<ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_BATCH, T>
+{
+public:
+    static void run(Model& model, Dataset<T> &data, Optimizer& o,
+                    SizeType epochs, SizeType batch_size)
+    {
+        auto& tm = ConcManager::TaskManager::instance();
+        tm.set_maximum_concurrency();
+        for (SizeType e = 0; e < epochs; ++e)
+        {
+            for (SizeType i = 0; i < data.size();)
+            {
+                std::vector<ConcManager::Future<Model>> futures;
+                for (SizeType t = 0; t < tm.maximum_concurrency(); ++t)
+                {
+                    futures.push_back(tm.enqueue(
+                        [batch_size](Model m,
+                           Dataset<T> &data,
+                           SizeType i)
+                        {
+                            for (SizeType b = 0; b < batch_size && i < data.size(); ++b, ++i)
+                            {
+                                m.step(data.trainset(i), data.labels(i));
+                            }
+                            return m;
+                        }, model, data, i + (t * batch_size)));
+                }
+
+                for (auto& f: futures) {
+                    Model m = f.get();
+                    model.train(o, m);
+                }
+                i += batch_size * tm.maximum_concurrency();
             }
         }
     }
