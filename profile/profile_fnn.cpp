@@ -51,6 +51,7 @@ struct ProfileRegressionFNN : Profiler
         EDGE_LEARNING_PROFILE_TITLE("FNN training and prediction process when "
                                     "solving a Regression problem");
         EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount());
+        EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level());
         EDGE_LEARNING_PROFILE_CALL(profile_on_training_set());
         EDGE_LEARNING_PROFILE_CALL(profile_on_layers_amount());
         EDGE_LEARNING_PROFILE_CALL(profile_on_layers_shape());
@@ -65,7 +66,89 @@ private:
         LossType::MSE,
         OptimizerType::GRADIENT_DESCENT,
         InitType::AUTO,
-        ParallelizationLevel::THREAD_PARALLELISM>;
+        ParallelizationLevel::SEQUENTIAL>;
+
+    void profile_on_parallelism_level() {
+        const SizeType EPOCHS        = 1;
+        const NumType  LEARNING_RATE = 0.03;
+
+        auto csv = CSV(DATA_TRAINING_FP.string());
+        auto labels_idx = std::set<SizeType>{4};
+        auto vec = csv.to_vec<NumType>();
+        vec.erase(vec.begin());
+        auto data = Dataset<NumType>(vec, csv.cols_size(), 1, labels_idx);
+        auto input_size = data.trainset_idx().size();
+        auto output_size = data.labels_idx().size();
+
+        LayerDescriptorVector layers_descriptor(
+            {
+                {"input_layer",   input_size,  ActivationType::Linear },
+                {"hidden_layer0", 15,          ActivationType::ReLU },
+                {"hidden_layer1", 15,          ActivationType::ReLU },
+                {"hidden_layer2", 15,          ActivationType::ReLU },
+                {"hidden_layer3", 15,          ActivationType::ReLU },
+                {"hidden_layer4", 15,          ActivationType::ReLU },
+                {"hidden_layer5", 15,          ActivationType::ReLU },
+                {"output_layer",  output_size, ActivationType::Linear },
+            }
+        );
+
+        std::vector<SizeType> batch_sizes = {1, 2, 4, 8, 16, 32, 64, 128};
+
+        using ProfileCompileFNNSequential = CompileFNN<
+            LossType::MSE,
+            OptimizerType::GRADIENT_DESCENT,
+            InitType::AUTO,
+            ParallelizationLevel::SEQUENTIAL>;
+
+        using ProfileCompileFNNThreadOnEntry = CompileFNN<
+            LossType::MSE,
+            OptimizerType::GRADIENT_DESCENT,
+            InitType::AUTO,
+            ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_ENTRY>;
+
+        using ProfileCompileFNNThreadOnBatch = CompileFNN<
+            LossType::MSE,
+            OptimizerType::GRADIENT_DESCENT,
+            InitType::AUTO,
+            ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_BATCH>;
+
+        for (const auto& batch_size: batch_sizes)
+        {
+            profile(
+                "training sequential model with batch_size: " + std::to_string(batch_size),
+                [&](SizeType i){
+                    (void) i;
+                    ProfileCompileFNNSequential m(
+                        layers_descriptor, "regressor_model");
+                    m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
+                }, 20, "training_sequential_on_batch_size" + std::to_string(batch_size));
+        }
+
+        for (const auto& batch_size: batch_sizes)
+        {
+            profile(
+                "training thread parallelism on data entry model with batch_size: " + std::to_string(batch_size),
+                [&](SizeType i){
+                    (void) i;
+                    ProfileCompileFNNThreadOnEntry m(
+                        layers_descriptor, "regressor_model");
+                    m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
+                }, 20, "training_thread_parallelism_entry_on_batch_size" + std::to_string(batch_size));
+        }
+
+        for (const auto& batch_size: batch_sizes)
+        {
+            profile(
+                "training thread parallelism on data batch model with batch_size: " + std::to_string(batch_size),
+                [&](SizeType i){
+                    (void) i;
+                    ProfileCompileFNNThreadOnBatch m(
+                        layers_descriptor, "regressor_model");
+                    m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
+                }, 20, "training_thread_parallelism_batch_on_batch_size" + std::to_string(batch_size));
+        }
+    }
 
     /**
      * \brief Profile the training and the prediction phase of a FNN model to
