@@ -1,5 +1,5 @@
 /***************************************************************************
- *            profile_fnn_regression.cpp
+ *            profile_fnn_classification.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -24,7 +24,7 @@
 
 #include "profile.hpp"
 
-#include "parser/csv.hpp"
+#include "parser/mnist.hpp"
 #include "data/dataset.hpp"
 #include "data/path.hpp"
 #include "middleware/fnn.hpp"
@@ -39,9 +39,9 @@ struct ProfileRegressionFNN : Profiler
         : Profiler(
             100,
 #if ENABLE_MLPACK
-            "profile_mlpack_fnn_regression"
+            "profile_mlpack_fnn_classification"
 #else
-            "profile_edgelearning_fnn_regression"
+            "profile_edgelearning_fnn_classification"
 #endif
             )
     {
@@ -49,7 +49,7 @@ struct ProfileRegressionFNN : Profiler
 
     void run() {
         EDGE_LEARNING_PROFILE_TITLE("FNN training and prediction process when "
-                                    "solving a Regression problem");
+                                    "solving a Classification problem");
         EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount());
         EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level());
         EDGE_LEARNING_PROFILE_CALL(profile_on_training_set());
@@ -58,12 +58,28 @@ struct ProfileRegressionFNN : Profiler
     }
 
 private:
-    const std::string DATA_TRAINING_FN = "execution-time.csv";
-    const std::filesystem::path DATA_TRAINING_FP = std::filesystem::path(__FILE__).parent_path()
-                                      / ".." / "data" / DATA_TRAINING_FN;
+    const std::string MNIST_TRAINING_IMAGES_FN =
+        "train-images.idx3-ubyte";
+    const std::string MNIST_TRAINING_LABELS_FN =
+        "train-labels.idx1-ubyte";
+    const std::string MNIST_TESTING_IMAGES_FN =
+        "t10k-images.idx3-ubyte";
+    const std::string MNIST_TESTING_LABELS_FN =
+        "t10k-labels.idx1-ubyte";
+
+    const std::filesystem::path MNIST_RESOURCE_ROOT =
+        std::filesystem::path(__FILE__).parent_path() / ".." / "data";
+    const std::filesystem::path MNIST_TRAINING_IMAGES_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TRAINING_IMAGES_FN;
+    const std::filesystem::path MNIST_TRAINING_LABELS_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TRAINING_LABELS_FN;
+    const std::filesystem::path MNIST_TESTING_IMAGES_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TESTING_IMAGES_FN;
+    const std::filesystem::path FIRST10_TESTING_LABELS_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TESTING_LABELS_FN;
 
     using ProfileCompileFNN = CompileFNN<
-        LossType::MSE,
+        LossType::CCE,
         OptimizerType::GRADIENT_DESCENT,
         InitType::AUTO,
         ParallelizationLevel::SEQUENTIAL>;
@@ -72,11 +88,8 @@ private:
         const SizeType EPOCHS        = 1;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(
-            DATA_TRAINING_FP.string(),
-            { Type::AUTO },
-            ',', {4});
-        auto data = Dataset<NumType>::parse(csv);
+        auto mnist = Mnist(MNIST_TRAINING_IMAGES_FP, MNIST_TRAINING_LABELS_FP);
+        auto data = Dataset<NumType>::parse(mnist, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
@@ -122,7 +135,8 @@ private:
                     ProfileCompileFNNSequential m(
                         layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
-                }, 20, "training_sequential_on_batch_size" + std::to_string(batch_size));
+                    std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
+                }, 1, "training_sequential_on_batch_size" + std::to_string(batch_size));
         }
 
         for (const auto& batch_size: batch_sizes)
@@ -134,7 +148,8 @@ private:
                     ProfileCompileFNNThreadOnEntry m(
                         layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
-                }, 20, "training_thread_parallelism_entry_on_batch_size" + std::to_string(batch_size));
+                    std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
+                }, 1, "training_thread_parallelism_entry_on_batch_size" + std::to_string(batch_size));
         }
 
         for (const auto& batch_size: batch_sizes)
@@ -146,7 +161,8 @@ private:
                     ProfileCompileFNNThreadOnBatch m(
                         layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
-                }, 20, "training_thread_parallelism_batch_on_batch_size" + std::to_string(batch_size));
+                    std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
+                }, 1, "training_thread_parallelism_batch_on_batch_size" + std::to_string(batch_size));
         }
     }
 
@@ -159,11 +175,8 @@ private:
         const SizeType EPOCHS        = 20;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(
-            DATA_TRAINING_FP.string(),
-            { Type::AUTO },
-            ',', {4});
-        auto data = Dataset<NumType>::parse(csv);
+        auto mnist = Mnist(MNIST_TRAINING_IMAGES_FP, MNIST_TRAINING_LABELS_FP);
+        auto data = Dataset<NumType>::parse(mnist, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
@@ -188,19 +201,9 @@ private:
                         ProfileCompileFNN m(
                             layers_descriptor, "regressor_model");
                         m.fit(data, e, BATCH_SIZE, LEARNING_RATE);
-                    }, 100, "training_on_epochs_amount" + std::to_string(e));
+                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
+                    }, 1, "training_on_epochs_amount" + std::to_string(e));
         }
-
-        ProfileCompileFNN m(layers_descriptor, "regressor_model");
-        m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-        profile("prediction after training with epochs amount: "
-                    + std::to_string(EPOCHS),
-                [&](SizeType i){
-                    (void) i;
-                    auto input = data.trainset();
-                    auto prediction = m.predict(input);
-                    (void) prediction;
-                }, 100, "prediction");
     }
 
     /**
@@ -213,11 +216,8 @@ private:
         const SizeType EPOCHS                = 5;
         const NumType  LEARNING_RATE         = 0.03;
 
-        auto csv = CSV(
-            DATA_TRAINING_FP.string(),
-            { Type::AUTO },
-            ',', {4});
-        auto data = Dataset<NumType>::parse(csv);
+        auto mnist = Mnist(MNIST_TRAINING_IMAGES_FP, MNIST_TRAINING_LABELS_FP);
+        auto data = Dataset<NumType>::parse(mnist, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         auto training_set_size = data.size();
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
@@ -249,27 +249,9 @@ private:
                             layers_descriptor, "regressor_model");
                         auto subset = data.subdata(0, curr_size);
                         m.fit(subset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                    }, 100,
+                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
+                    }, 1,
                     "training_on_dataset_size" + std::to_string(curr_size));
-            if (curr_size == training_set_size) break;
-        }
-
-        ProfileCompileFNN m(layers_descriptor, "regressor_model");
-        m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-        for (const auto& size: training_set_sizes)
-        {
-            auto curr_size = std::min(training_set_size, size);
-            profile("prediction with dataset size (#entries): "
-                        + std::to_string(curr_size),
-                    [&](SizeType i) {
-                        (void) i;
-                        auto input = data.subdata(0, curr_size)
-                            .trainset();
-                        auto prediction = m.predict(input);
-                        (void) prediction;
-                    },
-                    100,
-                    "prediction_on_dataset_size" + std::to_string(curr_size));
             if (curr_size == training_set_size) break;
         }
     }
@@ -284,11 +266,8 @@ private:
         const SizeType LAYERS_AMOUNT = 10;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(
-            DATA_TRAINING_FP.string(),
-            { Type::AUTO },
-            ',', {4});
-        auto data = Dataset<NumType>::parse(csv);
+        auto mnist = Mnist(MNIST_TRAINING_IMAGES_FP, MNIST_TRAINING_LABELS_FP);
+        auto data = Dataset<NumType>::parse(mnist, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
@@ -315,20 +294,9 @@ private:
                         ProfileCompileFNN m(
                             layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                    }, 100,
+                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
+                    }, 1,
                     "training_on_hidden_layers_amount"
-                        + std::to_string(amount));
-            ProfileCompileFNN m(layers_descriptor, "regressor_model");
-            m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-            profile("prediction with hidden layers amount: "
-                        + std::to_string(amount),
-                    [&](SizeType i){
-                        (void) i;
-                        auto input = data.trainset();
-                        auto prediction = m.predict(input);
-                        (void) prediction;
-                    }, 100,
-                    "prediction_on_hidden_layers_amount"
                         + std::to_string(amount));
         }
     }
@@ -343,11 +311,8 @@ private:
         const SizeType EPOCHS        = 5;
         const SizeType LAYERS_MAX_SIZE = 20;
 
-        auto csv = CSV(
-            DATA_TRAINING_FP.string(),
-            { Type::AUTO },
-            ',', {4});
-        auto data = Dataset<NumType>::parse(csv);
+        auto mnist = Mnist(MNIST_TRAINING_IMAGES_FP, MNIST_TRAINING_LABELS_FP);
+        auto data = Dataset<NumType>::parse(mnist, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
@@ -372,20 +337,9 @@ private:
                         ProfileCompileFNN m(
                             layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                    }, 100,
+                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
+                    }, 1,
                     "training_on_hidden_layers_shape" + std::to_string(shape));
-            ProfileCompileFNN m(layers_descriptor, "regressor_model");
-            m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-            profile("prediction with hidden layers shape: "
-                        + std::to_string(shape),
-                    [&](SizeType i){
-                        (void) i;
-                        auto input = data.trainset();
-                        auto prediction = m.predict(input);
-                        (void) prediction;
-                    }, 100,
-                    "prediction_on_hidden_layers_shape"
-                        + std::to_string(shape));
         }
     }
 };
