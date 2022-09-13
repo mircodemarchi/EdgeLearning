@@ -212,7 +212,7 @@ public:
                 NumType rand(((static_cast<NumType>(x())
                     / static_cast<NumType>(max_rand)) * 2.0) - 1.0);
                 rand = (rand * delta) + center;
-                return rand;
+                return static_cast<T>(rand);
             };
         return ret;
     }

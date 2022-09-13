@@ -124,6 +124,8 @@ public:
                      SizeType epochs = 1,
                      SizeType batch_size = 1,
                      NumType learning_rate = 0.03) = 0;
+    virtual NumType accuracy() { return 0.0; }
+    virtual NumType loss() { return 0.0; }
 
 protected:
     std::string _name;

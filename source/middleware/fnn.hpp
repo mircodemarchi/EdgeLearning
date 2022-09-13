@@ -125,12 +125,15 @@ public:
                 {
                     futures.push_back(tm.enqueue(
                         [batch_size](Model m,
-                           Dataset<T> &data,
-                           SizeType i)
+                           Dataset<T> &data_ref,
+                           SizeType idx)
                         {
-                            for (SizeType b = 0; b < batch_size && i < data.size(); ++b, ++i)
+                            for (SizeType b = 0;
+                                 b < batch_size && idx < data_ref.size();
+                                 ++b, ++idx)
                             {
-                                m.step(data.trainset(i), data.labels(i));
+                                m.step(data_ref.trainset(idx),
+                                       data_ref.labels(idx));
                             }
                             return m;
                         }, model, data, i + (t * batch_size)));
@@ -254,6 +257,16 @@ public:
         Training<PL, T>::run(_m, data, o, epochs, batch_size);
     }
 
+    NumType accuracy() override
+    {
+        return _m.accuracy();
+    }
+
+    NumType loss() override
+    {
+        return _m.avg_loss();
+    }
+
     Dataset<T> predict(Dataset<T> &data) override
     {
         auto output_size = _m.output_size();
@@ -324,6 +337,9 @@ public:
     {
         _fnn_model.fit(data, epochs, batch_size, learning_rate);
     }
+
+    NumType accuracy() { return _fnn_model.accuracy(); }
+    NumType loss() { return _fnn_model.loss(); }
 
 private:
     LayerDescriptorVector _layers;
