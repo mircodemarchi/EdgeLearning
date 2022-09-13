@@ -248,7 +248,7 @@ struct MnistItem
 /**
  * \brief MNIST Dataset core class.
  */
-class Mnist : public Parser
+class Mnist : public DatasetParser
 {
 public:
     /// \brief Image file magic number.
@@ -266,7 +266,7 @@ public:
      * \param label_fp File path of the labels.
      */
     Mnist(fs::path image_fp, fs::path label_fp)
-        : Parser()
+        : DatasetParser()
         , _image_ifs{image_fp}
         , _label_ifs{label_fp}
     {
@@ -397,6 +397,30 @@ public:
     MnistItem operator[](std::size_t idx)
     {
         return {image(idx), label(idx)};
+    }
+
+    std::vector<NumType> entry(SizeType i) override
+    {
+        auto mnist_image = image(i).data();
+        auto mnist_label = label(i).data();
+        std::vector<NumType> ret(mnist_image.begin(), mnist_image.end());
+        ret.push_back(mnist_label);
+        return ret;
+    }
+
+    SizeType entries_amount() const override
+    {
+        return size();
+    }
+
+    SizeType feature_size() const override
+    {
+        return height() * width() + 1;
+    }
+
+    std::set<SizeType> labels_idx() const override
+    {
+        return {feature_size() - 1};
     }
 
 private:

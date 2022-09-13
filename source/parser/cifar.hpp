@@ -339,7 +339,7 @@ struct CifarItem
 /**
  * \brief Cifar Dataset core class.
  */
-class Cifar : public Parser
+class Cifar : public DatasetParser
 {
 public:
     /// @brief The dataset size.
@@ -354,7 +354,7 @@ public:
           CifarShapeOrder order = CifarShapeOrder::CHN_ROW_COL,
           CifarDataset dataset = CifarDataset::CIFAR_10,
           fs::path fine_label_meta_fp = fs::path())
-        : Parser()
+        : DatasetParser()
         , _batch_ifs{batch_fp}
         , _order{order}
         , _dataset{dataset}
@@ -514,6 +514,67 @@ public:
     CifarItem operator[](std::size_t idx)
     {
         return {image(idx), label(idx)};
+    }
+
+    std::vector<NumType> entry(SizeType i) override
+    {
+        auto cifar_image = image(i).data();
+        auto cifar_label = label(i);
+        std::vector<NumType> ret(cifar_image.begin(), cifar_image.end());
+
+        switch(_dataset)
+        {
+            case CifarDataset::CIFAR_100:
+            {
+                ret.push_back(cifar_label.coarse_label());
+                ret.push_back(cifar_label.fine_label());
+                break;
+            }
+            case CifarDataset::CIFAR_10:
+            default:
+            {
+                ret.push_back(cifar_label.data());
+                break;
+            }
+        }
+        return ret;
+    }
+
+    SizeType entries_amount() const override
+    {
+        return size();
+    }
+
+    SizeType feature_size() const override
+    {
+        switch(_dataset)
+        {
+            case CifarDataset::CIFAR_100:
+            {
+                return height() * width() * channels() + 2;
+            }
+            case CifarDataset::CIFAR_10:
+            default:
+            {
+                return height() * width() * channels() + 1;
+            }
+        }
+    }
+
+    std::set<SizeType> labels_idx() const override
+    {
+        switch(_dataset)
+        {
+            case CifarDataset::CIFAR_100:
+            {
+                return {feature_size() - 2, feature_size() - 1};
+            }
+            case CifarDataset::CIFAR_10:
+            default:
+            {
+                return {feature_size() - 1};
+            }
+        }
     }
 
 private:

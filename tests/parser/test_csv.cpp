@@ -39,7 +39,9 @@ public:
         EDGE_LEARNING_TEST_CALL(test_csv_row());
         EDGE_LEARNING_TEST_CALL(test_csv());
         EDGE_LEARNING_TEST_CALL(test_csv_iterator(10));
+        EDGE_LEARNING_TEST_CALL(test_dataset_parser());
     }
+
 private:
     const std::string DATA_TRAINING_FN = "execution-time.csv";
     const std::filesystem::path data_training_fp =
@@ -239,6 +241,17 @@ private:
         EDGE_LEARNING_TEST_EQUAL(iterator_cpy3->idx(), csv[0].idx());
         EDGE_LEARNING_TEST_EQUAL((*iterator_cpy3).line(), csv[0].line());
         EDGE_LEARNING_TEST_ASSERT(iterator_cpy1 == iterator_cpy3);
+    }
+
+    void test_dataset_parser() {
+        auto csv_dp = CSV(data_training_fp.string(),
+                          { Type::AUTO }, ',', {3, 4});
+
+        EDGE_LEARNING_TEST_EQUAL(csv_dp.feature_size(), csv_dp.cols_size());
+        EDGE_LEARNING_TEST_EQUAL(csv_dp.entries_amount(), csv_dp.rows_size() - 1);
+        EDGE_LEARNING_TEST_EQUAL(csv_dp.entry(0).size(), csv_dp.cols_size());
+        EDGE_LEARNING_TEST_EQUAL(csv_dp.entry(1).size(), csv_dp.cols_size());
+        EDGE_LEARNING_TEST_EQUAL(csv_dp.labels_idx().size(), 2);
     }
 };
 

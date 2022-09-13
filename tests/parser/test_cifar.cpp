@@ -41,6 +41,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_cifar100_label());
         EDGE_LEARNING_TEST_CALL(test_cifar10());
         EDGE_LEARNING_TEST_CALL(test_cifar100());
+        EDGE_LEARNING_TEST_CALL(test_dataset_parser());
     }
 private:
     const std::string FIRST10_CIFAR10_BATCH1_FN = "first10_data_batch_1.bin";
@@ -330,6 +331,40 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             first_image_data[1],
             first_image_order_data[CifarImage::IMAGE_CHANNELS]);
+    }
+
+    void test_dataset_parser() {
+        auto cifar10 = Cifar(
+            FIRST10_CIFAR10_BATCH1_FP, CIFAR10_META_FP);
+
+        EDGE_LEARNING_TEST_EQUAL(
+            cifar10.feature_size(),
+            cifar10.height() *  cifar10.width() * cifar10.channels() + 1);
+        EDGE_LEARNING_TEST_EQUAL(cifar10.entries_amount(), cifar10.size());
+        EDGE_LEARNING_TEST_EQUAL(
+            cifar10.entry(0).size(),
+            cifar10.height() *  cifar10.width() * cifar10.channels() + 1);
+        EDGE_LEARNING_TEST_EQUAL(
+            cifar10.entry(1).size(),
+            cifar10.height() *  cifar10.width() * cifar10.channels() + 1);
+        EDGE_LEARNING_TEST_EQUAL(cifar10.labels_idx().size(), 1);
+
+        auto cifar100 = Cifar(
+            FIRST10_CIFAR100_TRAIN_FP, CIFAR100_COARSE_META_FP,
+            CifarShapeOrder::CHN_ROW_COL, CifarDataset::CIFAR_100,
+            CIFAR100_FINE_META_FP);
+
+        EDGE_LEARNING_TEST_EQUAL(
+            cifar100.feature_size(),
+            cifar100.height() *  cifar100.width() * cifar100.channels() + 2);
+        EDGE_LEARNING_TEST_EQUAL(cifar100.entries_amount(), cifar100.size());
+        EDGE_LEARNING_TEST_EQUAL(
+            cifar100.entry(0).size(),
+            cifar100.height() *  cifar100.width() * cifar100.channels() + 2);
+        EDGE_LEARNING_TEST_EQUAL(
+            cifar100.entry(1).size(),
+            cifar100.height() *  cifar100.width() * cifar100.channels() + 2);
+        EDGE_LEARNING_TEST_EQUAL(cifar100.labels_idx().size(), 2);
     }
 };
 

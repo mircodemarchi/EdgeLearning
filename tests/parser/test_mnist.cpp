@@ -39,6 +39,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_mnist_image());
         EDGE_LEARNING_TEST_CALL(test_mnist_label());
         EDGE_LEARNING_TEST_CALL(test_mnist());
+        EDGE_LEARNING_TEST_CALL(test_dataset_parser());
     }
 private:
     const std::string FIRST10_TRAINING_IMAGES_FN =
@@ -220,6 +221,20 @@ private:
             fs::path("first10-train-images-idx3-ubyte-copy"),
             FIRST10_TRAINING_LABELS_FP), std::runtime_error);
         fs::remove(fs::path("first10-train-images-idx3-ubyte-copy"));
+    }
+
+    void test_dataset_parser() {
+        auto mnist_dp = Mnist(
+            FIRST10_TRAINING_IMAGES_FP, FIRST10_TRAINING_LABELS_FP);
+
+        EDGE_LEARNING_TEST_EQUAL(mnist_dp.feature_size(),
+                                 mnist_dp.width() * mnist_dp.height() + 1);
+        EDGE_LEARNING_TEST_EQUAL(mnist_dp.entries_amount(), mnist_dp.size());
+        EDGE_LEARNING_TEST_EQUAL(mnist_dp.entry(0).size(),
+                                 mnist_dp.width() * mnist_dp.height() + 1);
+        EDGE_LEARNING_TEST_EQUAL(mnist_dp.entry(1).size(),
+                                 mnist_dp.width() * mnist_dp.height() + 1);
+        EDGE_LEARNING_TEST_EQUAL(mnist_dp.labels_idx().size(), 1);
     }
 };
 

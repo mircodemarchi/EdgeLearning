@@ -625,7 +625,7 @@ private:
 };
 
 
-class CSV : public Parser
+class CSV : public DatasetParser
 {
 public:
     /**
@@ -639,13 +639,14 @@ public:
      * The constructor throws a std::runtime_error if the file fails on open.
      */
     CSV(std::string fn, std::vector<Type> types = { Type::AUTO }, 
-        char separator = ',') 
-        : Parser()
+        char separator = ',', std::set<SizeType> labels_idx = {})
+        : DatasetParser()
         , _fn{fn}
         , _types{types}
         , _row_header{_types}
         , _row_cache{_types}
         , _separator{separator}
+        , _labels_idx{labels_idx}
     {
         auto file = std::ifstream{fn};
         if(!file.is_open() || !file.good()) 
@@ -880,6 +881,26 @@ public:
         return std::vector<std::vector<T>>(*this);
     }
 
+    std::vector<NumType> entry(SizeType i) override
+    {
+        return std::vector<NumType>(operator[](i + 1));
+    }
+
+    SizeType entries_amount() const override
+    {
+        return rows_size() - 1;
+    }
+
+    SizeType feature_size() const override
+    {
+        return cols_size();
+    }
+
+    std::set<SizeType> labels_idx() const override
+    {
+        return _labels_idx;
+    }
+
 private:
     std::string _fn;          ///< The CSV file path.
     std::vector<Type> _types; ///< The types vector of each field.
@@ -888,6 +909,7 @@ private:
     std::size_t _cols_amount; ///< Number of columns in CSV file.
     std::size_t _rows_amount; ///< Number of rows in CSV file.
     char _separator;          ///< Separator character of each field.
+    std::set<SizeType> _labels_idx;
 };
 
 
