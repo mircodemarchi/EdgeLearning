@@ -31,6 +31,7 @@
 #define EDGE_LEARNING_MIDDLEWARE_DATASET_HPP
 
 #include "type.hpp"
+#include "parser/parser.hpp"
 
 #include <cstddef>
 #include <vector>
@@ -505,6 +506,19 @@ public:
             );
         return Dataset<T>(subvector,
                           _feature_size, _sequence_size, _labels_idx);
+    }
+
+    static Dataset<T> parse(
+        DatasetParser& dataset_parser,
+        DatasetParser::LabelEncoding label_encoding = DatasetParser::LabelEncoding::DEFAULT_ENCODING,
+        SizeType sequence_size = 1)
+    {
+        return Dataset<T>(
+                dataset_parser.data_to_encoding(label_encoding),
+                dataset_parser.encoding_feature_size(label_encoding),
+                sequence_size,
+                dataset_parser.encoding_labels_idx(label_encoding)
+            );
     }
 
 private:

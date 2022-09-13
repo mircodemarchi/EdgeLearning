@@ -30,6 +30,51 @@
 using namespace std;
 using namespace EdgeLearning;
 
+
+class ExampleDatasetParser : public DatasetParser
+{
+public:
+    ExampleDatasetParser(const std::vector<NumType>& data,
+                         SizeType feature_size,
+                         std::set<SizeType> labels_idx = {})
+        : _data(data)
+        , _feature_size(feature_size)
+        , _entries_amount(data.size() / std::max(feature_size, SizeType(1)))
+        , _labels_idx(labels_idx)
+    {
+
+    }
+
+    std::vector<NumType> entry(SizeType i) override {
+        if (i >= _entries_amount) return {};
+
+        std::vector<NumType> ret(_feature_size);
+        auto offset = static_cast<std::int64_t>(i * _feature_size);
+        std::copy(_data.begin() + offset,
+                  _data.begin() + offset + static_cast<std::int64_t>(_feature_size),
+                  ret.begin());
+        return ret;
+    }
+
+    SizeType entries_amount() const override {
+        return _entries_amount;
+    }
+
+    SizeType feature_size() const override {
+        return _feature_size;
+    }
+
+    std::set<SizeType> labels_idx() const override {
+        return _labels_idx;
+    }
+
+    std::vector<NumType> _data;
+    SizeType _feature_size;
+    SizeType _entries_amount;
+    std::set<SizeType> _labels_idx;
+};
+
+
 class TestDataset {
 public:
     void test() {
@@ -39,6 +84,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_dataset_entry());
         EDGE_LEARNING_TEST_CALL(test_dataset_labels());
         EDGE_LEARNING_TEST_CALL(test_dataset_trainset());
+        EDGE_LEARNING_TEST_CALL(test_dataset_parse());
     }
 private:
 
@@ -704,6 +750,90 @@ private:
                                  d_vec.sequence_size());
         d_vec.labels_idx({0, 1});
         EDGE_LEARNING_TEST_ASSERT(d_vec.trainset().empty());
+    }
+
+    void test_dataset_parse()
+    {
+        std::vector<NumType> v({
+            5,5,5,5,5,0,1,
+            5,5,5,5,5,1,1,
+            5,5,5,5,5,0,2,
+            5,5,5,5,5,1,3,
+            5,5,5,5,5,0,1,
+            5,5,5,5,5,0,1,
+        });
+        std::set<SizeType> v_idx({5,6});
+        SizeType feature_size = 7;
+        auto edp = ExampleDatasetParser(v, feature_size, v_idx);
+
+        EDGE_LEARNING_TEST_TRY(Dataset<NumType>::parse(edp));
+        auto ds = Dataset<NumType>::parse(edp);
+        EDGE_LEARNING_TEST_EQUAL(ds.feature_size(), feature_size);
+        EDGE_LEARNING_TEST_EQUAL(ds.size(), 6);
+        EDGE_LEARNING_TEST_EQUAL(ds.sequence_size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(ds.trainset(0).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(ds.labels(0).size(), 2);
+        auto truth_trainset_idx = std::vector<SizeType>({0,1,2,3,4});
+        EDGE_LEARNING_TEST_EQUAL(truth_trainset_idx.size(), ds.trainset_idx().size());
+        for (std::size_t i = 0; i < truth_trainset_idx.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(truth_trainset_idx[i],
+                                     ds.trainset_idx()[i]);
+        }
+        auto truth_labels_idx = std::vector<SizeType>({5,6});
+        EDGE_LEARNING_TEST_EQUAL(truth_labels_idx.size(), ds.labels_idx().size());
+        for (std::size_t i = 0; i < truth_labels_idx.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(truth_labels_idx[i],
+                                     ds.labels_idx()[i]);
+        }
+
+        EDGE_LEARNING_TEST_TRY(Dataset<NumType>::parse(
+            edp, DatasetParser::LabelEncoding::ONE_HOT_ENCODING));
+        ds = Dataset<NumType>::parse(
+            edp, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+        EDGE_LEARNING_TEST_EQUAL(ds.feature_size(), 5+2+3);
+        EDGE_LEARNING_TEST_EQUAL(ds.size(), 6);
+        EDGE_LEARNING_TEST_EQUAL(ds.sequence_size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(ds.trainset(0).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(ds.labels(0).size(), 2+3);
+        EDGE_LEARNING_TEST_EQUAL(truth_trainset_idx.size(), ds.trainset_idx().size());
+        for (std::size_t i = 0; i < truth_trainset_idx.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(truth_trainset_idx[i],
+                                     ds.trainset_idx()[i]);
+        }
+        truth_labels_idx = std::vector<SizeType>({5,6,7,8,9});
+        EDGE_LEARNING_TEST_EQUAL(truth_labels_idx.size(), ds.labels_idx().size());
+        for (std::size_t i = 0; i < truth_labels_idx.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(truth_labels_idx[i],
+                                     ds.labels_idx()[i]);
+        }
+
+        EDGE_LEARNING_TEST_TRY(Dataset<NumType>::parse(
+            edp, DatasetParser::LabelEncoding::ONE_HOT_ENCODING, 2));
+        ds = Dataset<NumType>::parse(
+            edp, DatasetParser::LabelEncoding::ONE_HOT_ENCODING, 2);
+        EDGE_LEARNING_TEST_EQUAL(ds.feature_size(), 5+2+3);
+        EDGE_LEARNING_TEST_EQUAL(ds.size(), 6);
+        EDGE_LEARNING_TEST_EQUAL(ds.sequence_size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(ds.trainset(0).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(ds.labels(0).size(), 2+3);
+        EDGE_LEARNING_TEST_EQUAL(ds.trainset_seq(0).size(), 5*2);
+        EDGE_LEARNING_TEST_EQUAL(ds.labels_seq(0).size(), (2+3)*2);
+        for (std::size_t i = 0; i < truth_trainset_idx.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(truth_trainset_idx[i],
+                                     ds.trainset_idx()[i]);
+        }
+        truth_labels_idx = std::vector<SizeType>({5,6,7,8,9});
+        EDGE_LEARNING_TEST_EQUAL(truth_labels_idx.size(), ds.labels_idx().size());
+        for (std::size_t i = 0; i < truth_labels_idx.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_EQUAL(truth_labels_idx[i],
+                                     ds.labels_idx()[i]);
+        }
     }
 };
 
