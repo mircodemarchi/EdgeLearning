@@ -209,11 +209,41 @@ public:
         std::function<T(RneType&)> ret =
             [delta, center](RneType& x)
             {
-                T rand = ((static_cast<T>(x()) / static_cast<T>(max_rand))
-                          * T{2.0}) - T{1.0};
+                NumType rand(((static_cast<NumType>(x())
+                    / static_cast<NumType>(max_rand)) * 2.0) - 1.0);
                 rand = (rand * delta) + center;
                 return rand;
             };
+        return ret;
+    }
+
+    /**
+     * \brief Generate a random value from Uniform Probability Function.
+     * \tparam T   Return function output type.
+     * \param from The value from which the random value could occur.
+     * \param to   The value to which the random value could occur.
+     * \param seed The seed of the random generator.
+     * \return T The random value.
+     */
+    template <typename T>
+    static T rand(T from, T to, RneType& seed)
+    {
+        return uniform_pdf<T>((to + from) / T(2), to - from)(seed);
+    }
+
+    /**
+     * \brief Generate a random sequence of unique values.
+     * \param from The value from which the random sequence occur.
+     * \param to   The value to which the random sequence occur.
+     * \param seed The seed of the random generator.
+     * \return std::vector<SizeType> The sequence of random unique values.
+     */
+    static std::vector<SizeType> unique_rand_sequence(
+        SizeType from, SizeType to, RneType& seed)
+    {
+        std::vector<SizeType> ret(std::size_t(to - from));
+        std::iota(ret.begin(), ret.end(), from);
+        std::shuffle(ret.begin(), ret.end(), seed);
         return ret;
     }
 

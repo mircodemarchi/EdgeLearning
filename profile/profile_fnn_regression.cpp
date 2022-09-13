@@ -72,11 +72,11 @@ private:
         const SizeType EPOCHS        = 1;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(DATA_TRAINING_FP.string());
-        auto labels_idx = std::set<SizeType>{4};
-        auto vec = csv.to_vec<NumType>();
-        vec.erase(vec.begin());
-        auto data = Dataset<NumType>(vec, csv.cols_size(), 1, labels_idx);
+        auto csv = CSV(
+            DATA_TRAINING_FP.string(),
+            { Type::AUTO },
+            ',', {4});
+        auto data = Dataset<NumType>::parse(csv);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
@@ -159,11 +159,11 @@ private:
         const SizeType EPOCHS        = 20;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(DATA_TRAINING_FP.string());
-        auto labels_idx = std::set<SizeType>{4};
-        auto vec = csv.to_vec<NumType>();
-        vec.erase(vec.begin());
-        auto data = Dataset<NumType>(vec, csv.cols_size(), 1, labels_idx);
+        auto csv = CSV(
+            DATA_TRAINING_FP.string(),
+            { Type::AUTO },
+            ',', {4});
+        auto data = Dataset<NumType>::parse(csv);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
@@ -213,11 +213,11 @@ private:
         const SizeType EPOCHS                = 5;
         const NumType  LEARNING_RATE         = 0.03;
 
-        auto csv = CSV(DATA_TRAINING_FP.string());
-        auto labels_idx = std::set<SizeType>{4};
-        auto vec = csv.to_vec<NumType>();
-        vec.erase(vec.begin());
-        auto data = Dataset<NumType>(vec, csv.cols_size(), 1, labels_idx);
+        auto csv = CSV(
+            DATA_TRAINING_FP.string(),
+            { Type::AUTO },
+            ',', {4});
+        auto data = Dataset<NumType>::parse(csv);
         auto training_set_size = data.size();
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
@@ -284,11 +284,11 @@ private:
         const SizeType LAYERS_AMOUNT = 10;
         const NumType  LEARNING_RATE = 0.03;
 
-        auto csv = CSV(DATA_TRAINING_FP.string());
-        auto labels_idx = std::set<SizeType>{4};
-        auto vec = csv.to_vec<NumType>();
-        vec.erase(vec.begin());
-        auto data = Dataset<NumType>(vec, csv.cols_size(), 1, labels_idx);
+        auto csv = CSV(
+            DATA_TRAINING_FP.string(),
+            { Type::AUTO },
+            ',', {4});
+        auto data = Dataset<NumType>::parse(csv);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 
@@ -343,11 +343,11 @@ private:
         const SizeType EPOCHS        = 5;
         const SizeType LAYERS_MAX_SIZE = 20;
 
-        auto csv = CSV(DATA_TRAINING_FP.string());
-        auto labels_idx = std::set<SizeType>{4};
-        auto vec = csv.to_vec<NumType>();
-        vec.erase(vec.begin());
-        auto data = Dataset<NumType>(vec, csv.cols_size(), 1, labels_idx);
+        auto csv = CSV(
+            DATA_TRAINING_FP.string(),
+            { Type::AUTO },
+            ',', {4});
+        auto data = Dataset<NumType>::parse(csv);
         auto input_size = data.trainset_idx().size();
         auto output_size = data.labels_idx().size();
 

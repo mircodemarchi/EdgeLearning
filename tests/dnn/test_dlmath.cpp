@@ -46,6 +46,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_normal_pdf());
         EDGE_LEARNING_TEST_CALL(test_uniform_pdf());
         EDGE_LEARNING_TEST_CALL(test_pdf());
+        EDGE_LEARNING_TEST_CALL(test_rand());
         EDGE_LEARNING_TEST_CALL(test_kaiming_initialization());
         EDGE_LEARNING_TEST_CALL(test_xavier_initialization());
         EDGE_LEARNING_TEST_CALL(test_initialization());
@@ -215,6 +216,31 @@ private:
         {
             EDGE_LEARNING_TEST_PRINT(std::to_string(i) + ": "
                                      + std::to_string(dist(generator)));
+        }
+    }
+
+    void test_rand() {
+        RneType seed(1);
+        std::size_t from = 10;
+        std::size_t to = 20;
+        EDGE_LEARNING_TEST_TRY(DLMath::rand<std::size_t>(from, to, seed));
+        for (std::size_t i = 0; i < 100; ++i)
+        {
+            auto r = DLMath::rand<std::size_t>(from, to, seed);
+            EDGE_LEARNING_TEST_PRINT(r);
+            EDGE_LEARNING_TEST_ASSERT(r < to);
+            EDGE_LEARNING_TEST_ASSERT(r >= from);
+        }
+
+        EDGE_LEARNING_TEST_TRY(DLMath::unique_rand_sequence(from, to, seed));
+        auto v = DLMath::unique_rand_sequence(from, to, seed);
+        for (const auto& e: v)
+        {
+            EDGE_LEARNING_TEST_PRINT(e);
+        }
+        for (std::size_t i = from; i < to; ++i)
+        {
+            EDGE_LEARNING_TEST_ASSERT(DLMath::index_of(v, i) != -1);
         }
     }
 
