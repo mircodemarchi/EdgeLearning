@@ -85,6 +85,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_dataset_labels());
         EDGE_LEARNING_TEST_CALL(test_dataset_trainset());
         EDGE_LEARNING_TEST_CALL(test_dataset_parse());
+        EDGE_LEARNING_TEST_CALL(test_dataset_shuffle());
     }
 private:
 
@@ -212,6 +213,33 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             d_subdata.subdata(0, 100).data()[d_subdata.data().size() - 1],
             d_subdata.data()[d_subdata.data().size() - 1]);
+
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.4).size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.0).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.5).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.0).size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(-1.0).size(), 0);
+
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(0.4));
+        auto d_split = d_subdata.split(0.4);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 3);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(1.0));
+        d_split = d_subdata.split(1.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 0);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(1.5));
+        d_split = d_subdata.split(1.5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 0);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(0.0));
+        d_split = d_subdata.split(0.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 5);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(-1.0));
+        d_split = d_subdata.split(-1.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 5);
     }
 
     void test_dataset_mat() {
@@ -283,6 +311,33 @@ private:
         EDGE_LEARNING_TEST_ASSERT(d_subdata.subdata(1, 2).labels_idx().empty());
         EDGE_LEARNING_TEST_EQUAL(
             d_subdata.subdata(1, 2).data()[0], d_subdata.data()[2]);
+
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.4).size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.0).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.5).size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.0).size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(-1.0).size(), 0);
+
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(0.4));
+        auto d_split = d_subdata.split(0.4);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 3);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(1.0));
+        d_split = d_subdata.split(1.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 0);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(1.5));
+        d_split = d_subdata.split(1.5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 0);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(0.0));
+        d_split = d_subdata.split(0.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 5);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(-1.0));
+        d_split = d_subdata.split(-1.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 5);
     }
 
     void test_dataset_cub() {
@@ -380,6 +435,56 @@ private:
         EDGE_LEARNING_TEST_ASSERT(d_subdata.subdata(1, 2).labels_idx().empty());
         EDGE_LEARNING_TEST_EQUAL(
             d_subdata.subdata(1, 2).data()[0], d_subdata.data()[2]);
+
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.25).size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.25).sequence_size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.5).size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.5).sequence_size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.0).size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.0).sequence_size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.5).size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(1.5).sequence_size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.0).size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(0.0).sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(-1.0).size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_subdata.subdata(-1.0).sequence_size(), 0);
+
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(0.25));
+        auto d_split = d_subdata.split(0.25);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.sequence_size(), 2);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(0.5));
+        d_split = d_subdata.split(0.5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.sequence_size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.sequence_size(), 2);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(1.0));
+        d_split = d_subdata.split(1.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.sequence_size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.sequence_size(), 0);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(1.5));
+        d_split = d_subdata.split(1.5);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.sequence_size(), 2);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.sequence_size(), 0);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(0.0));
+        d_split = d_subdata.split(0.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.sequence_size(), 2);
+        EDGE_LEARNING_TEST_TRY((void) d_subdata.split(-1.0));
+        d_split = d_subdata.split(-1.0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.training_set.sequence_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(d_split.testing_set.sequence_size(), 2);
     }
 
     void test_dataset_entry() {
@@ -833,6 +938,55 @@ private:
         {
             EDGE_LEARNING_TEST_EQUAL(truth_labels_idx[i],
                                      ds.labels_idx()[i]);
+        }
+    }
+
+    void test_dataset_shuffle() {
+        std::vector<NumType> v({
+            5, 5, 5, 5, 5, 0, 1,
+            5, 5, 5, 5, 5, 1, 1,
+            5, 5, 5, 5, 5, 0, 2,
+            5, 5, 5, 5, 5, 1, 3,
+            5, 5, 5, 5, 5, 0, 1,
+            5, 5, 5, 5, 5, 0, 1,
+        });
+        std::set<SizeType> v_idx({5,6});
+        SizeType feature_size = 7;
+        auto ds = Dataset<NumType>(v, feature_size, 1, v_idx);
+        Dataset<NumType> ds_copy = ds;
+
+        EDGE_LEARNING_TEST_TRY(ds.shuffle());
+        EDGE_LEARNING_TEST_EQUAL(ds.feature_size(), ds_copy.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(ds.size(), ds_copy.size());
+
+        for (std::size_t i = 0; i < ds.size(); ++i)
+        {
+            auto train_entry = ds.trainset(i);
+            for (const auto& e: train_entry)
+            {
+                EDGE_LEARNING_TEST_EQUAL(e, 5);
+            }
+
+            bool exist_label = false;
+            auto label_entry = ds.labels(i);
+            EDGE_LEARNING_TEST_EQUAL(label_entry.size(), 2);
+            for (std::size_t i_ds_copy = 0; i_ds_copy < ds.size(); ++i_ds_copy)
+            {
+                auto label_entry_origin = ds_copy.labels(i_ds_copy);
+                EDGE_LEARNING_TEST_EQUAL(label_entry_origin.size(), 2);
+                if (label_entry_origin[0] == label_entry[0]
+                    && label_entry_origin[1] == label_entry[1])
+                {
+                    exist_label = true;
+                }
+            }
+            EDGE_LEARNING_TEST_ASSERT(exist_label);
+        }
+
+        for (std::size_t i = 0; i < ds.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_PRINT(ds.labels(i)[0]);
+            EDGE_LEARNING_TEST_PRINT(ds.labels(i)[1]);
         }
     }
 };
