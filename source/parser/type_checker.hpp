@@ -23,7 +23,7 @@
  */
 
 /*! \file  parser/type_checker.hpp
- *  \brief Type checking and conversion type of strings.
+ *  \brief TypeChecker::Type checking and conversion type of strings.
  */
 
 #ifndef EDGE_LEARNING_PARSER_TYPE_CHECKER_HPP
@@ -35,20 +35,6 @@
 #include <regex>
 
 namespace EdgeLearning {
-
-/**
- * \brief Enumeration class with the list of parserizable types.
- */
-enum class Type : int
-{
-    NONE    = -1, 
-    AUTO    =  0,
-    FLOAT   =  1,
-    INT     =  2,
-    BOOL    =  3,
-    STRING  =  4,
-    OBJECT  =  5,
-};
 
 /**
  * \brief Regex to detect float values in string.
@@ -153,6 +139,21 @@ inline std::string convert<bool>(bool v)
 class TypeChecker
 {
 public:
+
+    /**
+     * \brief Enumeration class with the list of parserizable types.
+     */
+    enum class Type : int
+    {
+        NONE    = -1,
+        AUTO    =  0,
+        FLOAT   =  1,
+        INT     =  2,
+        BOOL    =  3,
+        STRING  =  4,
+        OBJECT  =  5,
+    };
+
     /**
      * \brief Construct a new TypeChecker object.
      */
@@ -170,7 +171,7 @@ public:
      * \return false It is not of type float.
      */
     static bool is_float(const std::string& in)  
-        { return parse(in) == Type::FLOAT;  };
+        { return parse(in) == TypeChecker::Type::FLOAT;  };
 
     /**
      * \brief Check if the input string is of type bool.
@@ -179,7 +180,7 @@ public:
      * \return false It is not of type bool.
      */
     static bool is_bool(const std::string& in)   
-        { return parse(in) == Type::BOOL;   };
+        { return parse(in) == TypeChecker::Type::BOOL;   };
 
     /**
      * \brief Check if the input string is of type int.
@@ -188,7 +189,7 @@ public:
      * \return false It is not of type int.
      */
     static bool is_int(const std::string& in)    
-        { return parse(in) == Type::INT;    };
+        { return parse(in) == TypeChecker::Type::INT;    };
     
     /**
      * \brief Check if the input string is of type string.
@@ -197,7 +198,7 @@ public:
      * \return false It is not of type string.
      */
     static bool is_string(const std::string& in) 
-        { return parse(in) == Type::STRING; };
+        { return parse(in) == TypeChecker::Type::STRING; };
     
     /**
      * \brief Operator overloading for string conversion (see convert).
@@ -216,9 +217,9 @@ public:
     /**
      * \brief Operator overloading that parse a string (see parse).
      * \param field The string field.
-     * \return Type The type of the parsed field.
+     * \return TypeChecker::Type The type of the parsed field.
      */
-    Type operator()(const std::string& field) const
+    TypeChecker::Type operator()(const std::string& field) const
     {
         return parse(field);
     }
@@ -238,9 +239,9 @@ public:
     /**
      * \brief Operator () overloading that parse a vector of string.
      * \param field The vector of string field.
-     * \return Type The vector types of the parsed fields.
+     * \return TypeChecker::Type The vector types of the parsed fields.
      */
-    std::vector<Type> operator()(
+    std::vector<TypeChecker::Type> operator()(
         const std::vector<std::string>& fields) const
     {
         return parse(fields);
@@ -263,46 +264,46 @@ public:
     /**
      * \brief Parse the type of the given string field.
      * \param field The string to parse.
-     * \return Type The type of the converted string.
+     * \return TypeChecker::Type The type of the converted string.
      */
-    static Type parse(const std::string &field)
+    static TypeChecker::Type parse(const std::string &field)
     {
         if (field.empty())
         {
-            return Type::NONE;
+            return TypeChecker::Type::NONE;
         }
 
         if (std::regex_match(field, _string_regex))
         {
-            return Type::STRING;
+            return TypeChecker::Type::STRING;
         }
         else if (std::regex_match(field, _boolean_regex))
         {
-            return Type::BOOL;
+            return TypeChecker::Type::BOOL;
         }
         else if (std::regex_match(field, _integer_regex))
         {
-            return Type::INT;
+            return TypeChecker::Type::INT;
         }
         else if (std::regex_match(field, _float_regex))
         {
-            return Type::FLOAT;
+            return TypeChecker::Type::FLOAT;
         }
         else 
         {
-            return Type::STRING;
+            return TypeChecker::Type::STRING;
         }
     }
 
     /**
      * \brief Parse a vector of string fields.
      * \param fields The string fields to parse.
-     * \return std::vector<Type> The resulting types of string fields.
+     * \return std::vector<TypeChecker::Type> The resulting types of string fields.
      */
-    static std::vector<Type> parse(
+    static std::vector<TypeChecker::Type> parse(
         const std::vector<std::string>& fields)
     {
-        std::vector<Type> ret;
+        std::vector<TypeChecker::Type> ret;
         ret.resize(fields.size());
         for (std::size_t i = 0; i < fields.size(); ++i)
         {
@@ -315,23 +316,25 @@ public:
 /**
  * \brief Operator overloading to cout the type.
  * \param os  Input stream.
- * \param obj Type to print.
+ * \param obj TypeChecker::Type to print.
  * \return std::ostream& Output stream.
  */
-inline std::ostream& operator<<(std::ostream& os, const Type& obj)
+inline std::ostream& operator<<(std::ostream& os, const TypeChecker::Type& obj)
 {
    switch(obj)
    {
-        case Type::NONE:   os << "NONE"; break;
-        case Type::AUTO:   os << "AUTO"; break;
-        case Type::FLOAT:  os << "FLOAT"; break; 
-        case Type::INT:    os << "INT"; break;
-        case Type::BOOL:   os << "BOOL"; break;
-        case Type::STRING: os << "STRING"; break;
-        case Type::OBJECT: os << "OBJECT"; break;
+        case TypeChecker::Type::NONE:   os << "NONE"; break;
+        case TypeChecker::Type::AUTO:   os << "AUTO"; break;
+        case TypeChecker::Type::FLOAT:  os << "FLOAT"; break; 
+        case TypeChecker::Type::INT:    os << "INT"; break;
+        case TypeChecker::Type::BOOL:   os << "BOOL"; break;
+        case TypeChecker::Type::STRING: os << "STRING"; break;
+        case TypeChecker::Type::OBJECT: os << "OBJECT"; break;
         default: break;
    }
-   os << "(" << static_cast<std::underlying_type<Type>::type>(obj) << ")";
+   os << "("
+      << static_cast<std::underlying_type<TypeChecker::Type>::type>(obj)
+      << ")";
    return os;
 }
 
@@ -341,7 +344,9 @@ inline std::ostream& operator<<(std::ostream& os, const Type& obj)
  * \param obj Types to print.
  * \return std::ostream& Output stream.
  */
-inline std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
+inline std::ostream& operator<<(
+    std::ostream& os,
+    const std::vector<TypeChecker::Type>& obj)
 {
     os << "{";
     for (auto &pt: obj)
@@ -359,7 +364,9 @@ inline std::ostream& operator<<(std::ostream& os, const std::vector<Type>& obj)
  * \return true  Equals.
  * \return false Not equals.
  */
-inline bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
+inline bool operator==(
+    const std::vector<TypeChecker::Type> &lhs,
+    const std::vector<TypeChecker::Type> &rhs)
 {
     if (lhs.size() != rhs.size()) return false;
     for (std::size_t i = 0; i < lhs.size(); ++i)
@@ -379,7 +386,9 @@ inline bool operator==(const std::vector<Type> &lhs, const std::vector<Type> &rh
  * \return true  Different.
  * \return false Equals.
  */
-inline bool operator!=(const std::vector<Type> &lhs, const std::vector<Type> &rhs)
+inline bool operator!=(
+    const std::vector<TypeChecker::Type> &lhs,
+    const std::vector<TypeChecker::Type> &rhs)
 {
     return !operator==(lhs, rhs);
 }

@@ -87,7 +87,7 @@ public:
 
     /**
      * \brief Constructor with specific json_type.
-     * \param json_type JsonType The JSON Type of the implemented class.
+     * \param json_type JsonType The JSON TypeChecker::Type of the implemented class.
      */
     JsonObject(JsonType json_type)
         : Parser()
@@ -139,11 +139,11 @@ public:
     [[nodiscard]] virtual JsonType json_type() const { return _json_type; }
 
 protected:
-    JsonType _json_type; ///< \brief Type of the instantiated object.
+    JsonType _json_type; ///< \brief TypeChecker::Type of the instantiated object.
 };
 
 /**
- * \brief Conversion function from generic JsonObject to implemented Json Type
+ * \brief Conversion function from generic JsonObject to implemented Json TypeChecker::Type
  * based on json_type field of JsonObject.
  * If the json_type field does not correspond to the pointer of the object
  * passed, the function throws an exception.
@@ -477,21 +477,21 @@ public:
     JsonLeaf()
         : JsonObject(JsonType::LEAF)
         , _val{}
-        , _type{Type::NONE}
+        , _type{TypeChecker::Type::NONE}
     { }
 
     /**
      * \brief Constructor of a JsonLeaf.
      * \param val  const std::string& String of the value.
-     * \param type Type The type of the value: int, float, string, boolean.
+     * \param type TypeChecker::Type The type of the value: int, float, string, boolean.
      * If type is AUTO, then the type is inferred through the parser.
      */
-    JsonLeaf(const std::string& val, Type type = Type::AUTO)
+    JsonLeaf(const std::string& val, TypeChecker::Type type = TypeChecker::Type::AUTO)
         : JsonObject(JsonType::LEAF)
         , _val{val}
         , _type{type}
     {
-        if (_type == Type::AUTO)
+        if (_type == TypeChecker::Type::AUTO)
         {
             _type = _tc(_val);
         }
@@ -500,11 +500,11 @@ public:
     /**
      * \brief Construct a JsonLeaf with an array of char.
      * \param val  const char* An array of char as a value.
-     * \param type Type The type of the value passed: int, float, string,
+     * \param type TypeChecker::Type The type of the value passed: int, float, string,
      * boolean.
      * If type is AUTO, then the type is inferred through the parser.
      */
-    JsonLeaf(const char* val, Type type = Type::AUTO)
+    JsonLeaf(const char* val, TypeChecker::Type type = TypeChecker::Type::AUTO)
         : JsonLeaf(std::string(val), type)
     { }
 
@@ -514,22 +514,22 @@ public:
      * unsigned long, long long, unsigned long long.
      */
     JsonLeaf(int val)
-        : JsonLeaf(std::to_string(val), Type::INT)
+        : JsonLeaf(std::to_string(val), TypeChecker::Type::INT)
     { }
     JsonLeaf(unsigned int val)
-        : JsonLeaf(std::to_string(val), Type::INT)
+        : JsonLeaf(std::to_string(val), TypeChecker::Type::INT)
     { }
     JsonLeaf(long val)
-        : JsonLeaf(std::to_string(val), Type::INT)
+        : JsonLeaf(std::to_string(val), TypeChecker::Type::INT)
     { }
     JsonLeaf(unsigned long val)
-        : JsonLeaf(std::to_string(val), Type::INT)
+        : JsonLeaf(std::to_string(val), TypeChecker::Type::INT)
     { }
     JsonLeaf(long long val)
-        : JsonLeaf(std::to_string(val), Type::INT)
+        : JsonLeaf(std::to_string(val), TypeChecker::Type::INT)
     { }
     JsonLeaf(unsigned long long val)
-        : JsonLeaf(std::to_string(val), Type::INT)
+        : JsonLeaf(std::to_string(val), TypeChecker::Type::INT)
     { }
 
     /**
@@ -537,7 +537,7 @@ public:
      * \param val double A double as a value.
      */
     JsonLeaf(double val)
-        : JsonLeaf(std::to_string(val), Type::FLOAT)
+        : JsonLeaf(std::to_string(val), TypeChecker::Type::FLOAT)
     { }
 
     /**
@@ -545,7 +545,7 @@ public:
      * \param val bool A boolean as a value.
      */
     JsonLeaf(bool val)
-        : JsonLeaf(val ? "true" : "false", Type::BOOL)
+        : JsonLeaf(val ? "true" : "false", TypeChecker::Type::BOOL)
     { }
 
     /**
@@ -597,9 +597,9 @@ public:
 
     /**
      * \brief Getter of the value type (that is different from the json_type).
-     * \return const Type& The type of the value.
+     * \return const TypeChecker::Type& The type of the value.
      */
-    [[nodiscard]] const Type& type() const { return _type; }
+    [[nodiscard]] const TypeChecker::Type& type() const { return _type; }
 
     /**
      * \brief Overloading of equals operator.
@@ -664,7 +664,7 @@ public:
 
 private:
     std::string _val;   ///< \brief Value of the JsonLeaf.
-    Type _type;         ///< \brief Type of the value field.
+    TypeChecker::Type _type;         ///< \brief TypeChecker::Type of the value field.
 };
 
 /**
@@ -1475,7 +1475,7 @@ inline std::istream& operator>>(std::istream& os, JsonObject& obj)
 
 inline std::ostream& operator<<(std::ostream& os, const JsonLeaf& obj)
 {
-    if (obj._type == Type::STRING)
+    if (obj._type == TypeChecker::Type::STRING)
     {
         os << "\"" << obj._val << "\"";
     }
@@ -1492,7 +1492,7 @@ inline std::istream& operator>>(std::istream &os, JsonLeaf& obj)
     os.read(&c, 1);
     if (c == '\"')
     {
-        obj._type = Type::STRING;
+        obj._type = TypeChecker::Type::STRING;
         std::getline(os, obj._val, '\"');
         if (!os.eof())
         {

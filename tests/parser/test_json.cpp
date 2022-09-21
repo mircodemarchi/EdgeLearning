@@ -69,7 +69,7 @@ private:
         JsonLeaf jl = JsonLeaf("10");
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(), JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(jl.value(), "10");
-        EDGE_LEARNING_TEST_EQUAL(jl.type(), Type::INT);
+        EDGE_LEARNING_TEST_EQUAL(jl.type(), TypeChecker::Type::INT);
         EDGE_LEARNING_TEST_EQUAL(jl.as<int>(), 10);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(jl), 10);
         EDGE_LEARNING_TEST_EQUAL(jl.as<float>(), 10.0);
@@ -80,7 +80,7 @@ private:
         jl = JsonLeaf("1.0");
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(), JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(jl.value(), "1.0");
-        EDGE_LEARNING_TEST_EQUAL(jl.type(), Type::FLOAT);
+        EDGE_LEARNING_TEST_EQUAL(jl.type(), TypeChecker::Type::FLOAT);
         EDGE_LEARNING_TEST_EQUAL(jl.as<int>(), 1);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(jl), 1);
         EDGE_LEARNING_TEST_EQUAL(jl.as<float>(), 1.0);
@@ -91,7 +91,7 @@ private:
         jl = JsonLeaf("true");
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(), JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(jl.value(), "true");
-        EDGE_LEARNING_TEST_EQUAL(jl.type(), Type::BOOL);
+        EDGE_LEARNING_TEST_EQUAL(jl.type(), TypeChecker::Type::BOOL);
         EDGE_LEARNING_TEST_EQUAL(jl.as<int>(), 0);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(jl), 0);
         EDGE_LEARNING_TEST_EQUAL(jl.as<float>(), 0.0);
@@ -139,7 +139,7 @@ private:
             static_cast<unsigned long>(JsonLeaf(10UL)), 10UL);
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(), JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(i.value(), "10");
-        EDGE_LEARNING_TEST_EQUAL(i.type(), Type::INT);
+        EDGE_LEARNING_TEST_EQUAL(i.type(), TypeChecker::Type::INT);
         EDGE_LEARNING_TEST_EQUAL(i.as<int>(), 10);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(i), 10);
         EDGE_LEARNING_TEST_EQUAL(i.as<float>(), 10.0);
@@ -150,7 +150,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(), JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_PRINT(f.value());
         EDGE_LEARNING_TEST_EQUAL(f.value(), "1.000000");
-        EDGE_LEARNING_TEST_EQUAL(f.type(), Type::FLOAT);
+        EDGE_LEARNING_TEST_EQUAL(f.type(), TypeChecker::Type::FLOAT);
         EDGE_LEARNING_TEST_EQUAL(f.as<int>(), 1);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(f), 1);
         EDGE_LEARNING_TEST_EQUAL(f.as<float>(), 1.0);
@@ -160,7 +160,7 @@ private:
         JsonLeaf b = JsonLeaf(true);
         EDGE_LEARNING_TEST_EQUAL(jl.json_type(), JsonObject::JsonType::LEAF);
         EDGE_LEARNING_TEST_EQUAL(b.value(), "true");
-        EDGE_LEARNING_TEST_EQUAL(b.type(), Type::BOOL);
+        EDGE_LEARNING_TEST_EQUAL(b.type(), TypeChecker::Type::BOOL);
         EDGE_LEARNING_TEST_EQUAL(b.as<int>(), 0);
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(b), 0);
         EDGE_LEARNING_TEST_EQUAL(b.as<float>(), 0.0);
@@ -172,14 +172,14 @@ private:
         JsonLeaf jl2 = JsonLeaf(true);
         EDGE_LEARNING_TEST_PRINT(jl1);
         EDGE_LEARNING_TEST_PRINT(jl2);
-        EDGE_LEARNING_TEST_EQUAL(jl1.type(), Type::INT);
-        EDGE_LEARNING_TEST_EQUAL(jl2.type(), Type::BOOL);
+        EDGE_LEARNING_TEST_EQUAL(jl1.type(), TypeChecker::Type::INT);
+        EDGE_LEARNING_TEST_EQUAL(jl2.type(), TypeChecker::Type::BOOL);
         EDGE_LEARNING_TEST_ASSERT(jl1 != jl2);
         jl2.value(5.0);
-        EDGE_LEARNING_TEST_EQUAL(jl2.type(), Type::FLOAT);
+        EDGE_LEARNING_TEST_EQUAL(jl2.type(), TypeChecker::Type::FLOAT);
         EDGE_LEARNING_TEST_ASSERT(jl1 != jl2);
         jl2.value(5);
-        EDGE_LEARNING_TEST_EQUAL(jl2.type(), Type::INT);
+        EDGE_LEARNING_TEST_EQUAL(jl2.type(), TypeChecker::Type::INT);
         EDGE_LEARNING_TEST_ASSERT(jl1 == jl2);
     }
 
@@ -979,7 +979,7 @@ private:
         ifs.close();
         EDGE_LEARNING_TEST_PRINT(jl_in);
         EDGE_LEARNING_TEST_EQUAL(jl_in, jl_out);
-        EDGE_LEARNING_TEST_EQUAL(jl_in.type(), Type::INT);
+        EDGE_LEARNING_TEST_EQUAL(jl_in.type(), TypeChecker::Type::INT);
         EDGE_LEARNING_TEST_EQUAL(jl_in.json_type(),
                                  JsonObject::JsonType::LEAF);
 
@@ -993,7 +993,7 @@ private:
         ifs.close();
         EDGE_LEARNING_TEST_PRINT(jl_in);
         EDGE_LEARNING_TEST_EQUAL(jl_in, jl_out);
-        EDGE_LEARNING_TEST_EQUAL(jl_in.type(), Type::STRING);
+        EDGE_LEARNING_TEST_EQUAL(jl_in.type(), TypeChecker::Type::STRING);
         EDGE_LEARNING_TEST_EQUAL(jl_in.json_type(),
                                  JsonObject::JsonType::LEAF);
 

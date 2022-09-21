@@ -49,10 +49,10 @@ private:
             / ".." / ".." / "data" / DATA_TRAINING_FN;
 
     void test_csv_field() {
-        auto csv_field_int_t   = Type::AUTO;
-        auto csv_field_str_t   = Type::AUTO;
-        auto csv_field_float_t = Type::FLOAT;
-        auto csv_field_bool_t  = Type::BOOL;
+        auto csv_field_int_t   = TypeChecker::Type::AUTO;
+        auto csv_field_str_t   = TypeChecker::Type::AUTO;
+        auto csv_field_float_t = TypeChecker::Type::FLOAT;
+        auto csv_field_bool_t  = TypeChecker::Type::BOOL;
 
         auto csv_field_int     = CSVField{"123",   csv_field_int_t,   0};
         auto csv_field_str     = CSVField{"\"\"",  csv_field_str_t,   1};
@@ -71,8 +71,8 @@ private:
         EDGE_LEARNING_TEST_EQUAL(csv_field_float.idx(), 2);
         EDGE_LEARNING_TEST_EQUAL(csv_field_bool.idx(),  3);
 
-        EDGE_LEARNING_TEST_EQUAL(csv_field_int.type(), Type::INT);
-        EDGE_LEARNING_TEST_EQUAL(csv_field_str.type(), Type::STRING);
+        EDGE_LEARNING_TEST_EQUAL(csv_field_int.type(), TypeChecker::Type::INT);
+        EDGE_LEARNING_TEST_EQUAL(csv_field_str.type(), TypeChecker::Type::STRING);
 
         auto csv_field_cpy = csv_field_int;
         EDGE_LEARNING_TEST_EQUAL(csv_field_cpy.idx(), csv_field_int.idx());
@@ -80,7 +80,7 @@ private:
     }
 
     void test_csv_row() {
-        auto types = std::vector<Type>{Type::AUTO};
+        auto types = std::vector<TypeChecker::Type>{TypeChecker::Type::AUTO};
         auto csv_row = CSVRow("10,1.3,edge_learning,true", 0, 4, types, ',');
 
         EDGE_LEARNING_TEST_PRINT(csv_row);
@@ -107,9 +107,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(csv_row.empty(), false);
         EDGE_LEARNING_TEST_EQUAL(csv_row.size(),  4);
         EDGE_LEARNING_TEST_EQUAL(csv_row.idx(),   0);
-        auto types_groundtruth = std::vector<Type>{
-            Type::INT, Type::FLOAT,
-            Type::STRING, Type::BOOL};
+        auto types_groundtruth = std::vector<TypeChecker::Type>{
+            TypeChecker::Type::INT, TypeChecker::Type::FLOAT,
+            TypeChecker::Type::STRING, TypeChecker::Type::BOOL};
         auto types_to_test = csv_row.types();
         EDGE_LEARNING_TEST_EQUAL(types_groundtruth, types_to_test);
 
@@ -137,7 +137,7 @@ private:
 
     void test_csv() {
         auto csv = CSV(data_training_fp.string());
-        auto types_groundtruth = std::vector<Type>{6, Type::INT};
+        auto types_groundtruth = std::vector<TypeChecker::Type>{6, TypeChecker::Type::INT};
 
         EDGE_LEARNING_TEST_EQUAL(csv.cols_size(), 6);
         EDGE_LEARNING_TEST_EQUAL(csv.rows_size(), 3201);
@@ -168,15 +168,15 @@ private:
 
         EDGE_LEARNING_TEST_THROWS(CSV{""}, std::runtime_error);
 
-        csv = CSV(data_training_fp.string(), std::vector<Type>{});
+        csv = CSV(data_training_fp.string(), std::vector<TypeChecker::Type>{});
         EDGE_LEARNING_TEST_EQUAL(csv.types(), types_groundtruth);
 
         csv = CSV(data_training_fp.string(), 
-            std::vector<Type>{Type::INT});
+            std::vector<TypeChecker::Type>{TypeChecker::Type::INT});
         EDGE_LEARNING_TEST_EQUAL(csv.types(), types_groundtruth);
 
         csv = CSV(data_training_fp.string(), 
-            std::vector<Type>{6, Type::FLOAT});
+            std::vector<TypeChecker::Type>{6, TypeChecker::Type::FLOAT});
         EDGE_LEARNING_TEST_NOT_EQUAL(csv.types(), types_groundtruth);
 
         EDGE_LEARNING_TEST_EXECUTE(
@@ -245,7 +245,7 @@ private:
 
     void test_dataset_parser() {
         auto csv_dp = CSV(data_training_fp.string(),
-                          { Type::AUTO }, ',', {3, 4});
+                          { TypeChecker::Type::AUTO }, ',', {3, 4});
 
         EDGE_LEARNING_TEST_EQUAL(csv_dp.feature_size(), csv_dp.cols_size());
         EDGE_LEARNING_TEST_EQUAL(csv_dp.entries_amount(), csv_dp.rows_size() - 1);

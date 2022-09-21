@@ -57,15 +57,15 @@ public:
      * \param field     The CSV field string.
      * \param type      The CSV field type.
      * \param col_index The corresponding column index in CSV file.
-     * The type field is changed if it contains the Type::AUTO.
+     * The type field is changed if it contains the TypeChecker::Type::AUTO.
      */ 
-    CSVField(std::string field, Type& type, std::size_t col_index)
+    CSVField(std::string field, TypeChecker::Type& type, std::size_t col_index)
         : Parser()
         , _field{field}
         , _type{type}
         , _col_index{col_index}
     {
-        if (_type == Type::AUTO)
+        if (_type == TypeChecker::Type::AUTO)
         {
             _type = _tc(_field);
         }
@@ -126,9 +126,9 @@ public:
 
     /**
      * \brief Field type getter.
-     * \return const Type&
+     * \return const TypeChecker::Type&
      */
-    const Type& type() const { return _type; }
+    const TypeChecker::Type& type() const { return _type; }
 
     /**
      * \brief CSV column index gettere.
@@ -138,7 +138,7 @@ public:
 
 private:
     std::string _field;     ///< CSV field string.
-    Type& _type;            ///< CSV field type.
+    TypeChecker::Type& _type;            ///< CSV field type.
     std::size_t _col_index; ///> CSV field column index.
 };
 
@@ -163,10 +163,10 @@ public:
      * \param types       The list of types of each field.
      * \param separator   The separator of each field.
      * The vector of types is changed if it's not compliant to the 
-     * column amount or if it contains the Type::AUTO.
+     * column amount or if it contains the TypeChecker::Type::AUTO.
      */
     CSVRow(std::string line, std::size_t row_idx, std::size_t cols_amount, 
-        std::vector<Type>& types, char separator = ',')
+        std::vector<TypeChecker::Type>& types, char separator = ',')
         : Parser()
         , _line{line}
         , _idx{row_idx}
@@ -174,12 +174,12 @@ public:
         , _types{types}
         , _separator{separator}
     {
-        if((std::find(types.begin(), types.end(), Type::AUTO) != types.end())
+        if((std::find(types.begin(), types.end(), TypeChecker::Type::AUTO) != types.end())
             || types.size() == 0
             || types.size() != cols_amount) 
         {
             std::stringstream ss{line};
-            _types = std::vector<Type>{};
+            _types = std::vector<TypeChecker::Type>{};
             for (std::size_t i = 0; i < cols_amount; ++i)
             {
                 std::string s;
@@ -197,7 +197,7 @@ public:
      * \param separator The separator of each field.
      * Automatically calculates the number of columns.
      */
-    CSVRow(std::string line, std::size_t row_idx, std::vector<Type>& types, 
+    CSVRow(std::string line, std::size_t row_idx, std::vector<TypeChecker::Type>& types, 
         char separator = ',') 
         : CSVRow{line, row_idx,
             static_cast<std::size_t>(
@@ -213,7 +213,7 @@ public:
      * \param separator The separator of each field.
      * Construct an empty CSV Row.
      */
-    CSVRow(std::vector<Type>& types, char separator = ',')
+    CSVRow(std::vector<TypeChecker::Type>& types, char separator = ',')
         : CSVRow{std::string{}, std::size_t{}, std::size_t{0}, types, separator}
     {
 
@@ -414,9 +414,9 @@ public:
     
     /**
      * \brief Column types getter.
-     * \return const std::vector<Type>& The vector of column types.
+     * \return const std::vector<TypeChecker::Type>& The vector of column types.
      */
-    const std::vector<Type>& types() const { return _types; } 
+    const std::vector<TypeChecker::Type>& types() const { return _types; } 
     
     /**
      * \brief Getter of CSVRow index.
@@ -434,7 +434,7 @@ private:
     std::string _line;         ///< The line in string. 
     std::size_t _idx;          ///< The index of the CSV row.
     std::size_t _cols_amount;  ///< The column amount of the row.
-    std::vector<Type>& _types; ///< The types of each field in the row.
+    std::vector<TypeChecker::Type>& _types; ///< The types of each field in the row.
     char _separator;           ///< The separator of each field.
 };
 
@@ -459,7 +459,7 @@ public:
      * Open a file stream to input path fn. 
      */
     CSVIterator(std::string fn, std::size_t idx, std::size_t cols_amount,
-        std::vector<Type>& types, char separator = ',')
+        std::vector<TypeChecker::Type>& types, char separator = ',')
         : _fn{fn}
         , _row{std::string(), 0, cols_amount, types, separator}
         , _req_row_idx{idx}
@@ -634,11 +634,11 @@ public:
      * \param types     The list of types of each field.
      * \param separator The separator of each field.
      * If the list of types is not compliant to the colums amount of the CSV 
-     * file or it contains the Type::AUTO, then the types list is automatically
+     * file or it contains the TypeChecker::Type::AUTO, then the types list is automatically
      * computed using the second line of the CSV file.
      * The constructor throws a std::runtime_error if the file fails on open.
      */
-    CSV(std::string fn, std::vector<Type> types = { Type::AUTO }, 
+    CSV(std::string fn, std::vector<TypeChecker::Type> types = { TypeChecker::Type::AUTO }, 
         char separator = ',', std::set<SizeType> labels_idx = {})
         : DatasetParser()
         , _fn{fn}
@@ -671,7 +671,7 @@ public:
         _cols_amount = static_cast<std::size_t>(
             std::count(header.begin(), header.end(), separator)+1);
 
-        if((std::find(types.begin(), types.end(), Type::AUTO) != types.end())
+        if((std::find(types.begin(), types.end(), TypeChecker::Type::AUTO) != types.end())
             || types.size() == 0
             || types.size() != _cols_amount) 
         {
@@ -718,9 +718,9 @@ public:
 
     /**
      * \brief Getter of the types list of each field.
-     * \return const std::vector<Type>& Vector of types.
+     * \return const std::vector<TypeChecker::Type>& Vector of types.
      */
-    const std::vector<Type>& types() const { return _types; }
+    const std::vector<TypeChecker::Type>& types() const { return _types; }
     
     /**
      * \brief Get a CSVRow at the index row specified.
@@ -903,7 +903,7 @@ public:
 
 private:
     std::string _fn;          ///< The CSV file path.
-    std::vector<Type> _types; ///< The types vector of each field.
+    std::vector<TypeChecker::Type> _types; ///< The types vector of each field.
     CSVRow _row_header;       ///< The header of the CSV file.
     CSVRow _row_cache;        ///< A Row cache used for optimization.
     std::size_t _cols_amount; ///< Number of columns in CSV file.

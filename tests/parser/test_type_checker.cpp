@@ -44,15 +44,15 @@ public:
 
 private:
     void test_type() {
-        std::vector<Type> type_vec({
-            Type::NONE,
-            Type::AUTO,
-            Type::FLOAT,
-            Type::INT,
-            Type::BOOL,
-            Type::STRING,
-            Type::OBJECT,
-            static_cast<Type>(100)
+        std::vector<TypeChecker::Type> type_vec({
+            TypeChecker::Type::NONE,
+            TypeChecker::Type::AUTO,
+            TypeChecker::Type::FLOAT,
+            TypeChecker::Type::INT,
+            TypeChecker::Type::BOOL,
+            TypeChecker::Type::STRING,
+            TypeChecker::Type::OBJECT,
+            static_cast<TypeChecker::Type>(100)
         });
         EDGE_LEARNING_TEST_PRINT(type_vec);
     }
@@ -60,23 +60,23 @@ private:
 
     void test_parse() {
         auto parser = TypeChecker();
-        auto test_vec = std::map<std::string, Type>{
-            { "1.2",           Type::FLOAT  },
-            { "+0.0",          Type::FLOAT  },
-            { "-0.0",          Type::FLOAT  },
-            { "+1e-10",        Type::FLOAT  },
-            { "true",          Type::BOOL   },
-            { "1",             Type::INT    },
-            { "-1",            Type::INT    },
-            { "+0",            Type::INT    },
-            { "-0",            Type::INT    },
-            { "\"string\"",    Type::STRING },
-            { "123edgelearning456", Type::STRING },
-            { std::string{},   Type::NONE   },
+        auto test_vec = std::map<std::string, TypeChecker::Type>{
+            { "1.2",           TypeChecker::Type::FLOAT  },
+            { "+0.0",          TypeChecker::Type::FLOAT  },
+            { "-0.0",          TypeChecker::Type::FLOAT  },
+            { "+1e-10",        TypeChecker::Type::FLOAT  },
+            { "true",          TypeChecker::Type::BOOL   },
+            { "1",             TypeChecker::Type::INT    },
+            { "-1",            TypeChecker::Type::INT    },
+            { "+0",            TypeChecker::Type::INT    },
+            { "-0",            TypeChecker::Type::INT    },
+            { "\"string\"",    TypeChecker::Type::STRING },
+            { "123edgelearning456", TypeChecker::Type::STRING },
+            { std::string{},   TypeChecker::Type::NONE   },
         };
 
         auto keys = std::vector<std::string>{};
-        auto values = std::vector<Type>{};
+        auto values = std::vector<TypeChecker::Type>{};
         for (const auto& [key, value]: test_vec)
         {
             keys.push_back(key);
@@ -87,8 +87,8 @@ private:
         EDGE_LEARNING_TEST_ASSERT(parsed_values == values);
         EDGE_LEARNING_TEST_PRINT(parsed_values);
 
-        auto values_cpy = std::vector<Type>(values);
-        values_cpy.push_back(Type::NONE);
+        auto values_cpy = std::vector<TypeChecker::Type>(values);
+        values_cpy.push_back(TypeChecker::Type::NONE);
         EDGE_LEARNING_TEST_ASSERT(parsed_values != values_cpy);
 
         EDGE_LEARNING_TEST_EQUAL(parser(1), "1");
