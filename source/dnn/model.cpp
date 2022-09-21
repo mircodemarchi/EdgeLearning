@@ -164,6 +164,11 @@ void Model::train(Optimizer& optimizer, Model& model_from)
     {
         optimizer.train(*layer);
     }
+
+}
+
+void Model::reset_score()
+{
     for (const auto& loss_layer: _state.loss_layers)
     {
         loss_layer->reset_score();

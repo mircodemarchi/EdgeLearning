@@ -77,12 +77,12 @@ int main()
             {
                 m.step(inputs[i], targets[i]);
             }
-
+            m.train(o);
             std::cout << "Step " << i 
                 << " - loss: " << m.avg_loss()
                 << ", accuracy: " << m.accuracy() * 100.0 << " %"
                 << std::endl;
-            m.train(o);
+            m.reset_score();
         }
     }
     std::cout << "Training End" << std::endl;

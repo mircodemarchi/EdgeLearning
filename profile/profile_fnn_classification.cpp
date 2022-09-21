@@ -135,7 +135,6 @@ private:
                     ProfileCompileFNNSequential m(
                         layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
-                    std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
                 }, 1, "training_sequential_on_batch_size" + std::to_string(batch_size));
         }
 
@@ -148,7 +147,6 @@ private:
                     ProfileCompileFNNThreadOnEntry m(
                         layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
-                    std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
                 }, 1, "training_thread_parallelism_entry_on_batch_size" + std::to_string(batch_size));
         }
 
@@ -161,7 +159,6 @@ private:
                     ProfileCompileFNNThreadOnBatch m(
                         layers_descriptor, "regressor_model");
                     m.fit(data, EPOCHS, batch_size, LEARNING_RATE);
-                    std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
                 }, 1, "training_thread_parallelism_batch_on_batch_size" + std::to_string(batch_size));
         }
     }
@@ -201,7 +198,6 @@ private:
                         ProfileCompileFNN m(
                             layers_descriptor, "regressor_model");
                         m.fit(data, e, BATCH_SIZE, LEARNING_RATE);
-                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
                     }, 1, "training_on_epochs_amount" + std::to_string(e));
         }
     }
@@ -249,7 +245,6 @@ private:
                             layers_descriptor, "regressor_model");
                         auto subset = data.subdata(0, curr_size);
                         m.fit(subset, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
                     }, 1,
                     "training_on_dataset_size" + std::to_string(curr_size));
             if (curr_size == training_set_size) break;
@@ -294,7 +289,6 @@ private:
                         ProfileCompileFNN m(
                             layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
                     }, 1,
                     "training_on_hidden_layers_amount"
                         + std::to_string(amount));
@@ -337,7 +331,6 @@ private:
                         ProfileCompileFNN m(
                             layers_descriptor, "regressor_model");
                         m.fit(data, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-                        std::cout << "accuracy: " << m.accuracy() << " avg_loss: " << m.loss() << std::endl;
                     }, 1,
                     "training_on_hidden_layers_shape" + std::to_string(shape));
         }

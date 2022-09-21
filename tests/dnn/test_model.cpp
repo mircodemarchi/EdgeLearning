@@ -213,12 +213,12 @@ private:
                 {
                     m.step(inputs[i], targets[i]);
                 }
-
+                m.train(o);
                 std::cout << "Step " << i 
                     << " - loss: " << m.avg_loss()
                     << ", accuracy: " << m.accuracy()
                     << std::endl;
-                m.train(o);
+                m.reset_score();
             }
         }
 
@@ -283,12 +283,12 @@ private:
                 {
                     m.step(inputs[i], targets[i]);
                 }
-
+                m.train(o);
                 std::cout << "Step " << i 
                     << " - loss: " << m.avg_loss()
                     << ", accuracy: " << m.accuracy()
                     << std::endl;
-                m.train(o);
+                m.reset_score();
             }
         }
 
@@ -370,12 +370,12 @@ private:
                 {
                     m.step(inputs[i], targets[i]);
                 }
-
+                m.train(o);
                 std::cout << "Step " << i
                     << " - loss: " << m.avg_loss()
                     << ", accuracy: " << m.accuracy()
                     << std::endl;
-                m.train(o);
+                m.reset_score();
             }
         }
 

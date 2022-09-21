@@ -221,6 +221,11 @@ public:
     void train(Optimizer& optimizer, Model& model_from);
 
     /**
+     * \brief Reset the loss functions score: accuracy and cumulative loss.
+     */
+    void reset_score();
+
+    /**
      * \brief Train step: forward and backward.
      * This function does not update the layers parameter, this operation will
      * be done by the train function.  
