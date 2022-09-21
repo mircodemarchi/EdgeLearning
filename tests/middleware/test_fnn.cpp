@@ -34,6 +34,7 @@ public:
     void test() {
         EDGE_LEARNING_TEST_CALL(test_train());
         EDGE_LEARNING_TEST_CALL(test_predict());
+        EDGE_LEARNING_TEST_CALL(test_evaluate());
     }
 
 private:
@@ -114,6 +115,40 @@ private:
         {
             EDGE_LEARNING_TEST_PRINT(e);
         }
+    }
+
+    void test_evaluate() {
+        Dataset<NumType>::Mat data = {
+            {10.0, 1.0, 10.0, 1.0, 1.0, 0.0},
+            {1.0,  3.0, 8.0,  3.0, 0.0, 1.0},
+            {8.0,  1.0, 8.0,  1.0, 1.0, 0.0},
+            {1.0,  1.5, 8.0,  1.5, 0.0, 1.0},
+            {8.0,  1.0, 8.0,  1.0, 1.0, 0.0},
+            {1.0,  1.5, 8.0,  1.5, 0.0, 1.0},
+        };
+        Dataset<NumType> dataset{data, 1, {4, 5}};
+
+        LayerDescriptorVector layers_descriptor(
+            {{"input_layer",            4UL, ActivationType::Linear   },
+             {"hidden_layer_relu",      8UL, ActivationType::ReLU     },
+             {"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
+             {"hidden_layer_tanh",      8UL, ActivationType::TanH     },
+             {"hidden_layer_linear",    8UL, ActivationType::Linear   },
+             {"output_layer",           2UL, ActivationType::Linear   }}
+        );
+        auto m = CompileFNN<>(layers_descriptor, "regressor_model");
+        m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03);
+
+        NN<NumType>::EvaluationResult performance_metrics;
+        EDGE_LEARNING_TEST_TRY(performance_metrics = m.evaluate(dataset));
+        EDGE_LEARNING_TEST_PRINT(performance_metrics.loss);
+        EDGE_LEARNING_TEST_PRINT(performance_metrics.accuracy);
+        EDGE_LEARNING_TEST_EQUAL(performance_metrics.accuracy_perc,
+                                 performance_metrics.accuracy * 100.0);
+        EDGE_LEARNING_TEST_EQUAL(performance_metrics.error_rate,
+                                 1.0 - performance_metrics.accuracy);
+        EDGE_LEARNING_TEST_EQUAL(performance_metrics.error_rate_perc,
+                                 performance_metrics.error_rate * 100.0);
     }
 };
 

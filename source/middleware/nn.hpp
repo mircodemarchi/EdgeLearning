@@ -135,6 +135,10 @@ public:
             , error_rate_perc((1.0 - a) * 100.0)
         { }
 
+        EvaluationResult()
+            : EvaluationResult(T(0), T(0))
+        { }
+
         T loss;             ///< \brief Average loss.
         T accuracy;         ///< \brief Accuracy: correct / tot.
         T accuracy_perc;    ///< \brief Accuracy in percentage.
