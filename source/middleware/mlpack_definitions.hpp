@@ -91,7 +91,7 @@ struct MapLoss<Framework::MLPACK, LossType::MSE> {
 
 template <>
 struct MapOptimizer<Framework::MLPACK, OptimizerType::GRADIENT_DESCENT> {
-    using type = ens::GradientDescent;
+    using type = ens::SGD<>;
 };
 
 template <>
