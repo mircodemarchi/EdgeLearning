@@ -1,7 +1,7 @@
 /***************************************************************************
  *            profile.hpp
  *
- *  Copyright  2021  Luca Geretti
+ *  Copyright  2021  Luca Geretti, Mirco De Marchi
  *
  ****************************************************************************/
 
@@ -31,7 +31,9 @@
 
 #include "stopwatch.hpp"
 #include "type.hpp"
+#include "data/dataset.hpp"
 #include "data/path.hpp"
+#include "middleware/fnn.hpp"
 
 #include <functional>
 #include <iostream>
@@ -160,11 +162,68 @@ private:
             + " std: " +  _pretty_print(std);
     }
 
-private:
     Stopwatch<Microseconds> _sw;
     Randomizer _rnd;
     const SizeType _num_tries;
     std::string _name;
+};
+
+
+class DNNProfiler : public Profiler {
+public:
+    DNNProfiler(SizeType num_tries, std::string name = std::string())
+        : Profiler(num_tries, name)
+    { }
+
+    template<typename Model>
+    void training(std::string info, std::string profile_name,
+                  SizeType iteration_amount,
+                  Dataset<NumType>& data_training,
+                  Dataset<NumType>& data_evaluation,
+                  const LayerDescriptorVector& layers_descriptor,
+                  SizeType epochs,
+                  SizeType batch_size,
+                  NumType learning_rate)
+    {
+        profile(
+            info,
+            [&](SizeType i){
+                (void) i;
+                Model m(layers_descriptor, "training_profiling_model");
+                m.fit(data_training, epochs, batch_size, learning_rate);
+                auto metrics = m.evaluate(data_evaluation);
+                std::cout
+                    << "evaluation: { "
+                    << " accuracy: " << metrics.accuracy_perc << "%, "
+                    << " error_rate: " << metrics.error_rate_perc << "%, "
+                    << " avg_loss: " << metrics.loss << ", "
+                    << " } "<< std::endl;
+            },
+            iteration_amount, profile_name);
+    }
+
+    template<typename Model>
+    void predict(std::string info, std::string profile_name,
+                 SizeType iteration_amount,
+                 Dataset<NumType>& data,
+                 const LayerDescriptorVector& layers_descriptor,
+                 SizeType epochs,
+                 SizeType batch_size,
+                 NumType learning_rate)
+    {
+        Model m(layers_descriptor, "predict_profiling_model");
+        m.fit(data, epochs, batch_size, learning_rate);
+        profile(
+            info,
+            [&](SizeType i){
+                (void) i;
+                auto input = data.trainset();
+                auto prediction = m.predict(input);
+                (void) prediction;
+            },
+            iteration_amount,
+            profile_name);
+    }
 };
 
 #endif // EDGE_LEARNING_PROFILE_HPP
