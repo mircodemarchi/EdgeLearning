@@ -50,6 +50,7 @@ public:
     MlpackFNN(std::string name)
         : NN<T>{name}
         , _m{}
+        , _input_size{0}
         , _output_size{0}
         , _layers_name{}
     {
@@ -93,6 +94,11 @@ public:
         auto layer_name = std::get<0>(ld);
         auto layer_size = std::get<1>(ld);
         auto layer_activation = std::get<2>(ld);
+
+        if (_input_size == 0)
+        {
+            _input_size = layer_size;
+        }
 
         _layers_name.push_back(layer_name);
         if (_output_size != 0)
@@ -139,10 +145,14 @@ public:
         _output_size = layer_size;
     }
 
+    SizeType input_size() override { return _input_size; }
+    SizeType output_size() override { return _output_size; }
+
 private:
     mlpack::ann::FFN<
         typename MapLoss<Framework::MLPACK, LT>::type,
         typename MapInit<Framework::MLPACK, IT>::type> _m;
+    SizeType _input_size;
     SizeType _output_size;
     std::vector<std::string> _layers_name;
 };

@@ -276,6 +276,9 @@ public:
         return Dataset<T>(ret, output_size);
     }
 
+    SizeType input_size() override { return _m.input_size(); }
+    SizeType output_size() override { return _m.output_size(); }
+
 private:
     Model _m;
     SizeType _output_size;
@@ -330,6 +333,11 @@ public:
              NumType learning_rate = 0.03)
     {
         _fnn_model.fit(data, epochs, batch_size, learning_rate);
+    }
+
+    typename ModelFNN::EvaluationResult evaluate(Dataset<T>& data)
+    {
+        return _fnn_model.template evaluate<LT>(data);
     }
 
 private:
