@@ -187,17 +187,17 @@ public:
     {
         profile(
             info,
-            [&](SizeType i){
+            [&](SizeType i) {
                 (void) i;
                 Model m(layers_descriptor, "training_profiling_model");
                 m.fit(data_training, epochs, batch_size, learning_rate);
                 auto metrics = m.evaluate(data_evaluation);
                 std::cout
                     << "evaluation: { "
-                    << " accuracy: " << metrics.accuracy_perc << "%, "
-                    << " error_rate: " << metrics.error_rate_perc << "%, "
-                    << " avg_loss: " << metrics.loss << ", "
-                    << " } "<< std::endl;
+                    << "accuracy (%): " << metrics.accuracy_perc << ", "
+                    << "error_rate (%): " << metrics.error_rate_perc << ", "
+                    << "avg_loss: " << metrics.loss << " "
+                    << "} "<< std::endl;
             },
             iteration_amount, profile_name);
     }
@@ -215,7 +215,7 @@ public:
         m.fit(data, epochs, batch_size, learning_rate);
         profile(
             info,
-            [&](SizeType i){
+            [&](SizeType i) {
                 (void) i;
                 auto input = data.trainset();
                 auto prediction = m.predict(input);
@@ -223,6 +223,33 @@ public:
             },
             iteration_amount,
             profile_name);
+    }
+
+    template<typename Model>
+    void testing(std::string info, std::string profile_name,
+                  SizeType iteration_amount,
+                  Dataset<NumType>& data_training,
+                  Dataset<NumType>& data_testing,
+                  const LayerDescriptorVector& layers_descriptor,
+                  SizeType epochs,
+                  SizeType batch_size,
+                  NumType learning_rate)
+    {
+        Model m(layers_descriptor, "testing_profiling_model");
+        m.fit(data_training, epochs, batch_size, learning_rate);
+        profile(
+            info,
+            [&](SizeType i) {
+                (void) i;
+                auto metrics = m.evaluate(data_testing);
+                std::cout
+                    << "testing: { "
+                    << "accuracy (%): " << metrics.accuracy_perc << ", "
+                    << "error_rate (%): " << metrics.error_rate_perc << ", "
+                    << "avg_loss: " << metrics.loss << " "
+                    << "} "<< std::endl;
+            },
+            iteration_amount, profile_name);
     }
 };
 

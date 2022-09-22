@@ -58,9 +58,11 @@ public:
     virtual void run() {
         EDGE_LEARNING_PROFILE_TITLE(
             "FNN training and prediction process when "
-            "solving a" + _profile_name + " problem");
+            "solving a " + _profile_name + " problem");
         for (const auto& dt: _dataset_types)
         {
+            std::cout << "*** Dataset: " + std::string(ProfileDataset(dt))
+                      << " ***" << std::endl;
             EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount(dt));
             EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level(dt));
             EDGE_LEARNING_PROFILE_CALL(profile_on_training_set(dt));
@@ -97,7 +99,9 @@ private:
                 {"hidden_layer3", 15,          ActivationType::ReLU },
                 {"hidden_layer4", 15,          ActivationType::ReLU },
                 {"hidden_layer5", 15,          ActivationType::ReLU },
-                {"output_layer",  output_size, ActivationType::Linear },
+                {"output_layer",  output_size,
+                 _profile_name == "classification" ?
+                 ActivationType::Softmax : ActivationType::Linear },
             }
         );
 
@@ -130,6 +134,14 @@ private:
                     + std::to_string(batch_size),
                 1, data_training, data_evaluation,
                 layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
+
+            testing<ProfileCompileFNNSequential>(
+                "testing sequential model with batch_size: "
+                + std::to_string(batch_size),
+                "testing_sequential_on_batch_size"
+                + std::to_string(batch_size),
+                1, data_training, data_testing,
+                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
         }
 
         for (const auto& batch_size: batch_sizes)
@@ -140,7 +152,15 @@ private:
                 "training_thread_parallelism_entry_on_batch_size"
                     + std::to_string(batch_size),
                 1, data_training, data_evaluation,
-                layers_descriptor,EPOCHS, batch_size, LEARNING_RATE);
+                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
+
+            testing<ProfileCompileFNNThreadOnEntry>(
+                "testing thread parallelism on data entry model with batch_size: "
+                    + std::to_string(batch_size),
+                "testing_thread_parallelism_entry_on_batch_size"
+                    + std::to_string(batch_size),
+                1, data_training, data_testing,
+                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
         }
 
         for (const auto& batch_size: batch_sizes)
@@ -151,6 +171,14 @@ private:
                 "training_thread_parallelism_batch_on_batch_size"
                     + std::to_string(batch_size),
                 1, data_training, data_evaluation,
+                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
+
+            testing<ProfileCompileFNNThreadOnBatch>(
+                "testing thread parallelism on data batch model with batch_size: "
+                    + std::to_string(batch_size),
+                "testing_thread_parallelism_batch_on_batch_size"
+                    + std::to_string(batch_size),
+                1, data_training, data_testing,
                 layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
         }
     }
@@ -180,7 +208,9 @@ private:
                 {"hidden_layer3", 15,          ActivationType::ReLU },
                 {"hidden_layer4", 15,          ActivationType::ReLU },
                 {"hidden_layer5", 15,          ActivationType::ReLU },
-                {"output_layer",  output_size, ActivationType::Linear },
+                {"output_layer",  output_size,
+                 _profile_name == "classification" ?
+                 ActivationType::Softmax : ActivationType::Linear },
             }
         );
 
@@ -189,7 +219,7 @@ private:
             training<ProfileCompileFNN>(
                 "training epochs amount: " + std::to_string(e),
                 "training_on_epochs_amount" + std::to_string(e),
-                100, data_training, data_evaluation,
+                1, data_training, data_evaluation,
                 layers_descriptor, e, BATCH_SIZE, LEARNING_RATE);
         }
 
@@ -198,6 +228,13 @@ private:
                 + std::to_string(EPOCHS),
             "prediction",
             100, data_training,
+            layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+
+        testing<ProfileCompileFNN>(
+            "testing after training with epochs amount: "
+                + std::to_string(EPOCHS),
+            "testing",
+            1, data_training, data_testing,
             layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
     }
 
@@ -227,7 +264,9 @@ private:
                 {"hidden_layer3", 15,          ActivationType::ReLU },
                 {"hidden_layer4", 15,          ActivationType::ReLU },
                 {"hidden_layer5", 15,          ActivationType::ReLU },
-                {"output_layer",  output_size, ActivationType::Linear },
+                {"output_layer",  output_size,
+                 _profile_name == "classification" ?
+                 ActivationType::Softmax : ActivationType::Linear },
             }
         );
 
@@ -258,6 +297,19 @@ private:
                 layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
             if (curr_size == training_set_size) break;
         }
+
+        for (const auto& size: training_set_sizes)
+        {
+            auto curr_size = std::min(training_set_size, size);
+            auto subset = data_training.subdata(0, curr_size);
+            testing<ProfileCompileFNN>(
+                "testing with dataset size (#entries): "
+                + std::to_string(curr_size),
+                "testing_on_dataset_size" + std::to_string(curr_size),
+                1, subset, data_testing,
+                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+            if (curr_size == training_set_size) break;
+        }
     }
 
     /**
@@ -280,7 +332,9 @@ private:
         LayerDescriptorVector layers_descriptor(
             {
                 {"input_layer",   input_size,  ActivationType::Linear },
-                {"output_layer",  output_size, ActivationType::Linear },
+                {"output_layer",  output_size,
+                 _profile_name == "classification" ?
+                 ActivationType::Softmax : ActivationType::Linear },
             }
         );
 
@@ -304,6 +358,12 @@ private:
                     + std::to_string(amount),
                 "prediction_on_hidden_layers_amount" + std::to_string(amount),
                 100, data_training,
+                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+
+            testing<ProfileCompileFNN>(
+                "testing with hidden layers amount: " + std::to_string(amount),
+                "testing_on_hidden_layers_amount" + std::to_string(amount),
+                1, data_training, data_testing,
                 layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
         }
     }
@@ -336,7 +396,9 @@ private:
                     {"hidden_layer3", shape, ActivationType::ReLU},
                     {"hidden_layer4", shape, ActivationType::ReLU},
                     {"hidden_layer5", shape, ActivationType::ReLU},
-                    {"output_layer", output_size, ActivationType::Linear},
+                    {"output_layer", output_size,
+                     _profile_name == "classification" ?
+                     ActivationType::Softmax : ActivationType::Linear},
                 }
             );
             training<ProfileCompileFNN>(
@@ -349,6 +411,12 @@ private:
                 "prediction with hidden layers shape: " + std::to_string(shape),
                 "prediction_on_hidden_layers_shape" + std::to_string(shape),
                 100, data_training,
+                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+
+            testing<ProfileCompileFNN>(
+                "testing with hidden layers shape: " + std::to_string(shape),
+                "testing_on_hidden_layers_shape" + std::to_string(shape),
+                1, data_training, data_testing,
                 layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
         }
     }

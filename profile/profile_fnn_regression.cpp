@@ -31,7 +31,7 @@ class ProfileFNNRegression : public ProfileFNN<LossType::MSE, OT>
 public:
     ProfileFNNRegression(
         std::vector<ProfileDataset::Type> dataset_types)
-        : ProfileFNN<LossType::MSE, OT>("classification", dataset_types)
+        : ProfileFNN<LossType::MSE, OT>("regression", dataset_types)
     { }
 };
 

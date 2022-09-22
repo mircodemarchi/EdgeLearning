@@ -73,6 +73,24 @@ public:
         }
     }
 
+    operator std::string()
+    {
+        switch (_dataset_type) {
+            case Type::CSV_EXECUTION_TIME:
+            {
+                return "execution_time";
+            }
+            case Type::MNIST:
+            {
+                return "mnist";
+            }
+            default:
+            {
+                return "";
+            }
+        }
+    }
+
 private:
 
     std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>>
