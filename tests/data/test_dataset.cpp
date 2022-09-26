@@ -86,6 +86,7 @@ public:
         EDGE_LEARNING_TEST_CALL(test_dataset_trainset());
         EDGE_LEARNING_TEST_CALL(test_dataset_parse());
         EDGE_LEARNING_TEST_CALL(test_dataset_shuffle());
+        EDGE_LEARNING_TEST_CALL(test_dataset_normalization());
     }
 private:
 
@@ -987,6 +988,41 @@ private:
         {
             EDGE_LEARNING_TEST_PRINT(ds.labels(i)[0]);
             EDGE_LEARNING_TEST_PRINT(ds.labels(i)[1]);
+        }
+    }
+
+    void test_dataset_normalization() {
+        std::vector<NumType> v({
+            0, 5, 5, 5, 5, 0, 1,
+            5, 0, 5, 5, 5, 1, 1,
+            5, 5, 0, 5, 5, 0, 2,
+            5, 5, 5, 0, 5, 1, 3,
+            5, 5, 5, 5, 0, 0, 1,
+            5, 5, 5, 5, 5, 0, 1,
+        });
+        auto ds = Dataset<NumType>(v, 7, 1, {5,6});
+        Dataset<NumType> ds_copy = ds;
+
+        EDGE_LEARNING_TEST_TRY(ds.min_max_normalization(0, 5));
+        EDGE_LEARNING_TEST_EQUAL(ds.feature_size(), ds_copy.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(ds.size(), ds_copy.size());
+        EDGE_LEARNING_TEST_EQUAL(ds.sequence_size(), ds_copy.sequence_size());
+        EDGE_LEARNING_TEST_EQUAL(ds.trainset_idx().size(),
+                                 ds_copy.trainset_idx().size());
+        for (const auto& e: ds.trainset().data())
+        {
+            EDGE_LEARNING_TEST_EQUAL(e, 1.0);
+        }
+
+        EDGE_LEARNING_TEST_FAIL(ds.min_max_normalization(0, 0));
+        EDGE_LEARNING_TEST_THROWS(ds.min_max_normalization(0, 0),
+                                  std::runtime_error);
+
+        ds = ds_copy;
+        EDGE_LEARNING_TEST_TRY(ds.min_max_normalization());
+        for (const auto& e: ds.data()) {
+            EDGE_LEARNING_TEST_ASSERT(0.0 <= e);
+            EDGE_LEARNING_TEST_ASSERT(e <= 1.0);
         }
     }
 };

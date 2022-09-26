@@ -46,7 +46,7 @@ class ProfileDataset
 public:
     const NumType PERCENTAGE_TESTING_DATASET = 0.2;
     const NumType PERCENTAGE_TRAINING_DATASET = 1 - PERCENTAGE_TESTING_DATASET;
-    const NumType PERCENTAGE_EVALUATION_DATASET = 0.2;
+    const NumType PERCENTAGE_VALIDATION_DATASET = 0.2;
 
     enum class Type {
         MNIST,
@@ -124,12 +124,24 @@ private:
             MNIST_TESTING_LABELS_FP);
         auto data_training = Dataset<NumType>::parse(
             mnist_training,
-            DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+            DatasetParser::LabelEncoding::ONE_HOT_ENCODING)
+                .min_max_normalization();
         auto data_testing = Dataset<NumType>::parse(
             mnist_testing,
-            DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
-        auto data_evaluation = data_training.subdata(PERCENTAGE_EVALUATION_DATASET);
-        return {data_training, data_evaluation, data_testing};
+            DatasetParser::LabelEncoding::ONE_HOT_ENCODING)
+                .min_max_normalization();
+        auto data_validation = data_training.subdata(
+            PERCENTAGE_VALIDATION_DATASET);
+        std::cout << "data training shape: ("
+            << data_training.size() << ", "
+            << data_training.feature_size() << ")" << std::endl;
+        std::cout << "data validation shape: ("
+                  << data_validation.size() << ", "
+                  << data_validation.feature_size() << ")" << std::endl;
+        std::cout << "data testing shape: ("
+                  << data_testing.size() << ", "
+                  << data_testing.feature_size() << ")" << std::endl;
+        return {data_training, data_validation, data_testing};
     }
 
     std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>>
@@ -143,10 +155,10 @@ private:
                        { TypeChecker::Type::AUTO }, ',', {4});
         auto data = Dataset<NumType>::parse(csv);
         auto data_split = data.split(PERCENTAGE_TRAINING_DATASET);
-        auto data_evaluation = data_split.training_set.subdata(
-            PERCENTAGE_EVALUATION_DATASET);
+        auto data_validation = data_split.training_set.subdata(
+            PERCENTAGE_VALIDATION_DATASET);
         return {data_split.training_set,
-                data_evaluation,
+                data_validation,
                 data_split.testing_set};
     }
 

@@ -651,6 +651,61 @@ public:
         return *this;
     }
 
+    Dataset<T>& min_max_normalization(T min, T max)
+    {
+        if (min == max) {
+            throw std::runtime_error(
+                "normalization error: min and max cannot be equal");
+        }
+
+
+        for (std::size_t row = 0; row < _feature_amount; ++row)
+        {
+            for (std::size_t col = 0; col < _feature_size; ++col)
+            {
+                _data[row * _feature_size + col]
+                    = (_data[row * _feature_size + col] - min) / (max - min);
+            }
+        }
+        return *this;
+    }
+
+    Dataset<T>& min_max_normalization()
+    {
+        std::vector<T> min_vec(_feature_size);
+        std::vector<T> max_vec(_feature_size);
+
+        // Init min and max vectors with first row.
+        for (std::size_t col = 0; col < _feature_size; ++col)
+        {
+            min_vec[col] = _data[col];
+            max_vec[col] = _data[col];
+        }
+
+        // Update min and max vectors.
+        for (std::size_t row = 1; row < _feature_amount; ++row)
+        {
+            for (std::size_t col = 0; col < _feature_size; ++col)
+            {
+                auto idx = row * _feature_size + col;
+                if (_data[idx] > max_vec[col]) max_vec[col] = _data[idx];
+                if (_data[idx] < min_vec[col]) min_vec[col] = _data[idx];
+            }
+        }
+
+        // Apply min max normalization.
+        for (std::size_t row = 0; row < _feature_amount; ++row)
+        {
+            for (std::size_t col = 0; col < _feature_size; ++col)
+            {
+                _data[row * _feature_size + col]
+                    = (_data[row * _feature_size + col] - min_vec[col])
+                        / (max_vec[col] - min_vec[col]);
+            }
+        }
+        return *this;
+    }
+
     /**
      * \brief Parse a dataset from a given parser and label encoding.
      * Static method.
