@@ -908,6 +908,39 @@ public:
     }
 
     /**
+     * \brief Softmax Function with numerical stability.
+     * softmax(z)_i = exp(z_i - D) / \sum_j(exp(z_j)) where D = max(z)
+     * \tparam T     Type of each source and destination elements.
+     * \param dst    Array to write the result.
+     * \param src    Array of read elements.
+     * \param length Length of the arrays.
+     * \return T* The destination array pointer.
+     */
+    template <typename T>
+    static T* stable_softmax(T* dst, const T* src, SizeType length)
+    {
+        T d = max<T>(src, length);
+
+        // Compute the exponential of each value and compute the sum.
+        T sum_exp_z{0};
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] = std::exp(src[i] - d);
+            sum_exp_z += dst[i];
+        }
+
+        // Compute the inverse of the sum.
+        T inv_sum_exp_z = T{1} / sum_exp_z;
+
+        // Multiply the inverse of the sum for each value.
+        for (SizeType i = 0; i < length; ++i)
+        {
+            dst[i] *= inv_sum_exp_z;
+        }
+        return dst;
+    }
+
+    /**
      * \brief Derivative Optimized of Softmax Function with the value of the 
      * argmax already saved in the src array. Source and Destination has to be 
      * different. If Source and Destination pointers are equal, a runtime_error
@@ -964,9 +997,8 @@ public:
             dst[i] = T{0.0};
             for(SizeType j = 0; j < length; ++j)
             {
-                dst[i] += (i == j)
-                          ? src[i] * (T{1.0} - src[i]) * gradients[j]
-                          : -src[i] * src[j] * gradients[j];
+                dst[i] += src[i] * (
+                    (i == j ? 1.0 : 0.0) - src[j]) * gradients[j];
             }
         }
         return dst;
