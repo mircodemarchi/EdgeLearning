@@ -98,17 +98,20 @@ struct MapOptimizer<Framework::EDGE_LEARNING, OptimizerType::ADAM> {
 
 template <>
 struct MapInit<Framework::EDGE_LEARNING, InitType::HE_INIT> {
-    static const InitType type = InitType::HE_INIT;
+    static const Model::InitializationFunction type
+        = Model::InitializationFunction::KAIMING;
 };
 
 template <>
 struct MapInit<Framework::EDGE_LEARNING, InitType::XAVIER_INIT> {
-    static const InitType type = InitType::XAVIER_INIT;
+    static const Model::InitializationFunction type
+        = Model::InitializationFunction::XAVIER;
 };
 
 template <>
 struct MapInit<Framework::EDGE_LEARNING, InitType::AUTO> {
-    static const InitType type = InitType::AUTO;
+    static const Model::InitializationFunction type
+        = Model::InitializationFunction::AUTO;
 };
 
 } // namespace EdgeLearning

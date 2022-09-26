@@ -69,7 +69,7 @@ public:
         }
         using optimizer_type = typename MapOptimizer<
             Framework::MLPACK, OT>::type;
-        optimizer_type o(learning_rate, batch_size, data.size());
+        optimizer_type o(learning_rate, batch_size, data.size(), 0.0, false);
         auto trainset = data.trainset().template to_arma<arma::Mat<T>>();
         auto labels = data.labels().template to_arma<arma::Mat<T>>();
 

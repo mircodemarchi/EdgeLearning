@@ -61,14 +61,19 @@ public:
         {
             for (SizeType i = 0; i < data.size();)
             {
+                model.reset_score();
                 for (SizeType b = 0; b < batch_size
                                      && i < data.size(); ++b, ++i)
                 {
                     model.step(data.trainset(i), data.labels(i));
                 }
                 model.train(o);
-                model.reset_score();
             }
+
+            std::cout
+                << "accuracy: " << model.accuracy() << ", "
+                << "avg_loss: " << model.avg_loss()
+                << std::endl;
         }
     }
 };
@@ -86,6 +91,8 @@ public:
         {
             for (SizeType i = 0; i < data.size();)
             {
+                model.reset_score();
+
                 std::vector<ConcManager::Future<Model>> futures;
                 for (SizeType b = 0; b < batch_size
                                      && i < data.size(); ++b, ++i)
@@ -103,7 +110,6 @@ public:
                     Model m = f.get();
                     model.train(o, m);
                 }
-                model.reset_score();
             }
         }
     }
@@ -122,6 +128,8 @@ public:
         {
             for (SizeType i = 0; i < data.size();)
             {
+                model.reset_score();
+
                 std::vector<ConcManager::Future<Model>> futures;
                 for (SizeType t = 0; t < tm.maximum_concurrency(); ++t)
                 {
@@ -145,7 +153,6 @@ public:
                     Model m = f.get();
                     model.train(o, m);
                 }
-                model.reset_score();
 
                 i += batch_size * tm.maximum_concurrency();
             }
@@ -257,7 +264,8 @@ public:
         using optimizer_type = typename MapOptimizer<
             Framework::EDGE_LEARNING, OT>::type;
         auto o = optimizer_type(learning_rate);
-        _m.init();
+        _m.init(MapInit<Framework::EDGE_LEARNING, IT>::type,
+                Model::ProbabilityDensityFunction::NORMAL, 1);
         Training<PL, T>::run(_m, data, o, epochs, batch_size);
     }
 
@@ -294,7 +302,7 @@ struct MapModel<Framework::EDGE_LEARNING, LT, OT, IT, PL, T> {
     using loss_type = typename MapLoss<Framework::EDGE_LEARNING, LT>::type;
     using optimizer_type = typename MapOptimizer<
         Framework::EDGE_LEARNING, OT>::type;
-    static const InitType init_type = MapInit<
+    static const Model::InitializationFunction init_type = MapInit<
         Framework::EDGE_LEARNING, IT>::type;
     using type = Model;
     using fnn = EdgeFNN<LT, OT, IT, PL, T>;
