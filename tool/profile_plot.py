@@ -20,20 +20,21 @@ parser.add_argument("--edgelearning-folder",
                     help="Folder path in which there are EDGELEARNING profiling values")
 args = parser.parse_args()
 
-def get_data(file_prefix, range_list, files, framework_name, folder, x):
+def get_data(file_prefix, range_list, files, framework_name, folder, x, techniques=[""]):
     df = pd.DataFrame()
-    for i in range_list:
-        fn = file_prefix + (str(i) if i else "") + ".csv"
-        if fn not in files:
-            continue
-        f = os.path.join(folder, fn)
-        profile_times = pd.read_csv(f).to_numpy().flatten() / 1e3
-        data = {
-            "ms": profile_times, 
-            "framework": np.repeat(framework_name, len(profile_times)),
-            x: np.repeat(i if i else 0, len(profile_times))
-        }
-        df = pd.concat([df, pd.DataFrame(data)], ignore_index=True)
+    for technique in techniques:
+        for i in range_list:
+            fn = file_prefix + technique + (str(i) if i else "") + ".csv"
+            if fn not in files:
+                continue
+            f = os.path.join(folder, fn)
+            profile_times = pd.read_csv(f).to_numpy().flatten() / 1e3
+            data = {
+                "ms": profile_times, 
+                "framework": np.repeat(framework_name + "_" + technique, len(profile_times)),
+                x: np.repeat(i if i else 0, len(profile_times))
+            }
+            df = pd.concat([df, pd.DataFrame(data)], ignore_index=True)
 
     print("{:15}: {{ mean: {:10.4f}, median: {:10.4f}, std: {:10.4f} }}".format(
         framework_name,
@@ -72,10 +73,33 @@ def plot(file_prefix, range_list, files, mlpack_folder, edgelearning_folder, x="
         i += 1
     return fig
 
+
+def plot_techniques(file_prefix, range_list, files, folder, techniques, x="", types=[]):
+    if not types or len(types) == 0:
+        return None
+    types = [t for t in types if t in ["boxplot", "lineplot", "violinplot"]]
+    
+    df = get_data(file_prefix, range_list, files, "edgelearning", folder, x, techniques)
+
+    fig, axs = plt.subplots(nrows=len(types), figsize=(15,20))
+    i = 0
+    if "boxplot" in types: 
+        sns.boxplot(data=df, x=x, y="ms", hue="framework", showfliers=False, linewidth=0.5, ax=axs[i] if len(types) > 1 else None)
+        i += 1
+    if "lineplot" in types: 
+        sns.lineplot(data=df, x=x, y="ms", hue="framework", ax=axs[i] if len(types) > 1 else None)
+        axs[i].set_xticks(range_list)
+        i += 1
+    if "violinplot" in types:
+        sns.violinplot(data=df, x=x, y="ms", hue="framework", ax=axs[i] if len(types) > 1 else None)
+        i += 1
+    return fig
+
+
 def plot_training_on_epochs_amount(files, mlpack_folder, edgelearning_folder):
     print("-- plot_training_on_epochs_amount --")
     FILE_PREFIX = "training_on_epochs_amount"
-    EPOCHS_RANGE = np.arange(1,20)
+    EPOCHS_RANGE = np.arange(1,21)
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, EPOCHS_RANGE, files, mlpack_folder, edgelearning_folder, "epochs", TYPES)
     if fig:
@@ -95,7 +119,7 @@ def plot_prediction(files, mlpack_folder, edgelearning_folder):
 def plot_training_on_dataset_size(files, mlpack_folder, edgelearning_folder):
     print("-- plot_training_on_dataset_size --")
     FILE_PREFIX = "training_on_dataset_size"
-    RANGE = [100,121,152,210,343,1010]
+    RANGE = [10,50,100,200,300,400,600,800,1000,3200]
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "dataset_size", TYPES)
     if fig:
@@ -105,7 +129,7 @@ def plot_training_on_dataset_size(files, mlpack_folder, edgelearning_folder):
 def plot_prediction_on_dataset_size(files, mlpack_folder, edgelearning_folder):
     print("-- plot_prediction_on_dataset_size --")
     FILE_PREFIX = "prediction_on_dataset_size"
-    RANGE = [100,121,152,210,343,1010]
+    RANGE = [10,50,100,200,300,400,600,800,1000,3200]
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "dataset_size", TYPES)
     if fig:
@@ -115,7 +139,7 @@ def plot_prediction_on_dataset_size(files, mlpack_folder, edgelearning_folder):
 def plot_training_on_hidden_layers_amount(files, mlpack_folder, edgelearning_folder):
     print("-- plot_training_on_hidden_layers_amount --")
     FILE_PREFIX = "training_on_hidden_layers_amount"
-    RANGE = list(range(15))
+    RANGE = list(range(1,11))
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_amount", TYPES)
     if fig:
@@ -125,7 +149,7 @@ def plot_training_on_hidden_layers_amount(files, mlpack_folder, edgelearning_fol
 def plot_prediction_on_hidden_layers_amount(files, mlpack_folder, edgelearning_folder):
     print("-- plot_prediction_on_hidden_layers_amount --")
     FILE_PREFIX = "prediction_on_hidden_layers_amount"
-    RANGE = list(range(15))
+    RANGE = list(range(1,11))
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_amount", TYPES)
     if fig:
@@ -135,7 +159,7 @@ def plot_prediction_on_hidden_layers_amount(files, mlpack_folder, edgelearning_f
 def plot_training_on_hidden_layers_shape(files, mlpack_folder, edgelearning_folder):
     print("-- plot_training_on_hidden_layers_shape --")
     FILE_PREFIX = "training_on_hidden_layers_shape"
-    RANGE = list(range(10,20))
+    RANGE = list(range(10,21))
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_shape", TYPES)
     if fig:
@@ -145,12 +169,25 @@ def plot_training_on_hidden_layers_shape(files, mlpack_folder, edgelearning_fold
 def plot_prediction_on_hidden_layers_shape(files, mlpack_folder, edgelearning_folder):
     print("-- plot_prediction_on_hidden_layers_shape --")
     FILE_PREFIX = "prediction_on_hidden_layers_shape"
-    RANGE = list(range(10,20))
+    RANGE = list(range(10,21))
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_shape", TYPES)
     if fig:
         fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
         plt.close(fig)
+
+
+def plot_training_parallelism_techniques(files, folder):
+    print("-- plot_training_parallelism_techniques --")
+    FILE_PREFIX = "training_"
+    TECHNIQUES = ["sequential_on_batch_size", "thread_parallelism_batch_on_batch_size", "thread_parallelism_entry_on_batch_size"]
+    RANGE = [1,2,4,8,16,32,64,128]
+    TYPES = ["boxplot", "lineplot"]
+    fig = plot_techniques(FILE_PREFIX, RANGE, files, folder, TECHNIQUES, "batch_size", TYPES)
+    if fig:
+        fig.savefig(FILE_PREFIX + "technique_parallelism.jpg", dpi=DPI)
+        plt.close(fig)
+
 
 def main():
     mlpack_fp = args.mlpack_fp
@@ -176,6 +213,13 @@ def main():
     ]
     for fun in functions:
         fun(files, mlpack_folder=mlpack_fp, edgelearning_folder=edgelearning_fp)
+
+    files = edgelearning_profile_files
+    functions = [
+        plot_training_parallelism_techniques
+    ]
+    for fun in functions:
+        fun(files, folder=edgelearning_fp)
 
 
 if __name__ == '__main__':
