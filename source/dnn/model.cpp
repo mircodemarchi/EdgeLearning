@@ -164,7 +164,6 @@ void Model::train(Optimizer& optimizer, Model& model_from)
     {
         optimizer.train(*layer);
     }
-
 }
 
 void Model::reset_score()
@@ -197,6 +196,10 @@ void Model::step(const std::vector<NumType>& input,
     }
 
     // Backward.
+    for (const auto& loss_layer: _state.loss_layers)
+    {
+        loss_layer->backward(not_used);
+    }
     for (const auto& backward_arc: _state.backward_run)
     {
         backward_arc.to->backward(backward_arc.from->last_input_gradient());
