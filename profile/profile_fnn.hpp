@@ -95,11 +95,6 @@ private:
             {
                 {"input_layer",   input_size,  ActivationType::Linear },
                 {"hidden_layer0", 32,          ActivationType::ReLU },
-                {"hidden_layer1", 15,          ActivationType::ReLU },
-                {"hidden_layer2", 15,          ActivationType::ReLU },
-                {"hidden_layer3", 15,          ActivationType::ReLU },
-                {"hidden_layer4", 15,          ActivationType::ReLU },
-                {"hidden_layer5", 15,          ActivationType::ReLU },
                 {"output_layer",  output_size,
                  _profile_name == "classification" ?
                  ActivationType::Softmax : ActivationType::Linear },
@@ -204,11 +199,6 @@ private:
             {
                 {"input_layer",   input_size,  ActivationType::Linear },
                 {"hidden_layer0", 32,          ActivationType::ReLU },
-                // {"hidden_layer1", 15,          ActivationType::ReLU },
-                // {"hidden_layer2", 15,          ActivationType::ReLU },
-                // {"hidden_layer3", 15,          ActivationType::ReLU },
-                // {"hidden_layer4", 15,          ActivationType::ReLU },
-                // {"hidden_layer5", 15,          ActivationType::ReLU },
                 {"output_layer",  output_size,
                  _profile_name == "classification" ?
                  ActivationType::Softmax : ActivationType::Linear },
@@ -221,8 +211,7 @@ private:
                 "training epochs amount: " + std::to_string(e),
                 "training_on_epochs_amount" + std::to_string(e),
                 1, data_training, data_validation,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-            return;
+                layers_descriptor, e, BATCH_SIZE, LEARNING_RATE);
         }
 
         predict<ProfileCompileFNN>(
@@ -260,12 +249,7 @@ private:
         LayerDescriptorVector layers_descriptor(
             {
                 {"input_layer",   input_size,  ActivationType::Linear },
-                {"hidden_layer0", 15,          ActivationType::ReLU },
-                {"hidden_layer1", 15,          ActivationType::ReLU },
-                {"hidden_layer2", 15,          ActivationType::ReLU },
-                {"hidden_layer3", 15,          ActivationType::ReLU },
-                {"hidden_layer4", 15,          ActivationType::ReLU },
-                {"hidden_layer5", 15,          ActivationType::ReLU },
+                {"hidden_layer0", 32,          ActivationType::ReLU },
                 {"output_layer",  output_size,
                  _profile_name == "classification" ?
                  ActivationType::Softmax : ActivationType::Linear },
@@ -393,11 +377,6 @@ private:
                 {
                     {"input_layer", input_size, ActivationType::Linear},
                     {"hidden_layer0", shape, ActivationType::ReLU},
-                    {"hidden_layer1", shape, ActivationType::ReLU},
-                    {"hidden_layer2", shape, ActivationType::ReLU},
-                    {"hidden_layer3", shape, ActivationType::ReLU},
-                    {"hidden_layer4", shape, ActivationType::ReLU},
-                    {"hidden_layer5", shape, ActivationType::ReLU},
                     {"output_layer", output_size,
                      _profile_name == "classification" ?
                      ActivationType::Softmax : ActivationType::Linear},

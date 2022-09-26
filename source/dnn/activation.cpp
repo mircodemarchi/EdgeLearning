@@ -143,8 +143,8 @@ const std::vector<NumType>& SoftmaxLayer::forward(
     const std::vector<NumType>& inputs)
 {
     SizeType size = _output_activations.size();
-    DLMath::stable_softmax<NumType>(_output_activations.data(), inputs.data(),
-                                    size);
+    DLMath::stable_softmax_no_check<NumType>(
+        _output_activations.data(), inputs.data(), size);
     return ActivationLayer::forward(_output_activations);
 }
 

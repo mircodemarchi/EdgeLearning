@@ -1009,9 +1009,10 @@ private:
         EDGE_LEARNING_TEST_EQUAL(ds.sequence_size(), ds_copy.sequence_size());
         EDGE_LEARNING_TEST_EQUAL(ds.trainset_idx().size(),
                                  ds_copy.trainset_idx().size());
-        for (const auto& e: ds.trainset().data())
+        auto train_part = ds.trainset();
+        for (const auto& e: train_part.data())
         {
-            EDGE_LEARNING_TEST_EQUAL(e, 1.0);
+            EDGE_LEARNING_TEST_ASSERT(e == 0.0 || e == 1.0);
         }
 
         EDGE_LEARNING_TEST_FAIL(ds.min_max_normalization(0, 0));

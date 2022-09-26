@@ -917,7 +917,7 @@ public:
      * \return T* The destination array pointer.
      */
     template <typename T>
-    static T* stable_softmax(T* dst, const T* src, SizeType length)
+    static T* stable_softmax_no_check(T* dst, const T* src, SizeType length)
     {
         T d = max<T>(src, length);
 
@@ -938,6 +938,16 @@ public:
             dst[i] *= inv_sum_exp_z;
         }
         return dst;
+    }
+
+    template <typename T>
+    static T* stable_softmax(T* dst, const T* src, SizeType length)
+    {
+        if (!src)
+        {
+            throw std::runtime_error("stable softmax error: src null");
+        }
+        return stable_softmax_no_check(dst, src, length);
     }
 
     /**

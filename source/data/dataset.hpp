@@ -438,7 +438,7 @@ public:
         {
             _entry_trainset_cache.clear();
             return _entry_trainset_cache;
-        } 
+        }
         if (_trainset_idx.size() == _feature_size)
         {
             return entry(row_idx);
@@ -672,8 +672,8 @@ public:
 
     Dataset<T>& min_max_normalization()
     {
-        std::vector<T> min_vec(_feature_size);
-        std::vector<T> max_vec(_feature_size);
+        std::vector<T> min_vec(static_cast<std::size_t>(_feature_size));
+        std::vector<T> max_vec(static_cast<std::size_t>(_feature_size));
 
         // Init min and max vectors with first row.
         for (std::size_t col = 0; col < _feature_size; ++col)

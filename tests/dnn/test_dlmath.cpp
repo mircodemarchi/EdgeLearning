@@ -685,6 +685,28 @@ private:
                 + std::to_string(test_vec[i]));
             EDGE_LEARNING_TEST_WITHIN(test_vec[i], truth_vec[i], 0.00000000001);
         }
+
+        test_vec = {1000, 2000, 3000, 4000};
+        DLMath::softmax<TestNumType>(test_vec.data(), test_vec.data(),
+                                     test_vec.size());
+        for (std::size_t i = 0; i < test_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_ASSERT(std::isnan(test_vec[i]));
+        }
+
+        test_vec = {1000, 2000, 3000, 4000};
+        DLMath::stable_softmax<TestNumType>(test_vec.data(), test_vec.data(),
+                                            test_vec.size());
+        for (std::size_t i = 0; i < test_vec.size(); ++i)
+        {
+            EDGE_LEARNING_TEST_ASSERT(!std::isnan(test_vec[i]));
+        }
+
+        EDGE_LEARNING_TEST_FAIL(
+            DLMath::stable_softmax<TestNumType>(test_vec.data(), nullptr, 0));
+        EDGE_LEARNING_TEST_THROWS(
+            DLMath::stable_softmax<TestNumType>(test_vec.data(), nullptr, 0),
+            std::runtime_error);
     }
 
     void test_softmax_1() {

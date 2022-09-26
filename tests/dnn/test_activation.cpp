@@ -491,8 +491,8 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Softmax");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Softmax");
         EDGE_LEARNING_TEST_TRY(l.init());
-        EDGE_LEARNING_TEST_TRY(l.training_forward(v_empty));
-        EDGE_LEARNING_TEST_TRY(l.backward(v_empty));
+        EDGE_LEARNING_TEST_TRY(l.training_forward(v));
+        EDGE_LEARNING_TEST_TRY(l.backward(v));
         EDGE_LEARNING_TEST_TRY(l.print());
         EDGE_LEARNING_TEST_EQUAL(l.param_count(), 0);
         EDGE_LEARNING_TEST_FAIL(l.param(0));
@@ -500,10 +500,10 @@ private:
         EDGE_LEARNING_TEST_FAIL(l.gradient(0));
         EDGE_LEARNING_TEST_THROWS(l.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l.name(), "softmax_layer_test");
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
-        EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
-        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), v.size());
+        EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
         EDGE_LEARNING_TEST_TRY((void) l.clone());
         EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
@@ -519,10 +519,10 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_copy.gradient(0));
         EDGE_LEARNING_TEST_THROWS(l_copy.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_copy.name(), "softmax_layer_test");
-        EDGE_LEARNING_TEST_EQUAL(l_copy.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_copy.output_size(), 0);
-        EDGE_LEARNING_TEST_ASSERT(l_copy.last_input().empty());
-        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.input_size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.output_size(), v.size());
+        EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_output().size(),
                                  l_copy.output_size());
 
@@ -537,10 +537,10 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_assign.gradient(0));
         EDGE_LEARNING_TEST_THROWS(l_assign.gradient(0), std::runtime_error);
         EDGE_LEARNING_TEST_EQUAL(l_assign.name(), "softmax_layer_test");
-        EDGE_LEARNING_TEST_EQUAL(l_assign.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l_assign.output_size(), 0);
-        EDGE_LEARNING_TEST_ASSERT(l_assign.last_input().empty());
-        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v_empty.size());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.input_size(), v.size());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.output_size(), v.size());
+        EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
+        EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_output().size(),
                                  l_assign.output_size());
 
@@ -549,8 +549,6 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
-        EDGE_LEARNING_TEST_NOT_EQUAL(
-            l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());

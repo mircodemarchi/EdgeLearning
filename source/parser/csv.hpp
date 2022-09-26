@@ -39,6 +39,7 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <iterator>
 
 namespace EdgeLearning {
 
