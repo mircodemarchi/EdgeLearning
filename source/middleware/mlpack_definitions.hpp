@@ -78,6 +78,31 @@ struct MapActivation<Framework::MLPACK, ActivationType::Linear> {
 };
 
 template <>
+struct MapLayer<Framework::MLPACK, LayerType::Dense> {
+    using type = mlpack::ann::Linear<>;
+};
+
+template <>
+struct MapLayer<Framework::MLPACK, LayerType::Conv> {
+    using type = mlpack::ann::Convolution<>;
+};
+
+template <>
+struct MapLayer<Framework::MLPACK, LayerType::MaxPool> {
+    using type = mlpack::ann::MaxPooling<>;
+};
+
+template <>
+struct MapLayer<Framework::MLPACK, LayerType::AvgPool> {
+    using type = mlpack::ann::MeanPooling<>;
+};
+
+template <>
+struct MapLayer<Framework::MLPACK, LayerType::Dropout> {
+    using type = mlpack::ann::Dropout<>;
+};
+
+template <>
 struct MapLoss<Framework::MLPACK, LossType::CCE> {
     using type = mlpack::ann::CrossEntropyError<>;
     static constexpr std::string_view name = "cce_loss";

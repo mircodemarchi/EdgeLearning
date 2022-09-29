@@ -75,6 +75,31 @@ struct MapActivation<Framework::EDGE_LEARNING, ActivationType::Linear> {
 };
 
 template <>
+struct MapLayer<Framework::EDGE_LEARNING, LayerType::Dense> {
+    using type = DenseLayer;
+};
+
+template <>
+struct MapLayer<Framework::EDGE_LEARNING, LayerType::Conv> {
+    using type = ConvolutionalLayer;
+};
+
+template <>
+struct MapLayer<Framework::EDGE_LEARNING, LayerType::MaxPool> {
+    using type = MaxPoolingLayer;
+};
+
+template <>
+struct MapLayer<Framework::EDGE_LEARNING, LayerType::AvgPool> {
+    using type = AvgPoolingLayer;
+};
+
+template <>
+struct MapLayer<Framework::EDGE_LEARNING, LayerType::Dropout> {
+    using type = DropoutLayer;
+};
+
+template <>
 struct MapLoss<Framework::EDGE_LEARNING, LossType::CCE> {
     using type = CCELossLayer;
     inline static const std::string name = "cce_loss";

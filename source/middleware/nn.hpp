@@ -30,6 +30,10 @@
 #define EDGE_LEARNING_MIDDLEWARE_NN_HPP
 
 #include "dnn/dense.hpp"
+#include "dnn/convolutional.hpp"
+#include "dnn/dropout.hpp"
+#include "dnn/avg_pooling.hpp"
+#include "dnn/max_pooling.hpp"
 #include "dnn/activation.hpp"
 #include "dnn/mse_loss.hpp"
 #include "dnn/cce_loss.hpp"
@@ -56,6 +60,16 @@ enum class ParallelizationLevel
     SEQUENTIAL,
     THREAD_PARALLELISM_ON_DATA_ENTRY,
     THREAD_PARALLELISM_ON_DATA_BATCH,
+};
+
+enum class LayerType
+{
+    Dense,
+    Conv,
+    MaxPool,
+    AvgPool,
+    Dropout,
+    Input
 };
 
 enum class ActivationType
@@ -88,12 +102,16 @@ enum class InitType
     AUTO,
 };
 
-using LayerDescriptor = std::tuple<std::string, SizeType, ActivationType>;
-using LayerDescriptorVector = std::vector<LayerDescriptor>;
+
+class LayerDescriptor;
+using NNDescriptor = std::vector<LayerDescriptor>;
+
 
 // template <Framework F> struct MatType;
 
 template <Framework F, ActivationType A> struct MapActivation;
+
+template <Framework F, LayerType L> struct MapLayer;
 
 template <Framework F, LossType LT> struct MapLoss;
 
