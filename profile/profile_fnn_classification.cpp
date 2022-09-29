@@ -36,13 +36,13 @@ class ProfileFNNClassification : public ProfileFNN<LossType::CCE, OT>
 {
 public:
     ProfileFNNClassification(
-        std::vector<ProfileDataset::Type> dataset_types,
-        NNDescriptor hidden_layers_descriptor,
+        ProfileDataset::Type dataset_type,
+        std::vector<NNDescriptor> hidden_layers_descriptor_vec,
         ProfileNN::TrainingSetting default_setting)
         : ProfileFNN<LossType::CCE, OT>(
             "classification",
-            dataset_types,
-            hidden_layers_descriptor,
+            dataset_type,
+            hidden_layers_descriptor_vec,
             default_setting)
     { }
 };
@@ -52,11 +52,8 @@ int main() {
     SizeType BATCH_SIZE = 128;
     NumType LEARNING_RATE = 0.01;
 
-    std::vector<ProfileDataset::Type> dataset_types({
-        ProfileDataset::Type::MNIST,
-    });
     ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
-        dataset_types,
-        mnist_hidden_layers_descriptor,
+        ProfileDataset::Type::MNIST,
+        {mnist_hidden_layers_descriptor},
         {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
 }

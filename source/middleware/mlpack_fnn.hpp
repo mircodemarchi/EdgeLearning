@@ -133,9 +133,9 @@ private:
                     input_shape.width(),
                     input_shape.height());
                 _m.Add(layer);
-                return {DLMath::Shape3d(layer->OutputHeight(),
-                                        layer->OutputWidth(),
-                                        ld.setting().n_filters())};
+                return LayerShape(DLMath::Shape3d(layer->OutputHeight(),
+                                                  layer->OutputWidth(),
+                                                  ld.setting().n_filters()));
             }
             case LayerType::MaxPool:
             {
@@ -145,9 +145,9 @@ private:
                     ld.setting().stride().width(),
                     ld.setting().stride().height());
                 _m.Add(layer);
-                return {DLMath::Shape3d(layer->OutputHeight(),
-                                        layer->OutputWidth(),
-                                        input_shape.channels())};
+                return LayerShape(DLMath::Shape3d(layer->OutputHeight(),
+                                                  layer->OutputWidth(),
+                                                  input_shape.channels()));
             }
             case LayerType::AvgPool:
             {
@@ -157,9 +157,9 @@ private:
                     ld.setting().stride().width(),
                     ld.setting().stride().height());
                 _m.Add(layer);
-                return {DLMath::Shape3d(layer->OutputHeight(),
-                                        layer->OutputWidth(),
-                                        input_shape.channels())};
+                return LayerShape(DLMath::Shape3d(layer->OutputHeight(),
+                                                  layer->OutputWidth(),
+                                                  input_shape.channels()));
             }
             case LayerType::Dropout:
             {
@@ -175,7 +175,7 @@ private:
                     input_shape.size(),
                     ld.setting().units().size());
                 _m.Add(layer);
-                return {DLMath::Shape3d(layer->OutputSize())};
+                return LayerShape(DLMath::Shape3d(layer->OutputSize()));
             }
         }
     }
