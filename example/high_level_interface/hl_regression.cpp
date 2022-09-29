@@ -42,13 +42,13 @@ int main()
     };
     Dataset<NumType> dataset(data, 1, {4, 5});
 
-    LayerDescriptorVector layers_descriptor(
+    NNDescriptor layers_descriptor(
         {
-            {"input_layer",   INPUT_SIZE,  ActivationType::Linear },
-            {"hidden_layer1", 8UL,         ActivationType::ReLU   },
-            {"hidden_layer2", 32UL,        ActivationType::ReLU   },
-            {"hidden_layer3", 16UL,        ActivationType::ReLU   },
-            {"output_layer",  OUTPUT_SIZE, ActivationType::Linear }
+            Input{"input_layer",   INPUT_SIZE},
+            Dense{"hidden_layer1", 8UL,         ActivationType::ReLU   },
+            Dense{"hidden_layer2", 32UL,        ActivationType::ReLU   },
+            Dense{"hidden_layer3", 16UL,        ActivationType::ReLU   },
+            Dense{"output_layer",  OUTPUT_SIZE, ActivationType::Linear }
         }
     );
 

@@ -44,8 +44,6 @@ const std::vector<NumType>& MSELossLayer::forward(
 {
     SizeType in_size = inputs.size();
 
-    // std::cout << "[" << _name << "] forward" << std::endl;
-
     if (_target == nullptr)
     {
         throw std::runtime_error("_target is null, set_target not called");
@@ -71,8 +69,6 @@ const std::vector<NumType>& MSELossLayer::backward(
 {
     // Parameter ignored because it is a loss layer.
     (void) gradients;
-
-    std::cout << "[" << _name << "] backward" << std::endl;
 
     DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input,
         _inv_batch_size, _gradients.size());

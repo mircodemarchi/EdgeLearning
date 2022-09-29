@@ -30,6 +30,7 @@
 #define EDGE_LEARNING_MIDDLEWARE_FNN_HPP
 
 #include "definitions.hpp"
+#include "layer_descriptor.hpp"
 #if ENABLE_MLPACK
 #include "mlpack_fnn.hpp"
 #endif
@@ -69,11 +70,6 @@ public:
                 }
                 model.train(o);
             }
-
-            std::cout
-                << "accuracy: " << model.accuracy() << ", "
-                << "avg_loss: " << model.avg_loss()
-                << std::endl;
         }
     }
 };
@@ -171,75 +167,37 @@ public:
     EdgeFNN(std::string name)
         : NN<T>(name)
         , _m(NN<T>::_name)
-        , _output_size{0}
+        , _output_shape{0}
+        , _is_first_add{true}
     { }
 
     void add(LayerDescriptor ld) override
     {
-        auto layer_name = std::get<0>(ld);
-        auto layer_size = std::get<1>(ld);
-        auto layer_activation = std::get<2>(ld);
-
-        if (_output_size != 0)
+        if (_is_first_add)
         {
-            Layer::SharedPtr prev_layer;
-            if (!_m.layers().empty())
+            _is_first_add = false;
+            if (ld.type() == LayerType::Input)
             {
-                prev_layer = _m.layers().back();
-            }
-            auto layer = _m.template add_layer<DenseLayer>(
-                layer_name, _output_size, layer_size);
-            if (prev_layer)
-            {
-                _m.create_edge(prev_layer, layer);
-            }
-            switch (layer_activation) {
-                case ActivationType::ReLU:
-                {
-                    auto activation_layer = _m.template add_layer<ReluLayer>(
-                        layer_name, layer_size);
-                    _m.create_edge(layer, activation_layer);
-                    break;
-                }
-                case ActivationType::ELU:
-                {
-                    auto activation_layer = _m.template add_layer<EluLayer>(
-                        layer_name, layer_size);
-                    _m.create_edge(layer, activation_layer);
-                    break;
-                }
-                case ActivationType::Softmax:
-                {
-                    auto activation_layer = _m.template add_layer<SoftmaxLayer>(
-                        layer_name, layer_size);
-                    _m.create_edge(layer, activation_layer);
-                    break;
-                }
-                case ActivationType::TanH:
-                {
-                    auto activation_layer = _m.template add_layer<TanhLayer>(
-                        layer_name, layer_size);
-                    _m.create_edge(layer, activation_layer);
-                    break;
-                }
-                case ActivationType::Sigmoid:
-                {
-                    auto activation_layer = _m.template add_layer<SigmoidLayer>(
-                        layer_name, layer_size);
-                    _m.create_edge(layer, activation_layer);
-                    break;
-                }
-                case ActivationType::Linear:
-                default:
-                {
-                    auto activation_layer = _m.template add_layer<LinearLayer>(
-                        layer_name, layer_size);
-                    _m.create_edge(layer, activation_layer);
-                    break;
-                }
+                _output_shape = ld.setting().units();
+                return;
             }
         }
-        _output_size = layer_size;
+
+        Layer::SharedPtr prev_layer;
+        if (!_m.layers().empty())
+        {
+            prev_layer = _m.layers().back();
+        }
+        auto layer = _add_layer(ld, _output_shape);
+        if (!layer) return;
+        _output_shape = layer->output_shape();
+        if (prev_layer)
+        {
+            _m.create_edge(prev_layer, layer);
+        }
+        auto activation_layer = _add_activation_layer(ld, _output_shape);
+        if (!activation_layer) return;
+        _m.create_edge(layer, activation_layer);
     }
 
     void fit(Dataset<T>& data,
@@ -265,7 +223,7 @@ public:
             Framework::EDGE_LEARNING, OT>::type;
         auto o = optimizer_type(learning_rate);
         _m.init(MapInit<Framework::EDGE_LEARNING, IT>::type,
-                Model::ProbabilityDensityFunction::NORMAL, 1);
+                Model::ProbabilityDensityFunction::NORMAL);
         Training<PL, T>::run(_m, data, o, epochs, batch_size);
     }
 
@@ -288,8 +246,110 @@ public:
     SizeType output_size() override { return _m.output_size(); }
 
 private:
+    Layer::SharedPtr _add_layer(const LayerDescriptor& ld,
+                                LayerShape input_shape)
+    {
+        const auto& layer_name = ld.name();
+        switch (ld.type())
+        {
+            case LayerType::Input:
+            {
+                throw std::runtime_error("Model structure error: "
+                                         "Input layer have to be "
+                                         "put as first layer");
+            }
+            case LayerType::Conv: {
+                auto layer = _m.template add_layer<ConvolutionalLayer>(
+                    layer_name, input_shape.shape(),
+                    ld.setting().kernel_shape(),
+                    ld.setting().n_filters(),
+                    ld.setting().stride(),
+                    ld.setting().padding());
+                return layer;
+            }
+            case LayerType::MaxPool:
+            {
+                auto layer = _m.template add_layer<MaxPoolingLayer>(
+                    layer_name, input_shape.shape(),
+                    ld.setting().kernel_shape(),
+                    ld.setting().stride());
+                return layer;
+            }
+            case LayerType::AvgPool:
+            {
+                auto layer = _m.template add_layer<AvgPoolingLayer>(
+                    layer_name, input_shape.shape(),
+                    ld.setting().kernel_shape(),
+                    ld.setting().stride());
+                return layer;
+            }
+            case LayerType::Dropout: {
+                auto layer = _m.template add_layer<DropoutLayer>(
+                    layer_name, input_shape.size(),
+                    ld.setting().drop_probability());
+                return layer;
+            }
+            case LayerType::Dense:
+            default:
+            {
+                auto layer = _m.template add_layer<DenseLayer>(
+                    layer_name, input_shape.size(),
+                    ld.setting().units().size());
+                return layer;
+            }
+        }
+    }
+
+    Layer::SharedPtr _add_activation_layer(const LayerDescriptor& ld,
+                                           LayerShape input_shape)
+    {
+        const auto& layer_name = ld.name();
+
+        switch (ld.activation_type())
+        {
+            case ActivationType::ReLU:
+            {
+                auto activation_layer = _m.template add_layer<ReluLayer>(
+                    layer_name, input_shape.size());
+                return activation_layer;
+            }
+            case ActivationType::ELU:
+            {
+                auto activation_layer = _m.template add_layer<EluLayer>(
+                    layer_name, input_shape.size());
+                return activation_layer;
+            }
+            case ActivationType::Softmax:
+            {
+                auto activation_layer = _m.template add_layer<SoftmaxLayer>(
+                    layer_name, input_shape.size());
+                return activation_layer;
+            }
+            case ActivationType::TanH:
+            {
+                auto activation_layer = _m.template add_layer<TanhLayer>(
+                    layer_name, input_shape.size());
+                return activation_layer;
+            }
+            case ActivationType::Sigmoid:
+            {
+                auto activation_layer = _m.template add_layer<SigmoidLayer>(
+                    layer_name, input_shape.size());
+                return activation_layer;
+            }
+            case ActivationType::Linear:
+            default:
+            {
+                auto activation_layer = _m.template add_layer<LinearLayer>(
+                    layer_name, input_shape.size());
+                return activation_layer;
+            }
+        }
+    }
+
     Model _m;
-    SizeType _output_size;
+    LayerShape _output_shape;
+    bool _is_first_add;
 };
 
 template <
@@ -320,7 +380,7 @@ class FNN {
 public:
     using ModelFNN = typename MapModel<F, LT, OT, IT, PL, T>::fnn;
 
-    FNN(LayerDescriptorVector layers, std::string name)
+    FNN(NNDescriptor layers, std::string name)
         : _layers{std::move(layers)}
         , _fnn_model{name}
     {
@@ -349,7 +409,7 @@ public:
     }
 
 private:
-    LayerDescriptorVector _layers;
+    NNDescriptor _layers;
     ModelFNN _fnn_model;
 };
 

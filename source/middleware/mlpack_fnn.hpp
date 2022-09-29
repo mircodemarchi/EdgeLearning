@@ -29,8 +29,8 @@
 #ifndef EDGE_LEARNING_MIDDLEWARE_MLPACK_FNN_HPP
 #define EDGE_LEARNING_MIDDLEWARE_MLPACK_FNN_HPP
 
-#include "nn.hpp"
 #include "mlpack_definitions.hpp"
+#include "layer_descriptor.hpp"
 
 #include <map>
 #include <tuple>
@@ -50,9 +50,10 @@ public:
     MlpackFNN(std::string name)
         : NN<T>{name}
         , _m{}
-        , _input_size{0}
-        , _output_size{0}
+        , _input_shape{0}
+        , _output_shape{0}
         , _layers_name{}
+        , _is_first_add{true}
     {
 
     }
@@ -69,14 +70,11 @@ public:
         }
         using optimizer_type = typename MapOptimizer<
             Framework::MLPACK, OT>::type;
-        optimizer_type o(learning_rate, batch_size, data.size(), 0.0, false);
+        optimizer_type o(learning_rate, batch_size,
+                         epochs * data.size(), 0.0, false);
         auto trainset = data.trainset().template to_arma<arma::Mat<T>>();
         auto labels = data.labels().template to_arma<arma::Mat<T>>();
-
-        for (SizeType i = 0; i < epochs; ++i)
-        {
-            _m.Train(trainset, labels, o);
-        }
+        _m.Train(trainset, labels, o);
     }
 
     Dataset<T> predict(Dataset<T>& data) override
@@ -91,70 +89,147 @@ public:
 
     void add(LayerDescriptor ld) override
     {
-        auto layer_name = std::get<0>(ld);
-        auto layer_size = std::get<1>(ld);
-        auto layer_activation = std::get<2>(ld);
-
-        if (_input_size == 0)
+        if (_is_first_add)
         {
-            _input_size = layer_size;
-        }
-
-        _layers_name.push_back(layer_name);
-        if (_output_size != 0)
-        {
-            _m.template Add<mlpack::ann::Linear<>>(_output_size, layer_size);
-            switch (layer_activation) {
-                case ActivationType::ReLU:
-                {
-                    _m.template Add<mlpack::ann::ReLULayer<>>();
-                    break;
-                }
-                case ActivationType::ELU:
-                {
-                    _m.template Add<mlpack::ann::ReLULayer<>>();
-                    break;
-                }
-                case ActivationType::Softmax:
-                {
-#if __unix__
-                    _m.template Add<mlpack::ann::LogSoftMax<>>();
-#else
-                    _m.template Add<mlpack::ann::Softmax<>>();
-#endif
-                    break;
-                }
-                case ActivationType::TanH:
-                {
-                    _m.template Add<mlpack::ann::TanHLayer<>>();
-                    break;
-                }
-                case ActivationType::Sigmoid:
-                {
-                    _m.template Add<mlpack::ann::SigmoidLayer<>>();
-                    break;
-                }
-                case ActivationType::Linear:
-                default:
-                {
-                    _m.template Add<mlpack::ann::IdentityLayer<>>();
-                    break;
-                }
+            _is_first_add = false;
+            if (ld.type() == LayerType::Input)
+            {
+                _input_shape = ld.setting().units();
+                _output_shape = ld.setting().units();
+                return;
             }
         }
-        _output_size = layer_size;
+
+        _layers_name.push_back(ld.name());
+        _output_shape = _add_layer(ld, _output_shape);
+        _add_activation_layer(ld);
     }
 
-    SizeType input_size() override { return _input_size; }
-    SizeType output_size() override { return _output_size; }
+    SizeType input_size() override { return _input_shape.size(); }
+    SizeType output_size() override { return _output_shape.size(); }
 
 private:
+    LayerShape _add_layer(const LayerDescriptor& ld, LayerShape input_shape)
+    {
+        switch (ld.type())
+        {
+            case LayerType::Input:
+            {
+                throw std::runtime_error("Model structure error: "
+                                         "Input layer have to be "
+                                         "put as first layer");
+            }
+            case LayerType::Conv:
+            {
+                auto layer = new mlpack::ann::Convolution(
+                    input_shape.channels(),
+                    ld.setting().n_filters(),
+                    ld.setting().kernel_shape().width(),
+                    ld.setting().kernel_shape().height(),
+                    ld.setting().stride().width(),
+                    ld.setting().stride().height(),
+                    ld.setting().padding().width(),
+                    ld.setting().padding().height(),
+                    input_shape.width(),
+                    input_shape.height());
+                _m.Add(layer);
+                return {DLMath::Shape3d(layer->OutputHeight(),
+                                        layer->OutputWidth(),
+                                        ld.setting().n_filters())};
+            }
+            case LayerType::MaxPool:
+            {
+                auto layer = new mlpack::ann::MaxPooling(
+                    ld.setting().kernel_shape().width(),
+                    ld.setting().kernel_shape().height(),
+                    ld.setting().stride().width(),
+                    ld.setting().stride().height());
+                _m.Add(layer);
+                return {DLMath::Shape3d(layer->OutputHeight(),
+                                        layer->OutputWidth(),
+                                        input_shape.channels())};
+            }
+            case LayerType::AvgPool:
+            {
+                auto layer = new mlpack::ann::MeanPooling(
+                    ld.setting().kernel_shape().width(),
+                    ld.setting().kernel_shape().height(),
+                    ld.setting().stride().width(),
+                    ld.setting().stride().height());
+                _m.Add(layer);
+                return {DLMath::Shape3d(layer->OutputHeight(),
+                                        layer->OutputWidth(),
+                                        input_shape.channels())};
+            }
+            case LayerType::Dropout:
+            {
+                auto layer = new mlpack::ann::Dropout(
+                    ld.setting().drop_probability());
+                _m.Add(layer);
+                return input_shape;
+            }
+            case LayerType::Dense:
+            default:
+            {
+                auto layer = new mlpack::ann::Linear(
+                    input_shape.size(),
+                    ld.setting().units().size());
+                _m.Add(layer);
+                return {layer->OutputSize()};
+            }
+        }
+    }
+
+    void _add_activation_layer(const LayerDescriptor& ld)
+    {
+        switch (ld.activation_type())
+        {
+            case ActivationType::ReLU:
+            {
+                _m.template Add<mlpack::ann::ReLULayer<>>();
+                break;
+            }
+            case ActivationType::ELU:
+            {
+                _m.template Add<mlpack::ann::ELU<>>();
+                break;
+            }
+            case ActivationType::Softmax:
+            {
+#if __unix__
+                _m.template Add<mlpack::ann::LogSoftMax<>>();
+#else
+                _m.template Add<mlpack::ann::Softmax<>>();
+#endif
+                break;
+            }
+            case ActivationType::TanH:
+            {
+                _m.template Add<mlpack::ann::TanHLayer<>>();
+                break;
+            }
+            case ActivationType::Sigmoid:
+            {
+                _m.template Add<mlpack::ann::SigmoidLayer<>>();
+                break;
+            }
+            case ActivationType::Linear:
+            default:
+            {
+                _m.template Add<mlpack::ann::IdentityLayer<>>();
+                break;
+            }
+        }
+    }
+
+
     mlpack::ann::FFN<
         typename MapLoss<Framework::MLPACK, LT>::type,
         typename MapInit<Framework::MLPACK, IT>::type> _m;
-    SizeType _input_size;
-    SizeType _output_size;
+    LayerShape _input_shape;
+    LayerShape _output_shape;
     std::vector<std::string> _layers_name;
+    bool _is_first_add;
 };
 
 template <

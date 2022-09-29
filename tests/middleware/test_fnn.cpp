@@ -52,13 +52,13 @@ private:
         };
         Dataset<NumType> dataset{data, 1, {4, 5}};
 
-        LayerDescriptorVector layers_descriptor(
-            {{"input_layer",            4UL, ActivationType::Linear   },
-             {"hidden_layer_relu",      8UL, ActivationType::ReLU     },
-             {"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
-             {"hidden_layer_tanh",      8UL, ActivationType::TanH     },
-             {"hidden_layer_linear",    8UL, ActivationType::Linear   },
-             {"output_layer",           2UL, ActivationType::Linear   }}
+        NNDescriptor layers_descriptor(
+            {Input{"input_layer",            4UL},
+             Dense{"hidden_layer_relu",      8UL, ActivationType::ReLU     },
+             Dense{"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
+             Dense{"hidden_layer_tanh",      8UL, ActivationType::TanH     },
+             Dense{"hidden_layer_linear",    8UL, ActivationType::Linear   },
+             Dense{"output_layer",           2UL, ActivationType::Linear   }}
             );
         auto m = CompileFNN<>(layers_descriptor, "regressor_model");
         EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
@@ -95,15 +95,15 @@ private:
         };
         Dataset<NumType> dataset(data, 1, {4, 5});
 
-        LayerDescriptorVector layers_descriptor(
-            {{"input_layer",            4UL, ActivationType::Linear   },
-             {"hidden_layer_relu",      8UL, ActivationType::ReLU     },
-             {"hidden_layer_elu",       8UL, ActivationType::ELU      },
-             {"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
-             {"hidden_layer_tanh",      8UL, ActivationType::TanH     },
-             {"hidden_layer_sigmoid",   8UL, ActivationType::Sigmoid  },
-             {"hidden_layer_linear",    8UL, ActivationType::Linear   },
-             {"output_layer",   OUTPUT_SIZE, ActivationType::Linear   }}
+        NNDescriptor layers_descriptor(
+            {Input{"input_layer",            4UL},
+             Dense{"hidden_layer_relu",      8UL, ActivationType::ReLU     },
+             Dense{"hidden_layer_elu",       8UL, ActivationType::ELU      },
+             Dense{"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
+             Dense{"hidden_layer_tanh",      8UL, ActivationType::TanH     },
+             Dense{"hidden_layer_sigmoid",   8UL, ActivationType::Sigmoid  },
+             Dense{"hidden_layer_linear",    8UL, ActivationType::Linear   },
+             Dense{"output_layer",   OUTPUT_SIZE, ActivationType::Linear   }}
         );
         auto m = CompileFNN<>(layers_descriptor, "regressor_model");
 
@@ -128,13 +128,13 @@ private:
         };
         Dataset<NumType> dataset{data, 1, {4, 5}};
 
-        LayerDescriptorVector layers_descriptor(
-            {{"input_layer",            4UL, ActivationType::Linear   },
-             {"hidden_layer_relu",      8UL, ActivationType::ReLU     },
-             {"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
-             {"hidden_layer_tanh",      8UL, ActivationType::TanH     },
-             {"hidden_layer_linear",    8UL, ActivationType::Linear   },
-             {"output_layer",           2UL, ActivationType::Linear   }}
+        NNDescriptor layers_descriptor(
+            {Input{"input_layer",            4UL},
+             Dense{"hidden_layer_relu",      8UL, ActivationType::ReLU     },
+             Dense{"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
+             Dense{"hidden_layer_tanh",      8UL, ActivationType::TanH     },
+             Dense{"hidden_layer_linear",    8UL, ActivationType::Linear   },
+             Dense{"output_layer",           2UL, ActivationType::Linear   }}
         );
         auto m = CompileFNN<>(layers_descriptor, "regressor_model");
         m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03);
