@@ -1,5 +1,6 @@
 set(UNIT_TESTS
     test_fnn
+    test_layer_descriptor
 )
 
 foreach(TEST ${UNIT_TESTS})

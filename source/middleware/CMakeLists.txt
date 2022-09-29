@@ -3,7 +3,7 @@ set(LIBRARY_NAME edgelearning-middleware)
 set(SOURCES
     fnn.cpp
     rnn.cpp
-)
+    layer_descriptor.cpp)
 
 if (ENABLE_MLPACK)
     list(APPEND SOURCES
