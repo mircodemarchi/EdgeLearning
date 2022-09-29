@@ -651,17 +651,23 @@ public:
         return *this;
     }
 
-    Dataset<T>& min_max_normalization(T min, T max)
+    Dataset<T>& min_max_normalization(T min, T max,
+                                      std::vector<SizeType> idx_vec = {})
     {
         if (min == max) {
             throw std::runtime_error(
                 "normalization error: min and max cannot be equal");
         }
 
+        if (idx_vec.empty())
+        {
+            idx_vec = std::vector<SizeType>(_feature_size);
+            std::iota(idx_vec.begin(), idx_vec.end(), 0);
+        }
 
         for (std::size_t row = 0; row < _feature_amount; ++row)
         {
-            for (std::size_t col = 0; col < _feature_size; ++col)
+            for (const auto& col: idx_vec)
             {
                 _data[row * _feature_size + col]
                     = (_data[row * _feature_size + col] - min) / (max - min);
