@@ -32,7 +32,7 @@ using namespace EdgeLearning;
 class TestFNN {
 public:
     void test() {
-        test_layer_setting();
+        EDGE_LEARNING_TEST_CALL(test_layer_setting());
         EDGE_LEARNING_TEST_CALL(test_layer_descriptor());
         EDGE_LEARNING_TEST_CALL(test_layer_descriptor_implementations());
     }
@@ -132,6 +132,8 @@ private:
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(ld.activation_type()),
                                  static_cast<int>(ActivationType::Linear));
 
+        EDGE_LEARNING_TEST_TRY(ld.name("test_edit"));
+        EDGE_LEARNING_TEST_EQUAL(ld.name(), "test_edit");
         EDGE_LEARNING_TEST_TRY(ld.type(LayerType::Dropout));
         EDGE_LEARNING_TEST_EQUAL(static_cast<int>(ld.type()),
                                  static_cast<int>(LayerType::Dropout));

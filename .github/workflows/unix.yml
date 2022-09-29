@@ -34,16 +34,16 @@ jobs:
             c: "gcc-10"
           }
           - {
-            name: "Ubuntu 20.04 Clang 11 [NO MLPACK]",
+            name: "Ubuntu 22.04 Clang 11 [NO MLPACK]",
             mlpack: false,
-            os: ubuntu-20.04,
+            os: ubuntu-22.04,
             cxx: "clang++-11",
             c: "clang-11"
           }
           - {
-            name: "Ubuntu 20.04 GCC 10 [NO MLPACK]",
+            name: "Ubuntu 22.04 GCC 10 [NO MLPACK]",
             mlpack: false,
-            os: ubuntu-20.04,
+            os: ubuntu-22.04,
             cxx: "g++-10",
             c: "gcc-10"
           }
@@ -63,16 +63,16 @@ jobs:
           #   c: "gcc-9"
           # }
           - {
-            name: "Ubuntu 20.04 Clang 11 [MLPACK]",
+            name: "Ubuntu 22.04 Clang 11 [MLPACK]",
             mlpack: true,
-            os: ubuntu-20.04,
+            os: ubuntu-22.04,
             cxx: "clang++-11",
             c: "clang-11"
           }
           - {
-            name: "Ubuntu 20.04 GCC 10 [MLPACK]",
+            name: "Ubuntu 22.04 GCC 10 [MLPACK]",
             mlpack: true,
-            os: ubuntu-20.04,
+            os: ubuntu-22.04,
             cxx: "g++-10",
             c: "gcc-10"
           }

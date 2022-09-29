@@ -55,11 +55,7 @@ struct MapActivation<Framework::MLPACK, ActivationType::ELU> {
 
 template <>
 struct MapActivation<Framework::MLPACK, ActivationType::Softmax> {
-#if __unix__
-    using type = mlpack::ann::LogSoftMax<>;
-#else
     using type = mlpack::ann::Softmax<>;
-#endif
 };
 
 template <>
