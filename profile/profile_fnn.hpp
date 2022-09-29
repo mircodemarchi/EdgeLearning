@@ -36,14 +36,32 @@
 using namespace EdgeLearning;
 namespace fs = std::filesystem;
 
+template <LossType LT> struct MapOutputActivation;
 
-template <LossType LT, OptimizerType OT>
-class ProfileFNN : public DNNProfiler
+template <>
+struct MapOutputActivation<LossType::CCE>
+{
+    inline static const ActivationType type = ActivationType::Softmax;
+};
+
+template <>
+struct MapOutputActivation<LossType::MSE>
+{
+    inline static const ActivationType type = ActivationType::Linear;
+};
+
+template <
+    LossType LT,
+    OptimizerType OT,
+    ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL>
+class ProfileFNN : public ProfileNN
 {
 public:
     ProfileFNN(std::string profile_name,
-               std::vector<ProfileDataset::Type> dataset_types)
-        : DNNProfiler(
+               std::vector<ProfileDataset::Type> dataset_types,
+               NNDescriptor hidden_layers_descriptor,
+               TrainingSetting default_setting)
+        : ProfileNN(
             100,
 #if ENABLE_MLPACK
             "profile_mlpack_fnn_" + profile_name
@@ -53,6 +71,8 @@ public:
             )
         , _profile_name(profile_name)
         , _dataset_types(dataset_types)
+        , _hidden_layers_descriptor(hidden_layers_descriptor)
+        , _default_setting(default_setting)
     { }
 
     virtual void run() {
@@ -63,9 +83,9 @@ public:
         {
             std::cout << "*** Dataset: " + std::string(ProfileDataset(dt))
                       << " ***" << std::endl;
-            EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount(dt));
-            return;
+            profile_on_fixed_parameters(dt);
             EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level(dt));
+            EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount(dt));
             EDGE_LEARNING_PROFILE_CALL(profile_on_training_set(dt));
             EDGE_LEARNING_PROFILE_CALL(profile_on_layers_amount(dt));
             EDGE_LEARNING_PROFILE_CALL(profile_on_layers_shape(dt));
@@ -73,33 +93,52 @@ public:
     }
 
 private:
+    using ProfileCompileFNN = CompileFNN<LT, OT, InitType::AUTO, PL>;
 
-    using ProfileCompileFNN = CompileFNN<
-        LT,
-        OT,
-        InitType::AUTO,
-        ParallelizationLevel::SEQUENTIAL>;
-
-    void profile_on_parallelism_level(ProfileDataset::Type pd_type) {
-        const SizeType EPOCHS        = 1;
-        const NumType  LEARNING_RATE = 0.03;
-
+    void profile_on_fixed_parameters(ProfileDataset::Type pd_type) {
         auto data = ProfileDataset(pd_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
-        auto input_size = data_training.trainset_idx().size();
+        // auto input_size = data_training.trainset_idx().size();
         auto output_size = data_training.labels_idx().size();
 
-        LayerDescriptorVector layers_descriptor(
-            {
-                {"input_layer",   input_size,  ActivationType::Linear },
-                {"hidden_layer0", 32,          ActivationType::ReLU },
-                {"output_layer",  output_size,
-                 _profile_name == "classification" ?
-                 ActivationType::Softmax : ActivationType::Linear },
-            }
-        );
+        NNDescriptor layers_descriptor(_hidden_layers_descriptor);
+        layers_descriptor.insert(
+            layers_descriptor.begin(),
+            Input{"input_layer", DLMath::Shape3d{28, 28, 1}});
+        layers_descriptor.push_back(
+            Dense{"output_layer", output_size, MapOutputActivation<LT>::type});
+
+        training_testing<ProfileCompileFNN>(
+            "training and testing of sequential model with "
+            "default parameters: { "
+            "epochs: " + std::to_string(_default_setting.epochs) +
+            ", batch_size: " + std::to_string(_default_setting.batch_size) +
+            ", learning_rate: " + std::to_string(_default_setting.learning_rate) +
+            " }",
+            "training_testing_default_parameters",
+            1, data_training, data_validation, data_testing,
+            layers_descriptor,
+            _default_setting.epochs,
+            _default_setting.batch_size,
+            _default_setting.learning_rate);
+    }
+
+    void profile_on_parallelism_level(ProfileDataset::Type pd_type) {
+        auto data = ProfileDataset(pd_type).load_dataset();
+        auto data_training = std::get<0>(data);
+        auto data_validation = std::get<1>(data);
+        auto data_testing = std::get<2>(data);
+        // auto input_size = data_training.trainset_idx().size();
+        auto output_size = data_training.labels_idx().size();
+
+        NNDescriptor layers_descriptor(_hidden_layers_descriptor);
+        layers_descriptor.insert(
+            layers_descriptor.begin(),
+            Input{"input_layer", DLMath::Shape3d{28, 28, 1}});
+        layers_descriptor.push_back(
+            Dense{"output_layer", output_size, MapOutputActivation<LT>::type});
 
         std::vector<SizeType> batch_sizes = {1, 2, 4, 8, 16, 32, 64, 128};
 
@@ -123,59 +162,44 @@ private:
 
         for (const auto& batch_size: batch_sizes)
         {
-            training<ProfileCompileFNNSequential>(
-                "training sequential model with batch_size: "
+            training_testing<ProfileCompileFNNSequential>(
+                "training and testing sequential model with batch_size: "
                     + std::to_string(batch_size),
-                "training_sequential_on_batch_size"
+                "training_testing_sequential_on_batch_size"
                     + std::to_string(batch_size),
-                1, data_training, data_validation,
-                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
-
-            testing<ProfileCompileFNNSequential>(
-                "testing sequential model with batch_size: "
-                + std::to_string(batch_size),
-                "testing_sequential_on_batch_size"
-                + std::to_string(batch_size),
-                1, data_training, data_testing,
-                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
+                1, data_training, data_validation, data_testing,
+                layers_descriptor,
+                _default_setting.epochs,
+                batch_size,
+                _default_setting.learning_rate);
         }
 
         for (const auto& batch_size: batch_sizes)
         {
-            training<ProfileCompileFNNThreadOnEntry>(
-                "training thread parallelism on data entry model with batch_size: "
+            training_testing<ProfileCompileFNNThreadOnEntry>(
+                "training and testing thread parallelism on data entry model "
+                "with batch_size: " + std::to_string(batch_size),
+                "training_testing_thread_parallelism_entry_on_batch_size"
                     + std::to_string(batch_size),
-                "training_thread_parallelism_entry_on_batch_size"
-                    + std::to_string(batch_size),
-                1, data_training, data_validation,
-                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
-
-            testing<ProfileCompileFNNThreadOnEntry>(
-                "testing thread parallelism on data entry model with batch_size: "
-                    + std::to_string(batch_size),
-                "testing_thread_parallelism_entry_on_batch_size"
-                    + std::to_string(batch_size),
-                1, data_training, data_testing,
-                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
+                1, data_training, data_validation, data_testing,
+                layers_descriptor,
+                _default_setting.epochs,
+                batch_size,
+                _default_setting.learning_rate);
         }
 
         for (const auto& batch_size: batch_sizes)
         {
-            training<ProfileCompileFNNThreadOnBatch>(
-                "training thread parallelism on data batch model with batch_size: "
+            training_testing<ProfileCompileFNNThreadOnBatch>(
+                "training and testing thread parallelism on data batch model "
+                "with batch_size: " + std::to_string(batch_size),
+                "training_testing_thread_parallelism_batch_on_batch_size"
                     + std::to_string(batch_size),
-                "training_thread_parallelism_batch_on_batch_size"
-                    + std::to_string(batch_size),
-                1, data_training, data_validation,
-                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
-
-            testing<ProfileCompileFNNThreadOnBatch>(
-                "testing thread parallelism on data batch model with batch_size: "
-                    + std::to_string(batch_size),
-                "testing_thread_parallelism_batch_on_batch_size"
-                    + std::to_string(batch_size),
-                1, data_training, data_testing,
-                layers_descriptor, EPOCHS, batch_size, LEARNING_RATE);
+                1, data_training, data_validation, data_testing,
+                layers_descriptor,
+                _default_setting.epochs,
+                batch_size,
+                _default_setting.learning_rate);
         }
     }
 
@@ -184,10 +208,6 @@ private:
      * on epochs incrementation.
      */
     void profile_on_epochs_amount(ProfileDataset::Type pd_type) {
-        const SizeType BATCH_SIZE    = 1;
-        const SizeType EPOCHS        = 20;
-        const NumType  LEARNING_RATE = 0.03;
-
         auto data = ProfileDataset(pd_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
@@ -195,38 +215,34 @@ private:
         auto input_size = data_training.trainset_idx().size();
         auto output_size = data_training.labels_idx().size();
 
-        LayerDescriptorVector layers_descriptor(
-            {
-                {"input_layer",   input_size,  ActivationType::Linear },
-                {"hidden_layer0", 32,          ActivationType::ReLU },
-                {"output_layer",  output_size,
-                 _profile_name == "classification" ?
-                 ActivationType::Softmax : ActivationType::Linear },
-            }
-        );
+        NNDescriptor layers_descriptor(_hidden_layers_descriptor);
+        layers_descriptor.insert(
+            layers_descriptor.begin(),
+            Input{"input_layer", input_size});
+        layers_descriptor.push_back(
+            Dense{"output_layer", output_size, MapOutputActivation<LT>::type});
 
-        for (SizeType e = 1; e <= EPOCHS; ++e)
+        for (SizeType e = 1; e <= _default_setting.epochs; ++e)
         {
-            training<ProfileCompileFNN>(
-                "training epochs amount: " + std::to_string(e),
+            training_testing<ProfileCompileFNN>(
+                "training and testing epochs amount: " + std::to_string(e),
                 "training_on_epochs_amount" + std::to_string(e),
-                1, data_training, data_validation,
-                layers_descriptor, e, BATCH_SIZE, LEARNING_RATE);
+                100, data_training, data_validation, data_testing,
+                layers_descriptor,
+                e,
+                _default_setting.batch_size,
+                _default_setting.learning_rate);
         }
 
         predict<ProfileCompileFNN>(
             "prediction after training with epochs amount: "
-                + std::to_string(EPOCHS),
+                + std::to_string(_default_setting.epochs),
             "prediction",
             100, data_training,
-            layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-
-        testing<ProfileCompileFNN>(
-            "testing after training with epochs amount: "
-                + std::to_string(EPOCHS),
-            "testing",
-            1, data_training, data_testing,
-            layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+            layers_descriptor,
+            _default_setting.epochs,
+            _default_setting.batch_size,
+            _default_setting.learning_rate);
     }
 
     /**
@@ -234,10 +250,6 @@ private:
      * on different training set amount and fixed epoch amount.
      */
     void profile_on_training_set(ProfileDataset::Type pd_type) {
-        const SizeType BATCH_SIZE            = 1;
-        const SizeType EPOCHS                = 5;
-        const NumType  LEARNING_RATE         = 0.03;
-
         auto data = ProfileDataset(pd_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
@@ -246,15 +258,12 @@ private:
         auto input_size = data_training.trainset_idx().size();
         auto output_size = data_training.labels_idx().size();
 
-        LayerDescriptorVector layers_descriptor(
-            {
-                {"input_layer",   input_size,  ActivationType::Linear },
-                {"hidden_layer0", 32,          ActivationType::ReLU },
-                {"output_layer",  output_size,
-                 _profile_name == "classification" ?
-                 ActivationType::Softmax : ActivationType::Linear },
-            }
-        );
+        NNDescriptor layers_descriptor(_hidden_layers_descriptor);
+        layers_descriptor.insert(
+            layers_descriptor.begin(),
+            Input{"input_layer", input_size});
+        layers_descriptor.push_back(
+            Dense{"output_layer", output_size, MapOutputActivation<LT>::type});
 
         std::vector<std::size_t> training_set_sizes = {
             10, 50, 100, 200, 300, 400, 600, 800, 1000, 10000
@@ -262,12 +271,20 @@ private:
         for (const auto& size: training_set_sizes)
         {
             auto curr_size = std::min(training_set_size, size);
-            auto subset = data_training.subdata(0, curr_size);
-            training<ProfileCompileFNN>(
-                "training with dataset size (#entries): " + std::to_string(curr_size),
-                "training_on_dataset_size" + std::to_string(curr_size),
-                100, subset, data_validation,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+            auto subdata_training = data_training.subdata(0, curr_size);
+            auto subdata_validation = data_validation.subdata(
+                0, std::min(curr_size, data_validation.size()));
+            auto subdata_testing = data_testing.subdata(
+                0, std::min(curr_size, data_testing.size()));
+            training_testing<ProfileCompileFNN>(
+                "training and testing with dataset size (#entries): "
+                    + std::to_string(curr_size),
+                "training_testing_on_dataset_size" + std::to_string(curr_size),
+                100, subdata_training, subdata_validation, subdata_testing,
+                layers_descriptor,
+                _default_setting.epochs,
+                _default_setting.batch_size,
+                _default_setting.learning_rate);
             if (curr_size == training_set_size) break;
         }
 
@@ -280,20 +297,10 @@ private:
                     + std::to_string(curr_size),
                 "prediction_on_dataset_size" + std::to_string(curr_size),
                 100, subset,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-            if (curr_size == training_set_size) break;
-        }
-
-        for (const auto& size: training_set_sizes)
-        {
-            auto curr_size = std::min(training_set_size, size);
-            auto subset = data_training.subdata(0, curr_size);
-            testing<ProfileCompileFNN>(
-                "testing with dataset size (#entries): "
-                + std::to_string(curr_size),
-                "testing_on_dataset_size" + std::to_string(curr_size),
-                1, subset, data_testing,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+                layers_descriptor,
+                _default_setting.epochs,
+                _default_setting.batch_size,
+                _default_setting.learning_rate);
             if (curr_size == training_set_size) break;
         }
     }
@@ -303,11 +310,6 @@ private:
      * on incremental layers amount.
      */
     void profile_on_layers_amount(ProfileDataset::Type pd_type) {
-        const SizeType BATCH_SIZE    = 1;
-        const SizeType EPOCHS        = 5;
-        const SizeType LAYERS_AMOUNT = 10;
-        const NumType  LEARNING_RATE = 0.03;
-
         auto data = ProfileDataset(pd_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
@@ -315,42 +317,44 @@ private:
         auto input_size = data_training.trainset_idx().size();
         auto output_size = data_training.labels_idx().size();
 
-        LayerDescriptorVector layers_descriptor(
+        NNDescriptor layers_descriptor(
             {
-                {"input_layer",   input_size,  ActivationType::Linear },
-                {"output_layer",  output_size,
-                 _profile_name == "classification" ?
-                 ActivationType::Softmax : ActivationType::Linear },
+                Input{"input_layer",   input_size},
+                Dense{"output_layer",  output_size, MapOutputActivation<LT>::type },
             }
         );
 
-        for (std::size_t amount = 1; amount <= LAYERS_AMOUNT; ++amount)
+        std::vector<std::size_t> layers_amounts = {
+            1, 2, 5, 10, 20, 50, 100
+        };
+        for (const auto& amount: layers_amounts)
         {
-            layers_descriptor.insert(
-                layers_descriptor.end() - 1,
-                {
-                    "hidden_layer" + std::to_string(amount-1),
-                    15,
-                    ActivationType::ReLU
-                });
-            training<ProfileCompileFNN>(
-                "training with hidden layers amount: " + std::to_string(amount),
-                "training_on_hidden_layers_amount" + std::to_string(amount),
-                100, data_training, data_validation,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+            auto curr_ld = layers_descriptor;
+            for (std::size_t i = 0; i < amount; ++i)
+            {
+                std::string name = "hidden_layer" + std::to_string(amount - 1);
+                curr_ld.insert(
+                    layers_descriptor.end() - 1,
+                    Dense{name, 32, ActivationType::ReLU});
+            }
+
+            training_testing<ProfileCompileFNN>(
+                "training and testing with hidden layers amount: "
+                    + std::to_string(amount),
+                "training_testing_on_hidden_layers_amount"
+                    + std::to_string(amount),
+                100, data_training, data_validation, data_testing,
+                curr_ld,
+                _default_setting.epochs,
+                _default_setting.batch_size,
+                _default_setting.learning_rate);
 
             predict<ProfileCompileFNN>(
                 "prediction with hidden layers amount: "
                     + std::to_string(amount),
                 "prediction_on_hidden_layers_amount" + std::to_string(amount),
                 100, data_training,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-
-            testing<ProfileCompileFNN>(
-                "testing with hidden layers amount: " + std::to_string(amount),
-                "testing_on_hidden_layers_amount" + std::to_string(amount),
-                1, data_training, data_testing,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+                curr_ld, _default_setting.epochs, _default_setting.batch_size, _default_setting.learning_rate);
         }
     }
 
@@ -359,11 +363,6 @@ private:
      * on different hidden layer shape.
      */
     void profile_on_layers_shape(ProfileDataset::Type pd_type) {
-        const SizeType BATCH_SIZE    = 1;
-        const NumType  LEARNING_RATE = 0.03;
-        const SizeType EPOCHS        = 5;
-        const SizeType LAYERS_MAX_SIZE = 20;
-
         auto data = ProfileDataset(pd_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
@@ -371,39 +370,44 @@ private:
         auto input_size = data_training.trainset_idx().size();
         auto output_size = data_training.labels_idx().size();
 
-        for (std::size_t shape = 10; shape <= LAYERS_MAX_SIZE; ++shape)
+        std::vector<std::size_t> layers_shapes = {
+            10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000
+        };
+        for (const auto& shape: layers_shapes)
         {
-            LayerDescriptorVector layers_descriptor(
+            NNDescriptor layers_descriptor(
                 {
-                    {"input_layer", input_size, ActivationType::Linear},
-                    {"hidden_layer0", shape, ActivationType::ReLU},
-                    {"output_layer", output_size,
-                     _profile_name == "classification" ?
-                     ActivationType::Softmax : ActivationType::Linear},
+                    Input{"input_layer",   input_size},
+                    Dense{"hidden_layer0", shape,       ActivationType::ReLU   },
+                    Dense{"output_layer",  output_size, MapOutputActivation<LT>::type},
                 }
             );
-            training<ProfileCompileFNN>(
-                "training with hidden layers shape: " + std::to_string(shape),
-                "training_on_hidden_layers_shape" + std::to_string(shape),
-                100, data_training, data_validation,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+            training_testing<ProfileCompileFNN>(
+                "training and testing with hidden layers shape: "
+                    + std::to_string(shape),
+                "training_testing_on_hidden_layers_shape"
+                    + std::to_string(shape),
+                100, data_training, data_validation, data_testing,
+                layers_descriptor,
+                _default_setting.epochs,
+                _default_setting.batch_size,
+                _default_setting.learning_rate);
 
             predict<ProfileCompileFNN>(
                 "prediction with hidden layers shape: " + std::to_string(shape),
                 "prediction_on_hidden_layers_shape" + std::to_string(shape),
                 100, data_training,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
-
-            testing<ProfileCompileFNN>(
-                "testing with hidden layers shape: " + std::to_string(shape),
-                "testing_on_hidden_layers_shape" + std::to_string(shape),
-                1, data_training, data_testing,
-                layers_descriptor, EPOCHS, BATCH_SIZE, LEARNING_RATE);
+                layers_descriptor,
+                _default_setting.epochs,
+                _default_setting.batch_size,
+                _default_setting.learning_rate);
         }
     }
 
     std::string _profile_name;
     std::vector<ProfileDataset::Type> _dataset_types;
+    NNDescriptor _hidden_layers_descriptor;
+    TrainingSetting _default_setting;
 };
 
 #endif // EDGE_LEARNING_PROFILE_FNN_HPP

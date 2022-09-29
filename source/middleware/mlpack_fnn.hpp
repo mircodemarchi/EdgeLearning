@@ -175,7 +175,7 @@ private:
                     input_shape.size(),
                     ld.setting().units().size());
                 _m.Add(layer);
-                return {layer->OutputSize()};
+                return {DLMath::Shape3d(layer->OutputSize())};
             }
         }
     }

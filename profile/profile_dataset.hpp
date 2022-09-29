@@ -124,12 +124,14 @@ private:
             MNIST_TESTING_LABELS_FP);
         auto data_training = Dataset<NumType>::parse(
             mnist_training,
-            DatasetParser::LabelEncoding::ONE_HOT_ENCODING)
-                .min_max_normalization();
+            DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+        data_training = data_training.min_max_normalization(
+            0, 255, data_training.trainset_idx());
         auto data_testing = Dataset<NumType>::parse(
             mnist_testing,
-            DatasetParser::LabelEncoding::ONE_HOT_ENCODING)
-                .min_max_normalization();
+            DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+        data_testing = data_testing.min_max_normalization(
+            0, 255, data_testing.trainset_idx());
         auto data_validation = data_training.subdata(
             PERCENTAGE_VALIDATION_DATASET);
         std::cout << "data training shape: ("

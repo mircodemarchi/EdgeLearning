@@ -81,9 +81,9 @@ static const bool init_randomizer = _init_randomizer();
 
 using NsCount = long long unsigned int;
 
-class Profiler {
+class Profile {
 public:
-    Profiler(SizeType num_tries, std::string name = std::string())
+    Profile(SizeType num_tries, std::string name = std::string())
         : _num_tries(num_tries)
         , _name(name.empty() ? "profiler" : name)
     {
@@ -169,18 +169,32 @@ private:
 };
 
 
-class DNNProfiler : public Profiler {
+class ProfileNN : public Profile {
 public:
-    DNNProfiler(SizeType num_tries, std::string name = std::string())
-        : Profiler(num_tries, name)
+
+    struct TrainingSetting {
+        TrainingSetting(SizeType e, SizeType bs, NumType lr)
+            : epochs(e)
+            , batch_size(bs)
+            , learning_rate(lr)
+        { }
+
+        SizeType epochs;
+        SizeType batch_size;
+        NumType learning_rate;
+    };
+
+
+    ProfileNN(SizeType num_tries, std::string name = std::string())
+        : Profile(num_tries, name)
     { }
 
     template<typename Model>
     void training(std::string info, std::string profile_name,
                   SizeType iteration_amount,
                   Dataset<NumType>& data_training,
-                  Dataset<NumType>& data_evaluation,
-                  const LayerDescriptorVector& layers_descriptor,
+                  Dataset<NumType>& data_validation,
+                  const NNDescriptor& layers_descriptor,
                   SizeType epochs,
                   SizeType batch_size,
                   NumType learning_rate)
@@ -191,7 +205,7 @@ public:
                 (void) i;
                 Model m(layers_descriptor, "training_profiling_model");
                 m.fit(data_training, epochs, batch_size, learning_rate);
-                auto metrics = m.evaluate(data_evaluation);
+                auto metrics = m.evaluate(data_validation);
                 std::cout
                     << "evaluation: { "
                     << "accuracy (%): " << metrics.accuracy_perc << ", "
@@ -206,7 +220,7 @@ public:
     void predict(std::string info, std::string profile_name,
                  SizeType iteration_amount,
                  Dataset<NumType>& data,
-                 const LayerDescriptorVector& layers_descriptor,
+                 const NNDescriptor& layers_descriptor,
                  SizeType epochs,
                  SizeType batch_size,
                  NumType learning_rate)
@@ -230,7 +244,7 @@ public:
                   SizeType iteration_amount,
                   Dataset<NumType>& data_training,
                   Dataset<NumType>& data_testing,
-                  const LayerDescriptorVector& layers_descriptor,
+                  const NNDescriptor& layers_descriptor,
                   SizeType epochs,
                   SizeType batch_size,
                   NumType learning_rate)
@@ -247,6 +261,41 @@ public:
                     << "accuracy (%): " << metrics.accuracy_perc << ", "
                     << "error_rate (%): " << metrics.error_rate_perc << ", "
                     << "avg_loss: " << metrics.loss << " "
+                    << "} "<< std::endl;
+            },
+            iteration_amount, profile_name);
+    }
+
+    template<typename Model>
+    void training_testing(std::string info, std::string profile_name,
+                  SizeType iteration_amount,
+                  Dataset<NumType>& data_training,
+                  Dataset<NumType>& data_validation,
+                  Dataset<NumType>& data_testing,
+                  const NNDescriptor& layers_descriptor,
+                  SizeType epochs,
+                  SizeType batch_size,
+                  NumType learning_rate)
+    {
+        profile(
+            info,
+            [&](SizeType i) {
+                (void) i;
+                Model m(layers_descriptor, "training_testing_profiling_model");
+                m.fit(data_training, epochs, batch_size, learning_rate);
+                auto validation_metrics = m.evaluate(data_validation);
+                std::cout
+                    << "evaluation: { "
+                    << "accuracy (%): " << validation_metrics.accuracy_perc << ", "
+                    << "error_rate (%): " << validation_metrics.error_rate_perc << ", "
+                    << "avg_loss: " << validation_metrics.loss << " "
+                    << "} "<< std::endl;
+                auto testing_metrics = m.evaluate(data_testing);
+                std::cout
+                    << "testing: { "
+                    << "accuracy (%): " << testing_metrics.accuracy_perc << ", "
+                    << "error_rate (%): " << testing_metrics.error_rate_perc << ", "
+                    << "avg_loss: " << testing_metrics.loss << " "
                     << "} "<< std::endl;
             },
             iteration_amount, profile_name);
