@@ -94,6 +94,13 @@ void PoolingLayer::load(Json& in)
     _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
 }
 
+DLMath::Shape3d PoolingLayer::calculate_output_shape(
+    DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
+    DLMath::Shape2d stride)
+{
+    return pooling_output_shape(input_shape, kernel_shape, stride);
+}
+
 void PoolingLayer::_set_input_shape(LayerShape input_shape)
 {
     FeedforwardLayer::_set_input_shape(input_shape);

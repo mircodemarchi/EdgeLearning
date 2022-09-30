@@ -161,6 +161,21 @@ private:
                                 1,1,1, 1,1,1, 1,1,1};
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
+
+        auto output_shape = AvgPoolingLayer::calculate_output_shape(
+            in_shape, k_shape, {1,1});
+        EDGE_LEARNING_TEST_EQUAL(output_shape.height(), 2);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.width(), 2);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.channels(), 3);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.size(), 2*2*3);
+
+        output_shape = AvgPoolingLayer::calculate_output_shape(
+            in_shape, k_shape, {2,2});
+        EDGE_LEARNING_TEST_EQUAL(output_shape.height(), 1);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.width(), 1);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.channels(), 3);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.size(), 1*1*3);
+
         auto l = AvgPoolingLayer("avg_pooling_layer_test",
                                  in_shape, k_shape);
         EDGE_LEARNING_TEST_TRY(l.training_forward(v1));

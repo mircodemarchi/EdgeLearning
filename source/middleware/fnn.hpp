@@ -247,7 +247,7 @@ public:
 
 private:
     Layer::SharedPtr _add_layer(const LayerDescriptor& ld,
-                                LayerShape input_shape)
+                                const LayerShape& input_shape)
     {
         const auto& layer_name = ld.name();
         switch (ld.type())
@@ -301,7 +301,7 @@ private:
     }
 
     Layer::SharedPtr _add_activation_layer(const LayerDescriptor& ld,
-                                           LayerShape input_shape)
+                                           const LayerShape& input_shape)
     {
         const auto& layer_name = ld.name();
 

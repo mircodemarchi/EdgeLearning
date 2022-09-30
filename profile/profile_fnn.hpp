@@ -84,7 +84,7 @@ public:
 
         for (const auto& nn_descriptor: _hidden_layers_descriptor_vec)
         {
-            EDGE_LEARNING_PROFILE_CALL(profile_on_fixed_parameters(nn_descriptor));
+            profile_on_fixed_parameters(nn_descriptor);
             EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level(nn_descriptor));
             EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount(nn_descriptor));
             EDGE_LEARNING_PROFILE_CALL(profile_on_training_set(nn_descriptor));
@@ -102,13 +102,13 @@ private:
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
-        // auto input_size = data_training.trainset_idx().size();
+        auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
         NNDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
             layers_descriptor.begin(),
-            Input{"input_layer", DLMath::Shape3d{28, 28, 1}});
+            Input{"input_layer", input_size});
         layers_descriptor.push_back(
             Dense{"output_layer", output_size, MapOutputActivation<LT>::type});
 
@@ -132,7 +132,7 @@ private:
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
-        // auto input_size = data_training.trainset_idx().size();
+        auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
         NNDescriptor layers_descriptor(nn_descriptor);
@@ -245,7 +245,7 @@ private:
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
-        auto input_size = data_training.trainset_idx().size();
+        auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
         NNDescriptor layers_descriptor(nn_descriptor);
@@ -288,7 +288,7 @@ private:
         auto data_validation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
         auto training_set_size = data_training.size();
-        auto input_size = data_training.trainset_idx().size();
+        auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
         NNDescriptor layers_descriptor(nn_descriptor);
@@ -347,7 +347,7 @@ private:
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
-        auto input_size = data_training.trainset_idx().size();
+        auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
         NNDescriptor layers_descriptor(
@@ -400,7 +400,7 @@ private:
         auto data_training = std::get<0>(data);
         auto data_validation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
-        auto input_size = data_training.trainset_idx().size();
+        auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
         std::vector<std::size_t> layers_shapes = {

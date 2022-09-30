@@ -351,6 +351,14 @@ void ConvolutionalLayer::load(Json& in)
     }
 }
 
+DLMath::Shape3d ConvolutionalLayer::calculate_output_shape(
+    DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
+    DLMath::Shape2d stride, DLMath::Shape2d padding, SizeType n_filters)
+{
+    return convolutional_output_shape(
+        input_shape, kernel_shape, stride, padding, n_filters);
+}
+
 void ConvolutionalLayer::_set_input_shape(LayerShape input_shape)
 {
     FeedforwardLayer::_set_input_shape(input_shape);

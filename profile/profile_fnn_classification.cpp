@@ -27,6 +27,7 @@
 
 const NNDescriptor mnist_hidden_layers_descriptor(
     {
+        // Dense{"hidden_layer0", 32, ActivationType::ReLU },
         Conv{"hidden_layer0", {32, {3,3}}, ActivationType::ReLU },
     }
 );
@@ -48,7 +49,7 @@ public:
 };
 
 int main() {
-    SizeType EPOCHS = 20;
+    SizeType EPOCHS = 4;
     SizeType BATCH_SIZE = 128;
     NumType LEARNING_RATE = 0.01;
 

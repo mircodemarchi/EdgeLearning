@@ -57,7 +57,7 @@ public:
         : _dataset_type(dataset_type)
     { }
 
-    std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>>
+    std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>, LayerShape>
     load_dataset()
     {
         switch (_dataset_type) {
@@ -93,7 +93,7 @@ public:
 
 private:
 
-    std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>>
+    std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>, LayerShape>
     _load_mnist_dataset()
     {
         const std::string MNIST_TRAINING_IMAGES_FN =
@@ -143,10 +143,13 @@ private:
         std::cout << "data testing shape: ("
                   << data_testing.size() << ", "
                   << data_testing.feature_size() << ")" << std::endl;
-        return {data_training, data_validation, data_testing};
+        return {data_training,
+                data_validation,
+                data_testing,
+                DLMath::Shape3d{28, 28}};
     }
 
-    std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>>
+    std::tuple<Dataset<NumType>, Dataset<NumType>, Dataset<NumType>, LayerShape>
     _load_execution_time_dataset()
     {
         const std::string DATA_TRAINING_FN = "execution-time.csv";
@@ -161,7 +164,8 @@ private:
             PERCENTAGE_VALIDATION_DATASET);
         return {data_split.training_set,
                 data_validation,
-                data_split.testing_set};
+                data_split.testing_set,
+                data_split.training_set.trainset_idx().size()};
     }
 
     Type _dataset_type;

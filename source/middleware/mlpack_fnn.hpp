@@ -109,7 +109,7 @@ public:
     SizeType output_size() override { return _output_shape.size(); }
 
 private:
-    LayerShape _add_layer(const LayerDescriptor& ld, LayerShape input_shape)
+    LayerShape _add_layer(const LayerDescriptor& ld, const LayerShape& input_shape)
     {
         switch (ld.type())
         {
@@ -133,9 +133,12 @@ private:
                     input_shape.width(),
                     input_shape.height());
                 _m.Add(layer);
-                return LayerShape(DLMath::Shape3d(layer->OutputHeight(),
-                                                  layer->OutputWidth(),
-                                                  ld.setting().n_filters()));
+                return ConvolutionalLayer::calculate_output_shape(
+                    input_shape.shape(),
+                    ld.setting().kernel_shape(),
+                    ld.setting().stride(),
+                    ld.setting().padding(),
+                    ld.setting().n_filters());
             }
             case LayerType::MaxPool:
             {
@@ -145,9 +148,10 @@ private:
                     ld.setting().stride().width(),
                     ld.setting().stride().height());
                 _m.Add(layer);
-                return LayerShape(DLMath::Shape3d(layer->OutputHeight(),
-                                                  layer->OutputWidth(),
-                                                  input_shape.channels()));
+                return MaxPoolingLayer::calculate_output_shape(
+                    input_shape.shape(),
+                    ld.setting().kernel_shape(),
+                    ld.setting().stride());
             }
             case LayerType::AvgPool:
             {
@@ -157,9 +161,10 @@ private:
                     ld.setting().stride().width(),
                     ld.setting().stride().height());
                 _m.Add(layer);
-                return LayerShape(DLMath::Shape3d(layer->OutputHeight(),
-                                                  layer->OutputWidth(),
-                                                  input_shape.channels()));
+                return AvgPoolingLayer::calculate_output_shape(
+                    input_shape.shape(),
+                    ld.setting().kernel_shape(),
+                    ld.setting().stride());
             }
             case LayerType::Dropout:
             {
@@ -175,7 +180,7 @@ private:
                     input_shape.size(),
                     ld.setting().units().size());
                 _m.Add(layer);
-                return LayerShape(DLMath::Shape3d(layer->OutputSize()));
+                return ld.setting().units();
             }
         }
     }

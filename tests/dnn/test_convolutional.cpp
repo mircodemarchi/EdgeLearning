@@ -200,6 +200,21 @@ private:
         DLMath::Shape3d in_shape{3,3,3};
         DLMath::Shape2d k_shape{2,2};
         SizeType filters = 16;
+
+        auto output_shape = ConvolutionalLayer::calculate_output_shape(
+            in_shape, k_shape, {1,1}, {0,0}, filters);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.height(), 2);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.width(), 2);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.channels(), filters);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.size(), 2*2*filters);
+
+        output_shape = ConvolutionalLayer::calculate_output_shape(
+            in_shape, k_shape, {2,2}, {1,1}, filters);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.height(), 2);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.width(), 2);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.channels(), filters);
+        EDGE_LEARNING_TEST_EQUAL(output_shape.size(), 2*2*filters);
+
         auto l = ConvolutionalLayer("convolutional_layer_test",
                                     in_shape, k_shape, filters);
         EDGE_LEARNING_TEST_TRY(l.init());

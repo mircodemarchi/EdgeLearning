@@ -128,6 +128,10 @@ public:
      */
     void load(Json& in) override;
 
+    static DLMath::Shape3d calculate_output_shape(
+        DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
+        DLMath::Shape2d stride);
+
 protected:
     /**
      * \brief Input shape setter. In this layer, all the 3 fields contained in
