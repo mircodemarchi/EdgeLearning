@@ -84,7 +84,7 @@ public:
 
         for (const auto& nn_descriptor: _hidden_layers_descriptor_vec)
         {
-            profile_on_fixed_parameters(nn_descriptor);
+            EDGE_LEARNING_PROFILE_CALL(profile_on_fixed_parameters(nn_descriptor));
             EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level(nn_descriptor));
             EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount(nn_descriptor));
             EDGE_LEARNING_PROFILE_CALL(profile_on_training_set(nn_descriptor));
@@ -100,7 +100,7 @@ private:
     void profile_on_fixed_parameters(NNDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
-        auto data_validation = std::get<1>(data);
+        auto data_evaluation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
@@ -120,7 +120,7 @@ private:
             ", learning_rate: " + std::to_string(_default_setting.learning_rate) +
             " }",
             "training_testing_default_parameters",
-            1, data_training, data_validation, data_testing,
+            1, data_training, data_evaluation, data_testing,
             layers_descriptor,
             _default_setting.epochs,
             _default_setting.batch_size,
@@ -130,7 +130,7 @@ private:
     void profile_on_parallelism_level(NNDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
-        auto data_validation = std::get<1>(data);
+        auto data_evaluation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
@@ -170,7 +170,7 @@ private:
                     + std::to_string(batch_size),
                 "training_testing_sequential_on_batch_size"
                     + std::to_string(batch_size),
-                1, data_training, data_validation, data_testing,
+                1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 batch_size,
@@ -181,7 +181,7 @@ private:
                 "with batch size: " + std::to_string(batch_size),
                 "training_testing_thread_parallelism_entry_on_batch_size"
                     + std::to_string(batch_size),
-                1, data_training, data_validation, data_testing,
+                1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 batch_size,
@@ -192,7 +192,7 @@ private:
                 "with batch size: " + std::to_string(batch_size),
                 "training_testing_thread_parallelism_batch_on_batch_size"
                     + std::to_string(batch_size),
-                1, data_training, data_validation, data_testing,
+                1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 batch_size,
@@ -206,7 +206,7 @@ private:
                     + std::to_string(learning_rate),
                 "training_testing_sequential_on_learning_rate"
                     + std::to_string(learning_rate),
-                1, data_training, data_validation, data_testing,
+                1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 _default_setting.batch_size,
@@ -217,7 +217,7 @@ private:
                 "with learning rate: " + std::to_string(learning_rate),
                 "training_testing_thread_parallelism_entry_on_learning_rate"
                     + std::to_string(learning_rate),
-                1, data_training, data_validation, data_testing,
+                1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 _default_setting.batch_size,
@@ -228,7 +228,7 @@ private:
                 "with learning rate: " + std::to_string(learning_rate),
                 "training_testing_thread_parallelism_batch_on_learning_rate"
                     + std::to_string(learning_rate),
-                1, data_training, data_validation, data_testing,
+                1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 _default_setting.batch_size,
@@ -243,7 +243,7 @@ private:
     void profile_on_epochs_amount(NNDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
-        auto data_validation = std::get<1>(data);
+        auto data_evaluation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
@@ -260,7 +260,7 @@ private:
             training_testing<ProfileCompileFNN>(
                 "training and testing epochs amount: " + std::to_string(e),
                 "training_on_epochs_amount" + std::to_string(e),
-                100, data_training, data_validation, data_testing,
+                100, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 e,
                 _default_setting.batch_size,
@@ -285,7 +285,7 @@ private:
     void profile_on_training_set(NNDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
-        auto data_validation = std::get<1>(data);
+        auto data_evaluation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
         auto training_set_size = data_training.size();
         auto input_size = std::get<3>(data);
@@ -305,15 +305,15 @@ private:
         {
             auto curr_size = std::min(training_set_size, size);
             auto subdata_training = data_training.subdata(0, curr_size);
-            auto subdata_validation = data_validation.subdata(
-                0, std::min(curr_size, data_validation.size()));
+            auto subdata_evaluation = data_evaluation.subdata(
+                0, std::min(curr_size, data_evaluation.size()));
             auto subdata_testing = data_testing.subdata(
                 0, std::min(curr_size, data_testing.size()));
             training_testing<ProfileCompileFNN>(
                 "training and testing with dataset size (#entries): "
                     + std::to_string(curr_size),
                 "training_testing_on_dataset_size" + std::to_string(curr_size),
-                100, subdata_training, subdata_validation, subdata_testing,
+                100, subdata_training, subdata_evaluation, subdata_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 _default_setting.batch_size,
@@ -345,7 +345,7 @@ private:
     void profile_on_layers_amount() {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
-        auto data_validation = std::get<1>(data);
+        auto data_evaluation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
@@ -376,7 +376,7 @@ private:
                     + std::to_string(amount),
                 "training_testing_on_hidden_layers_amount"
                     + std::to_string(amount),
-                100, data_training, data_validation, data_testing,
+                100, data_training, data_evaluation, data_testing,
                 curr_ld,
                 _default_setting.epochs,
                 _default_setting.batch_size,
@@ -398,7 +398,7 @@ private:
     void profile_on_layers_shape() {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
-        auto data_validation = std::get<1>(data);
+        auto data_evaluation = std::get<1>(data);
         auto data_testing = std::get<2>(data);
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
@@ -420,7 +420,7 @@ private:
                     + std::to_string(shape),
                 "training_testing_on_hidden_layers_shape"
                     + std::to_string(shape),
-                100, data_training, data_validation, data_testing,
+                100, data_training, data_evaluation, data_testing,
                 layers_descriptor,
                 _default_setting.epochs,
                 _default_setting.batch_size,

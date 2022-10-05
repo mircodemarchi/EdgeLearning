@@ -32,7 +32,7 @@ $ git submodule update --init --recursive
     ```
 ## Contribution guidelines ##
 
-If you would like to contribute to Opera, please contact the developer:
+If you would like to contribute to Edge Learning, please contact the developer:
 
 * Mirco De Marchi <mirco.demarchi@univr.it>
 * Luca Geretti <luca.geretti@univr.it>

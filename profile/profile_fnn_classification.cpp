@@ -27,8 +27,9 @@
 
 const NNDescriptor mnist_hidden_layers_descriptor(
     {
-        // Dense{"hidden_layer0", 32, ActivationType::ReLU },
-        Conv{"hidden_layer0", {32, {3,3}}, ActivationType::ReLU },
+        Dense{"hidden_layer0", 200, ActivationType::ReLU },
+        Dense{"hidden_layer1", 100, ActivationType::ReLU },
+        // Conv{"hidden_layer0", {32, {3,3}}, ActivationType::ReLU },
     }
 );
 
@@ -49,9 +50,9 @@ public:
 };
 
 int main() {
-    SizeType EPOCHS = 4;
-    SizeType BATCH_SIZE = 128;
-    NumType LEARNING_RATE = 0.01;
+    SizeType EPOCHS = 5;
+    SizeType BATCH_SIZE = 64;
+    NumType LEARNING_RATE = 5e-3;
 
     ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
         ProfileDataset::Type::MNIST,

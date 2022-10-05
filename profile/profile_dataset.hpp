@@ -46,7 +46,7 @@ class ProfileDataset
 public:
     const NumType PERCENTAGE_TESTING_DATASET = 0.2;
     const NumType PERCENTAGE_TRAINING_DATASET = 1 - PERCENTAGE_TESTING_DATASET;
-    const NumType PERCENTAGE_VALIDATION_DATASET = 0.2;
+    const NumType PERCENTAGE_EVALUATION_DATASET = 0.1;
 
     enum class Type {
         MNIST,
@@ -132,19 +132,19 @@ private:
             DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         data_testing = data_testing.min_max_normalization(
             0, 255, data_testing.trainset_idx());
-        auto data_validation = data_training.subdata(
-            PERCENTAGE_VALIDATION_DATASET);
+        auto data_evaluation = data_training.subdata(
+            PERCENTAGE_EVALUATION_DATASET);
         std::cout << "data training shape: ("
             << data_training.size() << ", "
             << data_training.feature_size() << ")" << std::endl;
-        std::cout << "data validation shape: ("
-                  << data_validation.size() << ", "
-                  << data_validation.feature_size() << ")" << std::endl;
+        std::cout << "data evaluation shape: ("
+                  << data_evaluation.size() << ", "
+                  << data_evaluation.feature_size() << ")" << std::endl;
         std::cout << "data testing shape: ("
                   << data_testing.size() << ", "
                   << data_testing.feature_size() << ")" << std::endl;
         return {data_training,
-                data_validation,
+                data_evaluation,
                 data_testing,
                 DLMath::Shape3d{28, 28}};
     }
@@ -160,10 +160,10 @@ private:
                        { TypeChecker::Type::AUTO }, ',', {4});
         auto data = Dataset<NumType>::parse(csv);
         auto data_split = data.split(PERCENTAGE_TRAINING_DATASET);
-        auto data_validation = data_split.training_set.subdata(
-            PERCENTAGE_VALIDATION_DATASET);
+        auto data_evaluation = data_split.training_set.subdata(
+            PERCENTAGE_EVALUATION_DATASET);
         return {data_split.training_set,
-                data_validation,
+                data_evaluation,
                 data_split.testing_set,
                 data_split.training_set.trainset_idx().size()};
     }

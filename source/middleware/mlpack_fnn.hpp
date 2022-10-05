@@ -74,17 +74,18 @@ public:
                          epochs * data.size(), 0.0, false);
         auto trainset = data.trainset().template to_arma<arma::Mat<T>>();
         auto labels = data.labels().template to_arma<arma::Mat<T>>();
-        _m.Train(trainset, labels, o);
+        ens::StoreBestCoordinates<arma::mat> bestCoordinates;
+        _m.Train(trainset, labels, o, ens::PrintLoss(), ens::ProgressBar(), bestCoordinates);
+        _m.Parameters() = bestCoordinates.BestCoordinates();
     }
 
     Dataset<T> predict(Dataset<T>& data) override
     {
         arma::Mat<T> prediction;
         _m.Predict(data.template to_arma<arma::Mat<T>>(), prediction);
-        arma::Mat<T> predition_t = prediction.t();
-        predition_t.reshape(1, predition_t.n_rows * predition_t.n_cols);
-        auto predition_vec = arma::conv_to<std::vector<T>>::from(predition_t);
-        return Dataset<T>(predition_vec, prediction.n_rows);
+        auto prediction_vec = arma::conv_to<std::vector<T>>::from(
+            prediction.as_col());
+        return Dataset<T>(prediction_vec, prediction.n_rows);
     }
 
     void add(LayerDescriptor ld) override
