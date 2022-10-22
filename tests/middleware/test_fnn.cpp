@@ -61,28 +61,32 @@ private:
              Dense{"output_layer",           2UL, ActivationType::Linear   }}
             );
         auto m = CompileFNN<>(layers_descriptor, "regressor_model");
-        EDGE_LEARNING_TEST_TRY(m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
+        EDGE_LEARNING_TEST_TRY(m.fit(dataset, OptimizerType::GRADIENT_DESCENT, EPOCHS, BATCH_SIZE, 0.03));
+        EDGE_LEARNING_TEST_TRY(m.fit(dataset, OptimizerType::ADAM, EPOCHS, BATCH_SIZE, 0.03));
 
         auto m_runtime_err = CompileFNN<>({}, "regressor_model_runtime_err");
         EDGE_LEARNING_TEST_THROWS(
-            m_runtime_err.fit(dataset, EPOCHS, BATCH_SIZE, 0.03),
+            m_runtime_err.fit(dataset, OptimizerType::GRADIENT_DESCENT, EPOCHS, BATCH_SIZE, 0.03),
+            std::runtime_error);
+        EDGE_LEARNING_TEST_THROWS(
+            m_runtime_err.fit(dataset, OptimizerType::ADAM, EPOCHS, BATCH_SIZE, 0.03),
             std::runtime_error);
 
         auto m_thread_parallelism_on_data_entry = CompileFNN<
             LossType::MSE,
-            OptimizerType::GRADIENT_DESCENT,
             InitType::AUTO,
             ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_ENTRY
             >(layers_descriptor, "regressor_model");
-        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_entry.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
+        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_entry.fit(dataset, OptimizerType::GRADIENT_DESCENT, EPOCHS, BATCH_SIZE, 0.03));
+        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_entry.fit(dataset, OptimizerType::ADAM, EPOCHS, BATCH_SIZE, 0.03));
 
         auto m_thread_parallelism_on_data_batch = CompileFNN<
             LossType::MSE,
-            OptimizerType::GRADIENT_DESCENT,
             InitType::AUTO,
             ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_BATCH
         >(layers_descriptor, "regressor_model");
-        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_batch.fit(dataset, EPOCHS, BATCH_SIZE, 0.03));
+        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_batch.fit(dataset, OptimizerType::GRADIENT_DESCENT, EPOCHS, BATCH_SIZE, 0.03));
+        EDGE_LEARNING_TEST_TRY(m_thread_parallelism_on_data_batch.fit(dataset, OptimizerType::ADAM, EPOCHS, BATCH_SIZE, 0.03));
     }
 
     void test_predict() {
@@ -136,19 +140,33 @@ private:
              Dense{"hidden_layer_linear",    8UL, ActivationType::Linear   },
              Dense{"output_layer",           2UL, ActivationType::Linear   }}
         );
-        auto m = CompileFNN<>(layers_descriptor, "regressor_model");
-        m.fit(dataset, EPOCHS, BATCH_SIZE, 0.03);
+        auto m_gd = CompileFNN<>(layers_descriptor, "regressor_model");
+        m_gd.fit(dataset, OptimizerType::GRADIENT_DESCENT, EPOCHS, BATCH_SIZE, 0.03);
 
-        NN<NumType>::EvaluationResult performance_metrics;
-        EDGE_LEARNING_TEST_TRY(performance_metrics = m.evaluate(dataset));
-        EDGE_LEARNING_TEST_PRINT(performance_metrics.loss);
-        EDGE_LEARNING_TEST_PRINT(performance_metrics.accuracy);
-        EDGE_LEARNING_TEST_EQUAL(performance_metrics.accuracy_perc,
-                                 performance_metrics.accuracy * 100.0);
-        EDGE_LEARNING_TEST_EQUAL(performance_metrics.error_rate,
-                                 1.0 - performance_metrics.accuracy);
-        EDGE_LEARNING_TEST_EQUAL(performance_metrics.error_rate_perc,
-                                 performance_metrics.error_rate * 100.0);
+        NN<NumType>::EvaluationResult gd_performance_metrics;
+        EDGE_LEARNING_TEST_TRY(gd_performance_metrics = m_gd.evaluate(dataset));
+        EDGE_LEARNING_TEST_PRINT(gd_performance_metrics.loss);
+        EDGE_LEARNING_TEST_PRINT(gd_performance_metrics.accuracy);
+        EDGE_LEARNING_TEST_EQUAL(gd_performance_metrics.accuracy_perc,
+                                 gd_performance_metrics.accuracy * 100.0);
+        EDGE_LEARNING_TEST_EQUAL(gd_performance_metrics.error_rate,
+                                 1.0 - gd_performance_metrics.accuracy);
+        EDGE_LEARNING_TEST_EQUAL(gd_performance_metrics.error_rate_perc,
+                                 gd_performance_metrics.error_rate * 100.0);
+
+        auto m_adam = CompileFNN<>(layers_descriptor, "regressor_model");
+        m_adam.fit(dataset, OptimizerType::ADAM, EPOCHS, BATCH_SIZE, 0.03);
+
+        NN<NumType>::EvaluationResult adam_performance_metrics;
+        EDGE_LEARNING_TEST_TRY(adam_performance_metrics = m_adam.evaluate(dataset));
+        EDGE_LEARNING_TEST_PRINT(adam_performance_metrics.loss);
+        EDGE_LEARNING_TEST_PRINT(adam_performance_metrics.accuracy);
+        EDGE_LEARNING_TEST_EQUAL(adam_performance_metrics.accuracy_perc,
+                                 adam_performance_metrics.accuracy * 100.0);
+        EDGE_LEARNING_TEST_EQUAL(adam_performance_metrics.error_rate,
+                                 1.0 - adam_performance_metrics.accuracy);
+        EDGE_LEARNING_TEST_EQUAL(adam_performance_metrics.error_rate_perc,
+                                 adam_performance_metrics.error_rate * 100.0);
     }
 };
 

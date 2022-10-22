@@ -26,6 +26,8 @@
  *  \brief Deep Learning Math functionalities.
  */
 
+#include "type.hpp"
+
 #include <cmath>
 #include <functional>
 #include <cassert>
@@ -61,6 +63,12 @@ public:
             : row{c2d.row}
             , col{c2d.col}
             , channel{0}
+        {}
+
+        Coord3d(SizeType r, SizeType c, SizeType chn)
+            : row{r}
+            , col{c}
+            , channel{chn}
         {}
 
         SizeType row;

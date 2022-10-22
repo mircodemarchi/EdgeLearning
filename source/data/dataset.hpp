@@ -368,7 +368,13 @@ public:
     [[nodiscard]] bool empty() const { return _data.empty(); };
 
     /**
-     * \brief Return the data vector.
+     * \brief Setter for the data vector.
+     * \return std::vector<T>& The data vector reference.
+     */
+    std::vector<T>& data() { return _data; };
+
+    /**
+     * \brief Getter for the data vector.
      * \return const std::vector<T>& The data vector reference.
      */
     const std::vector<T>& data() const { return _data; };

@@ -122,7 +122,6 @@ template <Framework F, InitType IT> struct MapInit;
 template <
     Framework F,
     LossType LT,
-    OptimizerType OT,
     InitType IT,
     ParallelizationLevel PL,
     typename T>
@@ -196,12 +195,14 @@ public:
      * \brief Perform the training of the model with the given dataset.
      * The process will change the value of the model parameters.
      * \param data          The labelled data to use for training.
+     * \param optimizer     The optimizer to use for training.
      * \param epochs        The number of iterations over the dataset.
      * \param batch_size    The number of entries evaluated for gradient before
      *                      optimization.
      * \param learning_rate The optimization step size.
      */
     virtual void fit(Dataset<T>& data,
+                     OptimizerType optimizer = OptimizerType::ADAM,
                      SizeType epochs = 1,
                      SizeType batch_size = 1,
                      NumType learning_rate = 0.03) = 0;

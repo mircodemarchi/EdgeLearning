@@ -158,7 +158,6 @@ public:
 
 template<
     LossType LT = LossType::MSE,
-    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
@@ -201,6 +200,7 @@ public:
     }
 
     void fit(Dataset<T>& data,
+             OptimizerType optimizer = OptimizerType::ADAM,
              SizeType epochs = 1,
              SizeType batch_size = 1,
              NumType learning_rate = 0.03) override
@@ -219,12 +219,9 @@ public:
         _m.create_loss_edge(prev_layer, loss_layer);
 
         // Train.
-        using optimizer_type = typename MapOptimizer<
-            Framework::EDGE_LEARNING, OT>::type;
-        auto o = optimizer_type(learning_rate);
         _m.init(MapInit<Framework::EDGE_LEARNING, IT>::type,
                 Model::ProbabilityDensityFunction::NORMAL);
-        Training<PL, T>::run(_m, data, o, epochs, batch_size);
+        _fit(optimizer, data, epochs, batch_size, learning_rate);
     }
 
     Dataset<T> predict(Dataset<T> &data) override
@@ -246,6 +243,31 @@ public:
     SizeType output_size() override { return _m.output_size(); }
 
 private:
+    void _fit(OptimizerType optimizer,
+              Dataset<T>& data,
+              SizeType epochs, SizeType batch_size, NumType learning_rate)
+    {
+        switch (optimizer) {
+            case OptimizerType::GRADIENT_DESCENT:
+            {
+                using optimizer_type = typename MapOptimizer<
+                    Framework::EDGE_LEARNING, OptimizerType::GRADIENT_DESCENT>::type;
+                auto o = optimizer_type(learning_rate);
+                Training<PL, T>::run(_m, data, o, epochs, batch_size);
+                break;
+            }
+            case OptimizerType::ADAM:
+            default:
+            {
+                using optimizer_type = typename MapOptimizer<
+                    Framework::EDGE_LEARNING, OptimizerType::ADAM>::type;
+                auto o = optimizer_type(learning_rate);
+                Training<PL, T>::run(_m, data, o, epochs, batch_size);
+                break;
+            }
+        }
+    }
+
     Layer::SharedPtr _add_layer(const LayerDescriptor& ld,
                                 const LayerShape& input_shape)
     {
@@ -354,31 +376,27 @@ private:
 
 template <
     LossType LT,
-    OptimizerType OT,
     InitType IT,
     ParallelizationLevel PL,
     typename T>
-struct MapModel<Framework::EDGE_LEARNING, LT, OT, IT, PL, T> {
+struct MapModel<Framework::EDGE_LEARNING, LT, IT, PL, T> {
     using loss_type = typename MapLoss<Framework::EDGE_LEARNING, LT>::type;
-    using optimizer_type = typename MapOptimizer<
-        Framework::EDGE_LEARNING, OT>::type;
     static const Model::InitializationFunction init_type = MapInit<
         Framework::EDGE_LEARNING, IT>::type;
     using type = Model;
-    using fnn = EdgeFNN<LT, OT, IT, PL, T>;
+    using fnn = EdgeFNN<LT, IT, PL, T>;
 };
 
 
 template<
     Framework F = Framework::EDGE_LEARNING,
     LossType LT = LossType::MSE,
-    OptimizerType OT = OptimizerType::ADAM,
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
 class FNN {
 public:
-    using ModelFNN = typename MapModel<F, LT, OT, IT, PL, T>::fnn;
+    using ModelFNN = typename MapModel<F, LT, IT, PL, T>::fnn;
 
     FNN(NNDescriptor layers, std::string name)
         : _layers{std::move(layers)}
@@ -396,11 +414,12 @@ public:
     }
 
     void fit(Dataset<T> &data,
+             OptimizerType optimizer = OptimizerType::GRADIENT_DESCENT,
              SizeType epochs = 1,
              SizeType batch_size = 1,
              NumType learning_rate = 0.03)
     {
-        _fnn_model.fit(data, epochs, batch_size, learning_rate);
+        _fnn_model.fit(data, optimizer, epochs, batch_size, learning_rate);
     }
 
     typename ModelFNN::EvaluationResult evaluate(Dataset<T>& data)
@@ -416,19 +435,17 @@ private:
 #if ENABLE_MLPACK
 template<
     LossType LT = LossType::MSE,
-    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-using CompileFNN = FNN<Framework::MLPACK, LT, OT, IT, PL, T>;
+using CompileFNN = FNN<Framework::MLPACK, LT, IT, PL, T>;
 #else
 template<
     LossType LT = LossType::MSE,
-    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-using CompileFNN = FNN<Framework::EDGE_LEARNING, LT, OT, IT, PL, T>;
+using CompileFNN = FNN<Framework::EDGE_LEARNING, LT, IT, PL, T>;
 #endif
 
 } // namespace EdgeLearning

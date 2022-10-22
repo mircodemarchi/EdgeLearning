@@ -244,7 +244,7 @@ public:
      * \brief Getter of output_shape class field.
      * \return The size of the layer output.
      */
-    [[nodiscard]] virtual const LayerShape& output_shape() const;
+    [[nodiscard]] const LayerShape& output_shape() const;
 
     /**
      * \brief Getter of the list of input shapes of the layer.

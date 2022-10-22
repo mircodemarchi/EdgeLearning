@@ -50,7 +50,7 @@ struct MapActivation<Framework::MLPACK, ActivationType::ReLU> {
 
 template <>
 struct MapActivation<Framework::MLPACK, ActivationType::ELU> {
-    using type = mlpack::ann::ReLULayer<>;
+    using type = mlpack::ann::ELU<>;
 };
 
 template <>

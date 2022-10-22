@@ -41,9 +41,7 @@ namespace EdgeLearning {
 
 template<
     LossType LT = LossType::MSE,
-    OptimizerType OT = OptimizerType::GRADIENT_DESCENT,
     InitType IT = InitType::AUTO,
-    ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
 class MlpackFNN : public NN<T> {
 public:
@@ -59,6 +57,7 @@ public:
     }
 
     void fit(Dataset<T>& data,
+             OptimizerType optimizer = OptimizerType::ADAM,
              SizeType epochs = 1,
              SizeType batch_size = 1,
              NumType learning_rate = 0.03) override
@@ -68,15 +67,9 @@ public:
             throw std::runtime_error(
                 "The FNN has no layer: call add before fit");
         }
-        using optimizer_type = typename MapOptimizer<
-            Framework::MLPACK, OT>::type;
-        optimizer_type o(learning_rate, batch_size,
-                         epochs * data.size(), 0.0, false);
         auto trainset = data.trainset().template to_arma<arma::Mat<T>>();
         auto labels = data.labels().template to_arma<arma::Mat<T>>();
-        ens::StoreBestCoordinates<arma::mat> bestCoordinates;
-        _m.Train(trainset, labels, o, ens::PrintLoss(), ens::ProgressBar(), bestCoordinates);
-        _m.Parameters() = bestCoordinates.BestCoordinates();
+        _fit(optimizer, trainset, labels, epochs, batch_size, learning_rate);
     }
 
     Dataset<T> predict(Dataset<T>& data) override
@@ -110,6 +103,37 @@ public:
     SizeType output_size() override { return _output_shape.size(); }
 
 private:
+    void _fit(OptimizerType optimizer,
+              const arma::Mat<T> trainset, const arma::Mat<T> labels,
+              SizeType epochs, SizeType batch_size, NumType learning_rate)
+    {
+        ens::StoreBestCoordinates<arma::mat> bestCoordinates;
+        switch (optimizer) {
+            case OptimizerType::GRADIENT_DESCENT:
+            {
+                using optimizer_type = typename MapOptimizer<
+                    Framework::MLPACK, OptimizerType::GRADIENT_DESCENT>::type;
+                auto o = optimizer_type(learning_rate, batch_size,
+                                        epochs * trainset.n_cols, 0.0, false);
+                _m.Train(trainset, labels, ens::SGD<>(),
+                         ens::PrintLoss(), ens::ProgressBar(), bestCoordinates);
+                break;
+            }
+            case OptimizerType::ADAM:
+            default:
+            {
+                using optimizer_type = typename MapOptimizer<
+                    Framework::MLPACK, OptimizerType::ADAM>::type;
+                auto o = optimizer_type(learning_rate, batch_size,
+                                        epochs * trainset.n_cols, 0.0, false);
+                _m.Train(trainset, labels, ens::SGD<>(),
+                         ens::PrintLoss(), ens::ProgressBar(), bestCoordinates);
+                break;
+            }
+        }
+        _m.Parameters() = bestCoordinates.BestCoordinates();
+    }
+
     LayerShape _add_layer(const LayerDescriptor& ld, const LayerShape& input_shape)
     {
         switch (ld.type())
@@ -122,7 +146,9 @@ private:
             }
             case LayerType::Conv:
             {
-                auto layer = new mlpack::ann::Convolution(
+                using layer_type = typename MapLayer<
+                    Framework::MLPACK, LayerType::Conv>::type;
+                auto layer = new layer_type(
                     input_shape.channels(),
                     ld.setting().n_filters(),
                     ld.setting().kernel_shape().width(),
@@ -143,7 +169,9 @@ private:
             }
             case LayerType::MaxPool:
             {
-                auto layer = new mlpack::ann::MaxPooling(
+                using layer_type = typename MapLayer<
+                    Framework::MLPACK, LayerType::MaxPool>::type;
+                auto layer = new layer_type(
                     ld.setting().kernel_shape().width(),
                     ld.setting().kernel_shape().height(),
                     ld.setting().stride().width(),
@@ -156,7 +184,9 @@ private:
             }
             case LayerType::AvgPool:
             {
-                auto layer = new mlpack::ann::MeanPooling(
+                using layer_type = typename MapLayer<
+                    Framework::MLPACK, LayerType::AvgPool>::type;
+                auto layer = new layer_type(
                     ld.setting().kernel_shape().width(),
                     ld.setting().kernel_shape().height(),
                     ld.setting().stride().width(),
@@ -169,7 +199,9 @@ private:
             }
             case LayerType::Dropout:
             {
-                auto layer = new mlpack::ann::Dropout(
+                using layer_type = typename MapLayer<
+                    Framework::MLPACK, LayerType::Dropout>::type;
+                auto layer = new layer_type(
                     ld.setting().drop_probability());
                 _m.Add(layer);
                 return input_shape;
@@ -177,7 +209,9 @@ private:
             case LayerType::Dense:
             default:
             {
-                auto layer = new mlpack::ann::Linear(
+                using layer_type = typename MapLayer<
+                    Framework::MLPACK, LayerType::Dense>::type;
+                auto layer = new layer_type(
                     input_shape.size(),
                     ld.setting().units().size());
                 _m.Add(layer);
@@ -192,33 +226,45 @@ private:
         {
             case ActivationType::ReLU:
             {
-                _m.template Add<mlpack::ann::ReLULayer<>>();
+                using activation_type = typename MapActivation<
+                    Framework::MLPACK, ActivationType::ReLU>::type;
+                _m.template Add<activation_type>();
                 break;
             }
             case ActivationType::ELU:
             {
-                _m.template Add<mlpack::ann::ELU<>>();
+                using activation_type = typename MapActivation<
+                    Framework::MLPACK, ActivationType::ELU>::type;
+                _m.template Add<activation_type>();
                 break;
             }
             case ActivationType::Softmax:
             {
-                _m.template Add<mlpack::ann::Softmax<>>();
+                using activation_type = typename MapActivation<
+                    Framework::MLPACK, ActivationType::Softmax>::type;
+                _m.template Add<activation_type>();
                 break;
             }
             case ActivationType::TanH:
             {
-                _m.template Add<mlpack::ann::TanHLayer<>>();
+                using activation_type = typename MapActivation<
+                    Framework::MLPACK, ActivationType::TanH>::type;
+                _m.template Add<activation_type>();
                 break;
             }
             case ActivationType::Sigmoid:
             {
-                _m.template Add<mlpack::ann::SigmoidLayer<>>();
+                using activation_type = typename MapActivation<
+                    Framework::MLPACK, ActivationType::Sigmoid>::type;
+                _m.template Add<activation_type>();
                 break;
             }
             case ActivationType::Linear:
             default:
             {
-                _m.template Add<mlpack::ann::IdentityLayer<>>();
+                using activation_type = typename MapActivation<
+                    Framework::MLPACK, ActivationType::Linear>::type;
+                _m.template Add<activation_type>();
                 break;
             }
         }
@@ -236,16 +282,14 @@ private:
 
 template <
     LossType LT,
-    OptimizerType OT,
     InitType IT,
     ParallelizationLevel PL,
     typename T>
-struct MapModel<Framework::MLPACK, LT, OT, IT, PL, T> {
+struct MapModel<Framework::MLPACK, LT, IT, PL, T> {
     using loss_type = typename MapLoss<Framework::MLPACK, LT>::type;
-    using optimizer_type = typename MapOptimizer<Framework::MLPACK, OT>::type;
     using init_type = typename MapInit<Framework::MLPACK, IT>::type;
     using type = mlpack::ann::FFN<loss_type, init_type>;
-    using fnn = MlpackFNN<LT, OT, IT, PL, T>;
+    using fnn = MlpackFNN<LT, IT, T>;
 };
 
 } // namespace EdgeLearning
