@@ -161,9 +161,9 @@ template<
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-class EdgeFNN : public StaticNeuralNetwork<T> {
+class EdgeFeedforwardNeuralNetwork : public StaticNeuralNetwork<T> {
 public:
-    EdgeFNN(std::string name)
+    EdgeFeedforwardNeuralNetwork(std::string name)
         : StaticNeuralNetwork<T>(name)
         , _m(StaticNeuralNetwork<T>::_name)
         , _output_shape{0}
@@ -385,7 +385,7 @@ struct MapModel<Framework::EDGE_LEARNING, LT, IT, PL, T> {
         Framework::EDGE_LEARNING, IT>::type;
     static const ParallelizationLevel parallelization_level = PL;
     using type = Model;
-    using fnn = EdgeFNN<LT, IT, PL, T>;
+    using feedforward_model = EdgeFeedforwardNeuralNetwork<LT, IT, PL, T>;
 };
 
 
@@ -395,11 +395,12 @@ template<
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-class FNN {
+class FeedforwardNeuralNetwork {
 public:
-    using ModelFNN = typename MapModel<F, LT, IT, PL, T>::fnn;
+    using SubModelType = typename MapModel<F, LT, IT, PL, T>::feedforward_model;
+    using EvaluationResult = typename SubModelType::EvaluationResult;
 
-    FNN(NeuralNetworkDescriptor layers, std::string name)
+    FeedforwardNeuralNetwork(NeuralNetworkDescriptor layers, std::string name)
         : _layers{std::move(layers)}
         , _fnn_model{name}
     {
@@ -423,14 +424,14 @@ public:
         _fnn_model.fit(data, optimizer, epochs, batch_size, learning_rate);
     }
 
-    typename ModelFNN::EvaluationResult evaluate(Dataset<T>& data)
+    EvaluationResult evaluate(Dataset<T>& data)
     {
         return _fnn_model.template evaluate_static<LT>(data);
     }
 
 private:
     NeuralNetworkDescriptor _layers;
-    ModelFNN _fnn_model;
+    SubModelType _fnn_model;
 };
 
 #if ENABLE_MLPACK
@@ -439,20 +440,20 @@ template<
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-using CompileFNN = FNN<Framework::MLPACK, LT, IT, PL, T>;
+using CompileFeedforwardNeuralNetwork = FeedforwardNeuralNetwork<Framework::MLPACK, LT, IT, PL, T>;
 #else
 template<
     LossType LT = LossType::MSE,
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-using CompileFNN = FNN<Framework::EDGE_LEARNING, LT, IT, PL, T>;
+using CompileFeedforwardNeuralNetwork = FNN<Framework::EDGE_LEARNING, LT, IT, PL, T>;
 #endif
 
 template<
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-class DynamicFNN {
+class DynamicFeedforwardNeuralNetwork {
 public:
 
     template <
@@ -461,25 +462,27 @@ public:
         InitType MM_IT,
         ParallelizationLevel MM_PL,
         typename MM_T>
-    struct MapModelFeedForward {
-        using type = typename MapModel<MM_F, MM_LT, MM_IT, MM_PL, MM_T>::fnn;
+    struct MapModelFeedforward {
+        using type = typename MapModel<MM_F, MM_LT, MM_IT, MM_PL, MM_T>::feedforward_model;
     };
 
     template<Framework F>
-    using ModelFNN = DynamicNeuralNetwork<MapModelFeedForward, F, PL, T>;
+    using SubModelType = DynamicNeuralNetwork<MapModelFeedforward, F, PL, T>;
 
-    DynamicFNN(NeuralNetworkDescriptor layers, std::string name)
+    using EvaluationResult = typename NeuralNetwork<T>::EvaluationResult;
+
+    DynamicFeedforwardNeuralNetwork(NeuralNetworkDescriptor layers, std::string name)
         : _layers{std::move(layers)}
         , _fnn_models{}
     {
         auto _edge_learning_fnn_model = std::make_shared<
-            ModelFNN<Framework::EDGE_LEARNING>>(name);
+            SubModelType<Framework::EDGE_LEARNING>>(name);
         _fnn_models[Framework::EDGE_LEARNING] = _edge_learning_fnn_model;
 
 #if ENABLE_MLPACK
         auto _mlpack_fnn_model = std::make_shared<
-            ModelFNN<Framework::MLPACK>>(name);
-        _fnn_models[Framework::MLPACK] = _edge_learning_fnn_model;
+            SubModelType<Framework::MLPACK>>(name);
+        _fnn_models[Framework::MLPACK] = _mlpack_fnn_model;
 #endif
     }
 
@@ -493,30 +496,28 @@ public:
         std::map<Framework, Dataset<T>> ret;
         for (const auto& e: _fnn_models)
         {
-            ret[e.first] = e.second->fit(data);
+            ret[e.first] = predict(e.first, data);
         }
         return ret;
     }
 
     void fit(Framework framework, Dataset<T> &data,
-             OptimizerType optimizer = OptimizerType::GRADIENT_DESCENT,
              SizeType epochs = 1,
              SizeType batch_size = 1,
              NumType learning_rate = 0.03)
     {
-        _fnn_models[framework]->fit(data, optimizer, epochs,
+        _fnn_models[framework]->fit(data, epochs,
                                     batch_size, learning_rate);
     }
 
     void fit(Dataset<T> &data,
-             OptimizerType optimizer = OptimizerType::GRADIENT_DESCENT,
              SizeType epochs = 1,
              SizeType batch_size = 1,
              NumType learning_rate = 0.03)
     {
         for (const auto& e: _fnn_models)
         {
-            e.second->fit(data, optimizer, epochs, batch_size, learning_rate);
+            fit(e.first, data, epochs, batch_size, learning_rate);
         }
     }
 
@@ -525,12 +526,9 @@ public:
                  InitType init = InitType::AUTO)
     {
         _fnn_models[framework]->compile(loss, optimizer, init);
-        for (const auto& e: _layers)
+        for (const auto& l: _layers)
         {
-            _fnn_models[framework]->add(e);
-#if ENABLE_MLPACK
-            _fnn_models[framework]->add(e);
-#endif
+            _fnn_models[framework]->add(l);
         }
     }
 
@@ -540,23 +538,23 @@ public:
     {
         for (const auto& e: _fnn_models)
         {
-            e.second->compile(loss, optimizer, init);
+            compile(e.first, loss, optimizer, init);
         }
     }
 
-    typename NeuralNetwork<T>::EvaluationResult evaluate(
+    EvaluationResult evaluate(
         Framework framework, Dataset<T>& data)
     {
-        return _fnn_models[framework]->template evaluate(data);
+        return _fnn_models[framework]->evaluate(data);
     }
 
-    std::map<Framework, typename NeuralNetwork<T>::EvaluationResult> evaluate(
+    std::map<Framework, EvaluationResult> evaluate(
         Dataset<T>& data)
     {
         std::map<Framework, typename NeuralNetwork<T>::EvaluationResult > ret;
         for (const auto& e: _fnn_models)
         {
-            ret[e.first] = e.second->evaluate(data);
+            ret[e.first] = evaluate(e.first, data);
         }
         return ret;
     }

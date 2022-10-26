@@ -42,7 +42,7 @@ int main()
     };
     Dataset<NumType> dataset(data, 1, {4, 5});
 
-    NNDescriptor layers_descriptor(
+    NeuralNetworkDescriptor layers_descriptor(
         {
             Input{"input_layer",   INPUT_SIZE},
             Dense{"hidden_layer1", 8UL,         ActivationType::ReLU   },
@@ -52,7 +52,7 @@ int main()
         }
     );
 
-    FNN<Framework::EDGE_LEARNING,
+    FeedforwardNeuralNetwork<Framework::EDGE_LEARNING,
         LossType::MSE,
         InitType::AUTO> m(layers_descriptor, "regressor_model");
     m.fit(dataset, OptimizerType::GRADIENT_DESCENT, EPOCHS, BATCH_SIZE, LEARNING_RATE);

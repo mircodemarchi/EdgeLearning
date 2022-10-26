@@ -95,7 +95,7 @@ public:
     }
 
 private:
-    using ProfileCompileFNN = CompileFNN<LT, InitType::AUTO, PL>;
+    using ProfileCompileFNN = CompileFeedforwardNeuralNetwork<LT, InitType::AUTO, PL>;
 
     void profile_on_fixed_parameters(NeuralNetworkDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
@@ -146,17 +146,17 @@ private:
         std::vector<SizeType> batch_sizes = {1, 4, 16, 32, 64, 128};
         std::vector<NumType> learning_rates = {0.3, 0.1, 0.03, 0.01};
 
-        using ProfileCompileFNNSequential = CompileFNN<
+        using ProfileCompileFNNSequential = CompileFeedforwardNeuralNetwork<
             LT,
             InitType::AUTO,
             ParallelizationLevel::SEQUENTIAL>;
 
-        using ProfileCompileFNNThreadOnEntry = CompileFNN<
+        using ProfileCompileFNNThreadOnEntry = CompileFeedforwardNeuralNetwork<
             LT,
             InitType::AUTO,
             ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_ENTRY>;
 
-        using ProfileCompileFNNThreadOnBatch = CompileFNN<
+        using ProfileCompileFNNThreadOnBatch = CompileFeedforwardNeuralNetwork<
             LT,
             InitType::AUTO,
             ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_BATCH>;

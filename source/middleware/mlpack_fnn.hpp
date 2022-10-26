@@ -288,7 +288,7 @@ struct MapModel<Framework::MLPACK, LT, IT, PL, T> {
     using loss_type = typename MapLoss<Framework::MLPACK, LT>::type;
     using init_type = typename MapInit<Framework::MLPACK, IT>::type;
     using type = mlpack::ann::FFN<loss_type, init_type>;
-    using fnn = MlpackFNN<LT, IT, T>;
+    using feedforward_model = MlpackFNN<LT, IT, T>;
 };
 
 } // namespace EdgeLearning
