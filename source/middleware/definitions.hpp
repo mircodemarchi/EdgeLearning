@@ -29,20 +29,95 @@
 #ifndef EDGE_LEARNING_MIDDLEWARE_DEFINITIONS_HPP
 #define EDGE_LEARNING_MIDDLEWARE_DEFINITIONS_HPP
 
-#include "nn.hpp"
+#include "dnn/dense.hpp"
+#include "dnn/convolutional.hpp"
+#include "dnn/dropout.hpp"
+#include "dnn/avg_pooling.hpp"
+#include "dnn/max_pooling.hpp"
+#include "dnn/activation.hpp"
+#include "dnn/mse_loss.hpp"
+#include "dnn/cce_loss.hpp"
+#include "dnn/gd_optimizer.hpp"
+#include "dnn/adam_optimizer.hpp"
 
 
 namespace EdgeLearning {
 
-// template <Framework F>
-// struct MapType
-// {
-//     static ActivationType activation(ActivationType activation_type)
-//     {
-//         return activation_type;
-//     }
-// };
+enum class Framework
+{
+    EDGE_LEARNING,
+#if ENABLE_MLPACK
+    MLPACK,
+#endif
+};
 
+enum class ParallelizationLevel
+{
+    SEQUENTIAL,
+    THREAD_PARALLELISM_ON_DATA_ENTRY,
+    THREAD_PARALLELISM_ON_DATA_BATCH,
+};
+
+enum class LayerType
+{
+    Dense,
+    Conv,
+    MaxPool,
+    AvgPool,
+    Dropout,
+    Input
+};
+
+enum class ActivationType
+{
+    ReLU,
+    ELU,
+    Softmax,
+    TanH,
+    Sigmoid,
+    Linear,
+    None
+};
+
+enum class LossType
+{
+    CCE,
+    MSE,
+};
+
+enum class OptimizerType
+{
+    GRADIENT_DESCENT,
+    ADAM
+};
+
+enum class InitType
+{
+    HE_INIT,
+    XAVIER_INIT,
+    AUTO,
+};
+
+
+// template <Framework F> struct MatType;
+
+template <Framework F, ActivationType A> struct MapActivation;
+
+template <Framework F, LayerType L> struct MapLayer;
+
+template <Framework F, LossType LT> struct MapLoss;
+
+template <Framework F, OptimizerType OT> struct MapOptimizer;
+
+template <Framework F, InitType IT> struct MapInit;
+
+template <
+    Framework F,
+    LossType LT,
+    InitType IT,
+    ParallelizationLevel PL,
+    typename T>
+struct MapModel;
 
 template <>
 struct MapActivation<Framework::EDGE_LEARNING, ActivationType::ReLU> {

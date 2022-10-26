@@ -31,9 +31,7 @@
 #define EDGELEARNING_LAYER_DESCRIPTOR_HPP
 
 
-#include "type.hpp"
-#include "nn.hpp"
-#include "dnn/dlmath.hpp"
+#include "definitions.hpp"
 
 
 namespace EdgeLearning {

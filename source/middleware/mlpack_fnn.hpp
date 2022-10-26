@@ -43,10 +43,10 @@ template<
     LossType LT = LossType::MSE,
     InitType IT = InitType::AUTO,
     typename T = NumType>
-class MlpackFNN : public NN<T> {
+class MlpackFNN : public StaticNeuralNetwork<T> {
 public:
     MlpackFNN(std::string name)
-        : NN<T>{name}
+        : StaticNeuralNetwork<T>{name}
         , _m{}
         , _input_shape{0}
         , _output_shape{0}
@@ -269,7 +269,6 @@ private:
             }
         }
     }
-
 
     mlpack::ann::FFN<
         typename MapLoss<Framework::MLPACK, LT>::type,

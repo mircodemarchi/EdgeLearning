@@ -59,7 +59,7 @@ class ProfileFNN : public ProfileNN
 public:
     ProfileFNN(std::string profile_name,
                ProfileDataset::Type dataset_type,
-               std::vector<NNDescriptor> hidden_layers_descriptor_vec,
+               std::vector<NeuralNetworkDescriptor> hidden_layers_descriptor_vec,
                TrainingSetting default_setting)
         : ProfileNN(
             100,
@@ -95,9 +95,9 @@ public:
     }
 
 private:
-    using ProfileCompileFNN = CompileFNN<LT, OT, InitType::AUTO, PL>;
+    using ProfileCompileFNN = CompileFNN<LT, InitType::AUTO, PL>;
 
-    void profile_on_fixed_parameters(NNDescriptor nn_descriptor) {
+    void profile_on_fixed_parameters(NeuralNetworkDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_evaluation = std::get<1>(data);
@@ -105,7 +105,7 @@ private:
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
-        NNDescriptor layers_descriptor(nn_descriptor);
+        NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
             layers_descriptor.begin(),
             Input{"input_layer", input_size});
@@ -122,12 +122,13 @@ private:
             "training_testing_default_parameters",
             1, data_training, data_evaluation, data_testing,
             layers_descriptor,
+            OT,
             _default_setting.epochs,
             _default_setting.batch_size,
             _default_setting.learning_rate);
     }
 
-    void profile_on_parallelism_level(NNDescriptor nn_descriptor) {
+    void profile_on_parallelism_level(NeuralNetworkDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_evaluation = std::get<1>(data);
@@ -135,7 +136,7 @@ private:
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
-        NNDescriptor layers_descriptor(nn_descriptor);
+        NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
             layers_descriptor.begin(),
             Input{"input_layer", DLMath::Shape3d{28, 28, 1}});
@@ -147,19 +148,16 @@ private:
 
         using ProfileCompileFNNSequential = CompileFNN<
             LT,
-            OT,
             InitType::AUTO,
             ParallelizationLevel::SEQUENTIAL>;
 
         using ProfileCompileFNNThreadOnEntry = CompileFNN<
             LT,
-            OT,
             InitType::AUTO,
             ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_ENTRY>;
 
         using ProfileCompileFNNThreadOnBatch = CompileFNN<
             LT,
-            OT,
             InitType::AUTO,
             ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_BATCH>;
 
@@ -172,6 +170,7 @@ private:
                     + std::to_string(batch_size),
                 1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 batch_size,
                 _default_setting.learning_rate);
@@ -183,6 +182,7 @@ private:
                     + std::to_string(batch_size),
                 1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 batch_size,
                 _default_setting.learning_rate);
@@ -194,6 +194,7 @@ private:
                     + std::to_string(batch_size),
                 1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 batch_size,
                 _default_setting.learning_rate);
@@ -208,6 +209,7 @@ private:
                     + std::to_string(learning_rate),
                 1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 learning_rate);
@@ -219,6 +221,7 @@ private:
                     + std::to_string(learning_rate),
                 1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 learning_rate);
@@ -230,6 +233,7 @@ private:
                     + std::to_string(learning_rate),
                 1, data_training, data_evaluation, data_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 learning_rate);
@@ -240,7 +244,7 @@ private:
      * \brief Profile the training and the prediction phase of a FNN model
      * on epochs incrementation.
      */
-    void profile_on_epochs_amount(NNDescriptor nn_descriptor) {
+    void profile_on_epochs_amount(NeuralNetworkDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_evaluation = std::get<1>(data);
@@ -248,7 +252,7 @@ private:
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
-        NNDescriptor layers_descriptor(nn_descriptor);
+        NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
             layers_descriptor.begin(),
             Input{"input_layer", input_size});
@@ -262,7 +266,7 @@ private:
                 "training_on_epochs_amount" + std::to_string(e),
                 100, data_training, data_evaluation, data_testing,
                 layers_descriptor,
-                e,
+                OT, e,
                 _default_setting.batch_size,
                 _default_setting.learning_rate);
         }
@@ -273,6 +277,7 @@ private:
             "prediction",
             100, data_training,
             layers_descriptor,
+            OT,
             _default_setting.epochs,
             _default_setting.batch_size,
             _default_setting.learning_rate);
@@ -282,7 +287,7 @@ private:
      * \brief Profile the training and the prediction phase of a FNN model
      * on different training set amount and fixed epoch amount.
      */
-    void profile_on_training_set(NNDescriptor nn_descriptor) {
+    void profile_on_training_set(NeuralNetworkDescriptor nn_descriptor) {
         auto data = ProfileDataset(_dataset_type).load_dataset();
         auto data_training = std::get<0>(data);
         auto data_evaluation = std::get<1>(data);
@@ -291,7 +296,7 @@ private:
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
-        NNDescriptor layers_descriptor(nn_descriptor);
+        NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
             layers_descriptor.begin(),
             Input{"input_layer", input_size});
@@ -315,6 +320,7 @@ private:
                 "training_testing_on_dataset_size" + std::to_string(curr_size),
                 100, subdata_training, subdata_evaluation, subdata_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 _default_setting.learning_rate);
@@ -331,6 +337,7 @@ private:
                 "prediction_on_dataset_size" + std::to_string(curr_size),
                 100, subset,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 _default_setting.learning_rate);
@@ -350,7 +357,7 @@ private:
         auto input_size = std::get<3>(data);
         auto output_size = data_training.labels_idx().size();
 
-        NNDescriptor layers_descriptor(
+        NeuralNetworkDescriptor layers_descriptor(
             {
                 Input{"input_layer",   input_size},
                 Dense{"output_layer",  output_size, MapOutputActivation<LT>::type },
@@ -378,6 +385,7 @@ private:
                     + std::to_string(amount),
                 100, data_training, data_evaluation, data_testing,
                 curr_ld,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 _default_setting.learning_rate);
@@ -387,7 +395,11 @@ private:
                     + std::to_string(amount),
                 "prediction_on_hidden_layers_amount" + std::to_string(amount),
                 100, data_training,
-                curr_ld, _default_setting.epochs, _default_setting.batch_size, _default_setting.learning_rate);
+                curr_ld,
+                OT,
+                _default_setting.epochs,
+                _default_setting.batch_size,
+                _default_setting.learning_rate);
         }
     }
 
@@ -408,7 +420,7 @@ private:
         };
         for (const auto& shape: layers_shapes)
         {
-            NNDescriptor layers_descriptor(
+            NeuralNetworkDescriptor layers_descriptor(
                 {
                     Input{"input_layer",   input_size},
                     Dense{"hidden_layer0", shape,       ActivationType::ReLU   },
@@ -422,6 +434,7 @@ private:
                     + std::to_string(shape),
                 100, data_training, data_evaluation, data_testing,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 _default_setting.learning_rate);
@@ -431,6 +444,7 @@ private:
                 "prediction_on_hidden_layers_shape" + std::to_string(shape),
                 100, data_training,
                 layers_descriptor,
+                OT,
                 _default_setting.epochs,
                 _default_setting.batch_size,
                 _default_setting.learning_rate);
@@ -439,7 +453,7 @@ private:
 
     std::string _profile_name;
     ProfileDataset::Type _dataset_type;
-    std::vector<NNDescriptor> _hidden_layers_descriptor_vec;
+    std::vector<NeuralNetworkDescriptor> _hidden_layers_descriptor_vec;
     TrainingSetting _default_setting;
 };
 

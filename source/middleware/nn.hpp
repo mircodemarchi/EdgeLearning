@@ -29,16 +29,9 @@
 #ifndef EDGE_LEARNING_MIDDLEWARE_NN_HPP
 #define EDGE_LEARNING_MIDDLEWARE_NN_HPP
 
-#include "dnn/dense.hpp"
-#include "dnn/convolutional.hpp"
-#include "dnn/dropout.hpp"
-#include "dnn/avg_pooling.hpp"
-#include "dnn/max_pooling.hpp"
-#include "dnn/activation.hpp"
-#include "dnn/mse_loss.hpp"
-#include "dnn/cce_loss.hpp"
-#include "dnn/gd_optimizer.hpp"
-#include "dnn/adam_optimizer.hpp"
+#include "definitions.hpp"
+#include "layer_descriptor.hpp"
+
 #include "data/dataset.hpp"
 
 #include <utility>
@@ -47,93 +40,17 @@
 
 namespace EdgeLearning {
 
-enum class Framework
-{
-    EDGE_LEARNING,
-#if ENABLE_MLPACK
-    MLPACK,
-#endif
-};
 
-enum class ParallelizationLevel
-{
-    SEQUENTIAL,
-    THREAD_PARALLELISM_ON_DATA_ENTRY,
-    THREAD_PARALLELISM_ON_DATA_BATCH,
-};
-
-enum class LayerType
-{
-    Dense,
-    Conv,
-    MaxPool,
-    AvgPool,
-    Dropout,
-    Input
-};
-
-enum class ActivationType
-{
-    ReLU,
-    ELU,
-    Softmax,
-    TanH,
-    Sigmoid,
-    Linear,
-    None
-};
-
-enum class LossType
-{
-    CCE,
-    MSE,
-};
-
-enum class OptimizerType
-{
-    GRADIENT_DESCENT,
-    ADAM
-};
-
-enum class InitType
-{
-    HE_INIT,
-    XAVIER_INIT,
-    AUTO,
-};
-
-
-class LayerDescriptor;
-using NNDescriptor = std::vector<LayerDescriptor>;
-
-
-// template <Framework F> struct MatType;
-
-template <Framework F, ActivationType A> struct MapActivation;
-
-template <Framework F, LayerType L> struct MapLayer;
-
-template <Framework F, LossType LT> struct MapLoss;
-
-template <Framework F, OptimizerType OT> struct MapOptimizer;
-
-template <Framework F, InitType IT> struct MapInit;
-
-template <
-    Framework F,
-    LossType LT,
-    InitType IT,
-    ParallelizationLevel PL,
-    typename T>
-struct MapModel;
+using NeuralNetworkDescriptor = std::vector<LayerDescriptor>;
 
 /**
  * \brief High level interface of a neural network.
  * \tparam T Learning Parameters type.
  */
 template<typename T = NumType>
-class NN {
+class NeuralNetwork {
 public:
+    using SharedPtr = std::shared_ptr<NeuralNetwork>;
 
     /**
      * \brief Structure for result of model evaluation.
@@ -167,7 +84,7 @@ public:
      * \brief High level constructor with the model name.
      * \param name std::string The name of the model.
      */
-    NN(std::string name)
+    NeuralNetwork(std::string name)
         : _name{std::move(name)}
     {
     }
@@ -175,7 +92,7 @@ public:
     /**
      * \brief Default deconstruct.
      */
-    virtual ~NN() = default;
+    virtual ~NeuralNetwork() = default;
 
     /**
      * \brief Add a layer to the model.
@@ -192,22 +109,6 @@ public:
     virtual Dataset<T> predict(Dataset<T>& data) = 0;
 
     /**
-     * \brief Perform the training of the model with the given dataset.
-     * The process will change the value of the model parameters.
-     * \param data          The labelled data to use for training.
-     * \param optimizer     The optimizer to use for training.
-     * \param epochs        The number of iterations over the dataset.
-     * \param batch_size    The number of entries evaluated for gradient before
-     *                      optimization.
-     * \param learning_rate The optimization step size.
-     */
-    virtual void fit(Dataset<T>& data,
-                     OptimizerType optimizer = OptimizerType::ADAM,
-                     SizeType epochs = 1,
-                     SizeType batch_size = 1,
-                     NumType learning_rate = 0.03) = 0;
-
-    /**
      * \brief Getter of the input size of the model.
      * \return SizeType Model input size.
      */
@@ -219,6 +120,21 @@ public:
      */
     virtual SizeType output_size() = 0;
 
+    EvaluationResult evaluate(Dataset<T>& data, LossType loss)
+    {
+        switch (loss) {
+            case LossType::CCE:
+            {
+                return evaluate_static<LossType::CCE>(data);
+            }
+            case LossType::MSE:
+            default:
+            {
+                return evaluate_static<LossType::MSE>(data);
+            }
+        }
+    }
+
     /**
      * \brief Compute the performance metrics of the model given a dataset.
      * \tparam LT  The loss enumeration type.
@@ -226,7 +142,7 @@ public:
      * \return EvaluationResult The resulting performance metrics.
      */
     template <LossType LT>
-    EvaluationResult evaluate(Dataset<T>& data)
+    EvaluationResult evaluate_static(Dataset<T>& data)
     {
         using loss_type = typename MapLoss<Framework::EDGE_LEARNING, LT>::type;
         loss_type loss("evaluation_loss", output_size(), 1);
@@ -245,6 +161,190 @@ public:
 protected:
     std::string _name; ///< \brief The model name.
 };
+
+template<typename T = NumType>
+class StaticNeuralNetwork : public NeuralNetwork<T> {
+public:
+    using NeuralNetwork<T>::NeuralNetwork;
+    using SharedPtr = std::shared_ptr<StaticNeuralNetwork>;
+
+    /**
+     * \brief Perform the training of the model with the given dataset.
+     * The process will change the value of the model parameters.
+     * \param data          The labelled data to use for training.
+     * \param optimizer     The optimizer to use for training.
+     * \param epochs        The number of iterations over the dataset.
+     * \param batch_size    The number of entries evaluated for gradient before
+     *                      optimization.
+     * \param learning_rate The optimization step size.
+     */
+    virtual void fit(Dataset<T>& data,
+                     OptimizerType optimizer = OptimizerType::ADAM,
+                     SizeType epochs = 1,
+                     SizeType batch_size = 1,
+                     NumType learning_rate = 0.03) = 0;
+
+};
+
+template<typename T = NumType>
+class CompileNeuralNetwork : public NeuralNetwork<T> {
+public:
+    using NeuralNetwork<T>::NeuralNetwork;
+    using SharedPtr = std::shared_ptr<CompileNeuralNetwork>;
+
+    /**
+     * \brief Perform the training of the model with the given dataset.
+     * The process will change the value of the model parameters.
+     * \param data          The labelled data to use for training.
+     * \param optimizer     The optimizer to use for training.
+     * \param epochs        The number of iterations over the dataset.
+     * \param batch_size    The number of entries evaluated for gradient before
+     *                      optimization.
+     * \param learning_rate The optimization step size.
+     */
+    virtual void fit(Dataset<T>& data,
+                     SizeType epochs = 1,
+                     SizeType batch_size = 1,
+                     NumType learning_rate = 0.03) = 0;
+
+    virtual void compile(LossType loss = LossType::MSE,
+                         OptimizerType optimizer = OptimizerType::ADAM,
+                         InitType init = InitType::AUTO) = 0;
+
+    virtual typename NeuralNetwork<T>::EvaluationResult evaluate(
+        Dataset<T>& data) = 0;
+
+};
+
+template<
+    template<Framework, LossType, InitType, ParallelizationLevel, typename>
+    typename MM,
+    Framework F,
+    ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
+    typename T = NumType>
+class DynamicNeuralNetwork : public CompileNeuralNetwork<T> {
+public:
+    DynamicNeuralNetwork(std::string name)
+        : CompileNeuralNetwork<T>(name)
+        , _model_ptr()
+        , _optimizer()
+    { }
+
+    void compile(LossType loss = LossType::MSE,
+                 OptimizerType optimizer = OptimizerType::ADAM,
+                 InitType init = InitType::AUTO) override
+    {
+        _optimizer = optimizer;
+        _loss = loss;
+        if (loss == LossType::MSE && init == InitType::HE_INIT)
+        {
+            _model_ptr = std::make_shared<
+                typename MM<F, LossType::MSE, InitType::HE_INIT, PL, T>::type>(
+                CompileNeuralNetwork<T>::_name);
+        }
+        else if (loss == LossType::MSE && init == InitType::XAVIER_INIT)
+        {
+            _model_ptr = std::make_shared<
+                typename MM<F, LossType::MSE, InitType::XAVIER_INIT, PL, T>::type>(
+                CompileNeuralNetwork<T>::_name);
+        }
+        else if (loss == LossType::MSE && init == InitType::AUTO)
+        {
+            _model_ptr = std::make_shared<
+                typename MM<F, LossType::MSE, InitType::AUTO, PL, T>::type>(
+                CompileNeuralNetwork<T>::_name);
+        }
+        else if (loss == LossType::CCE && init == InitType::HE_INIT)
+        {
+            _model_ptr = std::make_shared<
+                typename MM<F, LossType::CCE, InitType::HE_INIT, PL, T>::type>(
+                CompileNeuralNetwork<T>::_name);
+        }
+        else if (loss == LossType::CCE && init == InitType::XAVIER_INIT)
+        {
+            _model_ptr = std::make_shared<
+                typename MM<F, LossType::CCE, InitType::XAVIER_INIT, PL, T>::type>(
+                CompileNeuralNetwork<T>::_name);
+        }
+        else if (loss == LossType::CCE && init == InitType::AUTO)
+        {
+            _model_ptr = std::make_shared<
+                typename MM<F, LossType::CCE, InitType::AUTO, PL, T>::type>(
+                CompileNeuralNetwork<T>::_name);
+        }
+        else
+        {
+            throw std::runtime_error("LossType and InitType not recognized");
+        }
+    }
+
+    void add(LayerDescriptor ld) override
+    {
+        if (!_model_ptr)
+        {
+            compile();
+        }
+        _model_ptr->add(ld);
+    }
+
+    Dataset<T> predict(Dataset<T>& data) override
+    {
+        if (!_model_ptr)
+        {
+            throw std::runtime_error("Predict error: you need to "
+                                     "add layers before predict");
+        }
+        return _model_ptr->predict(data);
+    }
+
+    void fit(Dataset<T>& data,
+             SizeType epochs = 1,
+             SizeType batch_size = 1,
+             NumType learning_rate = 0.03) override
+    {
+        if (!_model_ptr)
+        {
+            throw std::runtime_error("Training error: you need to call "
+                                     "the compile method before fit");
+        }
+        return _model_ptr->fit(data, _optimizer,
+                               epochs, batch_size, learning_rate);
+    }
+
+    SizeType input_size() override
+    {
+        if (!_model_ptr)
+        {
+            compile();
+        }
+        return _model_ptr->input_size();
+    }
+
+    SizeType output_size() override
+    {
+        if (!_model_ptr)
+        {
+            compile();
+        }
+        return _model_ptr->output_size();
+    }
+
+    typename NeuralNetwork<T>::EvaluationResult evaluate(Dataset<T>& data) override
+    {
+        if (!_model_ptr)
+        {
+            throw std::runtime_error("Evaluate error: you need to "
+                                     "call the compile method before evaluate");
+        }
+        return _model_ptr->evaluate(data, _loss);
+    }
+
+private:
+    typename StaticNeuralNetwork<T>::SharedPtr _model_ptr;
+    OptimizerType _optimizer;
+    LossType _loss;
+};
+
 
 } // namespace EdgeLearning
 

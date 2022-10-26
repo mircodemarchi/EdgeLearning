@@ -25,7 +25,7 @@
 #include "profile_fnn.hpp"
 
 
-const NNDescriptor mnist_hidden_layers_descriptor(
+const NeuralNetworkDescriptor mnist_hidden_layers_descriptor(
     {
         Dense{"hidden_layer0", 200, ActivationType::ReLU },
         Dense{"hidden_layer1", 100, ActivationType::ReLU },
@@ -33,15 +33,17 @@ const NNDescriptor mnist_hidden_layers_descriptor(
     }
 );
 
-template <OptimizerType OT>
-class ProfileFNNClassification : public ProfileFNN<LossType::CCE, OT>
+template <
+    OptimizerType OT,
+    ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL>
+class ProfileFNNClassification : public ProfileFNN<LossType::CCE, OT, PL>
 {
 public:
     ProfileFNNClassification(
         ProfileDataset::Type dataset_type,
-        std::vector<NNDescriptor> hidden_layers_descriptor_vec,
+        std::vector<NeuralNetworkDescriptor> hidden_layers_descriptor_vec,
         ProfileNN::TrainingSetting default_setting)
-        : ProfileFNN<LossType::CCE, OT>(
+        : ProfileFNN<LossType::CCE, OT, PL>(
             "classification",
             dataset_type,
             hidden_layers_descriptor_vec,
@@ -50,7 +52,7 @@ public:
 };
 
 int main() {
-    SizeType EPOCHS = 5;
+    SizeType EPOCHS = 1;
     SizeType BATCH_SIZE = 64;
     NumType LEARNING_RATE = 5e-3;
 

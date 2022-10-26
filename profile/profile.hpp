@@ -194,7 +194,8 @@ public:
                   SizeType iteration_amount,
                   Dataset<NumType>& data_training,
                   Dataset<NumType>& data_validation,
-                  const NNDescriptor& layers_descriptor,
+                  const NeuralNetworkDescriptor& layers_descriptor,
+                  OptimizerType optimizer,
                   SizeType epochs,
                   SizeType batch_size,
                   NumType learning_rate)
@@ -204,7 +205,7 @@ public:
             [&](SizeType i) {
                 (void) i;
                 Model m(layers_descriptor, "training_profiling_model");
-                m.fit(data_training, epochs, batch_size, learning_rate);
+                m.fit(data_training, optimizer, epochs, batch_size, learning_rate);
                 auto metrics = m.evaluate(data_validation);
                 std::cout
                     << "evaluation: { "
@@ -220,13 +221,14 @@ public:
     void predict(std::string info, std::string profile_name,
                  SizeType iteration_amount,
                  Dataset<NumType>& data,
-                 const NNDescriptor& layers_descriptor,
+                 const NeuralNetworkDescriptor& layers_descriptor,
+                 OptimizerType optimizer,
                  SizeType epochs,
                  SizeType batch_size,
                  NumType learning_rate)
     {
         Model m(layers_descriptor, "predict_profiling_model");
-        m.fit(data, epochs, batch_size, learning_rate);
+        m.fit(data, optimizer, epochs, batch_size, learning_rate);
         profile(
             info,
             [&](SizeType i) {
@@ -241,16 +243,17 @@ public:
 
     template<typename Model>
     void testing(std::string info, std::string profile_name,
-                  SizeType iteration_amount,
-                  Dataset<NumType>& data_training,
-                  Dataset<NumType>& data_testing,
-                  const NNDescriptor& layers_descriptor,
-                  SizeType epochs,
-                  SizeType batch_size,
-                  NumType learning_rate)
+                 SizeType iteration_amount,
+                 Dataset<NumType>& data_training,
+                 Dataset<NumType>& data_testing,
+                 const NeuralNetworkDescriptor& layers_descriptor,
+                 OptimizerType optimizer,
+                 SizeType epochs,
+                 SizeType batch_size,
+                 NumType learning_rate)
     {
         Model m(layers_descriptor, "testing_profiling_model");
-        m.fit(data_training, epochs, batch_size, learning_rate);
+        m.fit(data_training, optimizer, epochs, batch_size, learning_rate);
         profile(
             info,
             [&](SizeType i) {
@@ -272,7 +275,8 @@ public:
                   Dataset<NumType>& data_training,
                   Dataset<NumType>& data_validation,
                   Dataset<NumType>& data_testing,
-                  const NNDescriptor& layers_descriptor,
+                  const NeuralNetworkDescriptor& layers_descriptor,
+                  OptimizerType optimizer,
                   SizeType epochs,
                   SizeType batch_size,
                   NumType learning_rate)
@@ -282,7 +286,7 @@ public:
             [&](SizeType i) {
                 (void) i;
                 Model m(layers_descriptor, "training_testing_profiling_model");
-                m.fit(data_training, epochs, batch_size, learning_rate);
+                m.fit(data_training, optimizer, epochs, batch_size, learning_rate);
                 auto validation_metrics = m.evaluate(data_validation);
                 std::cout
                     << "evaluation: { "

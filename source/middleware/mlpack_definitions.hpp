@@ -29,7 +29,7 @@
 #ifndef EDGE_LEARNING_MIDDLEWARE_MLPACK_DEFINITIONS_HPP
 #define EDGE_LEARNING_MIDDLEWARE_MLPACK_DEFINITIONS_HPP
 
-#include "nn.hpp"
+#include "definitions.hpp"
 
 #include <mlpack/core.hpp>
 #include <mlpack/methods/ann/ffn.hpp>

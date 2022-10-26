@@ -25,7 +25,7 @@
 #include "profile_fnn.hpp"
 
 
-const NNDescriptor execution_time_hidden_layers_descriptor(
+const NeuralNetworkDescriptor execution_time_hidden_layers_descriptor(
     {
         Dense{"hidden_layer0", 32, ActivationType::ReLU },
     }
@@ -37,7 +37,7 @@ class ProfileFNNRegression : public ProfileFNN<LossType::MSE, OT>
 public:
     ProfileFNNRegression(
         ProfileDataset::Type dataset_type,
-        std::vector<NNDescriptor> hidden_layers_descriptor_vec,
+        std::vector<NeuralNetworkDescriptor> hidden_layers_descriptor_vec,
         ProfileNN::TrainingSetting default_setting)
         : ProfileFNN<LossType::MSE, OT>(
             "regression",
