@@ -205,18 +205,24 @@ public:
              SizeType batch_size = 1,
              NumType learning_rate = 0.03) override
     {
-        // Add Loss layer.
         if (_m.layers().empty())
         {
             throw std::runtime_error(
                 "The FNN has no layer: call add before fit");
         }
-        auto prev_layer = _m.layers().back();
-        auto loss_layer_name = MapLoss<Framework::EDGE_LEARNING, LT>::name;
-        auto loss_layer = _m.template add_loss<
-            typename MapLoss<Framework::EDGE_LEARNING, LT>::type>(
-                loss_layer_name, prev_layer->output_size(), batch_size);
-        _m.create_loss_edge(prev_layer, loss_layer);
+
+        // Add Loss layer.
+        if (_m.loss_layers().empty())
+        {
+            auto loss_layer_name = MapLoss<Framework::EDGE_LEARNING, LT>::name;
+            for (Layer::SharedPtr output_layer: _m.output_layers())
+            {
+                auto loss_layer = _m.template add_loss<
+                    typename MapLoss<Framework::EDGE_LEARNING, LT>::type>(
+                    loss_layer_name, output_layer->output_size(), batch_size);
+                _m.create_loss_edge(output_layer, loss_layer);
+            }
+        }
 
         // Train.
         _m.init(MapInit<Framework::EDGE_LEARNING, IT>::type,
@@ -447,7 +453,7 @@ template<
     InitType IT = InitType::AUTO,
     ParallelizationLevel PL = ParallelizationLevel::SEQUENTIAL,
     typename T = NumType>
-using CompileFeedforwardNeuralNetwork = FNN<Framework::EDGE_LEARNING, LT, IT, PL, T>;
+using CompileFeedforwardNeuralNetwork = FeedforwardNeuralNetwork<Framework::EDGE_LEARNING, LT, IT, PL, T>;
 #endif
 
 template<
