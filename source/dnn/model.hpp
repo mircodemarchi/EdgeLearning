@@ -258,18 +258,34 @@ public:
 
     /**
      * \brief  Layers getter.
-     * \return A list of shared_ptr Layer.
+     * \return const std::vector<Layer::SharedPtr>& The vector of layers.
      */
     const std::vector<Layer::SharedPtr>& layers() const;
+
+    /**
+     * \brief Input layers getter.
+     * \return const std::vector<Layer::SharedPtr>& The vector of input layers.
+     */
+    const std::vector<Layer::SharedPtr>& input_layers() const;
+
+    /**
+     * \brief Output layers getter.
+     * \return const std::vector<Layer::SharedPtr>& The vector of output layers.
+     */
+    const std::vector<Layer::SharedPtr>& output_layers() const;
+
+    /**
+     * \brief Loss layers getter.
+     * \return const std::vector<std::shared_ptr<LossLayer>>& The vector of
+     * loss layers.
+     */
+    const std::vector<std::shared_ptr<LossLayer>>& loss_layers() const;
 
     /**
      * \brief Model name provided for debugging purposes.
      * \return std::string const& Model name string.
      */
-    [[nodiscard]] std::string const& name() const noexcept
-    {
-        return _name;
-    }
+    [[nodiscard]] std::string const& name() const noexcept;
 
     /**
      * \brief Print the layers weights.

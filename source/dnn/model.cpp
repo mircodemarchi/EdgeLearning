@@ -248,6 +248,26 @@ const std::vector<Layer::SharedPtr>& Model::layers() const
     return _state.layers;
 }
 
+const std::vector<Layer::SharedPtr>& Model::input_layers() const
+{
+    return _state.input_layers;
+}
+
+const std::vector<Layer::SharedPtr>& Model::output_layers() const
+{
+    return _state.output_layers;
+}
+
+const std::vector<std::shared_ptr<LossLayer>>& Model::loss_layers() const
+{
+    return _state.loss_layers;
+}
+
+[[nodiscard]] std::string const& Model::name() const noexcept
+{
+    return _name;
+}
+
 void Model::print() const
 {
     for (auto& layer: _state.layers)

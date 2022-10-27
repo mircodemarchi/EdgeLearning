@@ -146,6 +146,12 @@ private:
         EDGE_LEARNING_TEST_EQUAL(m.output_size(), output_size);
         EDGE_LEARNING_TEST_EQUAL(m.layers().size(), 3);
         EDGE_LEARNING_TEST_EQUAL(m.layers()[0], l1);
+        EDGE_LEARNING_TEST_EQUAL(m.input_layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(m.input_layers()[0], l1);
+        EDGE_LEARNING_TEST_EQUAL(m.output_layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(m.output_layers()[0], l1_relu);
+        EDGE_LEARNING_TEST_EQUAL(m.loss_layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(m.loss_layers()[0], loss);
 
         std::vector<NumType> input{1,2,3,4};
         std::vector<NumType> target{1,2,3,4,5,6,7,8};
