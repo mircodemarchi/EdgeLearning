@@ -478,16 +478,15 @@ public:
     using EvaluationResult = typename NeuralNetwork<T>::EvaluationResult;
 
     DynamicFeedforwardNeuralNetwork(NeuralNetworkDescriptor layers, std::string name)
-        : _layers{std::move(layers)}
-        , _fnn_models{}
+        : _fnn_models{}
     {
         auto _edge_learning_fnn_model = std::make_shared<
-            SubModelType<Framework::EDGE_LEARNING>>(name);
+            SubModelType<Framework::EDGE_LEARNING>>(layers, name);
         _fnn_models[Framework::EDGE_LEARNING] = _edge_learning_fnn_model;
 
 #if ENABLE_MLPACK
         auto _mlpack_fnn_model = std::make_shared<
-            SubModelType<Framework::MLPACK>>(name);
+            SubModelType<Framework::MLPACK>>(layers, name);
         _fnn_models[Framework::MLPACK] = _mlpack_fnn_model;
 #endif
     }
@@ -532,10 +531,6 @@ public:
                  InitType init = InitType::AUTO)
     {
         _fnn_models[framework]->compile(loss, optimizer, init);
-        for (const auto& l: _layers)
-        {
-            _fnn_models[framework]->add(l);
-        }
     }
 
     void compile(LossType loss = LossType::MSE,
@@ -566,7 +561,6 @@ public:
     }
 
 private:
-    NeuralNetworkDescriptor _layers;
     std::map<Framework, typename CompileNeuralNetwork<T>::SharedPtr> _fnn_models;
 };
 

@@ -95,12 +95,6 @@ public:
     virtual ~NeuralNetwork() = default;
 
     /**
-     * \brief Add a layer to the model.
-     * \param ld LayerDescriptor The layer descriptor.
-     */
-    virtual void add(LayerDescriptor ld) = 0;
-
-    /**
      * \brief Perform the prediction of a given dataset with the current
      * values of the model parameters.
      * \param data Dataset<T>& The data to predict.
@@ -169,6 +163,12 @@ public:
     using SharedPtr = std::shared_ptr<StaticNeuralNetwork>;
 
     /**
+     * \brief Add a layer to the model.
+     * \param ld LayerDescriptor The layer descriptor.
+     */
+    virtual void add(LayerDescriptor ld) = 0;
+
+    /**
      * \brief Perform the training of the model with the given dataset.
      * The process will change the value of the model parameters.
      * \param data          The labelled data to use for training.
@@ -224,10 +224,12 @@ template<
     typename T = NumType>
 class DynamicNeuralNetwork : public CompileNeuralNetwork<T> {
 public:
-    DynamicNeuralNetwork(std::string name)
+    DynamicNeuralNetwork(NeuralNetworkDescriptor layers, std::string name)
         : CompileNeuralNetwork<T>(name)
         , _model_ptr()
+        , _layers(layers)
         , _optimizer()
+        , _loss()
     { }
 
     void compile(LossType loss = LossType::MSE,
@@ -276,23 +278,18 @@ public:
         {
             throw std::runtime_error("LossType and InitType not recognized");
         }
-    }
 
-    void add(LayerDescriptor ld) override
-    {
-        if (!_model_ptr)
+        for (const auto& l: _layers)
         {
-            compile();
+            _model_ptr->add(l);
         }
-        _model_ptr->add(ld);
     }
 
     Dataset<T> predict(Dataset<T>& data) override
     {
         if (!_model_ptr)
         {
-            throw std::runtime_error("Predict error: you need to "
-                                     "add layers before predict");
+            compile();
         }
         return _model_ptr->predict(data);
     }
@@ -341,6 +338,7 @@ public:
 
 private:
     typename StaticNeuralNetwork<T>::SharedPtr _model_ptr;
+    NeuralNetworkDescriptor _layers;
     OptimizerType _optimizer;
     LossType _loss;
 };

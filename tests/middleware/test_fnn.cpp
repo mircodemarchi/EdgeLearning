@@ -208,15 +208,11 @@ private:
             NumType>;
 
         TestDynamicModel::EvaluationResult score0;
-        EDGE_LEARNING_TEST_TRY(TestDynamicModel("dynamic_model"));
-        auto dynamic_m = TestDynamicModel("dynamic_model");
+        EDGE_LEARNING_TEST_TRY(TestDynamicModel(layers_descriptor, "dynamic_model"));
+        auto dynamic_m = TestDynamicModel(layers_descriptor, "dynamic_model");
         EDGE_LEARNING_TEST_TRY(dynamic_m.compile());
-        EDGE_LEARNING_TEST_EQUAL(dynamic_m.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(dynamic_m.output_size(), 0);
-        EDGE_LEARNING_TEST_TRY(dynamic_m.add(layers_descriptor[0]));
-        EDGE_LEARNING_TEST_TRY(dynamic_m.add(layers_descriptor[1]));
-        EDGE_LEARNING_TEST_TRY(dynamic_m.add(
-            layers_descriptor[layers_descriptor.size() - 1]));
+        EDGE_LEARNING_TEST_EQUAL(dynamic_m.input_size(), 4);
+        EDGE_LEARNING_TEST_EQUAL(dynamic_m.output_size(), 2);
         EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
         EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
         EDGE_LEARNING_TEST_PRINT(score0.loss);
@@ -233,24 +229,24 @@ private:
         EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.labels_idx().size());
         EDGE_LEARNING_TEST_EQUAL(prediction.size(), dataset.size());
 
-        auto fail_dynamic_m = TestDynamicModel("fail_dynamic_model");
+        auto fail_dynamic_m = TestDynamicModel(layers_descriptor, "fail_dynamic_model");
         EDGE_LEARNING_TEST_FAIL(fail_dynamic_m.compile(
             static_cast<LossType>(-1), OptimizerType::ADAM, static_cast<InitType>(-1)));
         EDGE_LEARNING_TEST_THROWS(fail_dynamic_m.compile(
             static_cast<LossType>(-1), OptimizerType::ADAM, static_cast<InitType>(-1)), std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL(fail_dynamic_m.predict(train_dataset));
-        EDGE_LEARNING_TEST_THROWS(fail_dynamic_m.predict(train_dataset), std::runtime_error);
         EDGE_LEARNING_TEST_FAIL(fail_dynamic_m.fit(dataset));
         EDGE_LEARNING_TEST_THROWS(fail_dynamic_m.fit(dataset), std::runtime_error);
         EDGE_LEARNING_TEST_FAIL(fail_dynamic_m.evaluate(dataset));
         EDGE_LEARNING_TEST_THROWS(fail_dynamic_m.evaluate(dataset), std::runtime_error);
 
-        auto safe_dynamic_m = TestDynamicModel("safe_dynamic_model");
-        EDGE_LEARNING_TEST_TRY(safe_dynamic_m.add(layers_descriptor[0]));
-        safe_dynamic_m = TestDynamicModel("safe_dynamic_model");
-        EDGE_LEARNING_TEST_EQUAL(safe_dynamic_m.input_size(), 0);
-        safe_dynamic_m = TestDynamicModel("safe_dynamic_model");
-        EDGE_LEARNING_TEST_EQUAL(safe_dynamic_m.output_size(), 0);
+        auto safe_dynamic_m = TestDynamicModel(layers_descriptor, "safe_dynamic_model");
+        EDGE_LEARNING_TEST_EQUAL(safe_dynamic_m.input_size(), 4);
+        safe_dynamic_m = TestDynamicModel(layers_descriptor, "safe_dynamic_model");
+        EDGE_LEARNING_TEST_EQUAL(safe_dynamic_m.output_size(), 2);
+        safe_dynamic_m = TestDynamicModel(layers_descriptor, "safe_dynamic_model");
+        EDGE_LEARNING_TEST_TRY(prediction = safe_dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(prediction.size(), dataset.size());
 
         EDGE_LEARNING_TEST_TRY(
             DynamicFeedforwardNeuralNetwork<>(
