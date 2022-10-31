@@ -31,7 +31,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake ${{runner.workspace}}/EdgeLearning -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_MLPACK=${{matrix.config.mlpack}}
+      run: cmake ${{runner.workspace}}/EdgeLearning -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_MLPACK=${{matrix.config.mlpack}} -DBUILD_PYTHON=ON
 
     - name: Build
       working-directory: ${{runner.workspace}}/build

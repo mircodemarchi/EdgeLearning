@@ -11,6 +11,6 @@ add_library(${LIBRARY_NAME} OBJECT
         dnn_submodule.cpp
         edgelearning_module.cpp)
 
-if (NOT ENABLE_MLPACK)
+if (NOT ENABLE_MLPACK AND NOT WIN32)
     target_compile_options(pyedgelearning-module-obj PUBLIC -Wshadow)
 endif()

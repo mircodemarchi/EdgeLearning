@@ -20,14 +20,15 @@ jobs:
 
     - name: Set Up Dependencies
       run: |
-        sudo apt install -y cmake pkg-config lcov g++-10 libmlpack-dev libensmallen-dev
+        sudo apt install -y cmake pkg-config lcov g++-10 libmlpack-dev libensmallen-dev python3-pip python3-dev
+        sudo pip3 install coverage pytest numpy
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10 -DCOVERAGE=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10 -DCOVERAGE=ON -DBUILD_PYTHON=ON
 
     - name: Build All
       working-directory: ${{runner.workspace}}/build

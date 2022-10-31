@@ -97,12 +97,17 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install gcc@10
+        brew install gcc@10 python3
+        export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
+        sudo easy_install pip
+        sudo pip3 install --upgrade pip
+        sudo pip3 install pytest numpy
 
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt upgrade -y && sudo apt install -y cmake pkg-config clang-11 g++-10
+        sudo apt update && sudo apt upgrade -y && sudo apt install -y cmake pkg-config clang-11 g++-10 python3-pip python3-dev
+        sudo pip3 install pytest numpy
 
     - name: Set Up macOS MLPACK
       if: runner.os == 'macOS' && matrix.config.mlpack
@@ -119,7 +124,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -DCMAKE_C_COMPILER=${{matrix.config.c}} -DENABLE_MLPACK=${{matrix.config.mlpack}}
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} -DCMAKE_C_COMPILER=${{matrix.config.c}} -DENABLE_MLPACK=${{matrix.config.mlpack}} -DBUILD_PYTHON=ON
 
     - name: Build All
       working-directory: ${{runner.workspace}}/build
