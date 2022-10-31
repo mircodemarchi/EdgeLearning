@@ -45,6 +45,9 @@ endif()
 set(ENABLE_MLPACK false CACHE BOOL "Enable MLPACK library. Warning: not supported.")
 add_definitions(-DENABLE_MLPACK=${ENABLE_MLPACK})
 
+set(BUILD_PYTHON false CACHE BOOL "Build Python interface library.")
+# add_definitions(-DBUILD_PYTHON=${BUILD_PYTHON})
+
 if (NOT ENABLE_MLPACK)
     if(NOT WIN32)
         set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
@@ -91,10 +94,16 @@ if(ENABLE_MLPACK)
     include_directories(${MLPACK_INCLUDE_DIRS})
 endif()
 
-add_subdirectory(source)
-
+add_custom_target(tests)
 enable_testing()
 include(CTest)
+
+add_subdirectory(source)
+if(BUILD_PYTHON)
+    message(STATUS "PYTHON interface enabled")
+    add_subdirectory(python)
+endif()
+
 add_subdirectory(tests)
 
 add_subdirectory(submodules)
