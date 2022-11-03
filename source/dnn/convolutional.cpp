@@ -252,9 +252,9 @@ void ConvolutionalLayer::print() const
     std::cout << std::endl;
 }
 
-void ConvolutionalLayer::dump(Json& out) const
+Json ConvolutionalLayer::dump() const
 {
-    FeedforwardLayer::dump(out);
+    Json out = FeedforwardLayer::dump();
 
     Json weights;
     for (SizeType r = 0; r < _kernel_shape.height(); ++r)
@@ -302,21 +302,22 @@ void ConvolutionalLayer::dump(Json& out) const
     out[dump_fields.at(DumpFields::WEIGHTS)] = weights;
     out[dump_fields.at(DumpFields::BIASES)] = biases;
     out[dump_fields.at(DumpFields::OTHERS)] = others;
+    return out;
 }
 
-void ConvolutionalLayer::load(Json& in)
+void ConvolutionalLayer::load(const Json& in)
 {
     FeedforwardLayer::load(in);
 
-    auto kernel_size = in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]
+    auto kernel_size = in.at(dump_fields.at(DumpFields::OTHERS)).at("kernel_size")
         .as_vec<std::size_t>();
     _kernel_shape = DLMath::Shape2d(kernel_size.at(0), kernel_size.at(1));
-    _n_filters = in[dump_fields.at(DumpFields::OTHERS)]["n_filters"]
+    _n_filters = in.at(dump_fields.at(DumpFields::OTHERS)).at("n_filters")
         .as<SizeType>();
-    auto stride = in[dump_fields.at(DumpFields::OTHERS)]["stride"]
+    auto stride = in.at(dump_fields.at(DumpFields::OTHERS)).at("stride")
         .as_vec<std::size_t>();
     _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
-    auto padding = in[dump_fields.at(DumpFields::OTHERS)]["padding"]
+    auto padding = in.at(dump_fields.at(DumpFields::OTHERS)).at("padding")
         .as_vec<std::size_t>();
     _padding = DLMath::Shape2d(padding.at(0), padding.at(1));
 
@@ -338,8 +339,9 @@ void ConvolutionalLayer::load(Json& in)
                 SizeType ch_offset = ch * _n_filters;
                 for (SizeType f = 0; f < _n_filters; ++f)
                 {
-                    _weights[r_offset + c_offset + ch_offset + f] = in[
-                        dump_fields.at(DumpFields::WEIGHTS)][r][c][ch][f];
+                    _weights[r_offset + c_offset + ch_offset + f] = in.at(
+                        dump_fields.at(DumpFields::WEIGHTS))
+                            .at(r).at(c).at(ch).at(f);
                 }
             }
         }
@@ -347,7 +349,7 @@ void ConvolutionalLayer::load(Json& in)
 
     for (SizeType i = 0; i < _n_filters; ++i)
     {
-        _biases[i] = in[dump_fields.at(DumpFields::BIASES)][i];
+        _biases[i] = in.at(dump_fields.at(DumpFields::BIASES)).at(i);
     }
 }
 

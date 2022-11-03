@@ -164,13 +164,13 @@ public:
         );
     }
 
-    void dump(Json& out) const override {
+    Json dump() const override {
         PYBIND11_OVERRIDE(
-            void, Layer, dump, out
+            Json, Layer, dump,
         );
     }
 
-    void load(Json& out) override {
+    void load(const Json& out) override {
         PYBIND11_OVERRIDE(
             void, Layer, load, out
         );
@@ -297,7 +297,7 @@ static void layer_class(pybind11::module& subm)
     layer_class.def("output_size", &Layer::output_size, "output_idx"_a=0);
     layer_class.def_property_readonly("input_layers", &Layer::input_layers);
     layer_class.def_property_readonly("output_layers", &Layer::output_layers);
-    layer_class.def("dump", &Layer::dump, "out"_a);
+    layer_class.def("dump", &Layer::dump);
     layer_class.def("load", &Layer::load, "in"_a);
 }
 

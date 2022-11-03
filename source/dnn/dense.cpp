@@ -208,9 +208,9 @@ void DenseLayer::print() const
     std::cout << std::endl;
 }
 
-void DenseLayer::dump(Json& out) const
+Json DenseLayer::dump() const
 {
-    FeedforwardLayer::dump(out);
+    Json out = FeedforwardLayer::dump();
 
     Json weights;
     for (SizeType i = 0; i < output_size(); ++i)
@@ -233,9 +233,10 @@ void DenseLayer::dump(Json& out) const
 
     out[dump_fields.at(DumpFields::WEIGHTS)] = weights;
     out[dump_fields.at(DumpFields::BIASES)] = biases;
+    return out;
 }
 
-void DenseLayer::load(Json& in)
+void DenseLayer::load(const Json& in)
 {
     FeedforwardLayer::load(in);
 
@@ -248,14 +249,14 @@ void DenseLayer::load(Json& in)
     {
         for (SizeType j = 0; j < input_size(); ++j)
         {
-            _weights[i * input_size() + j] = in[
-                dump_fields.at(DumpFields::WEIGHTS)][i][j];
+            _weights[i * input_size() + j] = in.at(
+                dump_fields.at(DumpFields::WEIGHTS)).at(i).at(j);
         }
     }
 
     for (SizeType i = 0; i < output_size(); ++i)
     {
-        _biases[i] = in[dump_fields.at(DumpFields::BIASES)][i];
+        _biases[i] = in.at(dump_fields.at(DumpFields::BIASES)).at(i);
     }
 }
 

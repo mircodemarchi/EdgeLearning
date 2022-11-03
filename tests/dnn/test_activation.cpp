@@ -700,7 +700,7 @@ private:
         auto l_relu = ReluLayer("relu_layer_test", 10);
 
         Json l_dump;
-        EDGE_LEARNING_TEST_TRY(l_relu.dump(l_dump));
+        EDGE_LEARNING_TEST_TRY(l_dump = l_relu.dump());
         EDGE_LEARNING_TEST_PRINT(l_dump);
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "Relu");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l_relu.name());
@@ -774,7 +774,7 @@ private:
 
         auto l_softmax = SoftmaxLayer("softmax_layer_test", 10);
 
-        EDGE_LEARNING_TEST_TRY(l_softmax.dump(l_dump));
+        EDGE_LEARNING_TEST_TRY(l_dump = l_softmax.dump());
         EDGE_LEARNING_TEST_PRINT(l_dump);
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "Softmax");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l_softmax.name());
@@ -847,7 +847,7 @@ private:
 
         auto l_tanh = TanhLayer("tanh_layer_test", 10);
 
-        EDGE_LEARNING_TEST_TRY(l_tanh.dump(l_dump));
+        EDGE_LEARNING_TEST_TRY(l_dump = l_tanh.dump());
         EDGE_LEARNING_TEST_PRINT(l_dump);
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "Tanh");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l_tanh.name());
@@ -920,7 +920,7 @@ private:
 
         auto l_linear = LinearLayer("linear_layer_test", 10);
 
-        EDGE_LEARNING_TEST_TRY(l_linear.dump(l_dump));
+        EDGE_LEARNING_TEST_TRY(l_dump = l_linear.dump());
         EDGE_LEARNING_TEST_PRINT(l_dump);
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "Linear");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l_linear.name());

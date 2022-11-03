@@ -67,9 +67,9 @@ void PoolingLayer::print() const
     std::cout << std::endl;
 }
 
-void PoolingLayer::dump(Json& out) const
+Json PoolingLayer::dump() const
 {
-    FeedforwardLayer::dump(out);
+    Json out = FeedforwardLayer::dump();
 
     Json others;
     std::vector<std::size_t> kernel_size = {
@@ -80,17 +80,18 @@ void PoolingLayer::dump(Json& out) const
     others["stride"] = Json(stride);
 
     out[dump_fields.at(DumpFields::OTHERS)] = others;
+    return out;
 }
 
-void PoolingLayer::load(Json& in)
+void PoolingLayer::load(const Json& in)
 {
     FeedforwardLayer::load(in);
 
-    auto kernel_size = in[dump_fields.at(DumpFields::OTHERS)]["kernel_size"]
-        .as_vec<std::size_t>();
+    auto kernel_size = in.at(dump_fields.at(DumpFields::OTHERS))
+        .at("kernel_size").as_vec<std::size_t>();
     _kernel_shape = DLMath::Shape2d(kernel_size.at(0), kernel_size.at(1));
-    auto stride = in[dump_fields.at(DumpFields::OTHERS)]["stride"]
-        .as_vec<std::size_t>();
+    auto stride = in.at(dump_fields.at(DumpFields::OTHERS))
+        .at("stride").as_vec<std::size_t>();
     _stride = DLMath::Shape2d(stride.at(0), stride.at(1));
 }
 

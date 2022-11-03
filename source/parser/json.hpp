@@ -295,13 +295,13 @@ public:
      * \brief Constant read-only subscript method for contained list json.
      * If the JsonItem is empty or there are no json list, then it throws a
      * runtime_error exception.
-     * \param idx unsigned long The index of the list.
+     * \param idx std::size_t The index of the list.
      * \return JsonItem& The JsonItem at the index.
      */
-    [[nodiscard]] const JsonItem& at(unsigned long idx) const;
+    [[nodiscard]] const JsonItem& at(std::size_t idx) const;
     [[nodiscard]] const JsonItem& at(int idx) const
     {
-        return at(static_cast<unsigned long>(idx));
+        return at(static_cast<std::size_t>(idx));
     }
 
     /**
@@ -1284,7 +1284,7 @@ inline JsonItem& JsonItem::operator[](std::string key)
                              "json object");
 }
 
-inline const JsonItem& JsonItem::at(unsigned long idx) const
+inline const JsonItem& JsonItem::at(std::size_t idx) const
 {
     if (!_value)
     {

@@ -78,12 +78,12 @@ void LossLayer::print() const
         << "\t" << (accuracy() * 100.0) << "%% correct" << std::endl;
 }
 
-void LossLayer::dump(Json& out) const
+Json LossLayer::dump() const
 {
-    Layer::dump(out);
+    return Layer::dump();
 }
 
-void LossLayer::load(Json& in)
+void LossLayer::load(const Json& in)
 {
     Layer::load(in);
     _gradients.resize(input_size());

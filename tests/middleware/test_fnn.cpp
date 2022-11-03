@@ -194,6 +194,10 @@ private:
 
         NeuralNetworkDescriptor layers_descriptor(
             {Input{"input_layer",            4UL},
+             Conv{"hidden_layer_conv",       {1, {1}}, ActivationType::ReLU},
+             MaxPool{"hidden_layer_max_pool",   {{1}}, ActivationType::ReLU},
+             AvgPool{"hidden_layer_avg_pool",   {{1}}, ActivationType::ReLU},
+             Dropout{"hidden_layer_dropout",    {0.0}, ActivationType::ReLU},
              Dense{"hidden_layer_relu",      8UL, ActivationType::ReLU     },
              Dense{"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
              Dense{"hidden_layer_tanh",      8UL, ActivationType::TanH     },
@@ -228,6 +232,55 @@ private:
         EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
         EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.labels_idx().size());
         EDGE_LEARNING_TEST_EQUAL(prediction.size(), dataset.size());
+
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::MSE, OptimizerType::GRADIENT_DESCENT, InitType::AUTO));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::CCE, OptimizerType::GRADIENT_DESCENT, InitType::AUTO));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::MSE, OptimizerType::ADAM, InitType::AUTO));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::CCE, OptimizerType::ADAM, InitType::AUTO));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::MSE, OptimizerType::GRADIENT_DESCENT, InitType::XAVIER_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::CCE, OptimizerType::GRADIENT_DESCENT, InitType::XAVIER_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::MSE, OptimizerType::ADAM, InitType::XAVIER_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::CCE, OptimizerType::ADAM, InitType::XAVIER_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::MSE, OptimizerType::GRADIENT_DESCENT, InitType::HE_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::CCE, OptimizerType::GRADIENT_DESCENT, InitType::HE_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::MSE, OptimizerType::ADAM, InitType::HE_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::CCE, OptimizerType::ADAM, InitType::HE_INIT));
+        EDGE_LEARNING_TEST_TRY(dynamic_m.fit(dataset));
+        EDGE_LEARNING_TEST_TRY(score0 = dynamic_m.evaluate(dataset));
+        EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
 
         auto fail_dynamic_m = TestDynamicModel(layers_descriptor, "fail_dynamic_model");
         EDGE_LEARNING_TEST_FAIL(fail_dynamic_m.compile(

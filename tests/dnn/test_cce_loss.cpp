@@ -306,7 +306,7 @@ private:
         auto l = CCELossLayer("cce_loss_layer_test", 2);
 
         Json l_dump;
-        EDGE_LEARNING_TEST_TRY(l.dump(l_dump));
+        EDGE_LEARNING_TEST_TRY(l_dump = l.dump());
         EDGE_LEARNING_TEST_PRINT(l_dump);
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "CCELoss");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());

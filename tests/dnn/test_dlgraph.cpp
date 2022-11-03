@@ -210,6 +210,8 @@ private:
         EDGE_LEARNING_TEST_TRY(graph.add_loss(l0));
         EDGE_LEARNING_TEST_TRY(graph.add_loss(l1));
 
+        EDGE_LEARNING_TEST_TRY(graph.add_node(d0));
+
         EDGE_LEARNING_TEST_EQUAL(graph.layers().size(), graph.size());
         for (i = 0; i < graph.size(); ++i)
         {
@@ -581,6 +583,27 @@ private:
         EDGE_LEARNING_TEST_TRY((void) graph.backward_run());
         auto backward_arcs = graph.backward_run();
         EDGE_LEARNING_TEST_EQUAL(backward_arcs.size(), 8);
+
+        DLGraph graph_copy(graph);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.layers().size(), 8);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.layers_idx().size(), 8);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.input_layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.input_layers_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.input_layers_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.output_layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.output_layers_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_copy.output_layers_idx()[0], 5);
+
+        DLGraph graph_assign;
+        EDGE_LEARNING_TEST_TRY(graph_assign = graph);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.layers().size(), 8);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.layers_idx().size(), 8);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.input_layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.input_layers_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.input_layers_idx()[0], 0);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.output_layers().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.output_layers_idx().size(), 1);
+        EDGE_LEARNING_TEST_EQUAL(graph_assign.output_layers_idx()[0], 5);
     }
 };
 

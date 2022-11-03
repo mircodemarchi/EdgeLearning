@@ -487,9 +487,9 @@ void RecurrentLayer::_set_input_shape(LayerShape input_shape) {
     _input_gradients.resize(_input_size * _time_steps);
 }
 
-void RecurrentLayer::dump(Json& out) const
+Json RecurrentLayer::dump() const
 {
-    Layer::dump(out);
+    Json out = Layer::dump();
 
     Json weights_i_to_h;
     for (SizeType i = 0; i < _hidden_size; ++i)
@@ -555,18 +555,20 @@ void RecurrentLayer::dump(Json& out) const
     out[dump_fields.at(DumpFields::WEIGHTS)] = weights;
     out[dump_fields.at(DumpFields::BIASES)] = biases;
     out[dump_fields.at(DumpFields::OTHERS)] = others;
+    return out;
 }
 
-void RecurrentLayer::load(Json& in)
+void RecurrentLayer::load(const Json& in)
 {
     Layer::load(in);
 
     _hidden_activation = static_cast<HiddenActivation>(
-        in[dump_fields.at(DumpFields::OTHERS)]["hidden_activation"].as<int>());
-    _hidden_size = in[dump_fields.at(DumpFields::OTHERS)]
-        ["hidden_size"].as<SizeType>();
-    _time_steps = in[dump_fields.at(DumpFields::OTHERS)]
-        ["time_steps"].as<SizeType>();
+        in.at(dump_fields.at(DumpFields::OTHERS)).at("hidden_activation")
+        .as<int>());
+    _hidden_size = in.at(dump_fields.at(DumpFields::OTHERS))
+        .at("hidden_size").as<SizeType>();
+    _time_steps = in.at(dump_fields.at(DumpFields::OTHERS))
+        .at("time_steps").as<SizeType>();
 
     auto ih_size = _input_size * _hidden_size;
     auto hh_size = _hidden_size * _hidden_size;
@@ -590,8 +592,8 @@ void RecurrentLayer::load(Json& in)
         SizeType offset = i * _input_size;
         for (SizeType j = 0; j < _input_size; ++j)
         {
-            _weights_i_to_h[offset + j] = in[
-                dump_fields.at(DumpFields::WEIGHTS)][0][i][j];
+            _weights_i_to_h[offset + j] = in.at(
+                dump_fields.at(DumpFields::WEIGHTS)).at(0).at(i).at(j);
         }
     }
 
@@ -600,8 +602,8 @@ void RecurrentLayer::load(Json& in)
         SizeType offset = i * _hidden_size;
         for (SizeType j = 0; j < _hidden_size; ++j)
         {
-            _weights_h_to_h[offset + j] = in[
-                dump_fields.at(DumpFields::WEIGHTS)][1][i][j];
+            _weights_h_to_h[offset + j] = in.at(
+                dump_fields.at(DumpFields::WEIGHTS)).at(1).at(i).at(j);
         }
     }
 
@@ -610,19 +612,19 @@ void RecurrentLayer::load(Json& in)
         SizeType offset = i * _hidden_size;
         for (SizeType j = 0; j < _hidden_size; ++j)
         {
-            _weights_h_to_o[offset + j] = in[
-                dump_fields.at(DumpFields::WEIGHTS)][2][i][j];
+            _weights_h_to_o[offset + j] = in.at(
+                dump_fields.at(DumpFields::WEIGHTS)).at(2).at(i).at(j);
         }
     }
 
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
-        _biases_to_h[i] = in[dump_fields.at(DumpFields::BIASES)][0][i];
+        _biases_to_h[i] = in.at(dump_fields.at(DumpFields::BIASES)).at(0).at(i);
     }
 
     for (SizeType i = 0; i < _output_size; ++i)
     {
-        _biases_to_o[i] = in[dump_fields.at(DumpFields::BIASES)][1][i];
+        _biases_to_o[i] = in.at(dump_fields.at(DumpFields::BIASES)).at(1).at(i);
     }
 }
 

@@ -363,7 +363,7 @@ private:
         CustomLayer l(10, 11, "layer_test_stream");
 
         Json l_dump;
-        EDGE_LEARNING_TEST_TRY(l.dump(l_dump));
+        EDGE_LEARNING_TEST_TRY(l_dump = l.dump());
         EDGE_LEARNING_TEST_PRINT(l_dump);
         EDGE_LEARNING_TEST_EQUAL(l_dump["type"].as<std::string>(), "None");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());
@@ -434,6 +434,11 @@ private:
         Json json_void;
         EDGE_LEARNING_TEST_FAIL(l.load(json_void));
         EDGE_LEARNING_TEST_THROWS(l.load(json_void), std::runtime_error);
+
+        Json l_different_type = l_dump;
+        l_different_type["type"] = "different_type";
+        EDGE_LEARNING_TEST_FAIL(l.load(l_different_type));
+        EDGE_LEARNING_TEST_THROWS(l.load(l_different_type), std::runtime_error);
     }
 };
 

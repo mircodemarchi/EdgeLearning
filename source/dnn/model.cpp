@@ -302,9 +302,7 @@ void Model::dump(std::ofstream& out)
     Json layers_json;
     for (auto& layer: _state.layers)
     {
-        Json layer_json;
-        layer->dump(layer_json);
-        layers_json.append(layer_json);
+        layers_json.append(layer->dump());
     }
     model["layer"] = layers_json;
     out << model;

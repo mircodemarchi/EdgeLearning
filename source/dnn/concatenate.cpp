@@ -141,12 +141,12 @@ void ConcatenateLayer::print() const
     std::cout << std::endl;
 }
 
-void ConcatenateLayer::dump(Json& out) const
+Json ConcatenateLayer::dump() const
 {
-    FeedforwardLayer::dump(out);
+    return FeedforwardLayer::dump();
 }
 
-void ConcatenateLayer::load(Json& in)
+void ConcatenateLayer::load(const Json& in)
 {
     FeedforwardLayer::load(in);
 }

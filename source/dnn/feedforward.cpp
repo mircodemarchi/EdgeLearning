@@ -39,12 +39,12 @@ FeedforwardLayer::FeedforwardLayer(
     _input_gradients.resize(input_shape.size());
 }
 
-void FeedforwardLayer::dump(Json& out) const
+Json FeedforwardLayer::dump() const
 {
-    Layer::dump(out);
+    return Layer::dump();
 }
 
-void FeedforwardLayer::load(Json& in)
+void FeedforwardLayer::load(const Json& in)
 {
     Layer::load(in);
     _output_activations.resize(output_size());

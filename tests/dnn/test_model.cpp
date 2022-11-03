@@ -93,21 +93,32 @@ private:
         EDGE_LEARNING_TEST_TRY(auto m = Model{"model"});
         Model m{"model"};
         EDGE_LEARNING_TEST_EQUAL(m.name(), "model");
+        EDGE_LEARNING_TEST_EQUAL(m.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(m.output_size(), 0);
 
         EDGE_LEARNING_TEST_EXECUTE(auto m_noname = Model{});
         EDGE_LEARNING_TEST_TRY(auto m_noname = Model{});
         Model m_noname{};
         EDGE_LEARNING_TEST_ASSERT(!m_noname.name().empty());
+        EDGE_LEARNING_TEST_EQUAL(m_noname.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(m_noname.output_size(), 0);
 
         EDGE_LEARNING_TEST_EXECUTE(Model m_copy{m});
         EDGE_LEARNING_TEST_TRY(Model m_copy{m});
         Model m_copy{m};
         EDGE_LEARNING_TEST_EQUAL(m_copy.name(), "model");
+        EDGE_LEARNING_TEST_EQUAL(m_copy.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(m_copy.output_size(), 0);
 
         EDGE_LEARNING_TEST_EXECUTE(Model m_assign; m_assign = m);
         EDGE_LEARNING_TEST_TRY(Model m_assign; m_assign = m);
         Model m_assign; m_assign = m;
         EDGE_LEARNING_TEST_EQUAL(m_assign.name(), "model");
+        EDGE_LEARNING_TEST_EQUAL(m_assign.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(m_assign.output_size(), 0);
+
+        EDGE_LEARNING_TEST_FAIL(m.predict({}));
+        EDGE_LEARNING_TEST_THROWS(m.predict({}), std::runtime_error);
 
         SizeType input_size = 4;
         SizeType output_size = 8;
@@ -136,6 +147,8 @@ private:
         SizeType input_size = 4;
         SizeType output_size = 8;
         Model m{"model"};
+        EDGE_LEARNING_TEST_EQUAL(m.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(m.output_size(), 0);
         auto l1 = m.add_layer<DenseLayer>("first", input_size, output_size);
         auto l1_relu = m.add_layer<ReluLayer>("first_relu", output_size);
         auto loss = m.add_loss<CustomLossLayer>(
@@ -143,7 +156,9 @@ private:
         m.create_edge(l1, l1_relu);
         m.create_loss_edge(l1_relu, loss);
         EDGE_LEARNING_TEST_EQUAL(m.input_size(), input_size);
+        EDGE_LEARNING_TEST_EQUAL(m.input_size(1), 0);
         EDGE_LEARNING_TEST_EQUAL(m.output_size(), output_size);
+        EDGE_LEARNING_TEST_EQUAL(m.output_size(1), 0);
         EDGE_LEARNING_TEST_EQUAL(m.layers().size(), 3);
         EDGE_LEARNING_TEST_EQUAL(m.layers()[0], l1);
         EDGE_LEARNING_TEST_EQUAL(m.input_layers().size(), 1);

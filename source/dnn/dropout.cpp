@@ -94,21 +94,22 @@ void DropoutLayer::print() const
     std::cout << std::endl;
 }
 
-void DropoutLayer::dump(Json& out) const
+Json DropoutLayer::dump() const
 {
-    FeedforwardLayer::dump(out);
+    Json out = FeedforwardLayer::dump();
 
     Json others;
     others["drop_probability"] = _drop_probability;
     out[dump_fields.at(DumpFields::OTHERS)] = others;
+    return out;
 }
 
-void DropoutLayer::load(Json& in)
+void DropoutLayer::load(const Json& in)
 {
     FeedforwardLayer::load(in);
 
-    _drop_probability = in[dump_fields.at(DumpFields::OTHERS)]
-        ["drop_probability"].as<NumType>();
+    _drop_probability = in.at(dump_fields.at(DumpFields::OTHERS))
+        .at("drop_probability").as<NumType>();
     _scale = (_drop_probability == 1.0) ? 1.0 : 1.0 / (1.0 - _drop_probability);
 }
 
