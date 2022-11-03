@@ -182,17 +182,12 @@ public:
             }
         }
 
-        Layer::SharedPtr prev_layer;
-        if (!_m.layers().empty())
-        {
-            prev_layer = _m.layers().back();
-        }
         auto layer = _add_layer(ld, _output_shape);
         if (!layer) return;
         _output_shape = layer->output_shape();
-        if (prev_layer)
+        if (_m.layers().size() > 1)
         {
-            _m.create_edge(prev_layer, layer);
+            _m.create_edge(_m.layers()[_m.layers().size() - 2], layer);
         }
         auto activation_layer = _add_activation_layer(ld, _output_shape);
         if (!activation_layer) return;

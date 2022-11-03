@@ -83,6 +83,16 @@ private:
             m_runtime_err.fit(dataset, OptimizerType::ADAM, EPOCHS, BATCH_SIZE, 0.03),
             std::runtime_error);
 
+        NeuralNetworkDescriptor bad_layers_descriptor({
+            Input("input_layer", 4),
+            Input("bad_input_layer", 4)
+        });
+        EDGE_LEARNING_TEST_FAIL(
+            CompileFeedforwardNeuralNetwork<>(bad_layers_descriptor, "bad_regressor_model"));
+        EDGE_LEARNING_TEST_THROWS(
+            CompileFeedforwardNeuralNetwork<>(bad_layers_descriptor, "bad_regressor_model"),
+            std::runtime_error);
+
         auto m_thread_parallelism_on_data_entry = CompileFeedforwardNeuralNetwork<
             LossType::MSE,
             InitType::AUTO,

@@ -153,10 +153,14 @@ private:
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+
+        EDGE_LEARNING_TEST_TRY(l.time_steps(2));
+        EDGE_LEARNING_TEST_FAIL(l.training_forward(v));
+        EDGE_LEARNING_TEST_THROWS(l.training_forward(v), std::runtime_error);
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = RecurrentLayer());
         EDGE_LEARNING_TEST_TRY(auto l2 = RecurrentLayer());
@@ -176,34 +180,34 @@ private:
         auto l = RecurrentLayer("recurrent_layer_test",
                                 10, 20, 5);
         EDGE_LEARNING_TEST_TRY(l.hidden_state({0.0}));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);
         EDGE_LEARNING_TEST_ASSERT(l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v_empty.size());
         EDGE_LEARNING_TEST_TRY(l.time_steps(1));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);
-        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.time_steps() * l.output_size());
         EDGE_LEARNING_TEST_TRY(l.time_steps(2));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 20);
-        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 40);
-        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.output_size());
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);
+        EDGE_LEARNING_TEST_EQUAL(l.last_output().size(), l.time_steps() * l.output_size());
         RecurrentLayer l_shape_copy{l};
-        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 20);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 40);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 20);
         EDGE_LEARNING_TEST_ASSERT(l_shape_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_input().size(),
                                  v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.last_output().size(),
-                                 l_shape_copy.output_size());
+                                 l_shape_copy.time_steps() * l_shape_copy.output_size());
         RecurrentLayer l_shape_assign; l_shape_assign = l;
-        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 20);
-        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 40);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 20);
         EDGE_LEARNING_TEST_ASSERT(l_shape_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_input().size(),
                                  v_empty.size());
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.last_output().size(),
-                                 l_shape_assign.output_size());
+                                 l_shape_assign.time_steps() * l_shape_assign.output_size());
     }
 
     void test_getter()
@@ -213,14 +217,17 @@ private:
         SizeType hidden_size = 5;
         auto l = RecurrentLayer("recurrent_layer_test",
                                 input_size, output_size, hidden_size);
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 0);
-        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l.time_steps(), 0);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 10);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 20);
         EDGE_LEARNING_TEST_TRY(l.time_steps(1));
+        EDGE_LEARNING_TEST_EQUAL(l.time_steps(), 1);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), output_size);
         EDGE_LEARNING_TEST_TRY(l.time_steps(2));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 2*input_size);
-        EDGE_LEARNING_TEST_EQUAL(l.output_size(), 2*output_size);
+        EDGE_LEARNING_TEST_EQUAL(l.time_steps(), 2);
+        EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
+        EDGE_LEARNING_TEST_EQUAL(l.output_size(), output_size);
     }
 
     void test_setter()
@@ -236,7 +243,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
 
         EDGE_LEARNING_TEST_TRY(l.time_steps(2));
-        EDGE_LEARNING_TEST_EQUAL(l.input_size(), 2*input_size);
+        EDGE_LEARNING_TEST_EQUAL(l.time_steps(), 2);
 
         auto l1_clone = l.clone();
         auto l2_clone = l.clone();

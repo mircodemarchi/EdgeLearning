@@ -303,7 +303,7 @@ protected:
      * \brief Check the input of the forward pass during layer training.
      * \param inputs The input of the layer.
      */
-    void _check_training_input(const std::vector<NumType>& inputs);
+    virtual void _check_training_input(const std::vector<NumType>& inputs);
 
     /**
      * \brief Setter of input_shape class field.

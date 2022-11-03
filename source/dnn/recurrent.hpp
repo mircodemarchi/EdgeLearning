@@ -118,12 +118,15 @@ public:
     void time_steps(SizeType time_steps)
     {
         _time_steps = time_steps;
-        _input_shape = _input_size * _time_steps;
-        _output_shape = _output_size * _time_steps;
         _hidden_state.resize(
             _hidden_size * std::max(_time_steps, SizeType(1U)));
         _output_activations.resize(_output_size * _time_steps);
         _input_gradients.resize(_input_size * _time_steps);
+    }
+
+    [[nodiscard]] SizeType time_steps() const
+    {
+        return _time_steps;
     }
 
     void reset_hidden_state()
@@ -148,6 +151,8 @@ public:
 
 protected:
 
+    void _check_training_input(const std::vector<NumType>& inputs) override;
+
     void _set_input_shape(LayerShape input_shape) override;
 
 private:
@@ -155,8 +160,6 @@ private:
     SizeType _hidden_size;
 
     std::vector<NumType> _hidden_state;
-    SizeType _input_size;
-    SizeType _output_size;
     SizeType _time_steps;
 
     // == Layer parameters ==

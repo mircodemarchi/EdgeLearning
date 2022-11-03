@@ -37,13 +37,11 @@ RecurrentLayer::RecurrentLayer(std::string name,
     SizeType input_size, SizeType output_size, SizeType hidden_size,
     SizeType time_steps, HiddenActivation hidden_activation)
     : Layer(std::move(name),
-            input_size * time_steps,
-            output_size * time_steps,
+            input_size,
+            output_size,
             "recurrent_layer_")
     , _hidden_activation{hidden_activation}
     , _hidden_size{hidden_size}
-    , _input_size{input_size}
-    , _output_size{output_size}
     , _time_steps{time_steps}
 {
     // std::cout << _name << ": " << input_size()
@@ -478,15 +476,6 @@ void RecurrentLayer::print() const
     std::cout << std::endl;
 }
 
-void RecurrentLayer::_set_input_shape(LayerShape input_shape) {
-    _input_size = input_shape.size();
-    Layer::_set_input_shape(_input_size * _time_steps);
-    auto ih_size = _input_size * _hidden_size;
-    _weights_i_to_h.resize(ih_size);
-    _weights_i_to_h_gradients.resize(ih_size);
-    _input_gradients.resize(_input_size * _time_steps);
-}
-
 Json RecurrentLayer::dump() const
 {
     Json out = Layer::dump();
@@ -626,6 +615,29 @@ void RecurrentLayer::load(const Json& in)
     {
         _biases_to_o[i] = in.at(dump_fields.at(DumpFields::BIASES)).at(1).at(i);
     }
+}
+
+void RecurrentLayer::_check_training_input(const std::vector<NumType>& inputs)
+{
+    if (input_size() == 0)
+    {
+        input_shape(inputs.size());
+    }
+    else if ((_time_steps * input_size()) != inputs.size())
+    {
+        throw std::runtime_error(
+            "Training forward input catch an unpredicted input size: "
+            + std::to_string(_time_steps * input_size())
+            + " != " + std::to_string(inputs.size()));
+    }
+}
+
+void RecurrentLayer::_set_input_shape(LayerShape input_shape) {
+    Layer::_set_input_shape(input_shape);
+    auto ih_size = _input_size * _hidden_size;
+    _weights_i_to_h.resize(ih_size);
+    _weights_i_to_h_gradients.resize(ih_size);
+    _input_gradients.resize(_input_size * _time_steps);
 }
 
 } // namespace EdgeLearning
