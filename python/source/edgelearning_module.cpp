@@ -308,12 +308,7 @@ static void layer_descriptor_class(pybind11::module& m)
         }), "kernel_size"_a, "strides"_a=py::make_tuple(1));
 
     py::class_<Dropout, LayerDescriptor> dropout_layer_descriptor_class(m, "Dropout");
-    dropout_layer_descriptor_class.def(py::init<std::string, Dropout::DropoutSetting, ActivationType>());
     dropout_layer_descriptor_class.def(py::init<std::string, NumType, ActivationType>());
-    py::class_<Dropout::DropoutSetting> dropout_setting(
-        dropout_layer_descriptor_class, "Setting");
-    dropout_setting.def(py::init<NumType>());
-
 }
 
 static void nn_class(pybind11::module& m)

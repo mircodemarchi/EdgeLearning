@@ -207,7 +207,7 @@ private:
              Conv{"hidden_layer_conv",       {1, {1}}, ActivationType::ReLU},
              MaxPool{"hidden_layer_max_pool",   {{1}}, ActivationType::ReLU},
              AvgPool{"hidden_layer_avg_pool",   {{1}}, ActivationType::ReLU},
-             Dropout{"hidden_layer_dropout",    {0.0}, ActivationType::ReLU},
+             Dropout{"hidden_layer_dropout",    0.0, ActivationType::ReLU},
              Dense{"hidden_layer_relu",      8UL, ActivationType::ReLU     },
              Dense{"hidden_layer_softmax",   8UL, ActivationType::Softmax  },
              Dense{"hidden_layer_tanh",      8UL, ActivationType::TanH     },

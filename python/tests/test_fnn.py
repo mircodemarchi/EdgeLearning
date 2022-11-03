@@ -229,8 +229,6 @@ def test_layer_descriptor():
     assert(dropout_ld.type == LayerType.DROPOUT)
     assert(dropout_ld.activation_type == ActivationType.RELU)
     assert(dropout_ld.setting.drop_probability == 0.2)
-    dropout_ld = Dropout("dropout_layer_descriptor", Dropout.Setting(0.2), ActivationType.RELU)
-    assert(dropout_ld.setting.drop_probability == 0.2)
 
 
 def test_nn():
