@@ -286,15 +286,15 @@ public:
 
     /**
      * \brief Save the layer infos to disk.
-     * \param out Json& out Json to write.
+     * \return Json Layer dump.
      */
-    virtual void dump(Json& out) const;
+    virtual Json dump() const;
 
     /**
      * \brief Load the layer infos from disk.
      * \param in const Json& Json to read.
      */
-    virtual void load(Json& in);
+    virtual void load(const Json& in);
 
 protected:
     friend class Model;

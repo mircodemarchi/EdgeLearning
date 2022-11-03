@@ -187,8 +187,9 @@ SizeType Layer::output_layers()
     return _output_shape.amount_shapes();
 }
 
-void Layer::dump(Json& out) const
+Json Layer::dump() const
 {
+    Json out;
     out[dump_fields.at(DumpFields::TYPE)] = type();
     out[dump_fields.at(DumpFields::NAME)] = _name;
 
@@ -211,16 +212,17 @@ void Layer::dump(Json& out) const
         output_shape.append(Json(output_size));
     }
     out[dump_fields.at(DumpFields::OUTPUT_SIZE)] = Json(output_shape);
+    return out;
 }
 
-void Layer::load(Json& in)
+void Layer::load(const Json& in)
 {
     if (in.json_type() == JsonObject::JsonType::NONE)
     {
         throw std::runtime_error("No well-formed JSON");
     }
 
-    auto t = in[dump_fields.at(DumpFields::TYPE)];
+    auto t = in.at(dump_fields.at(DumpFields::TYPE));
     if (t.as<std::string>() != type())
     {
         throw std::runtime_error(
@@ -228,30 +230,33 @@ void Layer::load(Json& in)
             " do not correspond with loaded type " + std::string(t));
     }
 
-    _name = std::string(in[dump_fields.at(DumpFields::NAME)]);
+    _name = std::string(in.at(dump_fields.at(DumpFields::NAME)));
 
     std::vector<DLMath::Shape3d> input_shapes;
-    auto input_shapes_json = in[dump_fields.at(DumpFields::INPUT_SIZE)];
+    auto input_shapes_json = in.at(dump_fields.at(DumpFields::INPUT_SIZE));
     for (SizeType i = 0; i < input_shapes_json.size(); ++i)
     {
         auto shape = input_shapes_json[i];
         input_shapes.emplace_back(shape[0], shape[1], shape[2]);
     }
     _input_shape = LayerShape(input_shapes);
+    _input_size = _input_shape.size();
 
     std::vector<DLMath::Shape3d> output_shapes;
-    auto output_shapes_json = in[dump_fields.at(DumpFields::OUTPUT_SIZE)];
+    auto output_shapes_json = in.at(dump_fields.at(DumpFields::OUTPUT_SIZE));
     for (SizeType i = 0; i < output_shapes_json.size(); ++i)
     {
         auto shape = output_shapes_json[i];
         output_shapes.emplace_back(shape[0], shape[1], shape[2]);
     }
     _output_shape = LayerShape(output_shapes);
+    _output_size = _output_shape.size();
 }
 
 void Layer::_set_input_shape(LayerShape input_shape)
 {
     _input_shape = std::move(input_shape);
+    _input_size = _input_shape.size();
 }
 
 void Layer::_check_training_input(const std::vector<NumType>& inputs)
