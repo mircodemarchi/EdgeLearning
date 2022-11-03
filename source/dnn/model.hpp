@@ -173,7 +173,7 @@ public:
      * \param dst Destination layer.
      */
     void create_back_arc(
-        const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
+        Layer::SharedPtr src, Layer::SharedPtr dst);
 
     /**
      * \brief Create a forward dependency between two constituent layers.
@@ -184,9 +184,9 @@ public:
      * \param dst Destination layer.
      */
     void create_front_arc(
-        const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
+        Layer::SharedPtr src, Layer::SharedPtr dst);
     void create_front_arc(
-        const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst);
+        Layer::SharedPtr src, std::shared_ptr<LossLayer> dst);
 
     /**
      * \brief Create a dependency between two constituent layers.
@@ -194,8 +194,8 @@ public:
      * \param src Source layer.
      * \param dst Destination layer.
      */
-    void create_edge(const Layer::SharedPtr& src, const Layer::SharedPtr& dst);
-    void create_loss_edge(const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst);
+    void create_edge(Layer::SharedPtr src, Layer::SharedPtr dst);
+    void create_loss_edge(Layer::SharedPtr src, std::shared_ptr<LossLayer> dst);
 
     /**
      * \brief Initialize the parameters of all nodes with the provided seed. 

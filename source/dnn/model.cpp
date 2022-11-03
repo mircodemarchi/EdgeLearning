@@ -60,28 +60,28 @@ void swap(Model& lop, Model& rop)
 }
 
 void Model::create_back_arc(
-    const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
+    Layer::SharedPtr src, Layer::SharedPtr dst)
 {
     _state.graph.add_arc_backward(dst, src);
     _state.update();
 }
 
 void Model::create_front_arc(
-    const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
+    Layer::SharedPtr src, Layer::SharedPtr dst)
 {
     _state.graph.add_arc_forward(src, dst);
     _state.update();
 }
 
 void Model::create_front_arc(
-    const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst)
+    Layer::SharedPtr src, std::shared_ptr<LossLayer> dst)
 {
     _state.graph.add_arc_forward(src, dst);
     _state.update();
 }
 
 void Model::create_edge(
-    const Layer::SharedPtr& src, const Layer::SharedPtr& dst)
+    Layer::SharedPtr src, Layer::SharedPtr dst)
 {
     // NOTE: No validation is done to ensure the edge doesn't already exist
     create_back_arc(src, dst);
@@ -89,7 +89,7 @@ void Model::create_edge(
 }
 
 void Model::create_loss_edge(
-    const Layer::SharedPtr& src, const std::shared_ptr<LossLayer>& dst)
+    Layer::SharedPtr src, std::shared_ptr<LossLayer> dst)
 {
     // NOTE: No validation is done to ensure the edge doesn't already exist
     create_back_arc(src, dst);

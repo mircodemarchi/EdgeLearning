@@ -209,11 +209,11 @@ public:
         // Add Loss layer.
         if (_m.loss_layers().empty())
         {
+            using LossLayerType = typename MapLoss<Framework::EDGE_LEARNING, LT>::type;
             auto loss_layer_name = MapLoss<Framework::EDGE_LEARNING, LT>::name;
-            for (Layer::SharedPtr output_layer: _m.output_layers())
+            for (auto output_layer: _m.output_layers())
             {
-                auto loss_layer = _m.template add_loss<
-                    typename MapLoss<Framework::EDGE_LEARNING, LT>::type>(
+                auto loss_layer = _m.template add_loss<LossLayerType>(
                     loss_layer_name, output_layer->output_size(), batch_size);
                 _m.create_loss_edge(output_layer, loss_layer);
             }
