@@ -177,11 +177,11 @@ AvgPool::AvgPool(std::string name,
 { }
 
 Dropout::Dropout(std::string name,
-                 NumType drop_probability,
+                 DropoutSetting setting,
                  ActivationType activation_type)
     : LayerDescriptor(
         name, LayerType::Dropout,
-        LayerSetting(drop_probability),
+        setting.drop_probability,
         activation_type)
 { }
 

@@ -418,12 +418,28 @@ class Dropout : public LayerDescriptor {
 public:
 
     /**
-     * \brief Constructor of Dropout layer descriptor.
-     * \param name              std::string The layer name.
-     * \param drop_probability  NumType The drop probability.
-     * \param activation_type   ActivationType The layer activation type.
+     * \brief Dropout layer settings.
      */
-    Dropout(std::string name, NumType drop_probability,
+    struct DropoutSetting {
+
+        /**
+         * \brief Constructor of Dropout layer settings.
+         * \param dp NumType The dropout probability.
+         */
+        DropoutSetting(NumType dp)
+            : drop_probability(dp)
+        { }
+
+        NumType drop_probability; ///< \brief The dropout probability.
+    };
+
+    /**
+     * \brief Constructor of Dropout layer descriptor.
+     * \param name            std::string The layer name.
+     * \param setting         DropoutSetting The Dropout Pooling settings.
+     * \param activation_type ActivationType The layer activation type.
+     */
+    Dropout(std::string name, DropoutSetting setting,
             ActivationType activation_type = ActivationType::Linear);
 };
 
