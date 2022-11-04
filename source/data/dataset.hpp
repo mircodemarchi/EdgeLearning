@@ -739,6 +739,25 @@ public:
             );
     }
 
+    static Dataset<T> concatenate(Dataset<T> d1, Dataset<T> d2)
+    {
+        if (d1.empty()) return d2;
+        if (d2.empty()) return d1;
+        if (d1._feature_size != d2._feature_size
+            || d1._sequence_size != d2._sequence_size
+            || d1._labels_idx != d2._labels_idx)
+        {
+            throw std::runtime_error("The inputs datasets have different "
+                                     "characteristics");
+        }
+
+        d1._data.insert(d1._data.end(), d2._data.begin(), d2._data.end());
+        d1._dataset_size += d2._dataset_size;
+        d1._feature_amount += d2._feature_amount;
+        d1._sequence_amount += d2._sequence_amount;
+        return d1;
+    }
+
 private:
     /**
      * \brief Retrieve a part of the features from a dataset entry given by
