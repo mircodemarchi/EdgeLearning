@@ -20,16 +20,16 @@ jobs:
         config:
           # Without MLPACK
           - {
-            name: "macOS 10.15 AppleClang [NO MLPACK]",
+            name: "macOS 11.0 AppleClang [NO MLPACK]",
             mlpack: false,
-            os: macos-10.15,
+            os: macos-11.0,
             cxx: "clang++",
             c: "clang"
           }
           - {
-            name: "macOS 10.15 GCC 10 [NO MLPACK]",
+            name: "macOS 11.0 GCC 10 [NO MLPACK]",
             mlpack: false,
-            os: macos-10.15,
+            os: macos-11.0,
             cxx: "g++-10",
             c: "gcc-10"
           }
@@ -49,9 +49,9 @@ jobs:
           }
           # With MLPACK
           - {
-            name: "macOS 10.15 AppleClang [MLPACK]",
+            name: "macOS 11.0 AppleClang [MLPACK]",
             mlpack: true,
-            os: macos-10.15,
+            os: macos-11.0,
             cxx: "clang++",
             c: "clang"
           }

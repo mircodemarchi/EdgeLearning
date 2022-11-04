@@ -1,0 +1,11 @@
+# MNIST
+*ubyte
+
+# Cifar-10 and Cifar-100
+*.txt
+*.bin
+*.html
+
+# Mlpack thyroid
+thyroid_train.csv
+thyroid_test.csv
