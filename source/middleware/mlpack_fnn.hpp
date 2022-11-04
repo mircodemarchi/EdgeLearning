@@ -115,7 +115,7 @@ private:
                     Framework::MLPACK, OptimizerType::GRADIENT_DESCENT>::type;
                 auto o = optimizer_type(learning_rate, batch_size,
                                         epochs * trainset.n_cols, 0.0, false);
-                _m.Train(trainset, labels, ens::SGD<>(),
+                _m.Train(trainset, labels, o,
                          ens::PrintLoss(), ens::ProgressBar(), bestCoordinates);
                 break;
             }
@@ -125,8 +125,9 @@ private:
                 using optimizer_type = typename MapOptimizer<
                     Framework::MLPACK, OptimizerType::ADAM>::type;
                 auto o = optimizer_type(learning_rate, batch_size,
+                                        0.9, 0.999, 1e-8,
                                         epochs * trainset.n_cols, 0.0, false);
-                _m.Train(trainset, labels, ens::SGD<>(),
+                _m.Train(trainset, labels, o,
                          ens::PrintLoss(), ens::ProgressBar(), bestCoordinates);
                 break;
             }
