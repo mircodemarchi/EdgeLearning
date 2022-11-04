@@ -25,6 +25,13 @@
 #include "profile_fnn.hpp"
 
 
+const NeuralNetworkDescriptor cifar_hidden_layers_descriptor(
+    {
+        Dense{"hidden_layer0", 20, ActivationType::ReLU },
+        Dense{"hidden_layer1", 10, ActivationType::ReLU },
+    }
+);
+
 const NeuralNetworkDescriptor mnist_hidden_layers_descriptor(
     {
         Dense{"hidden_layer0", 200, ActivationType::ReLU },
@@ -54,10 +61,35 @@ public:
 int main() {
     SizeType EPOCHS = 1;
     SizeType BATCH_SIZE = 64;
-    NumType LEARNING_RATE = 5e-3;
+    NumType LEARNING_RATE = 0.01;
+
+    ProfileFNNClassification<OptimizerType::ADAM>(
+        ProfileDataset::Type::MNIST,
+        {mnist_hidden_layers_descriptor},
+        {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
 
     ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
         ProfileDataset::Type::MNIST,
         {mnist_hidden_layers_descriptor},
+        {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
+
+    ProfileFNNClassification<OptimizerType::ADAM>(
+        ProfileDataset::Type::CIFAR10,
+        {cifar_hidden_layers_descriptor},
+        {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
+
+    ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
+        ProfileDataset::Type::CIFAR10,
+        {cifar_hidden_layers_descriptor},
+        {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
+
+    ProfileFNNClassification<OptimizerType::ADAM>(
+        ProfileDataset::Type::CIFAR100,
+        {cifar_hidden_layers_descriptor},
+        {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
+
+    ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
+        ProfileDataset::Type::CIFAR100,
+        {cifar_hidden_layers_descriptor},
         {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
 }

@@ -81,28 +81,30 @@ public:
             "solving a " + _profile_name + " problem");
         std::cout << "*** Dataset: " + std::string(ProfileDataset(_dataset_type))
                   << " ***" << std::endl;
+        auto data = ProfileDataset(_dataset_type).load_dataset();
 
         for (const auto& nn_descriptor: _hidden_layers_descriptor_vec)
         {
-            EDGE_LEARNING_PROFILE_CALL(profile_on_fixed_parameters(nn_descriptor));
-            EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level(nn_descriptor));
-            EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount(nn_descriptor));
-            EDGE_LEARNING_PROFILE_CALL(profile_on_training_set(nn_descriptor));
+            EDGE_LEARNING_PROFILE_CALL(profile_on_fixed_parameters(nn_descriptor, data));
+            EDGE_LEARNING_PROFILE_CALL(profile_on_parallelism_level(nn_descriptor, data));
+            EDGE_LEARNING_PROFILE_CALL(profile_on_epochs_amount(nn_descriptor, data));
+            EDGE_LEARNING_PROFILE_CALL(profile_on_training_set(nn_descriptor, data));
         }
 
-        EDGE_LEARNING_PROFILE_CALL(profile_on_layers_amount());
-        EDGE_LEARNING_PROFILE_CALL(profile_on_layers_shape());
+        EDGE_LEARNING_PROFILE_CALL(profile_on_layers_amount(data));
+        EDGE_LEARNING_PROFILE_CALL(profile_on_layers_shape(data));
     }
 
 private:
     using ProfileCompileFNN = CompileFeedforwardNeuralNetwork<LT, InitType::AUTO, PL>;
 
-    void profile_on_fixed_parameters(NeuralNetworkDescriptor nn_descriptor) {
-        auto data = ProfileDataset(_dataset_type).load_dataset();
-        auto data_training = std::get<0>(data);
-        auto data_evaluation = std::get<1>(data);
-        auto data_testing = std::get<2>(data);
-        auto input_size = std::get<3>(data);
+    void profile_on_fixed_parameters(
+        NeuralNetworkDescriptor nn_descriptor, ProfileDataset::Info& data)
+    {
+        auto data_training = data.train;
+        auto data_evaluation = data.evaluation;
+        auto data_testing = data.test;
+        auto input_size = data.input_shape;
         auto output_size = data_training.labels_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
@@ -128,18 +130,19 @@ private:
             _default_setting.learning_rate);
     }
 
-    void profile_on_parallelism_level(NeuralNetworkDescriptor nn_descriptor) {
-        auto data = ProfileDataset(_dataset_type).load_dataset();
-        auto data_training = std::get<0>(data);
-        auto data_evaluation = std::get<1>(data);
-        auto data_testing = std::get<2>(data);
-        auto input_size = std::get<3>(data);
+    void profile_on_parallelism_level(
+        NeuralNetworkDescriptor nn_descriptor, ProfileDataset::Info& data)
+    {
+        auto data_training = data.train;
+        auto data_evaluation = data.evaluation;
+        auto data_testing = data.test;
+        auto input_size = data.input_shape;
         auto output_size = data_training.labels_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
             layers_descriptor.begin(),
-            Input{"input_layer", DLMath::Shape3d{28, 28, 1}});
+            Input{"input_layer", input_size});
         layers_descriptor.push_back(
             Dense{"output_layer", output_size, MapOutputActivation<LT>::type});
 
@@ -244,12 +247,13 @@ private:
      * \brief Profile the training and the prediction phase of a FNN model
      * on epochs incrementation.
      */
-    void profile_on_epochs_amount(NeuralNetworkDescriptor nn_descriptor) {
-        auto data = ProfileDataset(_dataset_type).load_dataset();
-        auto data_training = std::get<0>(data);
-        auto data_evaluation = std::get<1>(data);
-        auto data_testing = std::get<2>(data);
-        auto input_size = std::get<3>(data);
+    void profile_on_epochs_amount(
+        NeuralNetworkDescriptor nn_descriptor, ProfileDataset::Info& data)
+    {
+        auto data_training = data.train;
+        auto data_evaluation = data.evaluation;
+        auto data_testing = data.test;
+        auto input_size = data.input_shape;
         auto output_size = data_training.labels_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
@@ -287,13 +291,14 @@ private:
      * \brief Profile the training and the prediction phase of a FNN model
      * on different training set amount and fixed epoch amount.
      */
-    void profile_on_training_set(NeuralNetworkDescriptor nn_descriptor) {
-        auto data = ProfileDataset(_dataset_type).load_dataset();
-        auto data_training = std::get<0>(data);
-        auto data_evaluation = std::get<1>(data);
-        auto data_testing = std::get<2>(data);
+    void profile_on_training_set(
+        NeuralNetworkDescriptor nn_descriptor, ProfileDataset::Info& data)
+    {
+        auto data_training = data.train;
+        auto data_evaluation = data.evaluation;
+        auto data_testing = data.test;
         auto training_set_size = data_training.size();
-        auto input_size = std::get<3>(data);
+        auto input_size = data.input_shape;
         auto output_size = data_training.labels_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
@@ -349,12 +354,11 @@ private:
      * \brief Profile the training and the prediction phase of a FNN model
      * on incremental layers amount.
      */
-    void profile_on_layers_amount() {
-        auto data = ProfileDataset(_dataset_type).load_dataset();
-        auto data_training = std::get<0>(data);
-        auto data_evaluation = std::get<1>(data);
-        auto data_testing = std::get<2>(data);
-        auto input_size = std::get<3>(data);
+    void profile_on_layers_amount(ProfileDataset::Info& data) {
+        auto data_training = data.train;
+        auto data_evaluation = data.evaluation;
+        auto data_testing = data.test;
+        auto input_size = data.input_shape;
         auto output_size = data_training.labels_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(
@@ -407,12 +411,11 @@ private:
      * \brief Profile the training phase of a FNN model
      * on different hidden layer shape.
      */
-    void profile_on_layers_shape() {
-        auto data = ProfileDataset(_dataset_type).load_dataset();
-        auto data_training = std::get<0>(data);
-        auto data_evaluation = std::get<1>(data);
-        auto data_testing = std::get<2>(data);
-        auto input_size = std::get<3>(data);
+    void profile_on_layers_shape(ProfileDataset::Info& data) {
+        auto data_training = data.train;
+        auto data_evaluation = data.evaluation;
+        auto data_testing = data.test;
+        auto input_size = data.input_shape;
         auto output_size = data_training.labels_idx().size();
 
         std::vector<std::size_t> layers_shapes = {
