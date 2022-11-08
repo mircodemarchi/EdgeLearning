@@ -1042,8 +1042,8 @@ private:
             6, 1, 6, 6, 6, 2, 2,
             6, 6, 1, 6, 6, 1, 3
         });
-        auto ds1 = Dataset<NumType>(v1, 7, 1, {5,6});
-        auto ds2 = Dataset<NumType>(v2, 7, 1, {5,6});
+        auto ds1 = Dataset<NumType>(v1, 7, 1, {5, 6});
+        auto ds2 = Dataset<NumType>(v2, 7, 1, {5, 6});
 
         Dataset<NumType> ds_concatenate;
         EDGE_LEARNING_TEST_TRY(
@@ -1062,6 +1062,18 @@ private:
                                  ds2.entry(0)[0]);
         EDGE_LEARNING_TEST_EQUAL(ds_concatenate.entry(ds1.size())[1],
                                  ds2.entry(0)[1]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx().size(),
+                                 ds1.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[0],
+                                 ds1.labels_idx()[0]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[1],
+                                 ds1.labels_idx()[1]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx().size(),
+                                 ds2.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[0],
+                                 ds2.labels_idx()[0]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[1],
+                                 ds2.labels_idx()[1]);
 
         Dataset<NumType> ds_empty;
         EDGE_LEARNING_TEST_TRY(
@@ -1090,14 +1102,75 @@ private:
         EDGE_LEARNING_TEST_FAIL(Dataset<NumType>::concatenate(ds1, ds3));
         EDGE_LEARNING_TEST_THROWS(Dataset<NumType>::concatenate(ds1, ds3),
                                   std::runtime_error);
-        ds2 = Dataset<NumType>(v2, 7, 2, {5,6});
-        EDGE_LEARNING_TEST_FAIL(Dataset<NumType>::concatenate(ds1, ds2));
-        EDGE_LEARNING_TEST_THROWS(Dataset<NumType>::concatenate(ds1, ds2),
+        auto ds2_edit = Dataset<NumType>(v2, 7, 2, {5,6});
+        EDGE_LEARNING_TEST_FAIL(Dataset<NumType>::concatenate(ds1, ds2_edit));
+        EDGE_LEARNING_TEST_THROWS(Dataset<NumType>::concatenate(ds1, ds2_edit),
                                   std::runtime_error);
-        ds2 = Dataset<NumType>(v2, 7, 1, {4,5,6});
-        EDGE_LEARNING_TEST_FAIL(Dataset<NumType>::concatenate(ds1, ds2));
-        EDGE_LEARNING_TEST_THROWS(Dataset<NumType>::concatenate(ds1, ds2),
+        ds2_edit = Dataset<NumType>(v2, 7, 1, {4,5,6});
+        EDGE_LEARNING_TEST_FAIL(Dataset<NumType>::concatenate(ds1, ds2_edit));
+        EDGE_LEARNING_TEST_THROWS(Dataset<NumType>::concatenate(ds1, ds2_edit),
                                   std::runtime_error);
+
+        SizeType axis = 2;
+        std::vector<NumType> v4({
+            1, 6,
+            6, 6,
+            6, 1,
+            6, 1,
+            6, 6,
+            6, 2,
+        });
+        auto ds4 = Dataset<NumType>(v4, axis);
+        EDGE_LEARNING_TEST_TRY(
+            ds_concatenate = Dataset<NumType>::concatenate(ds1, ds4, 2));
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.size(), ds1.size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.size(), ds4.size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.sequence_size(),
+                                 ds1.sequence_size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.sequence_size(),
+                                 ds4.sequence_size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.feature_size(),
+                                 ds1.feature_size() + ds4.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.entry(0)[ds1.feature_size()],
+                                 ds4.entry(0)[0]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.entry(0)[ds_concatenate.feature_size() - 1],
+                                 ds4.entry(0)[1]);
+        EDGE_LEARNING_TEST_ASSERT(ds_concatenate.labels_idx().empty());
+
+        axis = 1;
+        std::vector<NumType> v5({
+            2, 7, 7, 7, 7, 2,
+            7, 2, 7, 7, 7, 3,
+            7, 7, 2, 7, 7, 2
+        });
+        ds3 = Dataset<NumType>(v3, 6, 1, {4, 5});
+        auto ds5 = Dataset<NumType>(v5, 6, 1, {4, 5});
+        EDGE_LEARNING_TEST_TRY(
+            ds_concatenate = Dataset<NumType>::concatenate(ds3, ds5, axis));
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.size(),
+                                 ds3.size() + ds2.size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.sequence_size(),
+                                 ds3.sequence_size() + ds5.sequence_size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.feature_size(),
+                                 ds3.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.feature_size(),
+                                 ds5.feature_size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.entry_seq(0)[0],
+                                 ds3.entry(0)[0]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.entry_seq(0)[ds_concatenate.feature_size()],
+                                 ds5.entry(0)[0]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx().size(),
+                                 ds3.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[0],
+                                 ds3.labels_idx()[0]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[1],
+                                 ds3.labels_idx()[1]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx().size(),
+                                 ds5.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[0],
+                                 ds5.labels_idx()[0]);
+        EDGE_LEARNING_TEST_EQUAL(ds_concatenate.labels_idx()[1],
+                                 ds5.labels_idx()[1]);
     }
 };
 

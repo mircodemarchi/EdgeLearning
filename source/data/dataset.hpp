@@ -739,23 +739,46 @@ public:
             );
     }
 
-    static Dataset<T> concatenate(Dataset<T> d1, Dataset<T> d2)
+    /**
+     * \brief Concatenate two dataset along an axis.
+     * \param d1 Dataset<T> The first input dataset to concatenate.
+     * \param d2 Dataset<T> The second input dataset to concatenate.
+     * \param axis SizeType The axis along which concatenate the datasets.
+     * If axis = 0, then the concatenation is performed along the data entries,
+     * if axis = 1, then the concatenation is performed along the sequences,
+     * if axis = 1, then the concatenation is performed along the features.
+     * \return Dataset<T> The concatenated dataset.
+     */
+    static Dataset<T> concatenate(Dataset<T> d1, Dataset<T> d2,
+                                  SizeType axis = 0)
     {
         if (d1.empty()) return d2;
         if (d2.empty()) return d1;
-        if (d1._feature_size != d2._feature_size
-            || d1._sequence_size != d2._sequence_size
-            || d1._labels_idx != d2._labels_idx)
+        if (axis > 2)
+        {
+            throw std::runtime_error(
+                "Axis overflow: axis param is out of range [0,2]");
+        }
+        if (axis != 2 && d1._labels_idx != d2._labels_idx)
         {
             throw std::runtime_error("The inputs datasets have different "
-                                     "characteristics");
+                                     "label indexes");
         }
 
-        d1._data.insert(d1._data.end(), d2._data.begin(), d2._data.end());
-        d1._dataset_size += d2._dataset_size;
-        d1._feature_amount += d2._feature_amount;
-        d1._sequence_amount += d2._sequence_amount;
-        return d1;
+        DLMath::Shape3d d1_shape(
+            d1._sequence_amount, d1._sequence_size, d1._feature_size);
+        DLMath::Shape3d d2_shape(
+            d2._sequence_amount, d2._sequence_size, d2._feature_size);
+        DLMath::Shape3d res_shape(d1_shape);
+        res_shape[axis] += d2_shape[axis];
+
+        std::vector<T> res(res_shape.size());
+        DLMath::concatenate(res.data(),
+                            d1._data.data(), d1_shape,
+                            d2._data.data(), d2_shape, axis);
+
+        return Dataset<T>(res, res_shape[2], res_shape[1],
+                          axis == 2 ? std::set<SizeType>() : d1._labels_idx);
     }
 
 private:

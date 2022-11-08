@@ -1634,7 +1634,7 @@ public:
         }
         Shape3d dst_shape(src1_shape);
         dst_shape[axis] += src2_shape[axis];
-        append(dst, dst_shape, src1, src1_shape[axis], axis,0);
+        append(dst, dst_shape, src1, src1_shape[axis], axis, 0);
         return append(dst, dst_shape, src2, src2_shape[axis],
                       axis, src1_shape[axis]);
     }
