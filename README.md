@@ -63,7 +63,7 @@ Choose your desired configuration with the following parameters:
     ```bash
     cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
     ```
-- Enable MLPACK: 
+- Enable [MLPACK](https://www.mlpack.org): the high level api of EdgeLearning allows to select [Mlpack](https://github.com/mlpack/mlpack) functionalities statically or dynamically. 
     ```bash
     cmake -DENABLE_MLPACK=1 ..
     ```

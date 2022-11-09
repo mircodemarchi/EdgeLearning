@@ -1,2 +1,9 @@
-add_subdirectory(low_level_interface)
-add_subdirectory(high_level_interface)
+set(EXAMPLES
+    simple_regression
+    simple_classification
+)
+
+foreach(EX ${EXAMPLES})
+    add_executable(${EX} ${EX}.cpp util.hpp)
+    target_link_libraries(${EX} edgelearning)
+endforeach()
