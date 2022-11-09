@@ -228,13 +228,13 @@ int main()
     for (SizeType e = 0; e < EPOCHS; ++e)
     {
         std::cout << "[ EPOCH " << e << " ] ";
-        for (SizeType i = 0; i < inputs_ds.size();)
+        for (SizeType i = 0; i < training_set.size();)
         {
             // Reset the model loss scores.
             m_ll.reset_score();
 
             // Stochastic gradient descent.
-            for (SizeType b = 0; b < BATCH_SIZE && i < inputs_ds.size(); ++b, ++i)
+            for (SizeType b = 0; b < BATCH_SIZE && i < training_set.size(); ++b, ++i)
             {
                 // Crosses forward and backward the model, and generates the
                 // gradients.

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            example/simple_classification.cpp
+ *            example/mnist_dense.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -29,54 +29,12 @@
 // only this header file, which includes all the library headers.
 #include "edge_learning.hpp"
 
-#include <functional> //< For std::function type.
 #include <iomanip>    //< For std::setprecision() function.
 
 // The EdgeLeaning namespace is the only namespace in which all the features of
 // the library are included.
 using namespace EdgeLearning;
 
-/*
- * \brief Generate the input dataset (a vector of feature vectors).
- * \param random       Enable random generation of the dataset, otherwise the
- *                     dataset is taken from a constant built-in vector of
- *                     elements.
- * \param entry_amount Used only if the random generation is enabled. It defines
- *                     the amount of input entry in the dataset.
- * \param input_size   Used only if the random generation is enabled. It defines
- *                     the size of each input entry of the dataset.
- * \param value_from   Used only if the random generation is enabled. It defines
- *                     the value from which generate the random.
- * \param value_to     Used only if the random generation is enabled. It defines
- *                     the value to which generate the random.
- * \param seed         Used only if the random generation is enabled. It defines
- *                     the seed of the random generator.
- * \return The input dataset: a vector of feature vectors.
- *
- * RneType is the default Random number engine chosen in EdgeLearning. By
- * default, RneType is defined as std::mt19937_64.
- */
-static std::vector<std::vector<NumType>> generate_inputs(
-    bool random = false,
-    SizeType entry_amount = 0,
-    SizeType input_size = 0,
-    NumType value_from = 0.0,
-    NumType value_to = 0.0,
-    RneType::result_type seed = std::random_device{}());
-
-/*
- * \brief Generate the labels from an input dataset (a vector of feature
- * vectors) applying a classification function for each input entry.
- * \param inputs                  The input dataset constructed as a vector of
- *                                feature vectors.
- * \param classification_function The classification function performed for
- *                                each feature vector.
- * \return A vector of label vectors generated for each input entry.
- */
-static std::vector<std::vector<NumType>> generate_labels(
-    const std::vector<std::vector<NumType>>& inputs,
-    std::function<std::vector<NumType>(std::vector<NumType>)>
-        classification_function);
 
 /*
  * \brief Visualize the input, the expected output from the training set
@@ -102,64 +60,75 @@ int main()
     const SizeType SEED          = 134234563;
     // Number of data entries used to update the model gradients
     // (stochastic gradient descent).
-    const SizeType BATCH_SIZE    = 8;
+    const SizeType BATCH_SIZE    = 128;
     // Number of iterations performed over the whole dataset.
-    const SizeType EPOCHS        = 50;
+    const SizeType EPOCHS        = 1;
     // Step size of the optimizer.
     const NumType  LEARNING_RATE = 0.01;
 
-    // Size of the first hidden layer.
-    const SizeType HIDDEN1 = 200;
-    // Size of the second hidden layer.
-    const SizeType HIDDEN2 = 100;
+    // Size of the hidden layers.
+    const SizeType HIDDEN1 = 250;
+    const SizeType HIDDEN2 = 200;
+    const SizeType HIDDEN3 = 150;
+    const SizeType HIDDEN4 = 100;
+    const SizeType HIDDEN5 = 50;
+
+    const NumType PERCENTAGE_EVALUATION_DATASET = 0.1;
 
     Time elapsed; //< Utility for performance measure.
 
-    // Create dummy data as inputs for the following classification process.
-    // auto inputs = generate_inputs();
-    // By default, the generate_inputs() function uses a built-in dataset for
-    // debug purposes, in alternatives you can generate a random dataset as
-    // follows:
-    const SizeType ENTRY_AMOUNT = 1000;
-    const SizeType INPUT_SIZE = 4;
-    const NumType FROM_RANDOM_VALUE = -1.0;
-    const NumType TO_RANDOM_VALUE = 1.0;
-    auto inputs = generate_inputs(true, ENTRY_AMOUNT, INPUT_SIZE,
-                                  FROM_RANDOM_VALUE, TO_RANDOM_VALUE, SEED);
-    const SizeType input_size = inputs[0].size();
+    // Mnist filepaths.
+    const std::string MNIST_TRAINING_IMAGES_FN =
+        "train-images.idx3-ubyte";
+    const std::string MNIST_TRAINING_LABELS_FN =
+        "train-labels.idx1-ubyte";
+    const std::string MNIST_TESTING_IMAGES_FN =
+        "t10k-images.idx3-ubyte";
+    const std::string MNIST_TESTING_LABELS_FN =
+        "t10k-labels.idx1-ubyte";
+    const std::filesystem::path MNIST_RESOURCE_ROOT =
+        std::filesystem::path(__FILE__).parent_path() / ".." / "data";
+    const std::filesystem::path MNIST_TRAINING_IMAGES_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TRAINING_IMAGES_FN;
+    const std::filesystem::path MNIST_TRAINING_LABELS_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TRAINING_LABELS_FN;
+    const std::filesystem::path MNIST_TESTING_IMAGES_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TESTING_IMAGES_FN;
+    const std::filesystem::path MNIST_TESTING_LABELS_FP =
+        MNIST_RESOURCE_ROOT / MNIST_TESTING_LABELS_FN;
 
-    // Define the classification performed on inputs.
-    auto labels = generate_labels(
-        inputs,
-        [](std::vector<NumType> input){
-            auto flag =(input[0] > 0.5 || input[1] > 0.0)
-                && (input[2] > 0.0 || input[3] > 0.5);
-            return std::vector<NumType>({
-                static_cast<double>(flag),
-                static_cast<double>(!flag)
-            });
-        });
-    SizeType output_size = labels[0].size();
+    // Parse Mnist whole dataset.
+    auto mnist_training = Mnist(
+        MNIST_TRAINING_IMAGES_FP,
+        MNIST_TRAINING_LABELS_FP);
+    auto mnist_testing = Mnist(
+        MNIST_TESTING_IMAGES_FP,
+        MNIST_TESTING_LABELS_FP);
 
-    // Transform the inputs and the labels in Dataset class.
-    Dataset<NumType> inputs_ds(inputs);
-    Dataset<NumType> labels_ds(labels);
+    // Parse Mnist training set and normalize.
+    auto data_training = Dataset<NumType>::parse(
+        mnist_training,
+        DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+    data_training = data_training.min_max_normalization(
+        0, 255, data_training.input_idx());
+    // Parse Mnist testing set and normalize.
+    auto data_testing = Dataset<NumType>::parse(
+        mnist_testing,
+        DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+    data_testing = data_testing.min_max_normalization(
+        0, 255, data_testing.input_idx());
+    // Select Mnist evaluation dataset.
+    auto data_evaluation = data_training.subdata(
+        PERCENTAGE_EVALUATION_DATASET);
 
-    // Normalize inputs.
-    inputs_ds.min_max_normalization();
-
-    // Concatenate inputs and labels in order to build the training set.
-    // concatenate(inputs, labels, axis=2) => [ input | labels ]
-    auto training_set = Dataset<NumType>::concatenate(inputs_ds, labels_ds, 2);
-
-    // Set labels indexes in the training set.
-    std::vector<SizeType> labels_idx(output_size);
-    std::iota(labels_idx.begin(), labels_idx.end(), input_size);
-    training_set.label_idx(std::set(labels_idx.begin(), labels_idx.end()));
+    auto input_shape = DLMath::Shape3d{
+        MnistImage::IMAGE_SIDE, MnistImage::IMAGE_SIDE};
+    auto input_size = input_shape.size();
+    auto output_size = data_training.label_idx().size();
 
     //================================ MODEL DEFINITION: LOW LEVEL INTERFACE ===
     std::cout
-        << "Example simple_classification with LOW LEVEL INTERFACE"
+        << "Example mnist_dense with LOW LEVEL INTERFACE"
         << std::endl;
 
     // Create an optimizer object that requires the learning step size.
@@ -168,29 +137,50 @@ int main()
     // AdamOptimizer optimizer(LEARNING_RATE);
 
     // Create the model object with the low level interface.
-    Model m_ll{"classifier"};
+    Model m_ll{"mnist_classifier"};
 
     // Construct the model with the following structure:
     // ------------- IN[input_size] -------------
     //           Dense[HIDDEN1] + ReLU
     // #params: (input_size * HIDDEN1) + HIDDEN1
     // ------------------------------------------
-    //           Dense[HIDDEN1] + ReLU
+    //           Dense[HIDDEN2] + ReLU
     // #params: (HIDDEN1 * HIDDEN2) + HIDDEN2
     // ------------------------------------------
+    //           Dense[HIDDEN3] + ReLU
+    // #params: (HIDDEN2 * HIDDEN3) + HIDDEN3
+    // ------------------------------------------
+    //           Dense[HIDDEN4] + ReLU
+    // #params: (HIDDEN3 * HIDDEN4) + HIDDEN4
+    // ------------------------------------------
+    //           Dense[HIDDEN5] + ReLU
+    // #params: (HIDDEN4 * HIDDEN5) + HIDDEN5
+    // ------------------------------------------
     //           Dense[output_size] + Softmax
-    // #params: (HIDDEN2 * output_size) + output_size
+    // #params: (HIDDEN6 * output_size) + output_size
     // ------------ OUT[output_size] ------------
     auto h1          = m_ll.add_layer<DenseLayer>("h1", input_size, HIDDEN1);
     auto h1_relu     = m_ll.add_layer<ReluLayer>("h1_relu", HIDDEN1);
     auto h2          = m_ll.add_layer<DenseLayer>("h2", HIDDEN1, HIDDEN2);
     auto h2_relu     = m_ll.add_layer<ReluLayer>("h2_relu", HIDDEN2);
-    auto out         = m_ll.add_layer<DenseLayer>("out", HIDDEN2, output_size);
+    auto h3          = m_ll.add_layer<DenseLayer>("h3", HIDDEN2, HIDDEN3);
+    auto h3_relu     = m_ll.add_layer<ReluLayer>("h3_relu", HIDDEN3);
+    auto h4          = m_ll.add_layer<DenseLayer>("h4", HIDDEN3, HIDDEN4);
+    auto h4_relu     = m_ll.add_layer<ReluLayer>("h4_relu", HIDDEN4);
+    auto h5          = m_ll.add_layer<DenseLayer>("h5", HIDDEN4, HIDDEN5);
+    auto h5_relu     = m_ll.add_layer<ReluLayer>("h5_relu", HIDDEN5);
+    auto out         = m_ll.add_layer<DenseLayer>("out", HIDDEN5, output_size);
     auto out_softmax = m_ll.add_layer<SoftmaxLayer>("out_softmax", output_size);
     m_ll.create_edge(h1, h1_relu);
     m_ll.create_edge(h1_relu, h2);
     m_ll.create_edge(h2, h2_relu);
-    m_ll.create_edge(h2_relu, out);
+    m_ll.create_edge(h2_relu, h3);
+    m_ll.create_edge(h3, h3_relu);
+    m_ll.create_edge(h3_relu, h4);
+    m_ll.create_edge(h4, h4_relu);
+    m_ll.create_edge(h4_relu, h5);
+    m_ll.create_edge(h5, h5_relu);
+    m_ll.create_edge(h5_relu, out);
     m_ll.create_edge(out, out_softmax);
 
     // Define the loss for training.
@@ -214,22 +204,27 @@ int main()
     for (SizeType e = 0; e < EPOCHS; ++e)
     {
         std::cout << "[ EPOCH " << e << " ] ";
-        for (SizeType i = 0; i < training_set.size();)
+        for (SizeType i = 0; i < data_training.size();)
         {
             // Reset the model loss scores.
             m_ll.reset_score();
 
             // Stochastic gradient descent.
-            for (SizeType b = 0; b < BATCH_SIZE && i < training_set.size(); ++b, ++i)
+            for (SizeType b = 0; b < BATCH_SIZE && i < data_training.size(); ++b, ++i)
             {
                 // Crosses forward and backward the model, and generates the
                 // gradients.
-                m_ll.step(training_set.input(i), training_set.label(i));
+                m_ll.step(data_training.input(i), data_training.label(i));
             }
 
             // Update the model parameters with the optimizer and the generated
             // gradients.
             m_ll.train(optimizer);
+
+            std::cout << "step " << i << " "
+                      << "loss: " << m_ll.avg_loss()
+                      << ", accuracy: " << m_ll.accuracy() * 100.0 << "%"
+                      << std::endl;
         }
         std::cout << "loss: " << m_ll.avg_loss()
                   << ", accuracy: " << m_ll.accuracy() * 100.0 << "%"
@@ -237,17 +232,16 @@ int main()
     }
     elapsed.stop();
     std::cout << "elapsed: " << std::string(elapsed) << std::endl;
+    return 0;
 
-    // Validate the trained model.
-    std::cout << "--- Validation" << std::endl;
+    std::cout << "--- Predicting" << std::endl;
     std::vector<std::vector<NumType>> predictions;
-    for (SizeType i = 0; i < training_set.size(); ++i)
+    for (SizeType i = 0; i < data_evaluation.size(); ++i)
     {
-        predictions.push_back(m_ll.predict(training_set.input(i)));
+        predictions.push_back(m_ll.predict(data_evaluation.input(i)));
     }
     auto predictions_ds = Dataset<NumType>(predictions);
-    check_predictions(training_set, predictions_ds);
-
+    check_predictions(data_evaluation, predictions_ds);
 
     //=============================== MODEL DEFINITION: HIGH LEVEL INTERFACE ===
     std::cout
@@ -259,17 +253,29 @@ int main()
     //           Dense[HIDDEN1] + ReLU
     // #params: (input_size * HIDDEN1) + HIDDEN1
     // ------------------------------------------
-    //           Dense[HIDDEN1] + ReLU
+    //           Dense[HIDDEN2] + ReLU
     // #params: (HIDDEN1 * HIDDEN2) + HIDDEN2
     // ------------------------------------------
+    //           Dense[HIDDEN3] + ReLU
+    // #params: (HIDDEN2 * HIDDEN3) + HIDDEN3
+    // ------------------------------------------
+    //           Dense[HIDDEN4] + ReLU
+    // #params: (HIDDEN3 * HIDDEN4) + HIDDEN4
+    // ------------------------------------------
+    //           Dense[HIDDEN5] + ReLU
+    // #params: (HIDDEN4 * HIDDEN5) + HIDDEN5
+    // ------------------------------------------
     //           Dense[output_size] + Softmax
-    // #params: (HIDDEN2 * output_size) + output_size
+    // #params: (HIDDEN5 * output_size) + output_size
     // ------------ OUT[output_size] ------------
     NeuralNetworkDescriptor layers_descriptor(
         {
             Input{"input_layer",   input_size},
             Dense{"hidden_layer1", HIDDEN1,     ActivationType::ReLU   },
             Dense{"hidden_layer2", HIDDEN2,     ActivationType::ReLU   },
+            Dense{"hidden_layer3", HIDDEN3,     ActivationType::ReLU   },
+            Dense{"hidden_layer4", HIDDEN4,     ActivationType::ReLU   },
+            Dense{"hidden_layer5", HIDDEN5,     ActivationType::ReLU   },
             Dense{"output_layer",  output_size, ActivationType::Softmax }
         }
     );
@@ -283,86 +289,38 @@ int main()
     // Training.
     std::cout << "--- Training" << std::endl;
     elapsed.start();
-    m_hl.fit(training_set,                      //< Labeled dataset.
+    m_hl.fit(data_training,                      //< Labeled dataset.
              OptimizerType::GRADIENT_DESCENT,   //< Optimizer.
              EPOCHS, BATCH_SIZE, LEARNING_RATE, SEED);
     elapsed.stop();
     std::cout << "elapsed: " << std::string(elapsed) << std::endl;
 
-    // Validation.
-    std::cout << "--- Validation" << std::endl;
-    auto score = m_hl.evaluate(training_set);
+    // Evaluation.
+    std::cout << "--- Evaluation" << std::endl;
+    auto evaluation_score = m_hl.evaluate(data_evaluation);
     std::cout
-        << "Loss: " << score.loss << ", "
-        << "Accuracy: " << score.accuracy_perc << "%, "
-        << "Error rate: " << score.error_rate_perc << "%"
+        << "Loss: " << evaluation_score.loss << ", "
+        << "Accuracy: " << evaluation_score.accuracy_perc << "%, "
+        << "Error rate: " << evaluation_score.error_rate_perc << "%"
         << std::endl;
 
-    // Prediction.
-    auto observations = training_set.inputs();
-    auto prediction = m_hl.predict(observations);
-    check_predictions(training_set, prediction);
+    // Testing.
+    std::cout << "--- Testing" << std::endl;
+    auto testing_score = m_hl.evaluate(data_testing);
+    std::cout
+        << "Loss: " << testing_score.loss << ", "
+        << "Accuracy: " << testing_score.accuracy_perc << "%, "
+        << "Error rate: " << testing_score.error_rate_perc << "%"
+        << std::endl;
+
+    std::cout << "--- Predicting" << std::endl;
+    auto prediction = m_hl.predict(data_evaluation);
+    check_predictions(data_evaluation, prediction);
 
     std::cout << "End" << std::endl;
 }
 
 //==============================================================================
-static std::vector<std::vector<NumType>> generate_inputs(
-    bool random,
-    SizeType entry_amount,
-    SizeType input_size,
-    NumType value_from,
-    NumType value_to,
-    RneType::result_type seed)
-{
-    if (!random) {
-        // Return a constant built-in dataset.
-        std::vector<std::vector<NumType>> INPUTS = {
-            {10.0,  1.0,  10.0, 1.0},
-            { 1.0,  3.0,  8.0,  3.0},
-            { 8.0,  1.0,  8.0,  1.0},
-            { 1.0,  1.5,  8.0,  1.5},
-            {-1.0,  2.5, -1.0,  1.5},
-            { 8.0, -2.5,  1.0, -3.0},
-            { 1.0,  2.5, -1.0,  1.5},
-            { 8.0,  2.5,  1.0, -3.0},
-            { 0.0,  0.0,  0.0,  0.0},
-            { 1.0,  1.0,  1.0,  1.0},
-        };
-        return INPUTS;
-    }
-
-    // Generate random values for a dataset of entry_amount x input_size shape.
-    RneType rne(seed);
-    std::vector<std::vector<NumType>> ret;
-    for (SizeType i = 0; i < entry_amount; ++i)
-    {
-        std::vector<NumType> input_entry;
-        for (SizeType j = 0; j < input_size; ++j)
-        {
-            input_entry.push_back(
-                DLMath::rand<NumType>(value_from, value_to, rne));
-        }
-        ret.push_back(input_entry);
-    }
-    return ret;
-}
-
-static std::vector<std::vector<NumType>> generate_labels(
-    const std::vector<std::vector<NumType>>& inputs,
-    std::function<std::vector<NumType>(std::vector<NumType>)>
-        classification_function)
-{
-    std::vector<std::vector<NumType>> labels;
-
-    // Perform the classification for each input entry in dataset.
-    for (const auto& input_entry: inputs)
-    {
-        labels.push_back(classification_function(input_entry));
-    }
-    return labels;
-}
-
 static void check_predictions(Dataset<NumType>& trainset,
                               Dataset<NumType>& model_predictions)
 {

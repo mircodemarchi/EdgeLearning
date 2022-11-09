@@ -1,6 +1,7 @@
 set(EXAMPLES
     simple_regression
     simple_classification
+    mnist_dense
 )
 
 foreach(EX ${EXAMPLES})
