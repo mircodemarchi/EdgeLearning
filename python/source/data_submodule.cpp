@@ -47,11 +47,11 @@ static void dataset_class(pybind11::module& subm)
     dataset_class
         .def(py::init<>())
         .def(py::init<PyDataset::Vec, SizeType, SizeType, std::set<SizeType>>(),
-             "data"_a, "feature_size"_a=1, "sequence_size"_a=1, "labels_idx"_a=std::set<SizeType>())
+             "data"_a, "feature_size"_a=1, "sequence_size"_a=1, "label_idx"_a=std::set<SizeType>())
         .def(py::init<PyDataset::Mat, SizeType, std::set<SizeType>>(),
-             "data"_a, "sequence_size"_a=1, "labels_idx"_a=std::set<SizeType>())
+             "data"_a, "sequence_size"_a=1, "label_idx"_a=std::set<SizeType>())
         .def(py::init<PyDataset::Cub, std::set<SizeType>>(),
-             "data"_a, "labels_idx"_a=std::set<SizeType>());
+             "data"_a, "label_idx"_a=std::set<SizeType>());
 
     // From Numpy
     dataset_class
@@ -96,7 +96,7 @@ static void dataset_class(pybind11::module& subm)
             throw std::runtime_error(
                 "The maximum number of dimensions "
                 "accepted by the Dataset type is 3");
-        }), "np_arr"_a, "labels_idx"_a=std::set<SizeType>());
+        }), "np_arr"_a, "label_idx"_a=std::set<SizeType>());
 
     // To Numpy
     dataset_class.def_buffer([](PyDataset &ds) -> py::buffer_info {
@@ -145,17 +145,20 @@ static void dataset_class(pybind11::module& subm)
     dataset_class.def("empty", &PyDataset::empty);
     dataset_class.def("entry", &PyDataset::entry, "idx"_a);
     dataset_class.def("entry_seq", &PyDataset::entry_seq, "sequence_idx"_a);
-    dataset_class.def("trainset_idx", &PyDataset::trainset_idx);
-    dataset_class.def("trainset", [](PyDataset& py_dt, SizeType idx){ return py_dt.trainset(idx); }, "idx"_a);
-    dataset_class.def("trainset", [](PyDataset& py_dt){ return py_dt.trainset(); });
-    dataset_class.def("trainset_seq", &PyDataset::trainset_seq, "sequence_idx"_a);
+    dataset_class.def("input_idx", &PyDataset::input_idx);
+    dataset_class.def("input", [](PyDataset& py_dt, SizeType idx){ return py_dt.input(
+        idx); }, "idx"_a);
+    dataset_class.def("inputs", [](PyDataset& py_dt){ return py_dt.inputs(); });
+    dataset_class.def("inputs_seq", &PyDataset::inputs_seq, "sequence_idx"_a);
     dataset_class.def_property(
-        "labels_idx",
-        [](const PyDataset& py_dt){ return py_dt.labels_idx(); },
-        [](PyDataset& py_dt, const std::set<SizeType>& set){ py_dt.labels_idx(set); });
-    dataset_class.def("labels", [](PyDataset& py_dt, SizeType idx){ return py_dt.labels(idx); }, "idx"_a);
+        "label_idx",
+        [](const PyDataset& py_dt){ return py_dt.label_idx(); },
+        [](PyDataset& py_dt, const std::set<SizeType>& set){
+            py_dt.label_idx(set); });
+    dataset_class.def("label", [](PyDataset& py_dt, SizeType idx){ return py_dt.label(
+        idx); }, "idx"_a);
     dataset_class.def("labels", [](PyDataset& py_dt){ return py_dt.labels(); });
-    dataset_class.def("trainset_seq", &PyDataset::trainset_seq, "sequence_idx"_a);
+    dataset_class.def("inputs_seq", &PyDataset::inputs_seq, "sequence_idx"_a);
     dataset_class.def(
         "subdata",
         [](PyDataset& py_dt, SizeType from, SizeType to = 0) {

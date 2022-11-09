@@ -89,7 +89,7 @@ public:
         , _feature_amount{0}
         , _sequence_amount{0}
         , _labels_idx{}
-        , _trainset_idx{}
+        , _input_idx{}
     {
 
     }
@@ -122,7 +122,7 @@ public:
         , _sequence_amount{_dataset_size 
             / std::max(_feature_size * _sequence_size, SizeType(1))}
         , _labels_idx{labels_idx}
-        , _trainset_idx{}
+        , _input_idx{}
     {
         _data.resize(_dataset_size);
 
@@ -135,7 +135,7 @@ public:
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx.insert(idx_val);
+                _input_idx.insert(idx_val);
             }
         }
     }
@@ -155,7 +155,7 @@ public:
         , _entry_trainset_cache{}
         , _feature_amount{data.size()}
         , _labels_idx{labels_idx}
-        , _trainset_idx{}
+        , _input_idx{}
     {
         _sequence_size = std::min(sequence_size, _feature_amount);
         if (data.empty())
@@ -192,7 +192,7 @@ public:
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx.insert(idx_val);
+                _input_idx.insert(idx_val);
             }
         }
     } 
@@ -209,7 +209,7 @@ public:
         , _entry_trainset_cache{}
         , _sequence_amount{data.size()}
         , _labels_idx{labels_idx}
-        , _trainset_idx{}
+        , _input_idx{}
     {
         if (data.empty())
         {
@@ -258,7 +258,7 @@ public:
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx.insert(idx_val);
+                _input_idx.insert(idx_val);
             }
         }
     } 
@@ -426,10 +426,10 @@ public:
      * \brief Retrieve the indexes of the feature for training.
      * \return std::vector<SizeType> Vector of indexes of training features.
      */
-    std::vector<SizeType> trainset_idx() const 
+    std::vector<SizeType> input_idx() const
     { 
         return std::vector<SizeType>(
-            _trainset_idx.begin(), _trainset_idx.end());
+            _input_idx.begin(), _input_idx.end());
     }
 
     /**
@@ -438,38 +438,38 @@ public:
      * \return const std::vector<T>& A reference vector to the dataset train
      * features.
      */
-    const std::vector<T>& trainset(SizeType row_idx)
+    const std::vector<T>& input(SizeType row_idx)
     {
         if (row_idx >= _feature_amount)
         {
             _entry_trainset_cache.clear();
             return _entry_trainset_cache;
         }
-        if (_trainset_idx.size() == _feature_size)
+        if (_input_idx.size() == _feature_size)
         {
             return entry(row_idx);
         }
         return _field_from_row_idx(
-            _entry_trainset_cache, row_idx, _trainset_idx);
+            _entry_trainset_cache, row_idx, _input_idx);
     }
 
     /**
      * \brief Retrieve the training feature part of the dataset.
      * \return Dataset<T> The training feature dataset.
      */
-    Dataset<T> trainset()
+    Dataset<T> inputs()
     {
-        auto ret = Vec(std::size_t(_trainset_idx.size() * _feature_amount));
+        auto ret = Vec(std::size_t(_input_idx.size() * _feature_amount));
         for (std::size_t row_i = 0; row_i < _feature_amount; ++row_i)
         {
             std::size_t trainset_col_i = 0;
-            for (const auto& col_i: _trainset_idx)
+            for (const auto& col_i: _input_idx)
             {
-                ret[(row_i * _trainset_idx.size()) + trainset_col_i++]
+                ret[(row_i * _input_idx.size()) + trainset_col_i++]
                     = _data[(row_i * _feature_size) + col_i];
             }
         }
-        return Dataset<T>(ret, _trainset_idx.size(), _sequence_size);
+        return Dataset<T>(ret, _input_idx.size(), _sequence_size);
     }
 
     /**
@@ -479,26 +479,26 @@ public:
      * \return const std::vector<T>& A reference vector to the dataset train
      * features sequence.
      */
-    const std::vector<T>& trainset_seq(SizeType seq_idx)
+    const std::vector<T>& inputs_seq(SizeType seq_idx)
     {
         if (seq_idx >= _sequence_amount)
         {
             _entry_trainset_cache.clear();
             return _entry_trainset_cache;
         }
-        if (_trainset_idx.size() == _feature_size)
+        if (_input_idx.size() == _feature_size)
         {
             return entry_seq(seq_idx);
         }
         return _field_from_seq_idx(
-            _entry_trainset_cache, seq_idx, _trainset_idx);
+            _entry_trainset_cache, seq_idx, _input_idx);
     }
 
     /**
      * \brief Retrieve the indexes of the feature labels.
      * \return std::vector<SizeType> Vector of indexes of label features.
      */
-    std::vector<SizeType> labels_idx() const 
+    std::vector<SizeType> label_idx() const
     { 
         return {_labels_idx.begin(), _labels_idx.end()};
     }
@@ -507,19 +507,19 @@ public:
      * \brief Setter of the feature labels indexes.
      * \param set std::set<SizeType> The set of indexes for feature labels.
      */
-    void labels_idx(std::set<SizeType> set) 
+    void label_idx(std::set<SizeType> set)
     { 
         _labels_idx = set;
         for (auto it = _labels_idx.begin(); it != _labels_idx.end(); )
         {
             if (*it >= _feature_size) _labels_idx.erase(it++); else ++it;
         }
-        _trainset_idx.clear();
+        _input_idx.clear();
         for (SizeType idx_val = 0; idx_val < _feature_size; ++idx_val)
         {
             if (_labels_idx.find(idx_val) == _labels_idx.end())
             {
-                _trainset_idx.insert(idx_val);
+                _input_idx.insert(idx_val);
             }
         }
     }
@@ -530,7 +530,7 @@ public:
      * \return const std::vector<T>& A reference vector to the dataset label
      * features.
      */
-    const std::vector<T>& labels(SizeType row_idx)
+    const std::vector<T>& label(SizeType row_idx)
     {
         if (row_idx >= _feature_amount || _labels_idx.empty())
         {
@@ -877,7 +877,7 @@ private:
     /**
      * \brief Set of indexes for the training features.
      */
-    std::set<SizeType> _trainset_idx;
+    std::set<SizeType> _input_idx;
 };
 
 } // namespace EdgeLearning

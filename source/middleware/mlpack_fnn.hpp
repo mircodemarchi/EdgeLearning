@@ -60,14 +60,16 @@ public:
              OptimizerType optimizer = OptimizerType::ADAM,
              SizeType epochs = 1,
              SizeType batch_size = 1,
-             NumType learning_rate = 0.03) override
+             NumType learning_rate = 0.03,
+             RneType::result_type seed = 0) override
     {
+        (void) seed;
         if (_layers_name.empty())
         {
             throw std::runtime_error(
                 "The FNN has no layer: call add before fit");
         }
-        auto trainset = data.trainset().template to_arma<arma::Mat<T>>();
+        auto trainset = data.inputs().template to_arma<arma::Mat<T>>();
         auto labels = data.labels().template to_arma<arma::Mat<T>>();
         _fit(optimizer, trainset, labels, epochs, batch_size, learning_rate);
     }
@@ -193,7 +195,7 @@ private:
                     ld.setting().stride().width(),
                     ld.setting().stride().height());
                 _m.Add(layer);
-                return AvgPoolingLayer::calculate_output_shape(
+                return AveragePoolingLayer::calculate_output_shape(
                     input_shape.shape(),
                     ld.setting().kernel_shape(),
                     ld.setting().stride());

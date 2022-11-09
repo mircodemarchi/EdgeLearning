@@ -76,7 +76,7 @@ private:
         std::cout << "Iterations report: " << std::endl;
         for (std::size_t i = 0; i < eta_to_test.size(); ++i)
         {
-            std::cout << "GDOptimizer(" << eta_to_test[i] << ") iterations = ";
+            std::cout << "GradientDescentOptimizer(" << eta_to_test[i] << ") iterations = ";
             std::cout << (num_iterations[i] != 0
                           ? std::to_string(num_iterations[i])
                           : "inf") << std::endl;
@@ -85,9 +85,9 @@ private:
 
     SizeType _test_optimize(NumType eta)
     {
-        EDGE_LEARNING_TEST_PRINT("GDOptimizer(" + std::to_string(eta) + ")");
-        EDGE_LEARNING_TEST_TRY(auto o = GDOptimizer(eta); (void) o);
-        auto o = GDOptimizer(eta);
+        EDGE_LEARNING_TEST_PRINT("GradientDescentOptimizer(" + std::to_string(eta) + ")");
+        EDGE_LEARNING_TEST_TRY(auto o = GradientDescentOptimizer(eta); (void) o);
+        auto o = GradientDescentOptimizer(eta);
         EDGE_LEARNING_TEST_TRY(o.reset());
 
         auto l = DenseLayer("dense_optimizer", input_size, output_size);

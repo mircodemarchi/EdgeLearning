@@ -66,7 +66,7 @@ public:
                 for (SizeType b = 0; b < batch_size
                                      && i < data.size(); ++b, ++i)
                 {
-                    model.step(data.trainset(i), data.labels(i));
+                    model.step(data.input(i), data.label(i));
                 }
                 model.train(o);
             }
@@ -99,7 +99,7 @@ public:
                               std::vector<NumType> label_entry) {
                             m.step(train_entry, label_entry);
                             return m;
-                        }, model, data.trainset(i), data.labels(i)));
+                        }, model, data.input(i), data.label(i)));
                 }
 
                 for (auto& f: futures) {
@@ -138,8 +138,8 @@ public:
                                  b < batch_size && idx < data_ref.size();
                                  ++b, ++idx)
                             {
-                                m.step(data_ref.trainset(idx),
-                                       data_ref.labels(idx));
+                                m.step(data_ref.input(idx),
+                                       data_ref.label(idx));
                             }
                             return m;
                         }, model, data, i + (t * batch_size)));
@@ -198,7 +198,8 @@ public:
              OptimizerType optimizer = OptimizerType::ADAM,
              SizeType epochs = 1,
              SizeType batch_size = 1,
-             NumType learning_rate = 0.03) override
+             NumType learning_rate = 0.03,
+             RneType::result_type seed = 0) override
     {
         if (_m.layers().empty())
         {
@@ -213,7 +214,7 @@ public:
             auto loss_layer_name = MapLoss<Framework::EDGE_LEARNING, LT>::name;
             for (auto output_layer: _m.output_layers())
             {
-                auto loss_layer = _m.template add_loss<LossLayerType>(
+                auto loss_layer = _m.add_loss<LossLayerType>(
                     loss_layer_name, output_layer->output_size(), batch_size);
                 _m.create_loss_edge(output_layer, loss_layer);
             }
@@ -221,7 +222,7 @@ public:
 
         // Train.
         _m.init(MapInit<Framework::EDGE_LEARNING, IT>::type,
-                Model::ProbabilityDensityFunction::NORMAL);
+                Model::ProbabilityDensityFunction::NORMAL, seed);
         _fit(optimizer, data, epochs, batch_size, learning_rate);
     }
 
@@ -300,7 +301,7 @@ private:
             }
             case LayerType::AvgPool:
             {
-                auto layer = _m.template add_layer<AvgPoolingLayer>(
+                auto layer = _m.template add_layer<AveragePoolingLayer>(
                     layer_name, input_shape.shape(),
                     ld.setting().kernel_shape(),
                     ld.setting().stride());
@@ -420,9 +421,11 @@ public:
              OptimizerType optimizer = OptimizerType::GRADIENT_DESCENT,
              SizeType epochs = 1,
              SizeType batch_size = 1,
-             NumType learning_rate = 0.03)
+             NumType learning_rate = 0.03,
+             RneType::result_type seed = 0)
     {
-        _fnn_model.fit(data, optimizer, epochs, batch_size, learning_rate);
+        _fnn_model.fit(data, optimizer,
+                       epochs, batch_size, learning_rate, seed);
     }
 
     EvaluationResult evaluate(Dataset<T>& data)

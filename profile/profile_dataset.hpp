@@ -150,12 +150,12 @@ private:
             mnist_training,
             DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         data_training = data_training.min_max_normalization(
-            0, 255, data_training.trainset_idx());
+            0, 255, data_training.input_idx());
         auto data_testing = Dataset<NumType>::parse(
             mnist_testing,
             DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         data_testing = data_testing.min_max_normalization(
-            0, 255, data_testing.trainset_idx());
+            0, 255, data_testing.input_idx());
         auto data_evaluation = data_training.subdata(
             PERCENTAGE_EVALUATION_DATASET);
 
@@ -185,7 +185,7 @@ private:
         return {data_training,
                 data_evaluation,
                 data_testing,
-                data_split.training_set.trainset_idx().size()};
+                data_split.training_set.input_idx().size()};
     }
 
     Info _load_cifar10_dataset()
@@ -227,7 +227,7 @@ private:
                 data_training, cifar_batch_ds);
         }
         data_training = data_training.min_max_normalization(
-            0, 255, data_training.trainset_idx());
+            0, 255, data_training.input_idx());
 
         auto cifar_test = Cifar(CIFAR10_TEST_FP, CIFAR10_META_FP,
                                 CifarShapeOrder::CHN_ROW_COL,
@@ -235,7 +235,7 @@ private:
         auto data_testing = Dataset<NumType>::parse(
             cifar_test, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         data_testing = data_testing.min_max_normalization(
-            0, 255, data_testing.trainset_idx());
+            0, 255, data_testing.input_idx());
 
         auto data_evaluation = data_training.subdata(
             PERCENTAGE_EVALUATION_DATASET);
@@ -275,7 +275,7 @@ private:
         auto data_training = Dataset<NumType>::parse(
             cifar_train, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         data_training = data_training.min_max_normalization(
-            0, 255, data_training.trainset_idx());
+            0, 255, data_training.input_idx());
 
         auto cifar_test = Cifar(CIFAR100_TEST_FP, CIFAR100_COARSE_META_FP,
                                 CifarShapeOrder::CHN_ROW_COL,
@@ -284,7 +284,7 @@ private:
         auto data_testing = Dataset<NumType>::parse(
             cifar_test, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
         data_testing = data_testing.min_max_normalization(
-            0, 255, data_testing.trainset_idx());
+            0, 255, data_testing.input_idx());
 
         auto data_evaluation = data_training.subdata(
             PERCENTAGE_EVALUATION_DATASET);

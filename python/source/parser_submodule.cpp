@@ -77,7 +77,7 @@ void parser_submodule(pybind11::module& subm)
     dataset_parser_class.def("entry", &DatasetParser::entry, "idx"_a);
     dataset_parser_class.def("entries_amount", &DatasetParser::entries_amount);
     dataset_parser_class.def("feature_size", &DatasetParser::feature_size);
-    dataset_parser_class.def("labels_idx", &DatasetParser::labels_idx);
+    dataset_parser_class.def("label_idx", &DatasetParser::labels_idx);
     dataset_parser_class.def("unique", &DatasetParser::unique, "idx"_a);
     dataset_parser_class.def("unique_map", &DatasetParser::unique_map, "idx"_a);
     dataset_parser_class.def(

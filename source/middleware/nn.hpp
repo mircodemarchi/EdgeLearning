@@ -141,11 +141,11 @@ public:
         using loss_type = typename MapLoss<Framework::EDGE_LEARNING, LT>::type;
         loss_type loss("evaluation_loss", output_size(), 1);
 
-        auto data_train = data.trainset();
+        auto data_train = data.inputs();
         auto result = predict(data_train);
         for (std::size_t i = 0; i < result.size(); ++i)
         {
-            loss.set_target(data.labels(i));
+            loss.set_target(data.label(i));
             loss.forward(result.entry(i));
         }
 
@@ -177,12 +177,14 @@ public:
      * \param batch_size    The number of entries evaluated for gradient before
      *                      optimization.
      * \param learning_rate The optimization step size.
+     * \param seed          Seed random generator. If 0, it is unpredictable.
      */
     virtual void fit(Dataset<T>& data,
                      OptimizerType optimizer = OptimizerType::ADAM,
                      SizeType epochs = 1,
                      SizeType batch_size = 1,
-                     NumType learning_rate = 0.03) = 0;
+                     NumType learning_rate = 0.03,
+                     RneType::result_type seed = 0) = 0;
 
 };
 

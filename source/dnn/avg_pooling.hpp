@@ -39,15 +39,15 @@
 
 namespace EdgeLearning {
 
-class AvgPoolingLayer : public PoolingLayer
+class AveragePoolingLayer : public PoolingLayer
 {
 public:
     static const std::string TYPE;
 
-    AvgPoolingLayer(std::string name = std::string(),
-                    DLMath::Shape3d input_shape = {0, 0, 1},
-                    DLMath::Shape2d kernel_shape = {0},
-                    DLMath::Shape2d stride = {1});
+    AveragePoolingLayer(std::string name = std::string(),
+                        DLMath::Shape3d input_shape = {0, 0, 1},
+                        DLMath::Shape2d kernel_shape = {0},
+                        DLMath::Shape2d stride = {1});
 
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -80,7 +80,7 @@ public:
 
     [[nodiscard]] SharedPtr clone() const override
     {
-        return std::make_shared<AvgPoolingLayer>(*this);
+        return std::make_shared<AveragePoolingLayer>(*this);
     }
 
 private:

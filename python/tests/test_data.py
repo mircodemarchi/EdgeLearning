@@ -30,7 +30,7 @@ def test_constructors():
     assert(ds.size() == 0)
     assert(ds.feature_size() == 0)
     assert(ds.sequence_size == 0)
-    assert(ds.labels_idx == [])
+    assert(ds.label_idx == [])
 
     l = [1,2,3,4]
     labels = [1]
@@ -38,7 +38,7 @@ def test_constructors():
     assert(ds.size() == 2)
     assert(ds.feature_size() == 2)
     assert(ds.sequence_size == 1)
-    assert(ds.labels_idx == labels)
+    assert(ds.label_idx == labels)
 
     l = [[1,2],[3,4]]
     labels = [1]
@@ -46,7 +46,7 @@ def test_constructors():
     assert(ds.size() == 2)
     assert(ds.feature_size() == 2)
     assert(ds.sequence_size == 1)
-    assert(ds.labels_idx == labels)
+    assert(ds.label_idx == labels)
 
     l = [[[1,2],[3,4]], [[1,2],[3,4]]]
     labels = [1]
@@ -54,7 +54,7 @@ def test_constructors():
     assert(ds.size() == 4)
     assert(ds.feature_size() == 2)
     assert(ds.sequence_size == 2)
-    assert(ds.labels_idx == labels)
+    assert(ds.label_idx == labels)
 
 
 def test_from_numpy():
@@ -64,7 +64,7 @@ def test_from_numpy():
     assert(ds.size() == 8)
     assert(ds.feature_size() == 1)
     assert(ds.sequence_size == 1)
-    assert(ds.labels_idx == labels)
+    assert(ds.label_idx == labels)
 
     arr = arr.reshape((-1, 2))
     labels = [1]
@@ -72,7 +72,7 @@ def test_from_numpy():
     assert(ds.size() == 4)
     assert(ds.feature_size() == 2)
     assert(ds.sequence_size == 1)
-    assert(ds.labels_idx == labels)
+    assert(ds.label_idx == labels)
 
     arr = arr.reshape((-1, 2, 2))
     labels = [1]
@@ -80,7 +80,7 @@ def test_from_numpy():
     assert(ds.size() == 4)
     assert(ds.feature_size() == 2)
     assert(ds.sequence_size == 2)
-    assert(ds.labels_idx == labels)
+    assert(ds.label_idx == labels)
 
 
 def test_to_numpy():
@@ -97,7 +97,7 @@ def test_methods():
     assert(ds.size() == 4)
     assert(ds.feature_size() == 2)
     assert(ds.sequence_size == 2)
-    assert(ds.labels_idx == labels)
+    assert(ds.label_idx == labels)
 
     assert(not ds.empty())
     assert(Dataset().empty())
@@ -110,7 +110,7 @@ def test_methods():
     assert(ds.entry(0) == [1,2])
     assert(ds.entry_seq(0) == [1,2,3,4])
 
-    assert(ds.trainset_idx() == [0])
-    assert((np.array(ds.trainset()) == np.array([1,3,1,3])).all())
-    assert(ds.trainset(0) == [1])
-    assert(ds.trainset_seq(0) == [1,3])
+    assert(ds.input_idx() == [0])
+    assert((np.array(ds.inputs()) == np.array([1,3,1,3])).all())
+    assert(ds.input(0) == [1])
+    assert(ds.inputs_seq(0) == [1,3])

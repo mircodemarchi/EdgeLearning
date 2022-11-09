@@ -28,9 +28,9 @@
 
 namespace EdgeLearning {
 
-const std::string AvgPoolingLayer::TYPE = "AveragePool";
+const std::string AveragePoolingLayer::TYPE = "AveragePool";
 
-AvgPoolingLayer::AvgPoolingLayer(
+AveragePoolingLayer::AveragePoolingLayer(
     std::string name,
     DLMath::Shape3d input_shape, DLMath::Shape2d kernel_shape,
     DLMath::Shape2d stride)
@@ -38,7 +38,7 @@ AvgPoolingLayer::AvgPoolingLayer(
                    std::move(name), "avg_pooling_layer_")
 {}
 
-const std::vector<NumType>& AvgPoolingLayer::forward(
+const std::vector<NumType>& AveragePoolingLayer::forward(
     const std::vector<NumType>& inputs)
 {
     // Remember the last input data for backpropagation.
@@ -50,7 +50,7 @@ const std::vector<NumType>& AvgPoolingLayer::forward(
     return PoolingLayer::forward(_output_activations);
 }
 
-const std::vector<NumType>& AvgPoolingLayer::backward(
+const std::vector<NumType>& AveragePoolingLayer::backward(
     const std::vector<NumType>& gradients)
 {
     std::fill(_input_gradients.begin(), _input_gradients.end(), 0);

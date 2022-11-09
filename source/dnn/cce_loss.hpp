@@ -36,18 +36,18 @@
 
 namespace EdgeLearning {
 
-class CCELossLayer : public LossLayer {
+class CategoricalCrossEntropyLossLayer : public LossLayer {
 public:
     static const std::string TYPE;
 
     /**
-     * \brief Construct a new CCELossLayer object.
+     * \brief Construct a new CategoricalCrossEntropyLossLayer object.
      * \param name
      * \param input_size
      * \param batch_size
      */
-    CCELossLayer(std::string name = std::string(),
-        SizeType input_size = 0, SizeType batch_size = 1);
+    CategoricalCrossEntropyLossLayer(std::string name = std::string(),
+                                     SizeType input_size = 0, SizeType batch_size = 1);
 
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -65,7 +65,7 @@ public:
 
     [[nodiscard]] SharedPtr clone() const override
     {
-        return std::make_shared<CCELossLayer>(*this);
+        return std::make_shared<CategoricalCrossEntropyLossLayer>(*this);
     }
 
 private:

@@ -26,12 +26,12 @@
 
 namespace EdgeLearning {
 
-GDOptimizer::GDOptimizer(NumType eta)
+GradientDescentOptimizer::GradientDescentOptimizer(NumType eta)
     : Optimizer()
     , _eta{eta}
 { }
 
-void GDOptimizer::_train(Layer& layer_from, Layer& layer_to)
+void GradientDescentOptimizer::_train(Layer& layer_from, Layer& layer_to)
 {
     SizeType param_count = layer_to.param_count();
     for (SizeType i = 0; i < param_count; ++i)

@@ -245,7 +245,7 @@ public:
                 {
                     auto row = entry(row_idx);
 
-                    // Copy the trainset.
+                    // Copy the input.
                     for (SizeType col_idx = 0; col_idx < feature_size();
                          ++col_idx)
                     {

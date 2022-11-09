@@ -166,7 +166,7 @@ struct MapLayer<Framework::EDGE_LEARNING, LayerType::MaxPool> {
 
 template <>
 struct MapLayer<Framework::EDGE_LEARNING, LayerType::AvgPool> {
-    using type = AvgPoolingLayer;
+    using type = AveragePoolingLayer;
 };
 
 template <>
@@ -176,19 +176,19 @@ struct MapLayer<Framework::EDGE_LEARNING, LayerType::Dropout> {
 
 template <>
 struct MapLoss<Framework::EDGE_LEARNING, LossType::CCE> {
-    using type = CCELossLayer;
+    using type = CategoricalCrossEntropyLossLayer;
     inline static const std::string name = "cce_loss";
 };
 
 template <>
 struct MapLoss<Framework::EDGE_LEARNING, LossType::MSE> {
-    using type = MSELossLayer;
+    using type = MeanSquaredLossLayer;
     inline static const std::string name = "mse_loss";
 };
 
 template <>
 struct MapOptimizer<Framework::EDGE_LEARNING, OptimizerType::GRADIENT_DESCENT> {
-    using type = GDOptimizer;
+    using type = GradientDescentOptimizer;
 };
 
 template <>

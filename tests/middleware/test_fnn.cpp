@@ -238,9 +238,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(score0.error_rate_perc,
                                  score0.error_rate * 100.0);
         Dataset<NumType> prediction;
-        auto train_dataset = dataset.trainset();
+        auto train_dataset = dataset.inputs();
         EDGE_LEARNING_TEST_TRY(prediction = dynamic_m.predict(train_dataset));
-        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.label_idx().size());
         EDGE_LEARNING_TEST_EQUAL(prediction.size(), dataset.size());
 
         EDGE_LEARNING_TEST_TRY(dynamic_m.compile(LossType::MSE, OptimizerType::GRADIENT_DESCENT, InitType::AUTO));
@@ -308,7 +308,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(safe_dynamic_m.output_size(), 2);
         safe_dynamic_m = TestDynamicModel(layers_descriptor, "safe_dynamic_model");
         EDGE_LEARNING_TEST_TRY(prediction = safe_dynamic_m.predict(train_dataset));
-        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.label_idx().size());
         EDGE_LEARNING_TEST_EQUAL(prediction.size(), dataset.size());
 
         EDGE_LEARNING_TEST_TRY(
@@ -329,9 +329,9 @@ private:
                                  1.0 - score.accuracy);
         EDGE_LEARNING_TEST_EQUAL(score.error_rate_perc,
                                  score.error_rate * 100.0);
-        train_dataset = dataset.trainset();
+        train_dataset = dataset.inputs();
         EDGE_LEARNING_TEST_TRY(prediction = dynamic_fnn_m.predict(Framework::EDGE_LEARNING, train_dataset));
-        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.label_idx().size());
         EDGE_LEARNING_TEST_EQUAL(prediction.size(), dataset.size());
 
         std::map<Framework, DynamicFeedforwardNeuralNetwork<>::EvaluationResult> score_map;
@@ -359,7 +359,7 @@ private:
         auto safe_dynamic_fnn_m = DynamicFeedforwardNeuralNetwork<>(
             layers_descriptor, "fail_dynamic_fnn_model");
         EDGE_LEARNING_TEST_TRY(prediction = dynamic_fnn_m.predict(Framework::EDGE_LEARNING, train_dataset));
-        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.labels_idx().size());
+        EDGE_LEARNING_TEST_EQUAL(prediction.feature_size(), dataset.label_idx().size());
         EDGE_LEARNING_TEST_EQUAL(prediction.size(), dataset.size());
         EDGE_LEARNING_TEST_TRY(prediction_map = dynamic_fnn_m.predict(train_dataset));
         EDGE_LEARNING_TEST_ASSERT(prediction_map.size() >= 1);

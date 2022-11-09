@@ -37,13 +37,13 @@
 
 namespace EdgeLearning {
 
-class MSELossLayer : public LossLayer {
+class MeanSquaredLossLayer : public LossLayer {
 public:
     static const std::string TYPE;
 
-    MSELossLayer(std::string name = std::string(),
-                 SizeType input_size = 0, SizeType batch_size = 1,
-                 NumType loss_tolerance=0.1);
+    MeanSquaredLossLayer(std::string name = std::string(),
+                         SizeType input_size = 0, SizeType batch_size = 1,
+                         NumType loss_tolerance=0.1);
 
     [[nodiscard]] inline const std::string& type() const override
     { return TYPE; }
@@ -61,7 +61,7 @@ public:
 
     [[nodiscard]] SharedPtr clone() const override
     {
-        return std::make_shared<MSELossLayer>(*this);
+        return std::make_shared<MeanSquaredLossLayer>(*this);
     }
 
     /**

@@ -39,16 +39,16 @@ namespace EdgeLearning {
  * It can be used as part of the *Stochastic* gradient descent algorithm (SGD) 
  * by invoking it after smaller batches of training data are evaluated.
  */
-class GDOptimizer : public Optimizer
+class GradientDescentOptimizer : public Optimizer
 {
 public:
     /**
-     * \brief Construct a new GDOptimizer object.
+     * \brief Construct a new GradientDescentOptimizer object.
      * Given a loss gradient dL/dp for some parameter p, during gradient 
      * descent, p will be adjusted such that p' = p - eta * dL/dp.
      * \param eta commonly accepted character used to denote the learning rate.
      */
-    GDOptimizer(NumType eta);
+    GradientDescentOptimizer(NumType eta);
 
 private:
     /**

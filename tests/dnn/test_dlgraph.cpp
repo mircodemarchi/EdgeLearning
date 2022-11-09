@@ -197,9 +197,9 @@ private:
         auto d4 = std::make_shared<DenseLayer>("d4");
         auto d5 = std::make_shared<DenseLayer>("d5");
         auto l0 = std::dynamic_pointer_cast<LossLayer>(
-            std::make_shared<MSELossLayer>("l0"));
+            std::make_shared<MeanSquaredLossLayer>("l0"));
         auto l1 = std::dynamic_pointer_cast<LossLayer>(
-            std::make_shared<MSELossLayer>("l1"));
+            std::make_shared<MeanSquaredLossLayer>("l1"));
 
         EDGE_LEARNING_TEST_TRY(graph.add_node(d0));
         EDGE_LEARNING_TEST_TRY(graph.add_node(d1));
@@ -223,9 +223,9 @@ private:
         EDGE_LEARNING_TEST_TRY(
             graph.as<DenseLayer>(graph.layers_idx()[0]));
         EDGE_LEARNING_TEST_TRY(
-            graph.as<MSELossLayer>(graph.loss_layers_idx()[0]));
+            graph.as<MeanSquaredLossLayer>(graph.loss_layers_idx()[0]));
         auto d0_converted = graph.as<DenseLayer>(graph.layers_idx()[0]);
-        auto l0_converted = graph.as<MSELossLayer>(graph.loss_layers_idx()[0]);
+        auto l0_converted = graph.as<MeanSquaredLossLayer>(graph.loss_layers_idx()[0]);
         EDGE_LEARNING_TEST_EQUAL(d0->name(), d0_converted->name());
         EDGE_LEARNING_TEST_EQUAL(l0->name(), l0_converted->name());
 

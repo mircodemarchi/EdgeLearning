@@ -42,14 +42,14 @@ public:
 
 private:
     void test_layer() {
-        EDGE_LEARNING_TEST_EQUAL(MSELossLayer::TYPE, "MSELoss");
+        EDGE_LEARNING_TEST_EQUAL(MeanSquaredLossLayer::TYPE, "MSELoss");
         EDGE_LEARNING_TEST_EXECUTE(
-                auto l1 = MSELossLayer("mse_loss_layer_test"));
+                auto l1 = MeanSquaredLossLayer("mse_loss_layer_test"));
         EDGE_LEARNING_TEST_TRY(
-                auto l2 = MSELossLayer("mse_loss_layer_test"));
+                auto l2 = MeanSquaredLossLayer("mse_loss_layer_test"));
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
-        auto l = MSELossLayer("mse_loss_layer_test");
+        auto l = MeanSquaredLossLayer("mse_loss_layer_test");
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "MSELoss");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "MSELoss");
         EDGE_LEARNING_TEST_TRY(l.init());
@@ -76,9 +76,9 @@ private:
         EDGE_LEARNING_TEST_TRY((void) l.clone());
         EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
-        EDGE_LEARNING_TEST_EXECUTE(MSELossLayer l1_copy{l});
-        EDGE_LEARNING_TEST_TRY(MSELossLayer l2_copy{l});
-        MSELossLayer l_copy{l};
+        EDGE_LEARNING_TEST_EXECUTE(MeanSquaredLossLayer l1_copy{l});
+        EDGE_LEARNING_TEST_TRY(MeanSquaredLossLayer l2_copy{l});
+        MeanSquaredLossLayer l_copy{l};
         EDGE_LEARNING_TEST_TRY(l_copy.init());
         EDGE_LEARNING_TEST_FAIL(l_copy.training_forward(v_empty));
         EDGE_LEARNING_TEST_THROWS(l_copy.training_forward(v_empty),
@@ -101,9 +101,9 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_copy.last_output(), std::runtime_error);
 
-        EDGE_LEARNING_TEST_EXECUTE(MSELossLayer l_assign; l_assign = l);
-        EDGE_LEARNING_TEST_TRY(MSELossLayer l_assign; l_assign = l);
-        MSELossLayer l_assign; l_assign = l;
+        EDGE_LEARNING_TEST_EXECUTE(MeanSquaredLossLayer l_assign; l_assign = l);
+        EDGE_LEARNING_TEST_TRY(MeanSquaredLossLayer l_assign; l_assign = l);
+        MeanSquaredLossLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_TRY(l_assign.init());
         EDGE_LEARNING_TEST_FAIL(l_assign.training_forward(v_empty));
         EDGE_LEARNING_TEST_THROWS(
@@ -126,9 +126,9 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_assign.last_output());
         EDGE_LEARNING_TEST_THROWS(l_assign.last_output(), std::runtime_error);
 
-        EDGE_LEARNING_TEST_EXECUTE(auto l1_noname = MSELossLayer());
-        EDGE_LEARNING_TEST_TRY(auto l2_noname = MSELossLayer());
-        auto l_noname = MSELossLayer();
+        EDGE_LEARNING_TEST_EXECUTE(auto l1_noname = MeanSquaredLossLayer());
+        EDGE_LEARNING_TEST_TRY(auto l2_noname = MeanSquaredLossLayer());
+        auto l_noname = MeanSquaredLossLayer();
         EDGE_LEARNING_TEST_PRINT(l_noname.name());
         EDGE_LEARNING_TEST_ASSERT(!l_noname.name().empty());
     }
@@ -138,12 +138,12 @@ private:
         const std::size_t batch_size = 2;
         std::vector<NumType> v(input_size);
         EDGE_LEARNING_TEST_EXECUTE(
-                auto l1 = MSELossLayer("mse_loss_layer_test",
+                auto l1 = MeanSquaredLossLayer("mse_loss_layer_test",
                                        0, 0));
         EDGE_LEARNING_TEST_TRY(
-                auto l2 = MSELossLayer("mse_loss_layer_test",
+                auto l2 = MeanSquaredLossLayer("mse_loss_layer_test",
                                        0, 0));
-        auto l = MSELossLayer(
+        auto l = MeanSquaredLossLayer(
                               "mse_loss_layer_test",
                               input_size, batch_size);
         EDGE_LEARNING_TEST_TRY(l.init());
@@ -165,14 +165,14 @@ private:
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
 
-        MSELossLayer l_shape_copy{l};
+        MeanSquaredLossLayer l_shape_copy{l};
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 0);
         EDGE_LEARNING_TEST_ASSERT(!l_shape_copy.last_input().empty());
         EDGE_LEARNING_TEST_FAIL(l_shape_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_shape_copy.last_output(),
                                   std::runtime_error);
-        MSELossLayer l_shape_assign; l_shape_assign = l;
+        MeanSquaredLossLayer l_shape_assign; l_shape_assign = l;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), input_size);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 0);
         EDGE_LEARNING_TEST_ASSERT(!l_shape_assign.last_input().empty());
@@ -182,7 +182,7 @@ private:
     }
 
     void test_score() {
-        auto l = MSELossLayer("mse_loss_layer_test", 1);
+        auto l = MeanSquaredLossLayer("mse_loss_layer_test", 1);
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), 1);
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), 0);
         EDGE_LEARNING_TEST_EXECUTE(l.reset_score());
@@ -206,7 +206,7 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l.accuracy() != l.accuracy());
         EDGE_LEARNING_TEST_ASSERT(l.avg_loss() != l.avg_loss());
 
-        MSELossLayer l_shape_copy{l};
+        MeanSquaredLossLayer l_shape_copy{l};
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 1);
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 0);
         EDGE_LEARNING_TEST_ASSERT(!l_shape_copy.last_input().empty());
@@ -215,7 +215,7 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_shape_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_shape_copy.last_output(),
                                   std::runtime_error);
-        MSELossLayer l_shape_assign; l_shape_assign = l;
+        MeanSquaredLossLayer l_shape_assign; l_shape_assign = l;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 1);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 0);
         EDGE_LEARNING_TEST_ASSERT(!l_shape_assign.last_input().empty());
@@ -229,8 +229,8 @@ private:
     void testse_loss_layer() {
         SizeType input_size = 1;
         SizeType batch_size = 1;
-        auto l = MSELossLayer("mse_loss_layer_test",
-                              input_size, batch_size);
+        auto l = MeanSquaredLossLayer("mse_loss_layer_test",
+                                      input_size, batch_size);
         std::vector<NumType> v1{0};
         std::vector<NumType> target{1};
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), input_size);
@@ -251,7 +251,7 @@ private:
         EDGE_LEARNING_TEST_THROWS(l.last_output(), std::runtime_error);
 
         std::vector<NumType> v2{10};
-        MSELossLayer l_copy{l};
+        MeanSquaredLossLayer l_copy{l};
         EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v1.size());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input()[0], v1[0]);
@@ -265,7 +265,7 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_copy.last_output(), std::runtime_error);
 
-        MSELossLayer l_assign; l_assign = l;
+        MeanSquaredLossLayer l_assign; l_assign = l;
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v1.size());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input()[0], v1[0]);
@@ -281,8 +281,8 @@ private:
 
         input_size = 2;
         NumType e = 0.1;
-        auto l_regression = MSELossLayer("mse_loss_layer_test",
-                                         input_size, batch_size, e);
+        auto l_regression = MeanSquaredLossLayer("mse_loss_layer_test",
+                                                 input_size, batch_size, e);
         std::vector<NumType> v3{10.2, 10.3};
         std::vector<NumType> target_right{10.21, 10.26};
         std::vector<NumType> target_wrong{10.0, 10.0};
@@ -296,7 +296,7 @@ private:
 
     void test_stream()
     {
-        auto l = MSELossLayer("mse_loss_layer_test", 2, 1, 0.1);
+        auto l = MeanSquaredLossLayer("mse_loss_layer_test", 2, 1, 0.1);
 
         Json l_dump;
         EDGE_LEARNING_TEST_TRY(l_dump = l.dump());
@@ -335,7 +335,7 @@ private:
             EDGE_LEARNING_TEST_EQUAL(output_size, l.output_shape().size(i));
         }
 
-        l = MSELossLayer();
+        l = MeanSquaredLossLayer();
         EDGE_LEARNING_TEST_TRY(l.load(l_dump));
         EDGE_LEARNING_TEST_EQUAL(l.type(), "MSELoss");
         EDGE_LEARNING_TEST_EQUAL(l_dump["name"].as<std::string>(), l.name());

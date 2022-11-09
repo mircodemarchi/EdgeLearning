@@ -28,10 +28,10 @@
 
 namespace EdgeLearning {
 
-const std::string MSELossLayer::TYPE = "MSELoss";
+const std::string MeanSquaredLossLayer::TYPE = "MSELoss";
 
-MSELossLayer::MSELossLayer(std::string name,
-    SizeType input_size, SizeType batch_size, NumType loss_tolerance)
+MeanSquaredLossLayer::MeanSquaredLossLayer(std::string name,
+                                           SizeType input_size, SizeType batch_size, NumType loss_tolerance)
     : LossLayer(input_size, batch_size,
                 std::move(name), "mse_loss_layer_")
     , _loss_tolerance{loss_tolerance}
@@ -39,7 +39,7 @@ MSELossLayer::MSELossLayer(std::string name,
 
 }
 
-const std::vector<NumType>& MSELossLayer::forward(
+const std::vector<NumType>& MeanSquaredLossLayer::forward(
     const std::vector<NumType>& inputs)
 {
     SizeType in_size = inputs.size();
@@ -64,7 +64,7 @@ const std::vector<NumType>& MSELossLayer::forward(
     return inputs;
 }
 
-const std::vector<NumType>& MSELossLayer::backward(
+const std::vector<NumType>& MeanSquaredLossLayer::backward(
     const std::vector<NumType>& gradients)
 {
     // Parameter ignored because it is a loss layer.
@@ -76,7 +76,7 @@ const std::vector<NumType>& MSELossLayer::backward(
     return LossLayer::backward(_gradients);
 }
 
-Json MSELossLayer::dump() const
+Json MeanSquaredLossLayer::dump() const
 {
     Json out = LossLayer::dump();
 
@@ -86,7 +86,7 @@ Json MSELossLayer::dump() const
     return out;
 }
 
-void MSELossLayer::load(const Json& in)
+void MeanSquaredLossLayer::load(const Json& in)
 {
     LossLayer::load(in);
 

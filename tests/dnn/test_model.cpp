@@ -220,7 +220,7 @@ private:
         };
         
         // Model definition.
-        GDOptimizer o{NumType{0.5}};
+        GradientDescentOptimizer o{NumType{0.5}};
         Model m = TestModel::_create_binary_classifier_model();
         m.init();
         m.print();
@@ -263,7 +263,7 @@ private:
     }
 
     void test_classifier_model_predict() {
-        GDOptimizer o{NumType{0.3}};
+        GradientDescentOptimizer o{NumType{0.3}};
         Model m = TestModel::_create_binary_classifier_model();
 
         std::ifstream params_file{
@@ -290,7 +290,7 @@ private:
         };
         
         // Model definition.
-        GDOptimizer o{NumType{0.01}};
+        GradientDescentOptimizer o{NumType{0.01}};
         Model m = TestModel::_create_regressor_model();
         m.init();
         m.print();
@@ -333,7 +333,7 @@ private:
     }
 
     void test_regressor_model_predict() {
-        GDOptimizer o{NumType{0.3}};
+        GradientDescentOptimizer o{NumType{0.3}};
         Model m = TestModel::_create_regressor_model();
 
         std::ifstream params_file{
@@ -373,9 +373,9 @@ private:
         output_layer->hidden_state({0.01, 0.01});
         output_layer->time_steps(time_steps);
         output_layer->hidden_state({0.0, 0.0});
-        auto loss_layer = m.add_loss<MSELossLayer>("loss",
+        auto loss_layer = m.add_loss<MeanSquaredLossLayer>("loss",
             time_steps * output_size, BATCH_SIZE, 0.5);
-        GDOptimizer o{NumType{0.01}};
+        GradientDescentOptimizer o{NumType{0.01}};
         m.create_edge(first_layer, first_layer_relu);
         m.create_edge(first_layer_relu, output_layer);
         m.create_loss_edge(output_layer, loss_layer);
@@ -426,7 +426,7 @@ private:
             "output", 8, 2);
         auto output_layer_softmax = m.add_layer<SoftmaxLayer>(
             "output_softmax", 2);
-        auto loss_layer = m.add_loss<CCELossLayer>(
+        auto loss_layer = m.add_loss<CategoricalCrossEntropyLossLayer>(
             "loss", 2, BATCH_SIZE);
         m.create_edge(first_layer, first_layer_relu);
         m.create_edge(first_layer_relu, output_layer);
@@ -446,7 +446,7 @@ private:
             "output", 8, 2);
         auto output_layer_linear = m.add_layer<LinearLayer>(
             "output_linear", 2);
-        auto loss_layer = m.add_loss<MSELossLayer>(
+        auto loss_layer = m.add_loss<MeanSquaredLossLayer>(
             "loss", 2, BATCH_SIZE, 0.5);
         m.create_edge(first_layer, first_layer_relu);
         m.create_edge(first_layer_relu, output_layer);

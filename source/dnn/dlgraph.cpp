@@ -397,12 +397,9 @@ std::vector<DLGraph::Arc> DLGraph::training_forward_run() const
                 ret.push_back(arc);
 
                 done_list.push_back(from_layer_idx);
-                if (std::find(curr_layers_idx.begin(),curr_layers_idx.end(),
-                              to_layer_idx) == curr_layers_idx.end()
-                    && std::find(done_list.begin(),done_list.end(),
-                                 to_layer_idx) == done_list.end()
-                    && std::find(layers_idx.begin(),layers_idx.end(),
-                                 to_layer_idx) == layers_idx.end())
+                if (DLMath::index_of(curr_layers_idx, to_layer_idx) == -1
+                    && DLMath::index_of(done_list, to_layer_idx) == -1
+                    && DLMath::index_of(layers_idx, to_layer_idx) == -1)
                 {
                     layers_idx.push_back(to_layer_idx);
                 }
@@ -431,12 +428,9 @@ std::vector<DLGraph::Arc> DLGraph::forward_run() const
                 ret.push_back(arc);
 
                 done_list.push_back(from_layer_idx);
-                if (std::find(curr_layers_idx.begin(),curr_layers_idx.end(),
-                              to_layer_idx) == curr_layers_idx.end()
-                    && std::find(done_list.begin(),done_list.end(),
-                                 to_layer_idx) == done_list.end()
-                    && std::find(layers_idx.begin(),layers_idx.end(),
-                                 to_layer_idx) == layers_idx.end())
+                if (DLMath::index_of(curr_layers_idx, to_layer_idx) == -1
+                    && DLMath::index_of(done_list, to_layer_idx) == -1
+                    && DLMath::index_of(layers_idx, to_layer_idx) == -1)
                 {
                     layers_idx.push_back(to_layer_idx);
                 }

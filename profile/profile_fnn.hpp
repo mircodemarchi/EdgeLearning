@@ -105,7 +105,7 @@ private:
         auto data_evaluation = data.evaluation;
         auto data_testing = data.test;
         auto input_size = data.input_shape;
-        auto output_size = data_training.labels_idx().size();
+        auto output_size = data_training.label_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
@@ -137,7 +137,7 @@ private:
         auto data_evaluation = data.evaluation;
         auto data_testing = data.test;
         auto input_size = data.input_shape;
-        auto output_size = data_training.labels_idx().size();
+        auto output_size = data_training.label_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
@@ -254,7 +254,7 @@ private:
         auto data_evaluation = data.evaluation;
         auto data_testing = data.test;
         auto input_size = data.input_shape;
-        auto output_size = data_training.labels_idx().size();
+        auto output_size = data_training.label_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
@@ -299,7 +299,7 @@ private:
         auto data_testing = data.test;
         auto training_set_size = data_training.size();
         auto input_size = data.input_shape;
-        auto output_size = data_training.labels_idx().size();
+        auto output_size = data_training.label_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(nn_descriptor);
         layers_descriptor.insert(
@@ -359,7 +359,7 @@ private:
         auto data_evaluation = data.evaluation;
         auto data_testing = data.test;
         auto input_size = data.input_shape;
-        auto output_size = data_training.labels_idx().size();
+        auto output_size = data_training.label_idx().size();
 
         NeuralNetworkDescriptor layers_descriptor(
             {
@@ -416,7 +416,7 @@ private:
         auto data_evaluation = data.evaluation;
         auto data_testing = data.test;
         auto input_size = data.input_shape;
-        auto output_size = data_training.labels_idx().size();
+        auto output_size = data_training.label_idx().size();
 
         std::vector<std::size_t> layers_shapes = {
             10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000

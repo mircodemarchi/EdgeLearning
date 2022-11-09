@@ -33,10 +33,10 @@
 
 namespace EdgeLearning {
 
-const std::string CCELossLayer::TYPE = "CCELoss";
+const std::string CategoricalCrossEntropyLossLayer::TYPE = "CCELoss";
 
-CCELossLayer::CCELossLayer(std::string name,
-    SizeType input_size, SizeType batch_size)
+CategoricalCrossEntropyLossLayer::CategoricalCrossEntropyLossLayer(std::string name,
+                                                                   SizeType input_size, SizeType batch_size)
     : LossLayer(input_size, batch_size,
                 std::move(name), "cce_loss_layer_")
     , _active{}
@@ -44,7 +44,7 @@ CCELossLayer::CCELossLayer(std::string name,
 
 }
 
-const std::vector<NumType>& CCELossLayer::forward(
+const std::vector<NumType>& CategoricalCrossEntropyLossLayer::forward(
     const std::vector<NumType>& inputs)
 {
     SizeType in_size = inputs.size();
@@ -74,7 +74,7 @@ const std::vector<NumType>& CCELossLayer::forward(
     return inputs;
 }
 
-const std::vector<NumType>& CCELossLayer::backward(
+const std::vector<NumType>& CategoricalCrossEntropyLossLayer::backward(
     const std::vector<NumType>& gradients)
 {
     // Parameter ignored because it is a loss layer.
@@ -86,7 +86,7 @@ const std::vector<NumType>& CCELossLayer::backward(
     return LossLayer::backward(_gradients);
 }
 
-SizeType CCELossLayer::_argactive() const
+SizeType CategoricalCrossEntropyLossLayer::_argactive() const
 {
     for (SizeType i = 0; i < input_size(); ++i)
     {

@@ -233,7 +233,7 @@ public:
             info,
             [&](SizeType i) {
                 (void) i;
-                auto input = data.trainset();
+                auto input = data.inputs();
                 auto prediction = m.predict(input);
                 (void) prediction;
             },
