@@ -68,6 +68,27 @@ public:
      * computed in the function and dJ/dz will be the result saved in 
      * _activation_gradients.
      * \param gradients const std::vector<NumType>& Layer gradients in backward.
+     * Bias gradient.
+     * Calculate dJ/db = dJ/dg(z) * dg(z)/db
+     *                 = dJ/dg(z) * dg(z)/dz * dz/db            <- z = Wx+b
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/db
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * 1
+     *                 = dJ/dg(z) * dg(z)/dz
+     *                 = dJ/dz
+     * Weight gradient.
+     * Calculate dJ/dw_i_j = dJ/dg(z) * dg(z)/dw_i_j
+     *                     = dJ/dg(z) * dg(z)/dz * dz/dw_i_j    <- z = Wx+b
+     *                     = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/dw_i_j
+     *                     = dJ/dg(z) * dg(Wx+b)/dz * x_j
+     *                     = dJ/dg(z) * dg(z)/dz * x_j
+     *                     = dJ/dz * x_j
+     * Input gradient.
+     * Calculate dJ/dx = dJ/dg(z) * dg(z)/x
+     *                 = dJ/dg(z) * dg(z)/dz * dz/x             <- z = Wx+b
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/x
+     *                 = dJ/dg(z) * dg(Wx+b)/dz * W
+     *                 = dJ/dg(z) * dg(z)/dz * W
+     *                 = dJ/dz * W
      */
     const std::vector<NumType>& backward(
         const std::vector<NumType>& gradients) override;

@@ -104,7 +104,6 @@ Layer::Layer(std::string name, LayerShape input_shape, LayerShape output_shape,
     , _output_shape{output_shape}
     , _output_size{output_shape.size()}
     , _last_input{}
-    , _last_input_size{0}
 { 
     if (_name.empty())
     {
@@ -122,9 +121,7 @@ const std::vector<NumType>& Layer::forward(
 const std::vector<NumType>& Layer::training_forward(
     const std::vector<NumType>& inputs)
 {
-    _check_training_input(inputs);
     _last_input = inputs.data();
-    _last_input_size = inputs.size();
     return forward(inputs);
 }
 
@@ -137,8 +134,7 @@ const std::vector<NumType>& Layer::backward(
 std::vector<NumType> Layer::last_input()
 {
     return _last_input
-           ? std::vector<NumType>{
-            _last_input, _last_input + _last_input_size}
+           ? std::vector<NumType>{_last_input, _last_input + _input_size}
            : std::vector<NumType>{};
 }
 
@@ -257,21 +253,6 @@ void Layer::_set_input_shape(LayerShape input_shape)
 {
     _input_shape = std::move(input_shape);
     _input_size = _input_shape.size();
-}
-
-void Layer::_check_training_input(const std::vector<NumType>& inputs)
-{
-    if (input_size() == 0)
-    {
-        input_shape(inputs.size());
-    }
-    else if (input_size() != inputs.size())
-    {
-        throw std::runtime_error(
-            "Training forward input catch an unpredicted input size: "
-            + std::to_string(input_size())
-            + " != " + std::to_string(inputs.size()));
-    }
 }
 
 } // namespace EdgeLearning

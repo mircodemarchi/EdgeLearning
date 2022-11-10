@@ -47,11 +47,7 @@ DropoutLayer::DropoutLayer(std::string name, SizeType size,
 const std::vector<NumType>& DropoutLayer::training_forward(
     const std::vector<NumType>& inputs)
 {
-    Layer::_check_training_input(inputs);
-    // Last input not used for backpropagation.
-    _last_input = inputs.data();
-    _last_input_size = inputs.size();
-
+    Layer::training_forward(inputs);
     auto dist = DLMath::uniform_pdf<NumType>(0.5, 1.0);
 
     // Input size is equal to the output size.

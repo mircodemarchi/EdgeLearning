@@ -617,21 +617,6 @@ void RecurrentLayer::load(const Json& in)
     }
 }
 
-void RecurrentLayer::_check_training_input(const std::vector<NumType>& inputs)
-{
-    if (input_size() == 0)
-    {
-        input_shape(inputs.size());
-    }
-    else if ((_time_steps * input_size()) != inputs.size())
-    {
-        throw std::runtime_error(
-            "Training forward input catch an unpredicted input size: "
-            + std::to_string(_time_steps * input_size())
-            + " != " + std::to_string(inputs.size()));
-    }
-}
-
 void RecurrentLayer::_set_input_shape(LayerShape input_shape) {
     Layer::_set_input_shape(input_shape);
     auto ih_size = _input_size * _hidden_size;

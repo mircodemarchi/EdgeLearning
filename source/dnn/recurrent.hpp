@@ -151,8 +151,6 @@ public:
 
 protected:
 
-    void _check_training_input(const std::vector<NumType>& inputs) override;
-
     void _set_input_shape(LayerShape input_shape) override;
 
 private:

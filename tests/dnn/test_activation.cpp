@@ -112,9 +112,11 @@ private:
         auto l2_clone = l.clone();
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
-        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_TRY(l1_clone->input_shape(v.size()));
+        EDGE_LEARNING_TEST_TRY(l1_clone->training_forward(v));
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
@@ -221,9 +223,11 @@ private:
         auto l2_clone = l.clone();
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
-        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_TRY(l1_clone->input_shape(v.size()));
+        EDGE_LEARNING_TEST_TRY(l1_clone->training_forward(v));
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
@@ -330,9 +334,11 @@ private:
         auto l2_clone = l.clone();
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
-        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_TRY(l1_clone->input_shape(v.size()));
+        EDGE_LEARNING_TEST_TRY(l1_clone->training_forward(v));
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
@@ -439,9 +445,11 @@ private:
         auto l2_clone = l.clone();
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
-        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_TRY(l1_clone->input_shape(v.size()));
+        EDGE_LEARNING_TEST_TRY(l1_clone->training_forward(v));
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());
@@ -491,6 +499,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(l.TYPE, "Softmax");
         EDGE_LEARNING_TEST_EQUAL(l.type(), "Softmax");
         EDGE_LEARNING_TEST_TRY(l.init());
+        EDGE_LEARNING_TEST_TRY(l.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_TRY(l.backward(v));
         EDGE_LEARNING_TEST_TRY(l.print());
@@ -655,9 +664,11 @@ private:
         auto l2_clone = l.clone();
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
-        EDGE_LEARNING_TEST_CALL(l1_clone->training_forward(v));
+        EDGE_LEARNING_TEST_TRY(l1_clone->input_shape(v.size()));
+        EDGE_LEARNING_TEST_TRY(l1_clone->training_forward(v));
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_EQUAL(l.input_size(), v.size());
         EDGE_LEARNING_TEST_EQUAL(l.output_size(), l.input_size());

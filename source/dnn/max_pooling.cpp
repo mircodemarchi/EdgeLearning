@@ -40,9 +40,6 @@ MaxPoolingLayer::MaxPoolingLayer(
 const std::vector<NumType>& MaxPoolingLayer::forward(
     const std::vector<NumType>& inputs)
 {
-    // Remember the last input data for backpropagation.
-    _last_input = inputs.data();
-
     DLMath::max_pool<NumType>(_output_activations.data(), inputs.data(),
                               _input_shape.shape(), _kernel_shape, _stride);
 

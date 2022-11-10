@@ -41,9 +41,6 @@ AveragePoolingLayer::AveragePoolingLayer(
 const std::vector<NumType>& AveragePoolingLayer::forward(
     const std::vector<NumType>& inputs)
 {
-    // Remember the last input data for backpropagation.
-    _last_input = inputs.data();
-
     DLMath::avg_pool<NumType>(_output_activations.data(), inputs.data(),
                               _input_shape.shape(), _kernel_shape, _stride);
 

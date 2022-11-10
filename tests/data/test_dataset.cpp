@@ -1093,6 +1093,9 @@ private:
         EDGE_LEARNING_TEST_EQUAL(ds_concatenate.feature_size(),
                                  ds1.feature_size());
 
+        EDGE_LEARNING_TEST_FAIL(Dataset<NumType>::concatenate(ds1, ds2, 3));
+        EDGE_LEARNING_TEST_THROWS(Dataset<NumType>::concatenate(ds1, ds2, 3),
+                                  std::runtime_error);
         std::vector<NumType> v3({
             1, 6, 6, 6, 6, 1,
             6, 1, 6, 6, 6, 2,

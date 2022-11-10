@@ -300,12 +300,6 @@ protected:
     friend class Model;
 
     /**
-     * \brief Check the input of the forward pass during layer training.
-     * \param inputs The input of the layer.
-     */
-    virtual void _check_training_input(const std::vector<NumType>& inputs);
-
-    /**
      * \brief Setter of input_shape class field.
      * \param input_shape LayerShape Shape param used to take the size and
      * assign it to input_shape.
@@ -323,7 +317,6 @@ protected:
      * gradients with respect to the weights during backpropagation.
      */
     const NumType* _last_input;
-    SizeType _last_input_size;
 };
 
 } // namespace EdgeLearning

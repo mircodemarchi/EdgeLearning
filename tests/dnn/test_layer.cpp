@@ -173,7 +173,6 @@ private:
     void test_layer() {
         std::vector<NumType> v_empty;
         std::vector<NumType> v(std::size_t(10));
-        std::vector<NumType> v_diff_size(std::size_t(11));
         EDGE_LEARNING_TEST_EXECUTE(auto l = CustomLayer());
         EDGE_LEARNING_TEST_TRY(auto l = CustomLayer());
         auto l = CustomLayer();
@@ -211,17 +210,16 @@ private:
         auto l2_clone = l.clone();
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l1_clone->input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l1_clone->training_forward(v));
         EDGE_LEARNING_TEST_NOT_EQUAL(
             l1_clone->last_input().size(), l2_clone->last_input().size());
+        EDGE_LEARNING_TEST_TRY(l.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l.training_forward(v));
         EDGE_LEARNING_TEST_ASSERT(!l.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l.last_input().size(), v.size());
         EDGE_LEARNING_TEST_FAIL(l.last_output());
         EDGE_LEARNING_TEST_THROWS(l.last_output(), std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL(l.training_forward(v_diff_size));
-        EDGE_LEARNING_TEST_THROWS(l.training_forward(v_diff_size),
-                                  std::runtime_error);
         EDGE_LEARNING_TEST_TRY((void) l.clone());
         EDGE_LEARNING_TEST_EQUAL(l.clone()->name(), l.name());
 
@@ -262,14 +260,12 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l_copy.last_input().empty());
         EDGE_LEARNING_TEST_FAIL(l_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_copy.last_output(), std::runtime_error);
+        EDGE_LEARNING_TEST_TRY(l_copy.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l_copy.training_forward(v));
         EDGE_LEARNING_TEST_ASSERT(!l_copy.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_copy.last_input().size(), v.size());
         EDGE_LEARNING_TEST_FAIL(l_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_copy.last_output(), std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL(l_copy.training_forward(v_diff_size));
-        EDGE_LEARNING_TEST_THROWS(l_copy.training_forward(v_diff_size),
-                                  std::runtime_error);
 
         EDGE_LEARNING_TEST_EXECUTE(CustomLayer l_assign; l_assign = l);
         EDGE_LEARNING_TEST_TRY(CustomLayer l_assign; l_assign = l);
@@ -312,14 +308,12 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l_assign.last_input().empty());
         EDGE_LEARNING_TEST_FAIL(l_assign.last_output());
         EDGE_LEARNING_TEST_THROWS(l_assign.last_output(), std::runtime_error);
+        EDGE_LEARNING_TEST_TRY(l_assign.input_shape(v.size()));
         EDGE_LEARNING_TEST_TRY(l_assign.training_forward(v));
         EDGE_LEARNING_TEST_ASSERT(!l_assign.last_input().empty());
         EDGE_LEARNING_TEST_EQUAL(l_assign.last_input().size(), v.size());
         EDGE_LEARNING_TEST_FAIL(l_assign.last_output());
         EDGE_LEARNING_TEST_THROWS(l_assign.last_output(), std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL(l_assign.training_forward(v_diff_size));
-        EDGE_LEARNING_TEST_THROWS(l_assign.training_forward(v_diff_size),
-                                  std::runtime_error);
 
         EDGE_LEARNING_TEST_EXECUTE(auto l2 = CustomLayerNoName());
         EDGE_LEARNING_TEST_TRY(auto l2 = CustomLayerNoName());
@@ -333,9 +327,6 @@ private:
         EDGE_LEARNING_TEST_ASSERT(l_shape.last_input().empty());
         EDGE_LEARNING_TEST_FAIL(l_shape.last_output());
         EDGE_LEARNING_TEST_THROWS(l_shape.last_output(), std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL(l_shape.training_forward(v_diff_size));
-        EDGE_LEARNING_TEST_THROWS(l_shape.training_forward(v_diff_size),
-                                  std::runtime_error);
         CustomLayer l_shape_copy{l_shape};
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape_copy.output_size(), 20);
@@ -343,18 +334,12 @@ private:
         EDGE_LEARNING_TEST_FAIL(l_shape_copy.last_output());
         EDGE_LEARNING_TEST_THROWS(l_shape_copy.last_output(),
                                   std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL(l_shape_copy.training_forward(v_diff_size));
-        EDGE_LEARNING_TEST_THROWS(l_shape_copy.training_forward(v_diff_size),
-                                  std::runtime_error);
         CustomLayer l_shape_assign; l_shape_assign = l_shape;
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.input_size(), 10);
         EDGE_LEARNING_TEST_EQUAL(l_shape_assign.output_size(), 20);
         EDGE_LEARNING_TEST_ASSERT(l_shape_assign.last_input().empty());
         EDGE_LEARNING_TEST_FAIL(l_shape_assign.last_output());
         EDGE_LEARNING_TEST_THROWS(l_shape_assign.last_output(),
-                                  std::runtime_error);
-        EDGE_LEARNING_TEST_FAIL(l_shape_assign.training_forward(v_diff_size));
-        EDGE_LEARNING_TEST_THROWS(l_shape_assign.training_forward(v_diff_size),
                                   std::runtime_error);
     }
 

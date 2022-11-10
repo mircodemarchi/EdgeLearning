@@ -92,12 +92,14 @@ const std::vector<NumType>& DenseLayer::forward(
      * Compute the product of the input data with the weight add the bias.
      * z = W * x + b
      */
-    DLMath::matarr_mul_no_check<NumType>(
-        _output_activations.data(), _weights.data(), inputs.data(),
-        out_size, in_size);
-    DLMath::arr_sum<NumType>(_output_activations.data(),
-                             _output_activations.data(),
-                             _biases.data(), out_size);
+    for (SizeType i = 0; i < out_size; ++i)
+    {
+        _output_activations[i] = _biases[i];
+        for (SizeType j = 0; j < in_size; ++j)
+        {
+            _output_activations[i] += _weights[(i * in_size) + j] * inputs[j];
+        }
+    }
     return FeedforwardLayer::forward(_output_activations);
 }
 
@@ -105,52 +107,16 @@ const std::vector<NumType>& DenseLayer::backward(
     const std::vector<NumType>& gradients)
 {
     SizeType out_size = gradients.size();
-    SizeType in_size = _last_input_size;
+    SizeType in_size = _input_size;
 
-    /*
-     * Bias gradient.
-     * Calculate dJ/db = dJ/dg(z) * dg(z)/db
-     *                 = dJ/dg(z) * dg(z)/dz * dz/db            <- z = Wx+b
-     *                 = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/db 
-     *                 = dJ/dg(z) * dg(Wx+b)/dz * 1
-     *                 = dJ/dg(z) * dg(z)/dz
-     *                 = dJ/dz
-     */
-    DLMath::arr_sum(_bias_gradients.data(), _bias_gradients.data(),
-                    gradients.data(), out_size);
-
-    /*
-     * Weight gradient.
-     * Calculate dJ/dw_i_j = dJ/dg(z) * dg(z)/dw_i_j
-     *                     = dJ/dg(z) * dg(z)/dz * dz/dw_i_j    <- z = Wx+b
-     *                     = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/dw_i_j 
-     *                     = dJ/dg(z) * dg(Wx+b)/dz * x_j
-     *                     = dJ/dg(z) * dg(z)/dz * x_j
-     *                     = dJ/dz * x_j
-     */
+    std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
     for (SizeType i = 0; i < out_size; ++i)
     {
+        _bias_gradients[i] += gradients[i];
         for (SizeType j = 0; j < in_size; ++j)
         {
             _weight_gradients[(i * in_size) + j] +=
                 gradients[i] * _last_input[j];
-        }
-    }
-
-    /* 
-     * Input gradient.
-     * Calculate dJ/dx = dJ/dg(z) * dg(z)/x
-     *                 = dJ/dg(z) * dg(z)/dz * dz/x             <- z = Wx+b
-     *                 = dJ/dg(z) * dg(Wx+b)/dz * d(Wx+b)/x 
-     *                 = dJ/dg(z) * dg(Wx+b)/dz * W
-     *                 = dJ/dg(z) * dg(z)/dz * W
-     *                 = dJ/dz * W
-     */
-    std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
-    for (SizeType i = 0; i < out_size; ++i)
-    {
-        for (SizeType j = 0; j < in_size; ++j)
-        {
             _input_gradients[j] +=
                 gradients[i] * _weights[(i * in_size) + j];
         }
