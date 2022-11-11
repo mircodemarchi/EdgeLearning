@@ -1,6 +1,7 @@
 set(EXAMPLES
     simple_regression
     simple_classification
+    custom_loss
     mnist_dense
 )
 

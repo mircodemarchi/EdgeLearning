@@ -1,5 +1,5 @@
 /***************************************************************************
- *            example/simple_regression.cpp
+ *            example/custom_loss.cpp
  *
  *  Copyright  2021  Mirco De Marchi
  *
@@ -37,6 +37,92 @@
 // the library are included.
 using namespace EdgeLearning;
 
+class CustomLossLayer : public LossLayer {
+public:
+    CustomLossLayer(
+        std::string name = std::string(),
+        SizeType input_size = 0, SizeType batch_size = 1)
+        : LossLayer(input_size, batch_size, name)
+    { }
+
+    /*
+     * \brief Clone method.
+     * \return SharedPtr Layer pointer.
+     * This implementation is standard for each layer. Do not edit.
+     */
+    [[nodiscard]] SharedPtr clone() const override
+    { return std::make_shared<CustomLossLayer>(*this); }
+
+    /*
+     * \brief Forward step of the loss layer.
+     * \param inputs The prediction of the neural network.
+     * \return Not used.
+     *
+     * Implement here a custom cost function, that takes as inputs the current
+     * predicted output of the neural network (inputs) and the ground truth
+     * (_target), and return a single loss value, assigned to the _loss field.
+     *
+     * Important fields summary:
+     * - inputs: the predicted output of the model;
+     * - _target: the current ground truth to compare with the prediction;
+     * - _loss: the loss value to extrapolate;
+     * - _input_size: the input size of the layer aka the output size of the
+     *                neural network;
+     * - _cumulative_loss: accumulated loss;
+     * - _correct: number of correct prediction;
+     * - _incorrect: number of incorrect prediction;
+     */
+    const std::vector<NumType>& forward(
+        const std::vector<NumType>& inputs) override
+    {
+        _loss = 0.0;
+
+        // Suppose to implement MeanAbsoluteError.
+        for (SizeType i = 0; i < _input_size; ++i)
+        {
+            _loss += std::abs(inputs[i] - _target[i]);
+        }
+
+        _cumulative_loss += _loss;
+
+        // Evaluate correctness.
+        if (-0.1 <= _loss && _loss <= 0.1) _correct++;
+        else _incorrect++;
+        return inputs; //< Return value never used.
+    }
+
+    /*
+     * \brief Forward step of the loss layer.
+     * \param gradients Parameter not used (empty).
+     * \return The gradients to pass to the previous layer.
+     *
+     * Implement here the first derivative of the custom cost function used,
+     * that takes the last input of the loss layer (_last_input) and the ground
+     * truth (_target), and fill the gradients (_gradients) to pass backward
+     * to the previous layers.
+     *
+     * Important fields summary:
+     * - _last_input: pointer to the last input in forward of the layer,
+     *                automatically updated by the training process;
+     * - _target: the current ground truth to compare with the prediction;
+     */
+    const std::vector<NumType>& backward(
+        const std::vector<NumType>& gradients) override
+    {
+        (void) gradients; //< Input gradients never used.
+
+        // Implement MeanAbsoluteError first derivative.
+        for (SizeType i = 0; i < _gradients.size(); ++i)
+        {
+            _gradients[i] = (_last_input[i] - _target[i]) > 0 ? 1.0 : -1.0;
+        }
+
+        return _gradients;
+    }
+
+private:
+};
+
 /*
  * \brief Generate the input dataset (a vector of feature vectors).
  * \param random       Enable random generation of the dataset, otherwise the
@@ -70,30 +156,26 @@ static std::vector<std::vector<NumType>> generate_inputs(
  * vectors) applying a multivariate linear regression (through a set of
  * regression coefficients) and a set of non-linear functions used to generate
  * the individual labels.
- * \param inputs                  The input dataset constructed as a vector of
- *                                feature vectors.
- * \param regression_coefficients A vector of the same size of the input entries
- *                                plus 1, where the first element is the
- *                                regression bias and the others the regression
- *                                coefficients applied for each feature.
- * \param non_linear_functions    Vector of linear functions to apply after the
- *                                linear regression over inputs.
- *                                The size of each labels entry is defined by
- *                                the size of this vector.
+ * \param inputs    The input dataset constructed as a vector of feature
+ *                  vectors.
+ * \param functions Vector of linear functions to apply after the linear
+ *                  regression over inputs. The size of each labels entry is
+ *                  defined by the size of this vector.
  * \return A vector of label vectors generated for each input entry.
  */
 static std::vector<std::vector<NumType>> generate_labels(
     const std::vector<std::vector<NumType>>& inputs,
-    const std::vector<NumType>& regression_coefficients,
-    std::vector<std::function<NumType(NumType)>> non_linear_functions);
+    std::vector<std::function<NumType(std::vector<NumType>)>> functions);
 
 /*
  * \brief Visualize the input, the expected output from the training set
  * and the model predictions in order to compare each other.
- * \param trainset          Dataset<NumType> Training set.
+ * \param inputs            Dataset<NumType> Inputs.
+ * \param labels            Dataset<NumType> Labels.
  * \param model_predictions Dataset<NumType> Model predictions set.
  */
-static void check_predictions(Dataset<NumType>& trainset,
+static void check_predictions(Dataset<NumType>& inputs,
+                              Dataset<NumType>& labels,
                               Dataset<NumType>& model_predictions);
 
 
@@ -137,24 +219,16 @@ int main()
                                   FROM_RANDOM_VALUE, TO_RANDOM_VALUE, SEED);
     const SizeType input_size = inputs[0].size();
 
-    // Define the regression weights and the non-linear functions for the
-    // labels generation.
-    const std::vector<NumType> REGRESSION_WEIGHTS = {
-        // Bias.
-        0.03,
-        // 0.0,
-        // Weights on input: same size as each individual input entry.
-        0.05, 0.5, 0.3, 0.15
-        // 1.0, 1.0, 1.0, 1.0
+
+    const std::vector<std::function<NumType(std::vector<NumType>)>> USER_DEFINED_FUNCS = {
+        // Label 0: norm 2
+        [](std::vector<NumType> v) {
+            NumType ret = 0;
+            for (const auto& e: v) ret += e*e;
+            return std::sqrt(ret);
+        },
     };
-    const std::vector<std::function<NumType(NumType)>> NON_LINEAR_FUNCTIONS = {
-        // Label 0: square root function.
-        [](NumType v) { return std::sqrt(std::abs(v)); },
-        // Label 1: sin function.
-        [](NumType v) { return std::sin(v); }
-    };
-    auto labels = generate_labels(inputs,
-                                  REGRESSION_WEIGHTS, NON_LINEAR_FUNCTIONS);
+    auto labels = generate_labels(inputs, USER_DEFINED_FUNCS);
     SizeType output_size = labels[0].size();
 
     // Transform the inputs and the labels in Dataset class.
@@ -164,19 +238,6 @@ int main()
     // Normalize inputs.
     inputs_ds.min_max_normalization();
 
-    // Concatenate inputs and labels in order to build the training set.
-    // concatenate(inputs, labels, axis=2) => [ input | labels ]
-    auto training_set = Dataset<NumType>::concatenate(inputs_ds, labels_ds, 2);
-
-    // Set labels indexes in the training set.
-    std::vector<SizeType> labels_idx(output_size);
-    std::iota(labels_idx.begin(), labels_idx.end(), input_size);
-    training_set.label_idx(std::set(labels_idx.begin(), labels_idx.end()));
-
-    //================================ MODEL DEFINITION: LOW LEVEL INTERFACE ===
-    std::cout
-        << "Example simple_regression with LOW LEVEL INTERFACE"
-        << std::endl;
 
     // Create an optimizer object that requires the learning step size.
     GradientDescentOptimizer optimizer(LEARNING_RATE);
@@ -209,8 +270,7 @@ int main()
 
     // Define the loss for training.
     // It requires the batch size for normalization purpose in gradient update.
-    auto loss = m_ll.add_loss<MeanSquaredLossLayer>("mse", output_size,
-                                                    BATCH_SIZE);
+    auto loss = m_ll.add_loss<CustomLossLayer>("mse", output_size, BATCH_SIZE);
     m_ll.create_loss_edge(out, loss);
 
     // Initialize the model.
@@ -228,17 +288,17 @@ int main()
     for (SizeType e = 0; e < EPOCHS; ++e)
     {
         std::cout << "[ EPOCH " << e << " ] ";
-        for (SizeType i = 0; i < training_set.size();)
+        for (SizeType i = 0; i < inputs_ds.size();)
         {
             // Reset the model loss scores.
             m_ll.reset_score();
 
             // Stochastic gradient descent.
-            for (SizeType b = 0; b < BATCH_SIZE && i < training_set.size(); ++b, ++i)
+            for (SizeType b = 0; b < BATCH_SIZE && i < inputs_ds.size(); ++b, ++i)
             {
                 // Crosses forward and backward the model, and generates the
                 // gradients.
-                m_ll.step(training_set.input(i), training_set.label(i));
+                m_ll.step(inputs_ds.entry(i), labels_ds.entry(i));
             }
 
             // Update the model parameters with the optimizer and the generated
@@ -255,67 +315,12 @@ int main()
     // Validate the trained model.
     std::cout << "--- Validation" << std::endl;
     std::vector<std::vector<NumType>> predictions;
-    for (SizeType i = 0; i < training_set.size(); ++i)
+    for (SizeType i = 0; i < inputs_ds.size(); ++i)
     {
-        predictions.push_back(m_ll.predict(training_set.input(i)));
+        predictions.push_back(m_ll.predict(inputs_ds.entry(i)));
     }
     auto predictions_ds = Dataset<NumType>(predictions);
-    check_predictions(training_set, predictions_ds);
-
-
-    //=============================== MODEL DEFINITION: HIGH LEVEL INTERFACE ===
-    std::cout
-        << "Example simple_regression with HIGH LEVEL INTERFACE"
-        << std::endl;
-
-    // Construct the model with the following structure:
-    // ------------- IN[input_size] -------------
-    //           Dense[HIDDEN1] + ReLU
-    // #params: (input_size * HIDDEN1) + HIDDEN1
-    // ------------------------------------------
-    //           Dense[HIDDEN1] + ReLU
-    // #params: (HIDDEN1 * HIDDEN2) + HIDDEN2
-    // ------------------------------------------
-    //           Dense[output_size]
-    // #params: (HIDDEN2 * output_size) + output_size
-    // ------------ OUT[output_size] ------------
-    NeuralNetworkDescriptor layers_descriptor(
-        {
-            Input{"input_layer",   input_size},
-            Dense{"hidden_layer1", HIDDEN1,     ActivationType::ReLU   },
-            Dense{"hidden_layer2", HIDDEN2,     ActivationType::ReLU   },
-            Dense{"output_layer",  output_size, ActivationType::Linear }
-        }
-    );
-
-    // Create the model object with the high level interface.
-    CompileFeedforwardNeuralNetwork<LossType::MSE, InitType::AUTO> m_hl(
-        layers_descriptor, //< Model descriptor.
-        "regressor"        //< Model name.
-    );
-
-    // Training.
-    std::cout << "--- Training" << std::endl;
-    elapsed.start();
-    m_hl.fit(training_set,                      //< Labeled dataset.
-             OptimizerType::GRADIENT_DESCENT,   //< Optimizer.
-             EPOCHS, BATCH_SIZE, LEARNING_RATE, SEED);
-    elapsed.stop();
-    std::cout << "elapsed: " << std::string(elapsed) << std::endl;
-
-    // Validation.
-    std::cout << "--- Validation" << std::endl;
-    auto score = m_hl.evaluate(training_set);
-    std::cout
-        << "Loss: " << score.loss << ", "
-        << "Accuracy: " << score.accuracy_perc << "%, "
-        << "Error rate: " << score.error_rate_perc << "%"
-        << std::endl;
-
-    // Prediction.
-    auto observations = training_set.inputs();
-    auto prediction = m_hl.predict(observations);
-    check_predictions(training_set, prediction);
+    check_predictions(inputs_ds, labels_ds, predictions_ds);
 
     std::cout << "End" << std::endl;
 }
@@ -364,42 +369,33 @@ static std::vector<std::vector<NumType>> generate_inputs(
 
 static std::vector<std::vector<NumType>> generate_labels(
     const std::vector<std::vector<NumType>>& inputs,
-    const std::vector<NumType>& regression_coefficients,
-    std::vector<std::function<NumType(NumType)>> non_linear_functions)
+    std::vector<std::function<NumType(std::vector<NumType>)>> functions)
 {
     std::vector<std::vector<NumType>> labels;
 
     // Generate the labels for each input entry in dataset.
     for (const auto& input_entry: inputs)
     {
-        // Solve the multivariate linear regression applying the coefficients.
-        NumType mlr = regression_coefficients[0];
-        auto regression_size = std::min(
-            regression_coefficients.size() - 1, input_entry.size());
-        for (std::size_t w_i = 0; w_i < regression_size; ++w_i)
-        {
-            mlr += regression_coefficients[w_i + 1] * input_entry[w_i];
-        }
-
         // Apply non-linearity to the multivariate linear regression.
         std::vector<NumType> label_entry;
-        for (const auto& non_linear_f: non_linear_functions)
+        for (const auto& f: functions)
         {
-            label_entry.push_back(non_linear_f(mlr));
+            label_entry.push_back(f(input_entry));
         }
         labels.push_back(label_entry);
     }
     return labels;
 }
 
-static void check_predictions(Dataset<NumType>& trainset,
+static void check_predictions(Dataset<NumType>& inputs,
+                              Dataset<NumType>& labels,
                               Dataset<NumType>& model_predictions)
 {
     const SizeType MAX_ENTRY = 10;
-    for (SizeType i = 0; i < std::min(MAX_ENTRY, trainset.size()); ++i)
+    for (SizeType i = 0; i < std::min(MAX_ENTRY, inputs.size()); ++i)
     {
-        const auto& input_entry = trainset.input(i);
-        const auto& expected_output = trainset.label(i);
+        const auto& input_entry = inputs.entry(i);
+        const auto& expected_output = labels.entry(i);
         const auto& predicted_output = model_predictions.entry(i);
 
         std::cout << "INPUT" << i << ": { ";
@@ -425,5 +421,5 @@ static void check_predictions(Dataset<NumType>& trainset,
 
         std::cout << std::endl;
     }
-    if (trainset.size() > MAX_ENTRY) std::cout << " ... " << std::endl;
+    if (inputs.size() > MAX_ENTRY) std::cout << " ... " << std::endl;
 }
