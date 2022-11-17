@@ -58,9 +58,10 @@ public:
     void fit(PyNNDataset& data,
              SizeType epochs = 1,
              SizeType batch_size = 1,
-             NumType learning_rate = 0.03) override {
+             NumType learning_rate = 0.03,
+             RneType::result_type seed = 0) override {
         PYBIND11_OVERRIDE_PURE(
-            void, CompileNeuralNetwork<T>, fit, data, epochs, batch_size, learning_rate
+            void, CompileNeuralNetwork<T>, fit, data, epochs, batch_size, learning_rate, seed
         );
     }
 
@@ -372,7 +373,7 @@ static void nn_class(pybind11::module& m)
                  "loss"_a=LossType::MSE, "optimizer"_a=OptimizerType::ADAM, "init"_a=InitType::AUTO);
     nn_class.def("predict", &CompileNeuralNetwork<PyNumType>::predict, "data"_a);
     nn_class.def("fit", &CompileNeuralNetwork<PyNumType>::fit,
-                 "data"_a, "epochs"_a=1, "batch_size"_a=1, "learning_rate"_a=0.03);
+                 "data"_a, "epochs"_a=1, "batch_size"_a=1, "learning_rate"_a=0.03, "seed"_a=0);
     nn_class.def("evaluate", &CompileNeuralNetwork<PyNumType>::evaluate,
                  "data"_a);
     nn_class.def("input_size", &CompileNeuralNetwork<PyNumType>::input_size);
@@ -398,7 +399,7 @@ static void fnn_class(pybind11::module& m)
                        "loss"_a=LossType::MSE, "optimizer"_a=OptimizerType::ADAM, "init"_a=InitType::AUTO);
     edge_fnn_class.def("predict", &EdgeFNN::predict, "data"_a);
     edge_fnn_class.def("fit", &EdgeFNN::fit,
-                       "data"_a, "epochs"_a=1, "batch_size"_a=1, "learning_rate"_a=0.03);
+                       "data"_a, "epochs"_a=1, "batch_size"_a=1, "learning_rate"_a=0.03, "seed"_a=0);
     edge_fnn_class.def("evaluate", &EdgeFNN::evaluate, "data"_a);
     edge_fnn_class.def("input_size", &EdgeFNN::input_size);
     edge_fnn_class.def("output_size", &EdgeFNN::output_size);

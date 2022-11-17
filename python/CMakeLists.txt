@@ -38,6 +38,7 @@ if(PYTHON3_FOUND)
     install(TARGETS pyedgelearning DESTINATION "${PYTHON_BINDINGS_INSTALL_DIR}")
 
     add_subdirectory(tests)
+    add_subdirectory(example)
 
 else()
     message(STATUS "Python3 not found: Python bindings module 'pyedgelearning' will not be built.")
