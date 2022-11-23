@@ -69,6 +69,7 @@ public:
                     model.step(data.input(i), data.label(i));
                 }
                 model.train(o);
+                std::cout << "step " << i << std::endl;
             }
         }
     }
@@ -94,12 +95,12 @@ public:
                                      && i < data.size(); ++b, ++i)
                 {
                     futures.push_back(tm.enqueue(
-                        [](Model m,
-                              std::vector<NumType> train_entry,
-                              std::vector<NumType> label_entry) {
-                            m.step(train_entry, label_entry);
+                        [&](SizeType idx) {
+                            Model m(model);
+                            m.step(data.input(idx), data.label(idx));
                             return m;
-                        }, model, data.input(i), data.label(i)));
+                        }, i));
+                    std::cout << "step " << i << std::endl;
                 }
 
                 for (auto& f: futures) {
@@ -115,7 +116,7 @@ template<typename T>
 struct Training<ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_BATCH, T>
 {
 public:
-    static void run(Model& model, Dataset<T> &data, Optimizer& o,
+    static void run(Model& model, const Dataset<T>& data, Optimizer& o,
                     SizeType epochs, SizeType batch_size)
     {
         auto& tm = ConcManager::TaskManager::instance();
@@ -127,30 +128,29 @@ public:
                 model.reset_score();
 
                 std::vector<ConcManager::Future<Model>> futures;
-                for (SizeType t = 0; t < tm.maximum_concurrency(); ++t)
+                for (SizeType t = 0; t < tm.concurrency(); ++t)
                 {
                     futures.push_back(tm.enqueue(
-                        [batch_size](Model m,
-                           Dataset<T> &data_ref,
-                           SizeType idx)
+                        [&, batch_size](SizeType idx)
                         {
+                            Model m(model);
                             for (SizeType b = 0;
-                                 b < batch_size && idx < data_ref.size();
+                                 b < batch_size && idx < data.size();
                                  ++b, ++idx)
                             {
-                                m.step(data_ref.input(idx),
-                                       data_ref.label(idx));
+                                m.step(data.input(idx),
+                                       data.label(idx));
                             }
                             return m;
-                        }, model, data, i + (t * batch_size)));
+                        }, i));
+                    std::cout << "step " << i << std::endl;
+                    i += batch_size;
                 }
 
                 for (auto& f: futures) {
                     Model m = f.get();
                     model.train(o, m);
                 }
-
-                i += batch_size * tm.maximum_concurrency();
             }
         }
     }
