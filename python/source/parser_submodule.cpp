@@ -26,6 +26,12 @@
 
 #include "parser/parser.hpp"
 #include "parser/type_checker.hpp"
+#include "parser/mnist.hpp"
+#include "parser/cifar.hpp"
+#include "parser/csv.hpp"
+#include "parser/json.hpp"
+#include "data/path.hpp"
+#include "data/dataset.hpp"
 
 #include <set>
 
@@ -64,6 +70,122 @@ public:
     }
 };
 
+static py::tuple load_mnist(std::string folder_path)
+{
+    const std::string MNIST_TRAINING_IMAGES_FN =
+        "train-images.idx3-ubyte";
+    const std::string MNIST_TRAINING_LABELS_FN =
+        "train-labels.idx1-ubyte";
+    const std::string MNIST_TESTING_IMAGES_FN =
+        "t10k-images.idx3-ubyte";
+    const std::string MNIST_TESTING_LABELS_FN =
+        "t10k-labels.idx1-ubyte";
+
+    std::filesystem::path mnist_resource_root(folder_path);
+    std::filesystem::path mnist_training_images_fp  =
+        mnist_resource_root / MNIST_TRAINING_IMAGES_FN;
+    std::filesystem::path mnist_training_labels_fp =
+        mnist_resource_root / MNIST_TRAINING_LABELS_FN;
+    std::filesystem::path mnist_testing_images_fp =
+        mnist_resource_root / MNIST_TESTING_IMAGES_FN;
+    std::filesystem::path mnist_testing_labels_fp =
+        mnist_resource_root / MNIST_TESTING_LABELS_FN;
+
+    auto mnist_training = Mnist(
+        mnist_training_images_fp,
+        mnist_training_labels_fp);
+    auto mnist_testing = Mnist(
+        mnist_testing_images_fp,
+        mnist_testing_labels_fp);
+    auto data_training = Dataset<NumType>::parse(
+        mnist_training,
+        DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+    auto data_testing = Dataset<NumType>::parse(
+        mnist_testing,
+        DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+    return py::make_tuple(data_training, data_testing);
+}
+
+static py::tuple load_cifar10(std::string folder_path)
+{
+    const std::string CIFAR10_BATCH1_FN = "data_batch_1.bin";
+    const std::string CIFAR10_BATCH2_FN = "data_batch_2.bin";
+    const std::string CIFAR10_BATCH3_FN = "data_batch_3.bin";
+    const std::string CIFAR10_BATCH4_FN = "data_batch_4.bin";
+    const std::string CIFAR10_BATCH5_FN = "data_batch_5.bin";
+    const std::string CIFAR10_TEST_FN = "test_batch.bin";
+    const std::string CIFAR10_META_FN = "batches.meta.txt";
+
+    const std::vector<std::string> CIFAR10 = {
+        CIFAR10_BATCH1_FN,
+        CIFAR10_BATCH2_FN,
+        CIFAR10_BATCH3_FN,
+        CIFAR10_BATCH4_FN,
+        CIFAR10_BATCH5_FN
+    };
+
+    std::filesystem::path cifar10_resource_root(folder_path);
+    std::filesystem::path cifar10_test_fp =
+        cifar10_resource_root / CIFAR10_TEST_FN;
+    std::filesystem::path cifar10_meta_fp=
+        cifar10_resource_root / CIFAR10_META_FN;
+
+    Dataset<NumType> data_training;
+    for (const auto& batch_fn: CIFAR10)
+    {
+        std::filesystem::path batch_fp = cifar10_resource_root / batch_fn;
+        auto cifar_batch = Cifar(batch_fp, cifar10_meta_fp,
+                                 CifarShapeOrder::CHN_ROW_COL,
+                                 CifarDataset::CIFAR_10);
+        auto cifar_batch_ds = Dataset<NumType>::parse(
+            cifar_batch, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+        data_training = Dataset<NumType>::concatenate(
+            data_training, cifar_batch_ds);
+    }
+
+    auto cifar_test = Cifar(cifar10_test_fp, cifar10_meta_fp,
+                            CifarShapeOrder::CHN_ROW_COL,
+                            CifarDataset::CIFAR_10);
+    auto data_testing = Dataset<NumType>::parse(
+        cifar_test, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+
+    return py::make_tuple(data_training, data_testing);
+}
+
+static py::tuple load_cifar100(std::string folder_path)
+{
+    const std::string CIFAR100_TRAIN_FN = "train.bin";
+    const std::string CIFAR100_TEST_FN = "test.bin";
+    const std::string CIFAR100_COARSE_META_FN = "coarse_label_names.txt";
+    const std::string CIFAR100_FINE_META_FN = "fine_label_names.txt";
+
+    std::filesystem::path cifar_resource_root(folder_path);
+    std::filesystem::path cifar100_train_fp =
+        cifar_resource_root / CIFAR100_TRAIN_FN;
+    std::filesystem::path cifar100_test_fp =
+        cifar_resource_root / CIFAR100_TEST_FN;
+    std::filesystem::path cifar100_coarse_meta_fp =
+        cifar_resource_root / CIFAR100_COARSE_META_FN;
+    std::filesystem::path cifar100_fine_meta_fp =
+        cifar_resource_root / CIFAR100_FINE_META_FN;
+
+    auto cifar_train = Cifar(cifar100_train_fp, cifar100_coarse_meta_fp,
+                             CifarShapeOrder::CHN_ROW_COL,
+                             CifarDataset::CIFAR_100,
+                             cifar100_fine_meta_fp);
+    auto data_training = Dataset<NumType>::parse(
+        cifar_train, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+
+    auto cifar_test = Cifar(cifar100_test_fp, cifar100_coarse_meta_fp,
+                            CifarShapeOrder::CHN_ROW_COL,
+                            CifarDataset::CIFAR_100,
+                            cifar100_fine_meta_fp);
+    auto data_testing = Dataset<NumType>::parse(
+        cifar_test, DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
+
+    return py::make_tuple(data_training, data_testing);
+}
+
 void parser_submodule(pybind11::module& subm)
 {
     subm.doc() = "Python Edge Learning submodule for parsing datasets";
@@ -95,4 +217,8 @@ void parser_submodule(pybind11::module& subm)
     label_encoding.value("ONE_HOT_ENCODING", DatasetParser::LabelEncoding::ONE_HOT_ENCODING);
     label_encoding.value("DEFAULT_ENCODING", DatasetParser::LabelEncoding::DEFAULT_ENCODING);
     label_encoding.export_values();
+
+    subm.def("load_mnist", &load_mnist, "folder_path"_a);
+    subm.def("load_cifar10", &load_cifar10, "folder_path"_a);
+    subm.def("load_cifar100", &load_cifar100, "folder_path"_a);
 }

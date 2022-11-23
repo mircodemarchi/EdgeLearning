@@ -95,7 +95,7 @@ def main():
     print("--- Validation")
     start = time.time()
     score = model.evaluate(ds)
-    print("Loss {}, Accuracy: {}%%, Error rate: {}%%".format(
+    print("Loss {}, Accuracy: {}%, Error rate: {}%".format(
         score.loss, score.accuracy_perc, score.error_rate_perc))
     end = time.time()
     print("elapsed: {} ms".format((end - start) * 1e3))
