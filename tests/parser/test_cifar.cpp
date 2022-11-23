@@ -356,15 +356,15 @@ private:
 
         EDGE_LEARNING_TEST_EQUAL(
             cifar100.feature_size(),
-            cifar100.height() *  cifar100.width() * cifar100.channels() + 2);
+            cifar100.height() *  cifar100.width() * cifar100.channels() + 1);
         EDGE_LEARNING_TEST_EQUAL(cifar100.entries_amount(), cifar100.size());
         EDGE_LEARNING_TEST_EQUAL(
             cifar100.entry(0).size(),
-            cifar100.height() *  cifar100.width() * cifar100.channels() + 2);
+            cifar100.height() *  cifar100.width() * cifar100.channels() + 1);
         EDGE_LEARNING_TEST_EQUAL(
             cifar100.entry(1).size(),
-            cifar100.height() *  cifar100.width() * cifar100.channels() + 2);
-        EDGE_LEARNING_TEST_EQUAL(cifar100.labels_idx().size(), 2);
+            cifar100.height() *  cifar100.width() * cifar100.channels() + 1);
+        EDGE_LEARNING_TEST_EQUAL(cifar100.labels_idx().size(), 1);
     }
 };
 

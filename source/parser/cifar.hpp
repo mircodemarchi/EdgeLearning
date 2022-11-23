@@ -526,7 +526,6 @@ public:
         {
             case CifarDataset::CIFAR_100:
             {
-                ret.push_back(cifar_label.coarse_label());
                 ret.push_back(cifar_label.fine_label());
                 break;
             }
@@ -551,7 +550,7 @@ public:
         {
             case CifarDataset::CIFAR_100:
             {
-                return height() * width() * channels() + 2;
+                return height() * width() * channels() + 1;
             }
             case CifarDataset::CIFAR_10:
             default:
@@ -567,7 +566,7 @@ public:
         {
             case CifarDataset::CIFAR_100:
             {
-                return {feature_size() - 2, feature_size() - 1};
+                return {feature_size() - 1};
             }
             case CifarDataset::CIFAR_10:
             default:
