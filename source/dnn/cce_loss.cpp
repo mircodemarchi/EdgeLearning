@@ -35,10 +35,14 @@ namespace EdgeLearning {
 
 const std::string CategoricalCrossEntropyLossLayer::TYPE = "CCELoss";
 
-CategoricalCrossEntropyLossLayer::CategoricalCrossEntropyLossLayer(std::string name,
-                                                                   SizeType input_size, SizeType batch_size)
-    : LossLayer(input_size, batch_size,
-                std::move(name), "cce_loss_layer_")
+CategoricalCrossEntropyLossLayer::CategoricalCrossEntropyLossLayer(
+    std::string name,
+    SizeType input_size,
+    SizeType batch_size)
+    : LossLayer(input_size,
+                batch_size,
+                std::move(name),
+                "cce_loss_layer_")
     , _active{}
 { 
 
@@ -49,11 +53,11 @@ const std::vector<NumType>& CategoricalCrossEntropyLossLayer::forward(
 {
     SizeType in_size = inputs.size();
 
-    if (_target == nullptr)
+    if (_target.empty())
     {
-        throw std::runtime_error("_target is null, set_target not called");
+        throw std::runtime_error("_target is empty, set_target not called");
     }
-    _loss = DLMath::cross_entropy(_target, inputs.data(), in_size);
+    _loss = DLMath::cross_entropy(_target.data(), inputs.data(), in_size);
     _cumulative_loss += _loss;
     
     auto max = DLMath::max_and_argmax(inputs.data(), in_size);
@@ -80,7 +84,7 @@ const std::vector<NumType>& CategoricalCrossEntropyLossLayer::backward(
     // Parameter ignored because it is a loss layer.
     (void) gradients;
 
-    DLMath::cross_entropy_1(_gradients.data(), _target, _last_input,
+    DLMath::cross_entropy_1(_gradients.data(), _target.data(), _last_input,
         _inv_batch_size, _gradients.size());
 
     return LossLayer::backward(_gradients);
@@ -88,7 +92,7 @@ const std::vector<NumType>& CategoricalCrossEntropyLossLayer::backward(
 
 SizeType CategoricalCrossEntropyLossLayer::_argactive() const
 {
-    for (SizeType i = 0; i < input_size(); ++i)
+    for (SizeType i = 0; i < _input_size; ++i)
     {
         if (_target[i] != NumType{0.0})
         {

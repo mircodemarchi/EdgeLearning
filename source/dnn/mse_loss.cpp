@@ -44,11 +44,11 @@ const std::vector<NumType>& MeanSquaredLossLayer::forward(
 {
     SizeType in_size = inputs.size();
 
-    if (_target == nullptr)
+    if (_target.empty())
     {
         throw std::runtime_error("_target is null, set_target not called");
     }
-    _loss = DLMath::mean_squared_error(_target, inputs.data(), in_size);
+    _loss = DLMath::mean_squared_error(_target.data(), inputs.data(), in_size);
     _cumulative_loss += _loss;
 
     if (-_loss_tolerance <= _loss && _loss <= _loss_tolerance)
@@ -70,7 +70,7 @@ const std::vector<NumType>& MeanSquaredLossLayer::backward(
     // Parameter ignored because it is a loss layer.
     (void) gradients;
 
-    DLMath::mean_squared_error_1(_gradients.data(), _target, _last_input,
+    DLMath::mean_squared_error_1(_gradients.data(), _target.data(), _last_input,
         _inv_batch_size, _gradients.size());
 
     return LossLayer::backward(_gradients);

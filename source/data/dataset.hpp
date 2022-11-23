@@ -81,8 +81,6 @@ public:
      */
     Dataset()
         : _data{}
-        , _entry_labels_cache{}
-        , _entry_trainset_cache{}
         , _feature_size{0}
         , _sequence_size{0}
         , _dataset_size{0}
@@ -109,13 +107,11 @@ public:
             SizeType sequence_size = 1,
             std::set<SizeType> labels_idx = {})
         : _data{data}
-        , _entry_labels_cache{}
-        , _entry_trainset_cache{}
         , _feature_size{std::min(feature_size, _data.size())}
         , _sequence_size{std::min(sequence_size, 
             SizeType(_data.size() / std::max(_feature_size, SizeType(1))))}
         , _dataset_size{
-            SizeType(_data.size() 
+            SizeType(_data.size()
                 / std::max(_feature_size * _sequence_size, SizeType(1)))
             * (_feature_size * _sequence_size)}
         , _feature_amount{_dataset_size / std::max(_feature_size, SizeType(1))}
@@ -151,8 +147,6 @@ public:
     Dataset(Mat data, SizeType sequence_size = 1,
             std::set<SizeType> labels_idx = {})
         : _data{}
-        , _entry_labels_cache{}
-        , _entry_trainset_cache{}
         , _feature_amount{data.size()}
         , _labels_idx{labels_idx}
         , _input_idx{}
@@ -205,8 +199,6 @@ public:
      */
     Dataset(Cub data, std::set<SizeType> labels_idx = {})
         : _data{}
-        , _entry_labels_cache{}
-        , _entry_trainset_cache{}
         , _sequence_amount{data.size()}
         , _labels_idx{labels_idx}
         , _input_idx{}
@@ -266,7 +258,7 @@ public:
     /**
      * \brief Destroy the Dataset object.
      */
-    ~Dataset() {};
+    ~Dataset() = default;
 
 #if ENABLE_MLPACK
     /**
@@ -382,22 +374,14 @@ public:
     /**
      * \brief Retrieve an entry of the dataset at index.
      * \param row_idx SizeType The index of the dataset.
-     * \return const std::vector<T>& A reference vector to the dataset entry.
+     * \return std::vector<T> A reference vector to the dataset entry.
      */
-    const std::vector<T>& entry(SizeType row_idx)
+    std::vector<T> entry(SizeType row_idx) const
     {
-        if (row_idx >= _feature_amount)
-        {
-            _entry_trainset_cache.clear();
-            return _entry_trainset_cache;
-        } 
-        _entry_trainset_cache.resize(_feature_size);
-
-        std::copy(
-            _data.begin() + long(row_idx * _feature_size),
-            _data.begin() + long(row_idx * _feature_size) + long(_feature_size),
-            _entry_trainset_cache.begin());
-        return _entry_trainset_cache;
+        if (row_idx >= _feature_amount) return {};
+        return {_data.begin() + long(row_idx * _feature_size),
+                _data.begin() + long(row_idx * _feature_size)
+                    + long(_feature_size)};
     }
 
     /**
@@ -405,21 +389,12 @@ public:
      * \param seq_idx SizeType The sequence index of the dataset.
      * \return const std::vector<T>& A reference vector to the dataset sequence.
      */
-    const std::vector<T>& entry_seq(SizeType seq_idx)
+    std::vector<T> entry_seq(SizeType seq_idx) const
     {
-        if (seq_idx >= _sequence_amount)
-        {
-            _entry_trainset_cache.clear();
-            return _entry_trainset_cache;
-        } 
-        _entry_trainset_cache.resize(_sequence_size * _feature_size);
-
-        std::copy(
-            _data.begin() + long(seq_idx * _sequence_size * _feature_size),
-            _data.begin() + long(seq_idx * _sequence_size * _feature_size) 
-                + long(_sequence_size * _feature_size),
-            _entry_trainset_cache.begin());
-        return _entry_trainset_cache;
+        if (seq_idx >= _sequence_amount) return {};
+        return {_data.begin() + long(seq_idx * _sequence_size * _feature_size),
+                _data.begin() + long(seq_idx * _sequence_size * _feature_size)
+                    + long(_sequence_size * _feature_size)};
     }
 
     /**
@@ -428,36 +403,27 @@ public:
      */
     std::vector<SizeType> input_idx() const
     { 
-        return std::vector<SizeType>(
-            _input_idx.begin(), _input_idx.end());
+        return {_input_idx.begin(), _input_idx.end()};
     }
 
     /**
      * \brief Retrieve an train feature entry of the dataset at row index.
      * \param row_idx SizeType The row index of the dataset.
-     * \return const std::vector<T>& A reference vector to the dataset train
+     * \return std::vector<T> A reference vector to the dataset train
      * features.
      */
-    const std::vector<T>& input(SizeType row_idx)
+    std::vector<T> input(SizeType row_idx) const
     {
-        if (row_idx >= _feature_amount)
-        {
-            _entry_trainset_cache.clear();
-            return _entry_trainset_cache;
-        }
-        if (_input_idx.size() == _feature_size)
-        {
-            return entry(row_idx);
-        }
-        return _field_from_row_idx(
-            _entry_trainset_cache, row_idx, _input_idx);
+        if (row_idx >= _feature_amount) return {};
+        if (_input_idx.size() == _feature_size) return entry(row_idx);
+        return _field_from_row_idx(row_idx, _input_idx);
     }
 
     /**
      * \brief Retrieve the training feature part of the dataset.
      * \return Dataset<T> The training feature dataset.
      */
-    Dataset<T> inputs()
+    Dataset<T> inputs() const
     {
         auto ret = Vec(std::size_t(_input_idx.size() * _feature_amount));
         for (std::size_t row_i = 0; row_i < _feature_amount; ++row_i)
@@ -476,22 +442,14 @@ public:
      * \brief Retrieve a train feature sequence of the dataset at
      * sequence index.
      * \param seq_idx SizeType The sequence index of the dataset.
-     * \return const std::vector<T>& A reference vector to the dataset train
+     * \return std::vector<T> A reference vector to the dataset train
      * features sequence.
      */
-    const std::vector<T>& inputs_seq(SizeType seq_idx)
+    std::vector<T> inputs_seq(SizeType seq_idx) const
     {
-        if (seq_idx >= _sequence_amount)
-        {
-            _entry_trainset_cache.clear();
-            return _entry_trainset_cache;
-        }
-        if (_input_idx.size() == _feature_size)
-        {
-            return entry_seq(seq_idx);
-        }
-        return _field_from_seq_idx(
-            _entry_trainset_cache, seq_idx, _input_idx);
+        if (seq_idx >= _sequence_amount) return {};
+        if (_input_idx.size() == _feature_size) return entry_seq(seq_idx);
+        return _field_from_seq_idx(seq_idx, _input_idx);
     }
 
     /**
@@ -527,24 +485,20 @@ public:
     /**
      * \brief Retrieve a label feature entry of the dataset at row index.
      * \param row_idx SizeType The row index of the dataset.
-     * \return const std::vector<T>& A reference vector to the dataset label
+     * \return std::vector<T> A reference vector to the dataset label
      * features.
      */
-    const std::vector<T>& label(SizeType row_idx)
+    std::vector<T> label(SizeType row_idx) const
     {
-        if (row_idx >= _feature_amount || _labels_idx.empty())
-        {
-            _entry_labels_cache.clear();
-            return _entry_labels_cache;
-        } 
-        return _field_from_row_idx(_entry_labels_cache, row_idx, _labels_idx);
+        if (row_idx >= _feature_amount || _labels_idx.empty()) return {};
+        return _field_from_row_idx(row_idx, _labels_idx);
     }
 
     /**
      * \brief Retrieve the label feature part of the dataset.
      * \return Dataset<T> The label feature dataset.
      */
-    Dataset<T> labels()
+    Dataset<T> labels() const
     {
         auto ret = Vec(std::size_t(_labels_idx.size() * _feature_amount));
         for (std::size_t row_i = 0; row_i < _feature_amount; ++row_i)
@@ -563,17 +517,13 @@ public:
      * \brief Retrieve a label feature sequence of the dataset at
      * sequence index.
      * \param seq_idx SizeType The sequence index of the dataset.
-     * \return const std::vector<T>& A reference vector to the dataset label
+     * \return std::vector<T> A reference vector to the dataset label
      * features sequence.
      */
-    const std::vector<T>& labels_seq(SizeType seq_idx)
+    std::vector<T> labels_seq(SizeType seq_idx) const
     {
-        if (seq_idx >= _sequence_amount || _labels_idx.empty())
-        {
-            _entry_labels_cache.clear();
-            return _entry_labels_cache;
-        } 
-        return _field_from_seq_idx(_entry_labels_cache, seq_idx, _labels_idx);
+        if (seq_idx >= _sequence_amount || _labels_idx.empty()) return {};
+        return _field_from_seq_idx(seq_idx, _labels_idx);
     }
 
     /**
@@ -582,7 +532,7 @@ public:
      * \param to   SizeType The index entry to take the subsequence.
      * \return Dataset<T> The subsequence dataset from index to index.
      */
-    Dataset<T> subdata(SizeType from, SizeType to)
+    Dataset<T> subdata(SizeType from, SizeType to) const
     {
         if (to > _feature_amount)
         {
@@ -792,12 +742,11 @@ private:
      *                retrieve.
      * \return const std::vector<T>& The reference to dst.
      */
-    const std::vector<T>& _field_from_row_idx(
-        std::vector<T>& dst, 
+    std::vector<T> _field_from_row_idx(
         SizeType row_idx, 
-        const std::set<SizeType>& set_idx)
+        const std::set<SizeType>& set_idx) const
     {
-        dst.resize(set_idx.size());
+        std::vector<T> dst(set_idx.size());
         auto data_entry_idx = row_idx * _feature_size;
         SizeType i = 0;
         for (const auto& idx: set_idx)
@@ -815,14 +764,13 @@ private:
      * \param seq_idx SizeType The sequence entry index.
      * \param set_idx const std::set<SizeType>& The set of feature indexes to
      *                retrieve.
-     * \return const std::vector<T>& The reference to dst.
+     * \return std::vector<T> The reference to dst.
      */
-    const std::vector<T>& _field_from_seq_idx(
-        std::vector<T>& dst, 
+    std::vector<T> _field_from_seq_idx(
         SizeType seq_idx, 
-        const std::set<SizeType>& set_idx)
+        const std::set<SizeType>& set_idx) const
     {
-        dst.resize(_sequence_size * set_idx.size());
+        std::vector<T> dst(_sequence_size * set_idx.size());
         auto data_entry_idx = seq_idx * _sequence_size * _feature_size;
         SizeType i = 0;
         for (SizeType t = 0; t < _sequence_size; ++t)
@@ -837,8 +785,6 @@ private:
     }
 
     std::vector<T> _data;
-    std::vector<T> _entry_labels_cache;
-    std::vector<T> _entry_trainset_cache;
 
     /**
      * \brief The size of a single entry of the dataset, called feature.
@@ -853,7 +799,7 @@ private:
 
     /**
      * \brief The size of the dataset, that is the quantity of data fields.
-     * Element-wise granularity. 
+     * Element-wise granularity.
      */
     SizeType _dataset_size;
 

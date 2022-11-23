@@ -170,12 +170,12 @@ protected:
     void _set_input_shape(LayerShape input_shape) override;
 
     NumType _loss;
-    const NumType* _target;
+    Params _target;
 
     /**
      * The loss delivered back gradient with respect to any input.
      */
-    std::vector<NumType> _gradients;
+    Params _gradients;
 
     NumType _inv_batch_size; ///< Used to scale with batch size.
 

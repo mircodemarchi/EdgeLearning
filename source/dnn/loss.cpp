@@ -50,7 +50,7 @@ LossLayer::LossLayer(
 
 void LossLayer::set_target(const std::vector<NumType>& target)
 {
-    _target = target.data();
+    _target = target;
 }
 
 NumType LossLayer::accuracy() const
