@@ -28,23 +28,28 @@
 #include "activation.hpp"
 #include "parser/json.hpp"
 
+#include "concmanager/include/task_manager.hpp"
+
 #include <algorithm>
 
 namespace EdgeLearning {
 
 Model::Model(std::string name)
-    : _name{std::move(name)}
-{ 
-    if (_name.empty())
+    : _shared_fields(name)
+    , _state{}
+{
+    if (_shared_fields.name().empty())
     {
-        _name = "model_" + std::to_string(DLMath::unique());
+        _shared_fields.name() = "model_" + std::to_string(DLMath::unique());
     }
 }
 
 Model::Model(const Model& obj)
-    : _name{obj._name}
+    : _shared_fields(obj._shared_fields)
     , _state(obj._state)
-{}
+{
+    _state.update();
+}
 
 Model& Model::operator=(Model obj)
 {
@@ -55,7 +60,7 @@ Model& Model::operator=(Model obj)
 void swap(Model& lop, Model& rop)
 {
     using std::swap;
-    swap(lop._name, rop._name);
+    swap(lop._shared_fields, rop._shared_fields);
     swap(lop._state, rop._state);
 }
 
@@ -160,10 +165,23 @@ void Model::train(Optimizer& optimizer)
 
 void Model::train(Optimizer& optimizer, Model& model_from)
 {
+#if 0 // Enable thread optimization.
+    auto& tm = ConcManager::TaskManager::instance();
+    std::vector<ConcManager::Future<void>> futures;
+    for (const auto& layer: model_from._state.layers)
+    {
+        futures.push_back(tm.enqueue(
+            [&]() {
+                optimizer.train(*layer);
+            }));
+    }
+    for (auto& f: futures) f.get();
+#else
     for (const auto& layer: model_from._state.layers)
     {
         optimizer.train(*layer);
     }
+#endif
 }
 
 void Model::reset_score()
@@ -180,13 +198,13 @@ void Model::step(const std::vector<NumType>& input,
     const std::vector<NumType> not_used;
 
     // Set target.
-    for (const auto& loss_layer: _state.loss_layers)
+    for (auto loss_layer: _state.loss_layers)
     {
         loss_layer->set_target(target);
     }
 
     // Forward.
-    for (const auto& input_layer: _state.input_layers)
+    for (auto input_layer: _state.input_layers)
     {
         input_layer->training_forward(input);
     }
@@ -196,7 +214,7 @@ void Model::step(const std::vector<NumType>& input,
     }
 
     // Backward.
-    for (const auto& loss_layer: _state.loss_layers)
+    for (auto loss_layer: _state.loss_layers)
     {
         loss_layer->backward(not_used);
     }
@@ -212,7 +230,7 @@ const std::vector<NumType>& Model::predict(const std::vector<NumType>& input)
     {
         throw std::runtime_error("No output layers in model");
     }
-    for (const auto& input_layer: _state.input_layers)
+    for (auto input_layer: _state.input_layers)
     {
         input_layer->forward(input);
     }
@@ -265,7 +283,7 @@ const std::vector<std::shared_ptr<LossLayer>>& Model::loss_layers() const
 
 [[nodiscard]] std::string const& Model::name() const noexcept
 {
-    return _name;
+    return _shared_fields.name();
 }
 
 void Model::print() const
@@ -297,7 +315,7 @@ NumType Model::avg_loss() const
 void Model::dump(std::ofstream& out)
 {
     Json model;
-    model["name"] = _name;
+    model["name"] = _shared_fields.name();
 
     Json layers_json;
     for (auto& layer: _state.layers)
@@ -313,7 +331,7 @@ void Model::load(std::ifstream& in)
     Json model;
     in >> model;
 
-    _name = model["name"].as<std::string>();
+    _shared_fields.name() = model["name"].as<std::string>();
     for (std::size_t l_i = 0; l_i < _state.layers.size(); ++l_i)
     {
         auto layer_json = Json(model["layer"][l_i]);

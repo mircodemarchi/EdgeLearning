@@ -98,6 +98,19 @@ public:
         std::vector<DLGraph::Arc> backward_run;
     };
 
+    class SharedFields {
+    public:
+        SharedFields(const std::string& name)
+            : _name(std::make_shared<std::string>(name))
+        { }
+
+        std::string& name() { return *_name; }
+        [[nodiscard]] const std::string& name() const { return *_name; }
+
+    private:
+        std::shared_ptr<std::string> _name; ///< Model name;
+    };
+
     /**
      * \brief Construct a new Model object.
      * \param name The model name.
@@ -318,7 +331,7 @@ public:
 private:
     friend class Layer;
 
-    std::string _name;                           ///< Model name;
+    SharedFields _shared_fields;
     State _state;
 };
 

@@ -242,8 +242,8 @@ private:
 
         _print_info(data_training, data_testing, data_evaluation);
         return {data_training,
-                data_testing,
                 data_evaluation,
+                data_testing,
                 DLMath::Shape3d{CifarImage::IMAGE_CHANNELS,
                                 CifarImage::IMAGE_SIDE,
                                 CifarImage::IMAGE_SIDE}};
@@ -251,7 +251,6 @@ private:
 
     Info _load_cifar100_dataset()
     {
-
         const std::string CIFAR100_TRAIN_FN = "train.bin";
         const std::string CIFAR100_TEST_FN = "test.bin";
         const std::string CIFAR100_COARSE_META_FN = "coarse_label_names.txt";
@@ -291,8 +290,8 @@ private:
 
         _print_info(data_training, data_testing, data_evaluation);
         return {data_training,
-                data_testing,
                 data_evaluation,
+                data_testing,
                 DLMath::Shape3d{CifarImage::IMAGE_CHANNELS,
                                 CifarImage::IMAGE_SIDE,
                                 CifarImage::IMAGE_SIDE}};

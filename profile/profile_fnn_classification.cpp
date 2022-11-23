@@ -63,19 +63,14 @@ int main() {
     SizeType BATCH_SIZE = 64;
     NumType LEARNING_RATE = 0.01;
 
-    ProfileFNNClassification<OptimizerType::ADAM>(
-        ProfileDataset::Type::MNIST,
-        {mnist_hidden_layers_descriptor},
-        {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
-
     ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
         ProfileDataset::Type::MNIST,
         {mnist_hidden_layers_descriptor},
         {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
 
     ProfileFNNClassification<OptimizerType::ADAM>(
-        ProfileDataset::Type::CIFAR10,
-        {cifar_hidden_layers_descriptor},
+        ProfileDataset::Type::MNIST,
+        {mnist_hidden_layers_descriptor},
         {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
 
     ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
@@ -84,11 +79,16 @@ int main() {
         {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
 
     ProfileFNNClassification<OptimizerType::ADAM>(
+        ProfileDataset::Type::CIFAR10,
+        {cifar_hidden_layers_descriptor},
+        {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
+
+    ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
         ProfileDataset::Type::CIFAR100,
         {cifar_hidden_layers_descriptor},
         {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
 
-    ProfileFNNClassification<OptimizerType::GRADIENT_DESCENT>(
+    ProfileFNNClassification<OptimizerType::ADAM>(
         ProfileDataset::Type::CIFAR100,
         {cifar_hidden_layers_descriptor},
         {EPOCHS, BATCH_SIZE, LEARNING_RATE}).run();
