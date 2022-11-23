@@ -203,11 +203,13 @@ public:
      * \param batch_size    The number of entries evaluated for gradient before
      *                      optimization.
      * \param learning_rate The optimization step size.
+     * \param seed          Seed random generator. If 0, it is unpredictable.
      */
     virtual void fit(Dataset<T>& data,
                      SizeType epochs = 1,
                      SizeType batch_size = 1,
-                     NumType learning_rate = 0.03) = 0;
+                     NumType learning_rate = 0.03,
+                     RneType::result_type seed = 0) = 0;
 
     virtual void compile(LossType loss = LossType::MSE,
                          OptimizerType optimizer = OptimizerType::ADAM,
@@ -299,7 +301,8 @@ public:
     void fit(Dataset<T>& data,
              SizeType epochs = 1,
              SizeType batch_size = 1,
-             NumType learning_rate = 0.03) override
+             NumType learning_rate = 0.03,
+             RneType::result_type seed = 0) override
     {
         if (!_model_ptr)
         {
@@ -307,7 +310,7 @@ public:
                                      "the compile method before fit");
         }
         return _model_ptr->fit(data, _optimizer,
-                               epochs, batch_size, learning_rate);
+                               epochs, batch_size, learning_rate, seed);
     }
 
     SizeType input_size() override

@@ -145,7 +145,7 @@ static void dataset_class(pybind11::module& subm)
     dataset_class.def("empty", &PyDataset::empty);
     dataset_class.def("entry", &PyDataset::entry, "idx"_a);
     dataset_class.def("entry_seq", &PyDataset::entry_seq, "sequence_idx"_a);
-    dataset_class.def("input_idx", &PyDataset::input_idx);
+    dataset_class.def_property_readonly("input_idx", &PyDataset::input_idx);
     dataset_class.def("input", [](PyDataset& py_dt, SizeType idx){ return py_dt.input(
         idx); }, "idx"_a);
     dataset_class.def("inputs", [](PyDataset& py_dt){ return py_dt.inputs(); });

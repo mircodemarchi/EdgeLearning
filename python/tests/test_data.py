@@ -110,7 +110,7 @@ def test_methods():
     assert(ds.entry(0) == [1,2])
     assert(ds.entry_seq(0) == [1,2,3,4])
 
-    assert(ds.input_idx() == [0])
+    assert(ds.input_idx == [0])
     assert((np.array(ds.inputs()) == np.array([1,3,1,3])).all())
     assert(ds.input(0) == [1])
     assert(ds.inputs_seq(0) == [1,3])

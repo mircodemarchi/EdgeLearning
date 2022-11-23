@@ -79,7 +79,7 @@ struct Training<ParallelizationLevel::THREAD_PARALLELISM_ON_DATA_ENTRY, T>
 {
 public:
     static void run(Model& model, Dataset<T> &data, Optimizer& o,
-             SizeType epochs, SizeType batch_size)
+                    SizeType epochs, SizeType batch_size)
     {
         auto& tm = ConcManager::TaskManager::instance();
         tm.set_maximum_concurrency();
@@ -507,20 +507,22 @@ public:
     void fit(Framework framework, Dataset<T> &data,
              SizeType epochs = 1,
              SizeType batch_size = 1,
-             NumType learning_rate = 0.03)
+             NumType learning_rate = 0.03,
+             RneType::result_type seed = 0)
     {
         _fnn_models[framework]->fit(data, epochs,
-                                    batch_size, learning_rate);
+                                    batch_size, learning_rate, seed);
     }
 
     void fit(Dataset<T> &data,
              SizeType epochs = 1,
              SizeType batch_size = 1,
-             NumType learning_rate = 0.03)
+             NumType learning_rate = 0.03,
+             RneType::result_type seed = 0)
     {
         for (const auto& e: _fnn_models)
         {
-            fit(e.first, data, epochs, batch_size, learning_rate);
+            fit(e.first, data, epochs, batch_size, learning_rate, seed);
         }
     }
 

@@ -412,7 +412,7 @@ static void fnn_class(pybind11::module& m)
                          "loss"_a=LossType::MSE, "optimizer"_a=OptimizerType::ADAM, "init"_a=InitType::AUTO);
     mlpack_fnn_class.def("predict", &MlpackFNN::predict, "data"_a);
     mlpack_fnn_class.def("fit", &MlpackFNN::fit,
-                         "data"_a, "epochs"_a=1, "batch_size"_a=1, "learning_rate"_a=0.03);
+                         "data"_a, "epochs"_a=1, "batch_size"_a=1, "learning_rate"_a=0.03, "seed"_a=0);
     mlpack_fnn_class.def("evaluate", &MlpackFNN::evaluate, "data"_a);
     mlpack_fnn_class.def("input_size", &MlpackFNN::input_size);
     mlpack_fnn_class.def("output_size", &MlpackFNN::output_size);
