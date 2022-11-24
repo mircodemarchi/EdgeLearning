@@ -82,7 +82,8 @@ void RecurrentLayer::init(InitializationFunction init,
                           ProbabilityDensityFunction pdf,
                           RneType rne)
 {
-    auto dist_i = DLMath::initialization_pdf<NumType>(init, pdf, _input_size);
+    auto dist_i = DLMath::initialization_pdf<NumType>(
+        init, pdf, _shared_fields->input_size());
     auto dist_h = DLMath::initialization_pdf<NumType>(init, pdf, _hidden_size);
 
     for (NumType& w: _weights_i_to_h)
@@ -126,7 +127,7 @@ const std::vector<NumType>& RecurrentLayer::forward(
     // Loop the time sequences.
     for (SizeType t = 0; t < _time_steps; ++t)
     {
-        curr_sequence = inputs.data() + t * _input_size;
+        curr_sequence = inputs.data() + t * _shared_fields->input_size();
         curr_hs_idx = t;
         next_hs_idx = (t == (_time_steps - 1)) ? 0 : t + 1;
 
@@ -137,7 +138,7 @@ const std::vector<NumType>& RecurrentLayer::forward(
         DLMath::matarr_mul<NumType>(
             _hidden_state.data() + next_hs_idx * _hidden_size, 
             _weights_i_to_h.data(),
-            curr_sequence, _hidden_size, _input_size);
+            curr_sequence, _hidden_size, _shared_fields->input_size());
 
         /*
          * Compute the product of the hidden state with its 
@@ -197,14 +198,15 @@ const std::vector<NumType>& RecurrentLayer::forward(
          * hidden_to_output weights and the sum with the to_output bias.
          * a(t) = W_ho * h(t + 1) + b_o
          */
-        DLMath::matarr_mul<NumType>(_output_activations.data() + t * _output_size,
+        DLMath::matarr_mul<NumType>(
+            _output_activations.data() + t * _shared_fields->output_size(),
             _weights_h_to_o.data(),
             _hidden_state.data() + next_hs_idx * _hidden_size, 
-            _output_size, _hidden_size);
+            _shared_fields->output_size(), _hidden_size);
         DLMath::arr_sum<NumType>(
-            _output_activations.data() + t * _output_size,
-            _output_activations.data() + t * _output_size,
-            _biases_to_o.data(), _output_size);
+            _output_activations.data() + t * _shared_fields->output_size(),
+            _output_activations.data() + t * _shared_fields->output_size(),
+            _biases_to_o.data(), _shared_fields->output_size());
     }
 
     delete[] tmp_mul;
@@ -229,16 +231,16 @@ const std::vector<NumType>& RecurrentLayer::backward(
         SizeType t_idx = t - 1;
         curr_hs_idx = (t >= _time_steps) ? 0 : t;
         prev_hs_idx = t_idx;
-        curr_sequence_gradients = gradients.data() + (t_idx * _output_size);
+        curr_sequence_gradients = gradients.data() + (t_idx * _shared_fields->output_size());
 
         // Bias gradient to output.
         DLMath::arr_sum(
             _biases_to_o_gradients.data(), 
             _biases_to_o_gradients.data(),
-            curr_sequence_gradients, _output_size);
+            curr_sequence_gradients, _shared_fields->output_size());
 
         // Weight gradient hidden to output.
-        for (SizeType i = 0; i < _output_size; ++i)
+        for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
         {
             for (SizeType j = 0; j < _hidden_size; ++j)
             {
@@ -252,7 +254,7 @@ const std::vector<NumType>& RecurrentLayer::backward(
         for (SizeType j = 0; j < _hidden_size; ++j)
         {
             tmp_mul[j] = NumType(0.0);
-            for (SizeType i = 0; i < _output_size; ++i)
+            for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
             {
                 tmp_mul[j] += _weights_h_to_o[(i * _hidden_size) + j] 
                     * curr_sequence_gradients[i];
@@ -302,11 +304,11 @@ const std::vector<NumType>& RecurrentLayer::backward(
         // Weight gradient input to hidden.
         for (SizeType i = 0; i < _hidden_size; ++i)
         {
-            for (SizeType j = 0; j < _input_size; ++j)
+            for (SizeType j = 0; j < _shared_fields->input_size(); ++j)
             {
-                _weights_i_to_h_gradients[(i * _input_size) + j] +=
+                _weights_i_to_h_gradients[(i * _shared_fields->input_size()) + j] +=
                     next_hidden_state[i] 
-                    * _last_input[(t_idx * _input_size) + j];
+                    * _last_input[(t_idx * _shared_fields->input_size()) + j];
             }
         }
 
@@ -323,15 +325,15 @@ const std::vector<NumType>& RecurrentLayer::backward(
 
         // Input gradient.
         NumType* curr_input_gradients = _input_gradients.data() 
-            + (t_idx * _input_size);
-        std::fill(curr_input_gradients, curr_input_gradients + _input_size, 0);
+            + (t_idx * _shared_fields->input_size());
+        std::fill(curr_input_gradients, curr_input_gradients + _shared_fields->input_size(), 0);
         for (SizeType i = 0; i < _hidden_size; ++i)
         {
-            for (SizeType j = 0; j < _input_size; ++j)
+            for (SizeType j = 0; j < _shared_fields->input_size(); ++j)
             {
                 curr_input_gradients[j] += 
                     next_hidden_state[i] 
-                        * _weights_i_to_h[(i * _input_size) + j];
+                        * _weights_i_to_h[(i * _shared_fields->input_size()) + j];
             }
         }
 
@@ -426,13 +428,13 @@ NumType& RecurrentLayer::gradient(SizeType index)
 
 void RecurrentLayer::print() const 
 {
-    std::cout << _name << std::endl;
+    std::cout << _shared_fields->name() << std::endl;
     std::cout << "Weights input to hidden (" 
-        << _hidden_size << " x " << _input_size << ")" << std::endl;
+        << _hidden_size << " x " << _shared_fields->input_size() << ")" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
-        SizeType offset = i * _input_size;
-        for (SizeType j = 0; j < _input_size; ++j)
+        SizeType offset = i * _shared_fields->input_size();
+        for (SizeType j = 0; j < _shared_fields->input_size(); ++j)
         {
             std::cout << "\t[" << (offset + j) << "]" 
                 << _weights_i_to_h[offset + j];
@@ -440,7 +442,7 @@ void RecurrentLayer::print() const
         std::cout << std::endl;
     }
     std::cout << "Weights hidden to hidden (" 
-        << _hidden_size << " x " << _input_size << ")" << std::endl;
+        << _hidden_size << " x " << _shared_fields->input_size() << ")" << std::endl;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
         SizeType offset = i * _hidden_size;
@@ -452,8 +454,8 @@ void RecurrentLayer::print() const
         std::cout << std::endl;
     }
     std::cout << "Weights hidden to output (" 
-        << _output_size << " x " << _input_size << ")" << std::endl;
-    for (SizeType i = 0; i < _output_size; ++i)
+        << _shared_fields->output_size() << " x " << _shared_fields->input_size() << ")" << std::endl;
+    for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
     {
         SizeType offset = i * _hidden_size;
         for (SizeType j = 0; j < _hidden_size; ++j)
@@ -468,8 +470,8 @@ void RecurrentLayer::print() const
     {
         std::cout << "\t" << _biases_to_h[i] << std::endl;
     }
-    std::cout << "Biases to output (" << _output_size << " x 1)" << std::endl;
-    for (SizeType i = 0; i < _output_size; ++i)
+    std::cout << "Biases to output (" << _shared_fields->output_size() << " x 1)" << std::endl;
+    for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
     {
         std::cout << "\t" << _biases_to_o[i] << std::endl;
     }
@@ -483,9 +485,9 @@ Json RecurrentLayer::dump() const
     Json weights_i_to_h;
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
-        SizeType offset = i * _input_size;
+        SizeType offset = i * _shared_fields->input_size();
         Json weights_i_to_h_row;
-        for (SizeType j = 0; j < _input_size; ++j)
+        for (SizeType j = 0; j < _shared_fields->input_size(); ++j)
         {
             weights_i_to_h_row.append(_weights_i_to_h[offset + j]);
         }
@@ -505,7 +507,7 @@ Json RecurrentLayer::dump() const
     }
 
     Json weights_h_to_o;
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
     {
         SizeType offset = i * _hidden_size;
         Json weights_h_to_o_row;
@@ -527,7 +529,7 @@ Json RecurrentLayer::dump() const
         biases_to_h.append(_biases_to_h[i]);
     }
     Json biases_to_o;
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
     {
         biases_to_o.append(_biases_to_o[i]);
     }
@@ -559,27 +561,27 @@ void RecurrentLayer::load(const Json& in)
     _time_steps = in.at(dump_fields.at(DumpFields::OTHERS))
         .at("time_steps").as<SizeType>();
 
-    auto ih_size = _input_size * _hidden_size;
+    auto ih_size = _shared_fields->input_size() * _hidden_size;
     auto hh_size = _hidden_size * _hidden_size;
-    auto ho_size = _hidden_size * _output_size;
+    auto ho_size = _hidden_size * _shared_fields->output_size();
     _weights_i_to_h.resize(ih_size);
     _weights_h_to_h.resize(hh_size);
     _weights_h_to_o.resize(ho_size);
     _biases_to_h.resize(_hidden_size);
-    _biases_to_o.resize(_output_size);
-    _output_activations.resize(_output_size * _time_steps);
+    _biases_to_o.resize(_shared_fields->output_size());
+    _output_activations.resize(_shared_fields->output_size() * _time_steps);
     _hidden_state.resize(_hidden_size * std::max(_time_steps, SizeType(1U)));
     _weights_i_to_h_gradients.resize(ih_size);
     _weights_h_to_h_gradients.resize(hh_size);
     _weights_h_to_o_gradients.resize(ho_size);
     _biases_to_h_gradients.resize(_hidden_size);
-    _biases_to_o_gradients.resize(_output_size);
-    _input_gradients.resize(_input_size * _time_steps);
+    _biases_to_o_gradients.resize(_shared_fields->output_size());
+    _input_gradients.resize(_shared_fields->input_size() * _time_steps);
 
     for (SizeType i = 0; i < _hidden_size; ++i)
     {
-        SizeType offset = i * _input_size;
-        for (SizeType j = 0; j < _input_size; ++j)
+        SizeType offset = i * _shared_fields->input_size();
+        for (SizeType j = 0; j < _shared_fields->input_size(); ++j)
         {
             _weights_i_to_h[offset + j] = in.at(
                 dump_fields.at(DumpFields::WEIGHTS)).at(0).at(i).at(j);
@@ -596,7 +598,7 @@ void RecurrentLayer::load(const Json& in)
         }
     }
 
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
     {
         SizeType offset = i * _hidden_size;
         for (SizeType j = 0; j < _hidden_size; ++j)
@@ -611,7 +613,7 @@ void RecurrentLayer::load(const Json& in)
         _biases_to_h[i] = in.at(dump_fields.at(DumpFields::BIASES)).at(0).at(i);
     }
 
-    for (SizeType i = 0; i < _output_size; ++i)
+    for (SizeType i = 0; i < _shared_fields->output_size(); ++i)
     {
         _biases_to_o[i] = in.at(dump_fields.at(DumpFields::BIASES)).at(1).at(i);
     }
@@ -619,10 +621,10 @@ void RecurrentLayer::load(const Json& in)
 
 void RecurrentLayer::_set_input_shape(LayerShape input_shape) {
     Layer::_set_input_shape(input_shape);
-    auto ih_size = _input_size * _hidden_size;
+    auto ih_size = _shared_fields->input_size() * _hidden_size;
     _weights_i_to_h.resize(ih_size);
     _weights_i_to_h_gradients.resize(ih_size);
-    _input_gradients.resize(_input_size * _time_steps);
+    _input_gradients.resize(_shared_fields->input_size() * _time_steps);
 }
 
 } // namespace EdgeLearning

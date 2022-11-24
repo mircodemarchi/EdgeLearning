@@ -127,7 +127,7 @@ const std::vector<NumType>& DenseLayer::backward(
     const std::vector<NumType>& gradients)
 {
     SizeType out_size = gradients.size();
-    SizeType in_size = _input_size;
+    SizeType in_size = _shared_fields->input_size();
 
 #if 0 // Enable thread optimization.
     auto& tm = ConcManager::TaskManager::instance();
@@ -194,7 +194,7 @@ NumType& DenseLayer::gradient(SizeType index)
 
 void DenseLayer::print() const 
 {
-    std::cout << _name << std::endl;
+    std::cout << _shared_fields->name() << std::endl;
     std::cout << "Weights (" << output_size() << " x " << input_size() << ")"
         << std::endl;
     for (SizeType i = 0; i < output_size(); ++i)

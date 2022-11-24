@@ -280,7 +280,7 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             l1_clone->input_size(), l2_clone->input_size());
         EDGE_LEARNING_TEST_CALL(l1_clone->input_shape(20));
-        EDGE_LEARNING_TEST_NOT_EQUAL(
+        EDGE_LEARNING_TEST_EQUAL(
             l1_clone->input_size(), l2_clone->input_size());
     }
 

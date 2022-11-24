@@ -78,7 +78,7 @@ public:
         _loss = 0.0;
 
         // Suppose to implement MeanAbsoluteError.
-        for (SizeType i = 0; i < _input_size; ++i)
+        for (SizeType i = 0; i < input_size(); ++i)
         {
             _loss += std::abs(inputs[i] - _target[i]);
         }

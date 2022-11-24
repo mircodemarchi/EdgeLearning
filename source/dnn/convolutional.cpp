@@ -102,7 +102,8 @@ const std::vector<NumType>& ConvolutionalLayer::forward(
      * _weights vector on the input 3D matrix.
      */
     DLMath::cross_correlation<NumType>(
-        _output_activations.data(), inputs.data(), _input_shape.shape(),
+        _output_activations.data(), inputs.data(),
+        _shared_fields->input_shape().shape(),
         _weights.data(), _kernel_shape, _n_filters, _stride, _padding);
 
     return FeedforwardLayer::forward(_output_activations);
@@ -120,10 +121,10 @@ const std::vector<NumType>& ConvolutionalLayer::backward(
     for (SizeType f = 0; f < _n_filters; ++f)
     {
         NumType sum = 0;
-        for (SizeType r = 0; r < _output_shape.height(); ++r)
+        for (SizeType r = 0; r < _shared_fields->output_shape().height(); ++r)
         {
-            auto step = _output_shape.width() * _n_filters;
-            for (SizeType c = 0; c < _output_shape.width(); ++c)
+            auto step = _shared_fields->output_shape().width() * _n_filters;
+            for (SizeType c = 0; c < _shared_fields->output_shape().width(); ++c)
             {
                 sum += gradients[r * step + c * _n_filters + f];
             }
@@ -180,7 +181,8 @@ const std::vector<NumType>& ConvolutionalLayer::backward(
         }
     };
     DLMath::kernel_slide<NumType>(
-        gradients_op, nullptr, _last_input, _input_shape.shape(),
+        gradients_op, nullptr, _last_input,
+        _shared_fields->input_shape().shape(),
         _weights.data(), _kernel_shape,
         _n_filters, _stride, _padding);
 
@@ -215,21 +217,25 @@ NumType& ConvolutionalLayer::gradient(SizeType index)
 
 void ConvolutionalLayer::print() const
 {
-    std::cout << _name << std::endl;
+    std::cout << _shared_fields->name() << std::endl;
     std::cout << "Weights ("
         << _kernel_shape.height() << " x "
         << _kernel_shape.width()  << " x "
-        << _input_shape.channels()  << " x "
+        << _shared_fields->input_shape().channels()  << " x "
         << _n_filters << ")" << std::endl;
 
     for (SizeType r = 0; r < _kernel_shape.height(); ++r)
     {
-        SizeType r_offset = r * _kernel_shape.width() * _input_shape.channels()
-                            * _n_filters;
+        SizeType r_offset = r * _kernel_shape.width()
+                          * _shared_fields->input_shape().channels()
+                          * _n_filters;
         for (SizeType c = 0; c < _kernel_shape.width(); ++c)
         {
-            SizeType c_offset = c * _input_shape.channels() * _n_filters;
-            for (SizeType ch = 0; ch < _input_shape.channels(); ++ch)
+            SizeType c_offset = c * _shared_fields->input_shape().channels()
+                              * _n_filters;
+            for (SizeType ch = 0;
+                 ch < _shared_fields->input_shape().channels();
+                 ++ch)
             {
                 SizeType ch_offset = ch * _n_filters;
                 std::cout << "\t[" << r << "," << c << "," << ch << ",0:"
@@ -259,14 +265,18 @@ Json ConvolutionalLayer::dump() const
     Json weights;
     for (SizeType r = 0; r < _kernel_shape.height(); ++r)
     {
-        SizeType r_offset = r * _kernel_shape.width() * _input_shape.channels()
-                            * _n_filters;
+        SizeType r_offset = r * _kernel_shape.width()
+                          * _shared_fields->input_shape().channels()
+                          * _n_filters;
         Json weights_row;
         for (SizeType c = 0; c < _kernel_shape.width(); ++c)
         {
-            SizeType c_offset = c * _input_shape.channels() * _n_filters;
+            SizeType c_offset = c * _shared_fields->input_shape().channels()
+                              * _n_filters;
             Json weights_col;
-            for (SizeType ch = 0; ch < _input_shape.channels(); ++ch)
+            for (SizeType ch = 0;
+                 ch < _shared_fields->input_shape().channels();
+                 ++ch)
             {
                 SizeType ch_offset = ch * _n_filters;
                 Json weights_channel;
@@ -321,20 +331,27 @@ void ConvolutionalLayer::load(const Json& in)
         .as_vec<std::size_t>();
     _padding = DLMath::Shape2d(padding.at(0), padding.at(1));
 
-    _weights.resize(_kernel_shape.size() * _input_shape.channels() * _n_filters);
+    _weights.resize(_kernel_shape.size()
+                    * _shared_fields->input_shape().channels()
+                    * _n_filters);
     _biases.resize(_n_filters);
-    _weight_gradients.resize(_kernel_shape.size() * _input_shape.channels()
+    _weight_gradients.resize(_kernel_shape.size()
+                             * _shared_fields->input_shape().channels()
                              * _n_filters);
     _bias_gradients.resize(_n_filters);
 
     for (SizeType r = 0; r < _kernel_shape.height(); ++r)
     {
-        SizeType r_offset = r * _kernel_shape.width() * _input_shape.channels()
-                            * _n_filters;
+        SizeType r_offset = r * _kernel_shape.width()
+                          * _shared_fields->input_shape().channels()
+                          * _n_filters;
         for (SizeType c = 0; c < _kernel_shape.width(); ++c)
         {
-            SizeType c_offset = c * _input_shape.channels() * _n_filters;
-            for (SizeType ch = 0; ch < _input_shape.channels(); ++ch)
+            SizeType c_offset = c * _shared_fields->input_shape().channels()
+                              * _n_filters;
+            for (SizeType ch = 0;
+                 ch < _shared_fields->input_shape().channels();
+                 ++ch)
             {
                 SizeType ch_offset = ch * _n_filters;
                 for (SizeType f = 0; f < _n_filters; ++f)
@@ -369,9 +386,9 @@ void ConvolutionalLayer::_set_input_shape(LayerShape input_shape)
                              * _n_filters);
 
     // Update input and output shape accordingly (see this constructor).
-    _input_shape = input_shape;
-    _output_shape = convolutional_output_shape(input_shape.shape(), _kernel_shape,
-                                               _stride, _padding, _n_filters);
+    _shared_fields->input_shape() = input_shape;
+    _shared_fields->output_shape() = convolutional_output_shape(
+        input_shape.shape(), _kernel_shape, _stride, _padding, _n_filters);
 
     // Update output size accordingly (see Layer and FeedforwardLayer constr.).
     _output_activations.resize(output_size());

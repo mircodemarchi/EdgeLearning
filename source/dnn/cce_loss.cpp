@@ -92,7 +92,7 @@ const std::vector<NumType>& CategoricalCrossEntropyLossLayer::backward(
 
 SizeType CategoricalCrossEntropyLossLayer::_argactive() const
 {
-    for (SizeType i = 0; i < _input_size; ++i)
+    for (SizeType i = 0; i < _shared_fields->input_size(); ++i)
     {
         if (_target[i] != NumType{0.0})
         {

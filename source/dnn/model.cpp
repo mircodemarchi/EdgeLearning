@@ -35,12 +35,12 @@
 namespace EdgeLearning {
 
 Model::Model(std::string name)
-    : _shared_fields(name)
+    : _shared_fields(std::make_shared<Fields>(name))
     , _state{}
 {
-    if (_shared_fields.name().empty())
+    if (_shared_fields->name().empty())
     {
-        _shared_fields.name() = "model_" + std::to_string(DLMath::unique());
+        _shared_fields->name() = "model_" + std::to_string(DLMath::unique());
     }
 }
 
@@ -283,7 +283,7 @@ const std::vector<std::shared_ptr<LossLayer>>& Model::loss_layers() const
 
 [[nodiscard]] std::string const& Model::name() const noexcept
 {
-    return _shared_fields.name();
+    return _shared_fields->name();
 }
 
 void Model::print() const
@@ -315,14 +315,14 @@ NumType Model::avg_loss() const
 void Model::dump(std::ofstream& out)
 {
     Json model;
-    model["name"] = _shared_fields.name();
+    model["name"] = _shared_fields->name();
 
     Json layers_json;
     for (auto& layer: _state.layers)
     {
         layers_json.append(layer->dump());
     }
-    model["layer"] = layers_json;
+    model["layers"] = layers_json;
     out << model;
 }
 
@@ -331,10 +331,10 @@ void Model::load(std::ifstream& in)
     Json model;
     in >> model;
 
-    _shared_fields.name() = model["name"].as<std::string>();
+    _shared_fields->name() = model["name"].as<std::string>();
     for (std::size_t l_i = 0; l_i < _state.layers.size(); ++l_i)
     {
-        auto layer_json = Json(model["layer"][l_i]);
+        auto layer_json = Json(model["layers"][l_i]);
         _state.layers[l_i]->load(layer_json);
     }
 }

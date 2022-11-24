@@ -92,6 +92,45 @@ public:
     using ProbabilityDensityFunction = DLMath::ProbabilityDensityFunction;
     using SharedPtr = std::shared_ptr<Layer>;
 
+    class Fields {
+    public:
+        Fields(const std::string& name, const LayerShape& input_shape,
+               const LayerShape& output_shape)
+            : _name(name)
+            , _input_shape(input_shape)
+            , _input_size(_input_shape.size())
+            , _output_shape(output_shape)
+            , _output_size(_output_shape.size())
+        { }
+
+        std::string& name() { return _name; }
+        [[nodiscard]] const std::string& name() const
+        { return _name; }
+
+        LayerShape& input_shape() { return _input_shape; }
+        [[nodiscard]] const LayerShape& input_shape() const
+        { return _input_shape; }
+
+        SizeType& input_size() { return _input_size; }
+        [[nodiscard]] const SizeType& input_size() const
+        { return _input_size; }
+
+        LayerShape& output_shape() { return _output_shape; }
+        [[nodiscard]] const LayerShape& output_shape() const
+        { return _output_shape; }
+
+        SizeType& output_size() { return _output_size; }
+        [[nodiscard]] const SizeType& output_size() const
+        { return _output_size; }
+
+    private:
+        std::string _name;        ///< Layer name.
+        LayerShape _input_shape;  ///< Layer input shape.
+        SizeType   _input_size;   ///< Layer input size.
+        LayerShape _output_shape; ///< Layer output shape.
+        SizeType   _output_size;  ///< Layer output size.
+    };
+
     /**
      * \brief Construct a new Layer object.
      * \param name         The name of the layer.
@@ -225,7 +264,8 @@ public:
      * \brief Virtual method information dump for debugging purposes.
      * \return std::string const& The layer name.
      */
-    [[nodiscard]] std::string const& name() const noexcept { return _name; }
+    [[nodiscard]] std::string const& name() const noexcept
+    { return _shared_fields->name(); }
 
     /**
      * \brief Getter of input_shape class field.
@@ -306,11 +346,7 @@ protected:
      */
     virtual void _set_input_shape(LayerShape input_shape);
 
-    std::string _name;                ///< Layer name (for debug).
-    LayerShape _input_shape;          ///< Layer input shape.
-    SizeType   _input_size;
-    LayerShape _output_shape;         ///< Layer output shape.
-    SizeType   _output_size;
+    std::shared_ptr<Fields> _shared_fields; ///< Layer shared fields.
 
     /**
      * \brief The last input passed to the layer. It is needed to compute loss

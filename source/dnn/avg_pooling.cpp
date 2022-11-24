@@ -42,7 +42,8 @@ const std::vector<NumType>& AveragePoolingLayer::forward(
     const std::vector<NumType>& inputs)
 {
     DLMath::avg_pool<NumType>(_output_activations.data(), inputs.data(),
-                              _input_shape.shape(), _kernel_shape, _stride);
+                              _shared_fields->input_shape().shape(),
+                              _kernel_shape, _stride);
 
     return PoolingLayer::forward(_output_activations);
 }
@@ -85,7 +86,7 @@ const std::vector<NumType>& AveragePoolingLayer::backward(
         }
     };
     DLMath::kernel_slide<NumType>(
-        gradients_op, nullptr, nullptr, _input_shape.shape(),
+        gradients_op, nullptr, nullptr, _shared_fields->input_shape().shape(),
         nullptr, _kernel_shape,
         1, _stride, {0, 0});
 

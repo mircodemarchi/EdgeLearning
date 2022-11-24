@@ -261,13 +261,13 @@ private:
         EDGE_LEARNING_TEST_EQUAL(
             l2_clone->input_shape().channels(), l1_clone->input_shape().channels());
         EDGE_LEARNING_TEST_CALL(l2_clone->input_shape(DLMath::Shape3d{10,10,10}));
-        EDGE_LEARNING_TEST_NOT_EQUAL(
+        EDGE_LEARNING_TEST_EQUAL(
             l2_clone->input_size(), l1_clone->input_size());
-        EDGE_LEARNING_TEST_NOT_EQUAL(
+        EDGE_LEARNING_TEST_EQUAL(
             l2_clone->input_shape().height(), l1_clone->input_shape().height());
-        EDGE_LEARNING_TEST_NOT_EQUAL(
+        EDGE_LEARNING_TEST_EQUAL(
             l2_clone->input_shape().width(), l1_clone->input_shape().width());
-        EDGE_LEARNING_TEST_NOT_EQUAL(
+        EDGE_LEARNING_TEST_EQUAL(
             l2_clone->input_shape().channels(), l1_clone->input_shape().channels());
     }
 

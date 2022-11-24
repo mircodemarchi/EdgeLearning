@@ -85,7 +85,7 @@ const std::vector<NumType>& DropoutLayer::backward(
 
 void DropoutLayer::print() const
 {
-    std::cout << _name << std::endl;
+    std::cout << _shared_fields->name() << std::endl;
     std::cout << "No learnable parameters" << std::endl;
     std::cout << std::endl;
 }
@@ -112,7 +112,7 @@ void DropoutLayer::load(const Json& in)
 void DropoutLayer::_set_input_shape(LayerShape input_shape)
 {
     FeedforwardLayer::_set_input_shape(input_shape);
-    _output_shape = input_shape;
+    _shared_fields->output_shape() = input_shape;
     _output_activations.resize(output_size());
 }
 

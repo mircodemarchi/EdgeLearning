@@ -98,7 +98,8 @@ public:
      */
     SizeType param_count() const noexcept override
     {
-        return (_kernel_shape.size() * _input_shape.channels() * _n_filters)
+        return (_kernel_shape.size()
+            * _shared_fields->input_shape().channels() * _n_filters)
             + _n_filters;
     }
 

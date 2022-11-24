@@ -39,7 +39,7 @@ ActivationLayer::ActivationLayer(SizeType size,
 
 void ActivationLayer::print() const
 {
-    std::cout << _name << std::endl;
+    std::cout << _shared_fields->name() << std::endl;
     std::cout << "No learnable parameters" << std::endl;
     std::cout << std::endl;
 }
@@ -49,8 +49,8 @@ void ActivationLayer::_set_input_shape(LayerShape input_shape)
     FeedforwardLayer::_set_input_shape(input_shape);
 
     // Update output size accordingly (see Layer and FeedforwardLayer constr.).
-    _output_shape = input_shape.size();
-    _output_activations.resize(_output_shape.size());
+    _shared_fields->output_shape() = input_shape.size();
+    _output_activations.resize(_shared_fields->output_shape().size());
 }
 // =============================================================================
 

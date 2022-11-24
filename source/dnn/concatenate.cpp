@@ -107,7 +107,7 @@ const std::vector<NumType>& ConcatenateLayer::forward(
     }
 
     DLMath::append<NumType>(
-        _output_activations.data(), _output_shape.shape(),
+        _output_activations.data(), _shared_fields->output_shape().shape(),
         inputs.data(), input_shapes().at(_current_input_layer).at(_axis),
         _axis, _current_output_shape[_axis]);
 
@@ -136,7 +136,7 @@ const std::vector<NumType>& ConcatenateLayer::backward(
 
 void ConcatenateLayer::print() const 
 {
-    std::cout << _name << std::endl;
+    std::cout << _shared_fields->name() << std::endl;
     std::cout << "No learnable parameters" << std::endl;
     std::cout << std::endl;
 }

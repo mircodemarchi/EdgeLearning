@@ -62,7 +62,7 @@ PoolingLayer::PoolingLayer(
 
 void PoolingLayer::print() const
 {
-    std::cout << _name << std::endl;
+    std::cout << _shared_fields->name() << std::endl;
     std::cout << "No learnable parameters" << std::endl;
     std::cout << std::endl;
 }
@@ -107,8 +107,8 @@ void PoolingLayer::_set_input_shape(LayerShape input_shape)
     FeedforwardLayer::_set_input_shape(input_shape);
 
     // Update input and output shape accordingly (see this constructor).
-    _input_shape = input_shape;
-    _output_shape = pooling_output_shape(
+    _shared_fields->input_shape() = input_shape;
+    _shared_fields->output_shape() = pooling_output_shape(
         input_shape.shape(), _kernel_shape, _stride);
 
     // Update output size accordingly (see Layer and FeedforwardLayer constr.).

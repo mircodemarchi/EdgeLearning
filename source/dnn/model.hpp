@@ -98,17 +98,17 @@ public:
         std::vector<DLGraph::Arc> backward_run;
     };
 
-    class SharedFields {
+    class Fields {
     public:
-        SharedFields(const std::string& name)
-            : _name(std::make_shared<std::string>(name))
+        Fields(const std::string& name)
+            : _name(name)
         { }
 
-        std::string& name() { return *_name; }
-        [[nodiscard]] const std::string& name() const { return *_name; }
+        std::string& name() { return _name; }
+        [[nodiscard]] const std::string& name() const { return _name; }
 
     private:
-        std::shared_ptr<std::string> _name; ///< Model name;
+        std::string _name; ///< Model name;
     };
 
     /**
@@ -328,10 +328,11 @@ public:
      * \param in In file stream.
      */
     void load(std::ifstream& in);
+
 private:
     friend class Layer;
 
-    SharedFields _shared_fields;
+    std::shared_ptr<Fields> _shared_fields;
     State _state;
 };
 

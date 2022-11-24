@@ -91,8 +91,8 @@ public:
      */
     [[nodiscard]] SizeType param_count() const noexcept override
     {
-        return (_input_size + _hidden_size + 1UL) * _hidden_size
-             + (_hidden_size + 1UL) * _output_size;
+        return (_shared_fields->input_size() + _hidden_size + 1UL) * _hidden_size
+             + (_hidden_size + 1UL) * _shared_fields->output_size();
     }
 
     NumType& param(SizeType index) override;
@@ -120,8 +120,8 @@ public:
         _time_steps = time_steps;
         _hidden_state.resize(
             _hidden_size * std::max(_time_steps, SizeType(1U)));
-        _output_activations.resize(_output_size * _time_steps);
-        _input_gradients.resize(_input_size * _time_steps);
+        _output_activations.resize(_shared_fields->output_size() * _time_steps);
+        _input_gradients.resize(_shared_fields->input_size() * _time_steps);
     }
 
     [[nodiscard]] SizeType time_steps() const

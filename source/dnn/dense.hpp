@@ -99,7 +99,8 @@ public:
      */
     [[nodiscard]] SizeType param_count() const noexcept override
     {
-        return (_input_size + 1UL) * _output_size;
+        return (_shared_fields->input_size() + 1UL)
+            * _shared_fields->output_size();
     }
 
     NumType& param(SizeType index) override;

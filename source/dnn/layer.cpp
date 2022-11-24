@@ -98,17 +98,13 @@ const std::map<Layer::DumpFields, std::string> Layer::dump_fields = {
 
 Layer::Layer(std::string name, LayerShape input_shape, LayerShape output_shape,
              std::string prefix_name)
-    : _name{std::move(name)}
-    , _input_shape{input_shape}
-    , _input_size{input_shape.size()}
-    , _output_shape{output_shape}
-    , _output_size{output_shape.size()}
+    : _shared_fields(std::make_shared<Fields>(name, input_shape, output_shape))
     , _last_input{}
 { 
-    if (_name.empty())
+    if (_shared_fields->name().empty())
     {
         if (prefix_name.empty()) prefix_name = "layer_";
-        _name = prefix_name + std::to_string(DLMath::unique());
+        _shared_fields->name() = prefix_name + std::to_string(DLMath::unique());
     }
 }
 
@@ -134,13 +130,14 @@ const std::vector<NumType>& Layer::backward(
 std::vector<NumType> Layer::last_input()
 {
     return _last_input
-           ? std::vector<NumType>{_last_input, _last_input + _input_size}
+           ? std::vector<NumType>{_last_input,
+                                  _last_input + _shared_fields->input_size()}
            : std::vector<NumType>{};
 }
 
 const LayerShape& Layer::input_shape() const
 {
-    return _input_shape;
+    return _shared_fields->input_shape();
 }
 
 void Layer::input_shape(LayerShape input_shape)
@@ -150,47 +147,47 @@ void Layer::input_shape(LayerShape input_shape)
 
 const LayerShape& Layer::output_shape() const
 {
-    return _output_shape;
+    return _shared_fields->output_shape();
 }
 
 const std::vector<DLMath::Shape3d>& Layer::input_shapes() const
 {
-    return _input_shape.shapes();
+    return _shared_fields->input_shape().shapes();
 }
 
 const std::vector<DLMath::Shape3d>& Layer::output_shapes() const
 {
-    return _output_shape.shapes();
+    return _shared_fields->output_shape().shapes();
 }
 
 SizeType Layer::input_size(SizeType input_idx) const
 {
-    return _input_shape.size(input_idx);
+    return _shared_fields->input_shape().size(input_idx);
 }
 
 SizeType Layer::output_size(SizeType output_idx) const
 {
-    return _output_shape.size(output_idx);
+    return _shared_fields->output_shape().size(output_idx);
 }
 
 SizeType Layer::input_layers()
 {
-    return _input_shape.amount_shapes();
+    return _shared_fields->input_shape().amount_shapes();
 }
 
 SizeType Layer::output_layers()
 {
-    return _output_shape.amount_shapes();
+    return _shared_fields->output_shape().amount_shapes();
 }
 
 Json Layer::dump() const
 {
     Json out;
     out[dump_fields.at(DumpFields::TYPE)] = type();
-    out[dump_fields.at(DumpFields::NAME)] = _name;
+    out[dump_fields.at(DumpFields::NAME)] = _shared_fields->name();
 
     Json input_shape;
-    for (const auto& shape: _input_shape.shapes())
+    for (const auto& shape: _shared_fields->input_shape().shapes())
     {
         std::vector<SizeType> input_size = {
             shape.height(), shape.width(), shape.channels()
@@ -200,7 +197,7 @@ Json Layer::dump() const
     out[dump_fields.at(DumpFields::INPUT_SIZE)] = Json(input_shape);
 
     Json output_shape;
-    for (const auto& shape: _output_shape.shapes())
+    for (const auto& shape: _shared_fields->output_shape().shapes())
     {
         std::vector<SizeType> output_size = {
             shape.height(), shape.width(), shape.channels()
@@ -226,7 +223,7 @@ void Layer::load(const Json& in)
             " do not correspond with loaded type " + std::string(t));
     }
 
-    _name = std::string(in.at(dump_fields.at(DumpFields::NAME)));
+    _shared_fields->name() = std::string(in.at(dump_fields.at(DumpFields::NAME)));
 
     std::vector<DLMath::Shape3d> input_shapes;
     auto input_shapes_json = in.at(dump_fields.at(DumpFields::INPUT_SIZE));
@@ -235,8 +232,8 @@ void Layer::load(const Json& in)
         auto shape = input_shapes_json[i];
         input_shapes.emplace_back(shape[0], shape[1], shape[2]);
     }
-    _input_shape = LayerShape(input_shapes);
-    _input_size = _input_shape.size();
+    _shared_fields->input_shape() = LayerShape(input_shapes);
+    _shared_fields->input_size() = _shared_fields->input_shape().size();
 
     std::vector<DLMath::Shape3d> output_shapes;
     auto output_shapes_json = in.at(dump_fields.at(DumpFields::OUTPUT_SIZE));
@@ -245,14 +242,14 @@ void Layer::load(const Json& in)
         auto shape = output_shapes_json[i];
         output_shapes.emplace_back(shape[0], shape[1], shape[2]);
     }
-    _output_shape = LayerShape(output_shapes);
-    _output_size = _output_shape.size();
+    _shared_fields->output_shape() = LayerShape(output_shapes);
+    _shared_fields->output_size() = _shared_fields->output_shape().size();
 }
 
 void Layer::_set_input_shape(LayerShape input_shape)
 {
-    _input_shape = std::move(input_shape);
-    _input_size = _input_shape.size();
+    _shared_fields->input_shape() = std::move(input_shape);
+    _shared_fields->input_size() = _shared_fields->input_shape().size();
 }
 
 } // namespace EdgeLearning
