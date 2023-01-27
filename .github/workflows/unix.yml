@@ -48,13 +48,13 @@ jobs:
             c: "gcc-10"
           }
           # With MLPACK
-          - {
-            name: "macOS 11.0 AppleClang [MLPACK]",
-            mlpack: true,
-            os: macos-11.0,
-            cxx: "clang++",
-            c: "clang"
-          }
+          # - {
+          #   name: "macOS 11.0 AppleClang [MLPACK]",
+          #   mlpack: true,
+          #   os: macos-11.0,
+          #   cxx: "clang++",
+          #   c: "clang"
+          # }
           # - {
           #   name: "macOS 10.15 GCC 9 [MLPACK]",
           #   mlpack: true,
