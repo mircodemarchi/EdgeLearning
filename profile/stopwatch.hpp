@@ -43,6 +43,7 @@ namespace EdgeLearning {
 using Seconds = std::chrono::seconds;
 using Milliseconds = std::chrono::milliseconds;
 using Microseconds = std::chrono::microseconds;
+using Nanoseconds = std::chrono::nanoseconds;
 
 template<class D> class Stopwatch {
 public:
@@ -65,17 +66,10 @@ public:
     }
 
     //! \brief Get the duration in the given type
-    D duration() const
+    [[nodiscard]] double duration() const
     {
         if (_durations.empty()) return -1;
         return _durations.back();
-    }
-
-    //! \brief Get the duration in seconds, in double precision
-    [[nodiscard]] double elapsed_seconds() const
-    {
-        return std::chrono::duration_cast<std::chrono::duration<double>>(
-            duration()).count();
     }
 
     //! \brief Restart the watch time to zero

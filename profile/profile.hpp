@@ -154,15 +154,15 @@ private:
 
     [[nodiscard]] std::string _pretty_print()
     {
-        auto mean = static_cast<NsCount>(_sw.mean() * 1000);
-        auto median = static_cast<NsCount>(_sw.median() * 1000);
-        auto std = static_cast<NsCount>(_sw.std() * 1000);
+        auto mean = static_cast<NsCount>(_sw.mean());
+        auto median = static_cast<NsCount>(_sw.median());
+        auto std = static_cast<NsCount>(_sw.std());
         return "mean: " + _pretty_print(mean)
             + " median: " +  _pretty_print(median)
             + " std: " +  _pretty_print(std);
     }
 
-    Stopwatch<Microseconds> _sw;
+    Stopwatch<Nanoseconds> _sw;
     Randomizer _rnd;
     const SizeType _num_tries;
     std::string _name;

@@ -1,6 +1,7 @@
 set(PROFILE_FILES
     profile_fnn_regression
     profile_fnn_classification
+    profile_dense
 )
 
 foreach(PROFILE ${PROFILE_FILES})
