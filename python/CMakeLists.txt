@@ -37,7 +37,6 @@ if(PYTHON3_FOUND)
         CACHE STRING "Install destination for Python targets")
     install(TARGETS pyedgelearning DESTINATION "${PYTHON_BINDINGS_INSTALL_DIR}")
 
-    add_subdirectory(tests)
     add_subdirectory(example)
 
 else()

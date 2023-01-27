@@ -27,11 +27,11 @@ jobs:
             c: "clang"
           }
           - {
-            name: "macOS 11.0 GCC 10 [NO MLPACK]",
+            name: "macOS 11.0 GCC 11 [NO MLPACK]",
             mlpack: false,
             os: macos-11.0,
-            cxx: "g++-10",
-            c: "gcc-10"
+            cxx: "g++-11",
+            c: "gcc-11"
           }
           - {
             name: "Ubuntu 22.04 Clang 11 [NO MLPACK]",
@@ -41,11 +41,11 @@ jobs:
             c: "clang-11"
           }
           - {
-            name: "Ubuntu 22.04 GCC 10 [NO MLPACK]",
+            name: "Ubuntu 22.04 GCC 11 [NO MLPACK]",
             mlpack: false,
             os: ubuntu-22.04,
-            cxx: "g++-10",
-            c: "gcc-10"
+            cxx: "g++-11",
+            c: "gcc-11"
           }
           # With MLPACK
           # - {
@@ -56,11 +56,11 @@ jobs:
           #   c: "clang"
           # }
           # - {
-          #   name: "macOS 10.15 GCC 9 [MLPACK]",
+          #   name: "macOS 11.0 GCC 11 [MLPACK]",
           #   mlpack: true,
-          #   os: macos-10.15,
-          #   cxx: "g++-9",
-          #   c: "gcc-9"
+          #   os: macos-11.0,
+          #   cxx: "g++-11",
+          #   c: "gcc-11"
           # }
           - {
             name: "Ubuntu 22.04 Clang 11 [MLPACK]",
@@ -70,15 +70,15 @@ jobs:
             c: "clang-11"
           }
           - {
-            name: "Ubuntu 22.04 GCC 10 [MLPACK]",
+            name: "Ubuntu 22.04 GCC 11 [MLPACK]",
             mlpack: true,
             os: ubuntu-22.04,
-            cxx: "g++-10",
-            c: "gcc-10"
+            cxx: "g++-11",
+            c: "gcc-11"
           }
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
@@ -97,7 +97,7 @@ jobs:
     - name: Set Up macOS Dependencies
       if: runner.os == 'macOS'
       run: |
-        brew install gcc@10 python3
+        brew install gcc@11 python3
         export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
         sudo easy_install pip
         sudo pip3 install --upgrade pip
@@ -106,7 +106,7 @@ jobs:
     - name: Set Up Linux Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt upgrade -y && sudo apt install -y cmake pkg-config clang-11 g++-10 python3-pip python3-dev
+        sudo apt update && sudo apt upgrade -y && sudo apt install -y cmake pkg-config clang-11 g++-11 python3-pip python3-dev
         sudo pip3 install pytest numpy
 
     - name: Set Up macOS MLPACK

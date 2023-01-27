@@ -1,2 +1,2 @@
 add_subdirectory(conclog)
-add_subdirectory(concmanager)
+add_subdirectory(betterthreads)

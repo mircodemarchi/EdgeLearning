@@ -27,7 +27,7 @@
  */
 
 #include "type.hpp"
-#include "concmanager/include/task_manager.hpp"
+#include "betterthreads/task_manager.hpp"
 
 #include <cmath>
 #include <functional>
@@ -1802,9 +1802,9 @@ public:
         T* dst, const T* src, const T* weights, const T* bias,
         SizeType input_size, SizeType output_size)
     {
-        auto& tm = ConcManager::TaskManager::instance();
+        auto& tm = BetterThreads::TaskManager::instance();
         tm.set_maximum_concurrency();
-        std::vector<ConcManager::Future<void>> futures;
+        std::vector<BetterThreads::Future<void>> futures;
         for (SizeType i = 0; i < output_size; ++i)
         {
             futures.push_back(tm.enqueue(
@@ -1877,9 +1877,9 @@ public:
         SizeType input_size, SizeType output_size)
     {
         std::fill(input_gradients, input_gradients + input_size, 0);
-        auto& tm = ConcManager::TaskManager::instance();
+        auto& tm = BetterThreads::TaskManager::instance();
         tm.set_maximum_concurrency();
-        std::vector<ConcManager::Future<void>> futures;
+        std::vector<BetterThreads::Future<void>> futures;
         for (SizeType i = 0; i < output_size; ++i)
         {
             futures.push_back(tm.enqueue(

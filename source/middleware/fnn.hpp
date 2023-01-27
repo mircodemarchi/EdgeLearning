@@ -35,7 +35,7 @@
 #include "mlpack_fnn.hpp"
 #endif
 
-#include "concmanager/include/task_manager.hpp"
+#include "betterthreads/task_manager.hpp"
 
 #include <map>
 #include <tuple>
@@ -82,7 +82,7 @@ public:
     static void run(Model& model, Dataset<T> &data, Optimizer& o,
                     SizeType epochs, SizeType batch_size)
     {
-        auto& tm = ConcManager::TaskManager::instance();
+        auto& tm = BetterThreads::TaskManager::instance();
         tm.set_maximum_concurrency();
         for (SizeType e = 0; e < epochs; ++e)
         {
@@ -90,7 +90,7 @@ public:
             {
                 model.reset_score();
 
-                std::vector<ConcManager::Future<Model>> futures;
+                std::vector<BetterThreads::Future<Model>> futures;
                 for (SizeType b = 0; b < batch_size
                                      && i < data.size(); ++b, ++i)
                 {
@@ -119,7 +119,7 @@ public:
     static void run(Model& model, const Dataset<T>& data, Optimizer& o,
                     SizeType epochs, SizeType batch_size)
     {
-        auto& tm = ConcManager::TaskManager::instance();
+        auto& tm = BetterThreads::TaskManager::instance();
         tm.set_maximum_concurrency();
         for (SizeType e = 0; e < epochs; ++e)
         {
@@ -127,7 +127,7 @@ public:
             {
                 model.reset_score();
 
-                std::vector<ConcManager::Future<Model>> futures;
+                std::vector<BetterThreads::Future<Model>> futures;
                 for (SizeType t = 0; t < tm.concurrency(); ++t)
                 {
                     futures.push_back(tm.enqueue(

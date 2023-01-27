@@ -8,10 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
@@ -20,7 +20,7 @@ jobs:
 
     - name: Set Up Dependencies
       run: |
-        sudo apt install -y cmake pkg-config lcov g++-10 libmlpack-dev libensmallen-dev python3-pip python3-dev
+        sudo apt install -y cmake pkg-config lcov g++-11 libmlpack-dev libensmallen-dev python3-pip python3-dev
         sudo pip3 install coverage pytest numpy
 
     - name: Create Build Environment
@@ -28,7 +28,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10 -DCOVERAGE=ON -DBUILD_PYTHON=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_C_COMPILER=gcc-11 -DCOVERAGE=ON -DBUILD_PYTHON=ON
 
     - name: Build All
       working-directory: ${{runner.workspace}}/build

@@ -25,7 +25,6 @@
 #include "dense.hpp"
 
 #include "dlmath.hpp"
-#include "concmanager/include/task_manager.hpp"
 
 #include <algorithm>
 #include <cstdio>

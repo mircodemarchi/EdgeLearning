@@ -28,7 +28,7 @@
 #include "activation.hpp"
 #include "parser/json.hpp"
 
-#include "concmanager/include/task_manager.hpp"
+#include "betterthreads/task_manager.hpp"
 
 #include <algorithm>
 
@@ -166,8 +166,8 @@ void Model::train(Optimizer& optimizer)
 void Model::train(Optimizer& optimizer, Model& model_from)
 {
 #if 0 // Enable thread optimization.
-    auto& tm = ConcManager::TaskManager::instance();
-    std::vector<ConcManager::Future<void>> futures;
+    auto& tm = BetterThreads::TaskManager::instance();
+    std::vector<BetterThreads::Future<void>> futures;
     for (const auto& layer: model_from._state.layers)
     {
         futures.push_back(tm.enqueue(

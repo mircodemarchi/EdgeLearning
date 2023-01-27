@@ -3,6 +3,11 @@ message(STATUS "CMake version ${CMAKE_VERSION}")
 
 project(EdgeLearning VERSION 0.1)
 
+option(COVERAGE "Enable coverage reporting" OFF)
+if(COVERAGE)
+    message(STATUS "Enabled coverage reporting")
+endif()
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.20)
         message(FATAL_ERROR "MSVC version must be at least 19.20!")
@@ -61,16 +66,39 @@ if (NOT ENABLE_MLPACK)
     endif()
 endif()
 
-option(COVERAGE "Enable coverage reporting" OFF)
-add_library(coverage_config INTERFACE)
-if(COVERAGE)
-    message(STATUS "Enabled coverage reporting")
-    target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-        target_link_options(coverage_config INTERFACE --coverage)
-    else()
-        target_link_libraries(coverage_config INTERFACE --coverage)
+find_package(Git)
+if(GIT_FOUND)
+    if (NOT EXISTS ${PROJECT_SOURCE_DIR}/.git) # Manages the case when an archive is used
+        execute_process(COMMAND git init WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/conclog OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND rm -Rf ${PROJECT_SOURCE_DIR}/submodules/betterthreads OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/conclog submodules/conclog WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+        execute_process(COMMAND git submodule add -f https://github.com/ariadne-cps/betterthreads submodules/betterthreads WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
     endif()
+    message(STATUS "Getting all submodules if not downloaded already...")
+    execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET ERROR_QUIET)
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/conclog/CMakeLists.txt OR NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/betterthreads/CMakeLists.txt)
+        message(ERROR "ConcLog and BetterThreads download failure")
+    else()
+        message(STATUS "ConcLog and BetterThreads submodules found")
+    endif()
+else()
+    message(FATAL_ERROR "Git not found, no submodules could be downloaded")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
+    execute_process(COMMAND mkdir ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
+    message(STATUS "Created symbolic links directory for submodules")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/conclog/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/conclog)
+    message(STATUS "Created symbolic link to ConcLog submodule")
+endif()
+
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
+    execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/submodules/betterthreads/include ${PROJECT_SOURCE_DIR}/submodules/.symbolic/betterthreads)
+    message(STATUS "Created symbolic link to BetterThreads submodule")
 endif()
 
 # Find MLPACK and dependencies
@@ -88,51 +116,57 @@ if(ENABLE_MLPACK AND MLPACK_FOUND)
     endif()
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules)
+include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/submodules/.symbolic)
 if(ENABLE_MLPACK)
     include_directories(${ARMADILLO_INCLUDE_DIRS})
     include_directories(${MLPACK_INCLUDE_DIRS})
 endif()
 
-add_custom_target(tests)
-enable_testing()
-include(CTest)
+if(NOT TARGET edgelearning)
+    add_subdirectory(source)
+    if(BUILD_PYTHON)
+        message(STATUS "PYTHON interface enabled")
+        add_subdirectory(python)
+    endif()
 
-add_subdirectory(source)
-if(BUILD_PYTHON)
-    message(STATUS "PYTHON interface enabled")
-    add_subdirectory(python)
-endif()
+    if(NOT TARGET tests)
+        if(COVERAGE)
+            include(CodeCoverage)
+            append_coverage_compiler_flags()
+        endif()
 
-add_subdirectory(tests)
+        enable_testing()
+        include(CTest)
+        add_subdirectory(tests)
+        if(BUILD_PYTHON)
+            add_subdirectory(python/tests)
+        endif()
+    endif()
 
-add_subdirectory(submodules)
+    add_subdirectory(submodules)
 
-add_subdirectory(profile)
+    add_subdirectory(profile)
 
-add_library(edgelearning ${LIBRARY_KIND}
-    $<TARGET_OBJECTS:edgelearning-dnn>
-    $<TARGET_OBJECTS:edgelearning-middleware>
-    $<TARGET_OBJECTS:edgelearning-parser>
-)
-target_link_libraries(edgelearning
-    conclog
-    concmanager
-)
+    add_library(edgelearning ${LIBRARY_KIND}
+        $<TARGET_OBJECTS:edgelearning-dnn>
+        $<TARGET_OBJECTS:edgelearning-middleware>
+        $<TARGET_OBJECTS:edgelearning-parser>
+        )
+    target_link_libraries(edgelearning
+        conclog
+        betterthreads
+        )
 
-if (EXISTS "/etc/nv_tegra_release")
-    target_link_libraries(edgelearning -lstdc++fs)
-endif()
+    if (EXISTS "/etc/nv_tegra_release")
+        target_link_libraries(edgelearning -lstdc++fs)
+    endif()
 
-if(ENABLE_MLPACK)
-    target_link_libraries(edgelearning ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
-endif()
+    if(ENABLE_MLPACK)
+        target_link_libraries(edgelearning ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
+    endif()
 
-if(COVERAGE)
-    target_link_libraries(edgelearning coverage_config)
-endif()
-
-set(BUILD_EXAMPLE true CACHE BOOL "Build EdgeLearning examples code")
-if(BUILD_EXAMPLE)
-    add_subdirectory(example)
+    set(BUILD_EXAMPLE true CACHE BOOL "Build EdgeLearning examples code")
+    if(BUILD_EXAMPLE)
+        add_subdirectory(example)
+    endif()
 endif()
