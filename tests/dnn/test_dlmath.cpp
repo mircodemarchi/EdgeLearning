@@ -80,6 +80,8 @@ public:
         EDGE_LEARNING_TEST_CALL(test_extract());
         EDGE_LEARNING_TEST_CALL(test_concatenate());
         EDGE_LEARNING_TEST_CALL(test_separate());
+        EDGE_LEARNING_TEST_CALL(test_dense());
+        EDGE_LEARNING_TEST_CALL(test_dense_1());
     }
 
 private:
@@ -2353,6 +2355,148 @@ private:
             DLMath::separate(result.data(), {{3,3,1}, {3,3,2}, {3,0,2}},
                              test_vec.data(), 2),
             std::runtime_error);
+    }
+
+    void test_dense()
+    {
+        SizeType in_size = 4, out_size = 2;
+        std::vector<TestNumType> weights({
+            0.1, 0.2, 0.3, 0.4,
+            0.5, 0.6, 0.7, 0.8
+        });
+        std::vector<TestNumType> biases({
+            0.1, 0.2,
+        });
+        std::vector<TestNumType> test_vec({
+            1, 2, 3, 4
+        });
+        std::vector<TestNumType> truth_vec({
+            3.1, 7.2
+        });
+        std::vector<TestNumType> result_vec(truth_vec.size());
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::dense(
+                result_vec.data(), test_vec.data(),
+                weights.data(), biases.data(), in_size, out_size));
+        for (SizeType i = 0; i < out_size; ++i)
+        {
+            EDGE_LEARNING_TEST_WITHIN(result_vec[i], truth_vec[i],
+                                      0.000000000000001);
+        }
+
+        std::fill(result_vec.begin(), result_vec.end(), 0);
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::dense_thread_opt(
+                result_vec.data(), test_vec.data(),
+                weights.data(), biases.data(), in_size, out_size));
+        for (SizeType i = 0; i < out_size; ++i)
+        {
+            EDGE_LEARNING_TEST_WITHIN(result_vec[i], truth_vec[i],
+                                      0.000000000000001);
+        }
+
+        std::vector<TestNumType> weights_t({
+            0.1, 0.5,
+            0.2, 0.6,
+            0.3, 0.7,
+            0.4, 0.8,
+        });
+        std::fill(result_vec.begin(), result_vec.end(), 0);
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::dense_simd_opt(
+                result_vec.data(), test_vec.data(),
+                weights.data(), biases.data(), in_size, out_size));
+        for (SizeType i = 0; i < out_size; ++i)
+        {
+            EDGE_LEARNING_TEST_WITHIN(result_vec[i], truth_vec[i],
+                                      0.000000000000001);
+        }
+    }
+
+    void test_dense_1()
+    {
+        SizeType in_size = 4, out_size = 2;
+        std::vector<TestNumType> weights({
+            0.1, 0.2, 0.3, 0.4,
+            0.5, 0.6, 0.7, 0.8
+        });
+        std::vector<TestNumType> last_input({
+            1, 2, 3, 4
+        });
+        std::vector<TestNumType> gradients({
+            -0.1, -0.2
+        });
+        std::vector<TestNumType> truth_input_gradient({
+            -0.11, -0.14, -0.17, -0.2
+        });
+        std::vector<TestNumType> truth_weight_gradient({
+            -0.1, -0.2, -0.3, -0.4,
+            -0.2, -0.4, -0.6, -0.8,
+        });
+        std::vector<TestNumType> truth_bias_gradient({
+            -0.1, -0.2
+        });
+        std::vector<TestNumType> result_input_gradient(truth_input_gradient.size());
+        std::vector<TestNumType> result_weight_gradient(truth_weight_gradient.size());
+        std::vector<TestNumType> result_bias_gradient(truth_bias_gradient.size());
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::dense_1(
+                result_input_gradient.data(), result_weight_gradient.data(),
+                result_bias_gradient.data(),
+                gradients.data(), last_input.data(), weights.data(),
+                in_size, out_size));
+        for (SizeType i = 0; i < in_size; ++i)
+        {
+            EDGE_LEARNING_TEST_WITHIN(result_input_gradient[i],
+                                      truth_input_gradient[i],
+                                      0.000000000000001);
+        }
+        for (SizeType i = 0; i < out_size; ++i)
+        {
+            for (SizeType j = 0; j < in_size; ++j)
+            {
+                EDGE_LEARNING_TEST_WITHIN(result_weight_gradient[(i * in_size) + j],
+                                          truth_weight_gradient[(i * in_size) + j],
+                                          0.000000000000001);
+            }
+        }
+        for (SizeType i = 0; i < out_size; ++i)
+        {
+            EDGE_LEARNING_TEST_WITHIN(result_bias_gradient[i],
+                                      truth_bias_gradient[i],
+                                      0.000000000000001);
+        }
+
+        std::fill(result_input_gradient.begin(), result_input_gradient.end(), 0);
+        std::fill(result_weight_gradient.begin(), result_weight_gradient.end(), 0);
+        std::fill(result_bias_gradient.begin(), result_bias_gradient.end(), 0);
+        EDGE_LEARNING_TEST_TRY(
+            DLMath::dense_1_thread_opt(
+                result_input_gradient.data(), result_weight_gradient.data(),
+                result_bias_gradient.data(),
+                gradients.data(), last_input.data(), weights.data(),
+                in_size, out_size));
+        for (SizeType i = 0; i < in_size; ++i)
+        {
+            EDGE_LEARNING_TEST_WITHIN(result_input_gradient[i],
+                                      truth_input_gradient[i],
+                                      0.000000000000001);
+        }
+        for (SizeType i = 0; i < out_size; ++i)
+        {
+            for (SizeType j = 0; j < in_size; ++j)
+            {
+                EDGE_LEARNING_TEST_WITHIN(result_weight_gradient[(i * in_size) + j],
+                                          truth_weight_gradient[(i * in_size) + j],
+                                          0.000000000000001);
+            }
+        }
+        for (SizeType i = 0; i < out_size; ++i)
+        {
+            EDGE_LEARNING_TEST_WITHIN(result_bias_gradient[i],
+                                      truth_bias_gradient[i],
+                                      0.000000000000001);
+        }
     }
 
 };

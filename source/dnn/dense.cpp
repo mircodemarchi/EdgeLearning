@@ -25,7 +25,6 @@
 #include "dense.hpp"
 
 #include "dlmath.hpp"
-
 #include "concmanager/include/task_manager.hpp"
 
 #include <algorithm>
@@ -94,32 +93,10 @@ const std::vector<NumType>& DenseLayer::forward(
      * Compute the product of the input data with the weight add the bias.
      * z = W * x + b
      */
-#if 0 // Enable thread optimization.
-    auto& tm = ConcManager::TaskManager::instance();
-    tm.set_maximum_concurrency();
-    std::vector<ConcManager::Future<void>> futures;
-    for (SizeType i = 0; i < out_size; ++i)
-    {
-        futures.push_back(tm.enqueue(
-            [&](SizeType out_idx) {
-                _output_activations[out_idx] = _biases[out_idx];
-                for (SizeType j = 0; j < in_size; ++j)
-                {
-                    _output_activations[out_idx] += _weights[(out_idx * in_size) + j] * inputs[j];
-                }
-            }, i));
-    }
-    for (auto& f: futures) f.get();
-#else
-    for (SizeType i = 0; i < out_size; ++i)
-    {
-        _output_activations[i] = _biases[i];
-        for (SizeType j = 0; j < in_size; ++j)
-        {
-            _output_activations[i] += _weights[(i * in_size) + j] * inputs[j];
-        }
-    }
-#endif
+    DLMath::dense(
+        _output_activations.data(),
+        inputs.data(), _weights.data(), _biases.data(),
+        in_size, out_size);
     return FeedforwardLayer::forward(_output_activations);
 }
 
@@ -129,39 +106,11 @@ const std::vector<NumType>& DenseLayer::backward(
     SizeType out_size = gradients.size();
     SizeType in_size = _shared_fields->input_size();
 
-#if 0 // Enable thread optimization.
-    auto& tm = ConcManager::TaskManager::instance();
-    tm.set_maximum_concurrency();
-    std::vector<ConcManager::Future<void>> futures;
-    for (SizeType i = 0; i < out_size; ++i)
-    {
-        futures.push_back(tm.enqueue(
-            [&](SizeType out_idx) {
-                _bias_gradients[out_idx] += gradients[out_idx];
-                for (SizeType j = 0; j < in_size; ++j)
-                {
-                    _weight_gradients[(out_idx * in_size) + j] +=
-                        gradients[out_idx] * _last_input[j];
-                    _input_gradients[j] +=
-                        gradients[out_idx] * _weights[(out_idx * in_size) + j];
-                }
-            }, i));
-    }
-    for (auto& f: futures) f.get();
-#else
-    std::fill(_input_gradients.begin(), _input_gradients.end(), 0);
-    for (SizeType i = 0; i < out_size; ++i)
-    {
-        _bias_gradients[i] += gradients[i];
-        for (SizeType j = 0; j < in_size; ++j)
-        {
-            _weight_gradients[(i * in_size) + j] +=
-                gradients[i] * _last_input[j];
-            _input_gradients[j] +=
-                gradients[i] * _weights[(i * in_size) + j];
-        }
-    }
-#endif
+    DLMath::dense_1(
+        _input_gradients.data(), _weight_gradients.data(),
+        _bias_gradients.data(),
+        gradients.data(), _last_input, _weights.data(),
+        in_size, out_size);
 
     return FeedforwardLayer::backward(_input_gradients);;
 }

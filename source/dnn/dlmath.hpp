@@ -27,6 +27,7 @@
  */
 
 #include "type.hpp"
+#include "concmanager/include/task_manager.hpp"
 
 #include <cmath>
 #include <functional>
@@ -39,8 +40,11 @@
 #include <vector>
 #include <numeric>
 #include <string>
-
 #include <iostream>
+
+#if __ARM_NEON
+#include "arm_neon.h"
+#endif
 
 #ifndef EDGE_LEARNING_DNN_DLMATH_HPP
 #define EDGE_LEARNING_DNN_DLMATH_HPP
@@ -1775,6 +1779,123 @@ public:
         }
 
         return dst;
+    }
+
+    template <typename T>
+    static T* dense(
+        T* dst, const T* src, const T* weights, const T* bias,
+        SizeType input_size, SizeType output_size)
+    {
+        for (SizeType i = 0; i < output_size; ++i)
+        {
+            dst[i] = bias[i];
+            for (SizeType j = 0; j < input_size; ++j)
+            {
+                dst[i] += weights[(i * input_size) + j] * src[j];
+            }
+        }
+        return dst;
+    }
+
+    template <typename T>
+    static T* dense_thread_opt(
+        T* dst, const T* src, const T* weights, const T* bias,
+        SizeType input_size, SizeType output_size)
+    {
+        auto& tm = ConcManager::TaskManager::instance();
+        tm.set_maximum_concurrency();
+        std::vector<ConcManager::Future<void>> futures;
+        for (SizeType i = 0; i < output_size; ++i)
+        {
+            futures.push_back(tm.enqueue(
+                [&](SizeType out_idx) {
+                    dst[out_idx] = bias[out_idx];
+                    for (SizeType j = 0; j < input_size; ++j)
+                    {
+                        dst[out_idx] += weights[
+                            (out_idx * input_size) + j] * src[j];
+                    }
+                }, i));
+        }
+        for (auto& f: futures) f.get();
+        return dst;
+    }
+
+    static double* dense_simd_opt(
+        double* dst, const double* src,
+        const double* weights, const double* bias,
+        SizeType input_size, SizeType output_size)
+    {
+#if 0 // __ARM_NEON
+        float64x2_t simd_dst;
+        float64x2_t simd_src;
+        float64x2_t simd_weights0, simd_weights1;
+        for (SizeType i = 0; i < output_size; i += 2)
+        {
+            simd_dst = vld1q_f64(bias + i);
+            for (SizeType j = 0; j < input_size; j += 2)
+            {
+                simd_src = vld1q_f64(src + j);
+                simd_weights0 = vld1q_f64(weights + (i * input_size) + j);
+                simd_dst = vmlaq_f64(simd_dst, simd_weights0, simd_src);
+                simd_weights1 = vld1q_f64(weights + ((i + 1) * input_size) + j);
+                simd_dst = vmlaq_f64(simd_dst, simd_weights1, simd_src);
+            }
+            vst1q_f64(dst + i, simd_dst);
+        }
+        return dst;
+#else
+        return dense(dst, src, weights, bias, input_size, output_size);
+#endif
+    }
+
+    template <typename T>
+    static T* dense_1(
+        T* input_gradients, T* weight_gradients, T* bias_gradients,
+        const T* gradients, const T* last_input, const T* weights,
+        SizeType input_size, SizeType output_size)
+    {
+        std::fill(input_gradients, input_gradients + input_size, 0);
+        for (SizeType i = 0; i < output_size; ++i)
+        {
+            bias_gradients[i] += gradients[i];
+            for (SizeType j = 0; j < input_size; ++j)
+            {
+                weight_gradients[(i * input_size) + j] +=
+                    gradients[i] * last_input[j];
+                input_gradients[j] +=
+                    gradients[i] * weights[(i * input_size) + j];
+            }
+        }
+        return input_gradients;
+    }
+
+    template <typename T>
+    static T* dense_1_thread_opt(
+        T* input_gradients, T* weight_gradients, T* bias_gradients,
+        const T* gradients, const T* last_input, const T* weights,
+        SizeType input_size, SizeType output_size)
+    {
+        std::fill(input_gradients, input_gradients + input_size, 0);
+        auto& tm = ConcManager::TaskManager::instance();
+        tm.set_maximum_concurrency();
+        std::vector<ConcManager::Future<void>> futures;
+        for (SizeType i = 0; i < output_size; ++i)
+        {
+            futures.push_back(tm.enqueue(
+                [&](SizeType out_idx) {
+                    bias_gradients[out_idx] += gradients[out_idx];
+                    for (SizeType j = 0; j < input_size; ++j)
+                    {
+                        weight_gradients[(out_idx * input_size) + j] +=
+                            gradients[out_idx] * last_input[j];
+                        input_gradients[j] +=
+                            gradients[out_idx] * weights[(out_idx * input_size) + j];
+                    }
+                }, i));
+        }
+        for (auto& f: futures) f.get();
+        return input_gradients;
     }
 
 private:
