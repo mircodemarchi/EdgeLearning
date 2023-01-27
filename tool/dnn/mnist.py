@@ -83,18 +83,18 @@ def train_densenet(msg, x_train, y_train, x_test, y_test):
     model = keras.Sequential(
         [
             keras.Input(shape=input_shape),
-            keras.layers.Dense(32, activation="relu"),
-            keras.layers.Dense(num_classes, activation="softmax"),
+            keras.layers.Dense(36, activation="relu"),
+            keras.layers.Dense(10, activation="softmax"),
         ]
     )
 
     model.summary()
 
     batch_size = 128
-    epochs = 20
-    optimizer = keras.optimizers.SGD(learning_rate=0.01)
-    model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"])
-    model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.2)
+    epochs = 10
+    optimizer = keras.optimizers.Adam(learning_rate=0.001)
+    model.compile(loss=keras.losses.CategoricalCrossentropy(), optimizer=optimizer, metrics=["accuracy"])
+    model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.0)
 
     score = model.evaluate(x_test, y_test, verbose=0)
     print("Test loss:", score[0])
@@ -107,7 +107,7 @@ def main():
 
     tests = [
         train_densenet,
-        train_convnet
+        # train_convnet
     ]
 
     for test in tests:

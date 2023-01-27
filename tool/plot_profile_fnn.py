@@ -5,7 +5,7 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 
-DPI=500
+DPI = 500
 
 parser = argparse.ArgumentParser(description="Profile Tool", epilog="Mirco De Marchi")
 parser.add_argument("--mlpack-folder",
@@ -20,6 +20,10 @@ parser.add_argument("--edgelearning-folder",
                     help="Folder path in which there are EDGELEARNING profiling values")
 args = parser.parse_args()
 
+output_path = os.path.join(".", "plots_profile_fnn")
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+
 def get_data(file_prefix, range_list, files, framework_name, folder, x, techniques=[""]):
     df = pd.DataFrame()
     for technique in techniques:
@@ -28,7 +32,7 @@ def get_data(file_prefix, range_list, files, framework_name, folder, x, techniqu
             if fn not in files:
                 continue
             f = os.path.join(folder, fn)
-            profile_times = pd.read_csv(f).to_numpy().flatten() / 1e3
+            profile_times = pd.read_csv(f).to_numpy().flatten() / 1e6
             data = {
                 "ms": profile_times, 
                 "framework": np.repeat(framework_name + "_" + technique, len(profile_times)),
@@ -103,7 +107,7 @@ def plot_training_on_epochs_amount(files, mlpack_folder, edgelearning_folder):
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, EPOCHS_RANGE, files, mlpack_folder, edgelearning_folder, "epochs", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)    
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)    
         plt.close(fig)
 
 def plot_prediction(files, mlpack_folder, edgelearning_folder):
@@ -113,7 +117,7 @@ def plot_prediction(files, mlpack_folder, edgelearning_folder):
     TYPES = ["violinplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)
         plt.close(fig)
 
 def plot_training_on_dataset_size(files, mlpack_folder, edgelearning_folder):
@@ -123,7 +127,7 @@ def plot_training_on_dataset_size(files, mlpack_folder, edgelearning_folder):
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "dataset_size", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)
         plt.close(fig)
 
 def plot_prediction_on_dataset_size(files, mlpack_folder, edgelearning_folder):
@@ -133,7 +137,7 @@ def plot_prediction_on_dataset_size(files, mlpack_folder, edgelearning_folder):
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "dataset_size", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)
         plt.close(fig)
 
 def plot_training_on_hidden_layers_amount(files, mlpack_folder, edgelearning_folder):
@@ -143,7 +147,7 @@ def plot_training_on_hidden_layers_amount(files, mlpack_folder, edgelearning_fol
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_amount", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)
         plt.close(fig)
 
 def plot_prediction_on_hidden_layers_amount(files, mlpack_folder, edgelearning_folder):
@@ -153,7 +157,7 @@ def plot_prediction_on_hidden_layers_amount(files, mlpack_folder, edgelearning_f
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_amount", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)
         plt.close(fig)
 
 def plot_training_on_hidden_layers_shape(files, mlpack_folder, edgelearning_folder):
@@ -163,7 +167,7 @@ def plot_training_on_hidden_layers_shape(files, mlpack_folder, edgelearning_fold
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_shape", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)
         plt.close(fig)
 
 def plot_prediction_on_hidden_layers_shape(files, mlpack_folder, edgelearning_folder):
@@ -173,7 +177,7 @@ def plot_prediction_on_hidden_layers_shape(files, mlpack_folder, edgelearning_fo
     TYPES = ["boxplot", "lineplot"]
     fig = plot(FILE_PREFIX, RANGE, files, mlpack_folder, edgelearning_folder, "hidden_layers_shape", TYPES)
     if fig:
-        fig.savefig(FILE_PREFIX + ".jpg", dpi=DPI)
+        fig.savefig(os.path.join(output_path, FILE_PREFIX + ".jpg"), dpi=DPI)
         plt.close(fig)
 
 

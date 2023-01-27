@@ -42,7 +42,7 @@
 #include <string>
 #include <iostream>
 
-#if __ARM_NEON
+#if defined(__ARM_NEON) && __ARM_NEON
 #include "arm_neon.h"
 #endif
 
@@ -1826,7 +1826,7 @@ public:
         const double* weights, const double* bias,
         SizeType input_size, SizeType output_size)
     {
-#if 0 // __ARM_NEON
+#if 0 // defined(__ARM_NEON) && __ARM_NEON
         float64x2_t simd_dst;
         float64x2_t simd_src;
         float64x2_t simd_weights0, simd_weights1;
